@@ -1,6 +1,11 @@
 import { ManagedRepo, cleanDocument } from '@parameter1/mongodb';
 import Joi, { validateAsync } from '@parameter1/joi';
-import { userAttributes as attrs } from '../schema/attributes/index.js';
+import { isFunction as isFn } from '@parameter1/utils';
+import {
+  userAttributes as attrs,
+  userEventAttributes as eventAttrs,
+  tokenAttributes as tokenAttrs,
+} from '../schema/attributes/index.js';
 
 export default class UserRepo extends ManagedRepo {
   /**
@@ -61,6 +66,74 @@ export default class UserRepo extends ManagedRepo {
       }),
       options,
     });
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {string} params.email
+   * @param {string} [params.ip]
+   * @param {string} [params.ua]
+   * @param {string} [params.ttl=3600]
+   * @param {string} [params.scope]
+   * @param {function} [params.inTransaction]
+   */
+  async createLoginLinkToken(params = {}) {
+    const {
+      email,
+      ip,
+      ua,
+      ttl,
+      scope,
+      session: currentSession,
+      inTransaction,
+    } = await validateAsync(Joi.object({
+      email: attrs.email.required(),
+      ip: eventAttrs.ip,
+      ua: eventAttrs.ua,
+      ttl: tokenAttrs.ttl.default(3600),
+      scope: Joi.string(),
+      session: Joi.object(),
+      inTransaction: Joi.function(),
+    }).required(), params);
+
+    const session = currentSession || await this.client.startSession();
+    const previouslyStarted = session.inTransaction();
+    if (!previouslyStarted) session.startTransaction();
+
+    try {
+      const user = await this.findByEmail({
+        email,
+        options: { strict: true, projection: { email: 1 }, session },
+      });
+
+      const token = await this.manager.$('token').create({
+        subject: 'login-link',
+        audience: user._id,
+        ttl,
+        ...(scope && { data: { scope } }),
+        options: { session },
+      });
+
+      const { signed } = token;
+      await this.manager.$('user-event').create({
+        user,
+        action: 'send-login-link',
+        ip,
+        ua,
+        data: { scope, loginToken: token },
+        options: { session },
+      });
+
+      if (isFn(inTransaction)) await inTransaction({ user, token });
+      if (!previouslyStarted) await session.commitTransaction();
+      return signed;
+    } catch (e) {
+      if (!previouslyStarted) await session.abortTransaction();
+      throw e;
+    } finally {
+      if (!previouslyStarted) session.endSession();
+    }
   }
 
   /**

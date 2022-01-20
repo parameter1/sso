@@ -1,6 +1,7 @@
 import inquirer from 'inquirer';
 import { immediatelyThrow } from '@parameter1/utils';
 import { connect, close } from './mongodb.js';
+import createIndexes from './actions/create-indexes.js';
 import createUser from './actions/create-user.js';
 import registerOrg from './actions/register-org.js';
 
@@ -15,6 +16,7 @@ process.on('unhandledRejection', immediatelyThrow);
       name: 'action',
       message: 'Choose an action',
       choices: [
+        { name: 'Create database indexes', value: 'createIndexes' },
         { name: 'Create new user', value: 'createUser' },
         { name: 'Register new organization', value: 'registerOrg' },
       ],
@@ -25,6 +27,9 @@ process.on('unhandledRejection', immediatelyThrow);
   await connect();
 
   switch (action) {
+    case 'createIndexes':
+      await createIndexes();
+      break;
     case 'createUser':
       await createUser();
       break;

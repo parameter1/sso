@@ -11,9 +11,9 @@ export default class UserRepo extends ManagedRepo {
     super({
       ...params,
       collectionName: 'users',
-      collatableFields: ['email.address', 'name.family'],
+      collatableFields: ['email', 'name.family'],
       indexes: [
-        { key: { 'email.address': 1 }, unique: true, collation: { locale: 'en_US' } },
+        { key: { email: 1 }, unique: true, collation: { locale: 'en_US' } },
 
         { key: { 'name.family': 1, _id: 1 }, collation: { locale: 'en_US' } },
         { key: { 'date.created': 1, _id: 1 } },
@@ -48,10 +48,8 @@ export default class UserRepo extends ManagedRepo {
     const now = new Date();
     return this.insertOne({
       doc: cleanDocument({
-        email: {
-          address: email,
-          domain: email.split('@')[1],
-        },
+        email,
+        domain: email.split('@')[1],
         name: {
           given: givenName,
           family: familyName,

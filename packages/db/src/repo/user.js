@@ -150,6 +150,56 @@ export default class UserRepo extends ManagedRepo {
 
   /**
    * @param {object} params
+   * @param {string} params.authToken
+   * @param {string} [params.ip]
+   * @param {string} [params.ua]
+   */
+  async logout(params = {}) {
+    const { authToken: token, ip, ua } = await validateAsync(Joi.object({
+      authToken: Joi.string().required(),
+      ip: eventAttrs.ip,
+      ua: eventAttrs.ua,
+    }).required(), params);
+
+    const authToken = await this.manager.$('token').verify({ token, subject: 'auth' });
+    const userId = get(authToken, 'doc.audience');
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    try {
+      const user = await this.findByObjectId({
+        id: userId,
+        options: { strict: true, projection: { email: 1, session } },
+      });
+
+      await Promise.all([
+        this.manager.$('token').invalidate({ id: get(authToken, 'doc._id'), options: { session } }),
+        this.manager.$('user-event').create({
+          user,
+          action: 'logout',
+          ip,
+          ua,
+          data: { authToken },
+          options: { session },
+        }),
+        this.updateOne({
+          query: { _id: userId },
+          update: { $set: { 'date.lastSeen': new Date() } },
+          options: { session },
+        }),
+      ]);
+      await session.commitTransaction();
+      return 'ok';
+    } catch (e) {
+      await session.abortTransaction();
+      throw e;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
+   * @param {object} params
    * @param {string} params.loginToken
    * @param {string} [params.ip]
    * @param {string} [params.ua]

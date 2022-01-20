@@ -49,4 +49,15 @@ export default class OrganizationRepo extends ManagedRepo {
       options,
     });
   }
+
+  /**
+   * Finds an organization by slug.
+   *
+   * @param {object} params
+   * @param {string} params.slug
+   * @param {object} [params.options]
+   */
+  findBySlug({ slug, options } = {}) {
+    return this.findOne({ query: { slug }, options });
+  }
 }

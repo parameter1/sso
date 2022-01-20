@@ -49,4 +49,15 @@ export default class ApplicationRepo extends ManagedRepo {
       options,
     });
   }
+
+  /**
+   * Finds an application by slug.
+   *
+   * @param {object} params
+   * @param {string} params.slug
+   * @param {object} [params.options]
+   */
+  findBySlug({ slug, options } = {}) {
+    return this.findOne({ query: { slug }, options });
+  }
 }

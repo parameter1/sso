@@ -26,4 +26,14 @@ export default {
     ip,
     ua,
   }),
+
+  /**
+   * @param {object} params
+   * @param {string} params.token
+   * @param {object} [params.projection]
+   */
+  verifyAuthToken: ({ token, projection }) => repos.$('user').verifyAuthToken({
+    token,
+    projection,
+  }),
 };

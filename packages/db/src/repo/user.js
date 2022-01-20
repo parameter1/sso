@@ -1,6 +1,6 @@
 import { ManagedRepo, cleanDocument } from '@parameter1/mongodb';
 import Joi, { validateAsync } from '@parameter1/joi';
-import userAttrs from '../schema/attributes/user.js';
+import { userAttributes as attrs } from '../schema/attributes/index.js';
 
 export default class UserRepo extends ManagedRepo {
   /**
@@ -38,10 +38,10 @@ export default class UserRepo extends ManagedRepo {
       verified,
       options,
     } = await validateAsync(Joi.object({
-      email: userAttrs.email.required(),
-      familyName: userAttrs.familyName.allow(null).empty(null),
-      givenName: userAttrs.givenName.allow(null).empty(null),
-      verified: userAttrs.verified.default(false),
+      email: attrs.email.required(),
+      familyName: attrs.familyName.allow(null).empty(null),
+      givenName: attrs.givenName.allow(null).empty(null),
+      verified: attrs.verified.default(false),
       options: Joi.object().default({}),
     }).required(), params);
 

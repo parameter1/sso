@@ -62,4 +62,15 @@ export default class UserRepo extends ManagedRepo {
       options,
     });
   }
+
+  /**
+   * Finds a user by email address.
+   *
+   * @param {object} params
+   * @param {string} params.email
+   * @param {object} [params.options]
+   */
+  findByEmail({ email, options } = {}) {
+    return this.findOne({ query: { email }, options });
+  }
 }

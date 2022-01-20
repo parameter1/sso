@@ -5,6 +5,7 @@ import { connect, close } from './mongodb.js';
 import {
   createApplication,
   createIndexes,
+  createInstance,
   createOrganization,
   createUser,
 } from './actions/index.js';
@@ -21,6 +22,7 @@ const run = async () => {
         { name: 'Create database indexes', value: 'createIndexes' },
         { name: 'Create application', value: 'createApplication' },
         { name: 'Create organization', value: 'createOrganization' },
+        { name: 'Create instance', value: 'createInstance' },
         { name: 'Create user', value: 'createUser' },
       ],
     },
@@ -34,6 +36,9 @@ const run = async () => {
       break;
     case 'createApplication':
       await createApplication();
+      break;
+    case 'createInstance':
+      await createInstance();
       break;
     case 'createOrganization':
       await createOrganization();

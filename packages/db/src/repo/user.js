@@ -55,7 +55,7 @@ export default class UserRepo extends ManagedRepo {
         name: {
           given: givenName,
           family: familyName,
-          full: [familyName, givenName].filter((v) => v).join(' '),
+          full: [givenName, familyName].filter((v) => v).join(' '),
         },
         verified,
         loginCount: 0,

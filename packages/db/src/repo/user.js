@@ -173,7 +173,7 @@ export default class UserRepo extends ManagedRepo {
         options: { projection: { email: 1 }, strict: true },
       });
 
-      const session = await this.mongodb.startSession();
+      const session = await this.client.startSession();
       session.startTransaction();
       try {
         const authToken = await this.manager.$('token').getOrCreateAuthToken({

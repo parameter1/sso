@@ -58,31 +58,20 @@ export default class TokenRepo extends ManagedRepo {
       return { ...obj, expiresAt: exp };
     }), params);
 
-    const session = await this.client.startSession();
-    session.startTransaction();
-
-    try {
-      const doc = await this.insertOne({
-        doc: cleanDocument({
-          subject,
-          audience,
-          issuer,
-          issuedAt,
-          ttl,
-          expiresAt,
-          data,
-        }),
-        options,
-      });
-      const signed = this.signDocument(doc);
-      await session.commitTransaction();
-      return { doc, signed };
-    } catch (e) {
-      await session.abortTransaction();
-      throw e;
-    } finally {
-      session.endSession();
-    }
+    const doc = await this.insertOne({
+      doc: cleanDocument({
+        subject,
+        audience,
+        issuer,
+        issuedAt,
+        ttl,
+        expiresAt,
+        data,
+      }),
+      options,
+    });
+    const signed = this.signDocument(doc);
+    return { doc, signed };
   }
 
   /**

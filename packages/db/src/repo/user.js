@@ -218,7 +218,7 @@ export default class UserRepo extends ManagedRepo {
     try {
       const loginLinkToken = await this.manager.$('token').verify({ token, subject: 'login-link' });
       const shouldInvalidateToken = get(loginLinkToken, 'doc.data.scope') !== 'invite';
-      const user = await this.user.findByObjectId({
+      const user = await this.findByObjectId({
         id: get(loginLinkToken, 'doc.audience'),
         options: { projection: { email: 1 }, strict: true },
       });

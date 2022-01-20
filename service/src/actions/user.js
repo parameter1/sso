@@ -13,4 +13,17 @@ export default {
     ip,
     ua,
   }),
+
+  /**
+   *
+   * @param {object} params
+   * @param {string} params.loginLinkToken
+   * @param {string} [params.ip]
+   * @param {string} [params.ua]
+   */
+  magicLogin: ({ loginLinkToken, ip, ua } = {}) => repos.$('user').magicLogin({
+    loginLinkToken,
+    ip,
+    ua,
+  }),
 };

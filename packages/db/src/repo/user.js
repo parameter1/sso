@@ -13,11 +13,11 @@ export default class UserRepo extends ManagedRepo {
       collectionName: 'users',
       collatableFields: ['email', 'name.family'],
       indexes: [
-        [{ email: 1 }, { unique: true, collation: { locale: 'en_US' } }],
+        { key: { email: 1 }, unique: true, collation: { locale: 'en_US' } },
 
-        [{ 'name.family': 1, _id: 1 }, { collation: { locale: 'en_US' } }],
-        { 'date.created': 1, _id: 1 },
-        { 'date.updated': 1, _id: 1 },
+        { key: { 'name.family': 1, _id: 1 }, collation: { locale: 'en_US' } },
+        { key: { 'date.created': 1, _id: 1 } },
+        { key: { 'date.updated': 1, _id: 1 } },
       ],
     });
   }

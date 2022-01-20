@@ -16,8 +16,8 @@ export default class InstanceRepo extends ManagedRepo {
       collectionName: 'instances',
       collatableFields: [],
       indexes: [
-        { key: { 'org._id': 1, 'app._id': 1 }, unique: true },
-        { key: { 'app._id': 1 } },
+        { key: { 'org.node._id': 1, 'app.node._id': 1 }, unique: true },
+        { key: { 'app.node._id': 1 } },
 
         { key: { 'date.created': 1, _id: 1 } },
         { key: { 'date.updated': 1, _id: 1 } },

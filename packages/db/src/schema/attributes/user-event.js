@@ -6,6 +6,6 @@ export default {
   action: Joi.string().valid(...actions),
   date: Joi.date(),
   data: Joi.object(),
-  ip: Joi.string().allow('', null),
-  ua: Joi.string().allow('', null),
+  ip: Joi.string().allow(null).empty(null),
+  ua: Joi.string().allow(null).empty(null),
 };

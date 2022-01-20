@@ -1,6 +1,7 @@
 import { ManagedRepo, cleanDocument } from '@parameter1/mongodb';
 import Joi, { validateAsync } from '@parameter1/joi';
 import { isFunction as isFn } from '@parameter1/utils';
+import { get } from '@parameter1/object-path';
 import {
   userAttributes as attrs,
   userEventAttributes as eventAttrs,
@@ -145,5 +146,79 @@ export default class UserRepo extends ManagedRepo {
    */
   findByEmail({ email, options } = {}) {
     return this.findOne({ query: { email }, options });
+  }
+
+  /**
+   * @param {object} params
+   * @param {string} params.loginToken
+   * @param {string} [params.ip]
+   * @param {string} [params.ua]
+   */
+  async magicLogin(params = {}) {
+    const {
+      loginLinkToken: token,
+      ip,
+      ua,
+    } = await validateAsync(Joi.object({
+      loginLinkToken: Joi.string().trim().required(),
+      ip: eventAttrs.ip,
+      ua: eventAttrs.ua,
+    }).required(), params);
+
+    try {
+      const loginLinkToken = await this.manager.$('token').verify({ token, subject: 'login-link' });
+      const shouldInvalidateToken = get(loginLinkToken, 'doc.data.scope') !== 'invite';
+      const user = await this.user.findByObjectId({
+        id: get(loginLinkToken, 'doc.audience'),
+        options: { projection: { email: 1 }, strict: true },
+      });
+
+      const session = await this.mongodb.startSession();
+      session.startTransaction();
+      try {
+        const authToken = await this.manager.$('token').getOrCreateAuthToken({
+          userId: user._id,
+          options: { session },
+          findOptions: { session },
+        });
+        const now = new Date();
+        const $set = { verified: true, 'date.lastLoggedIn': now, 'date.lastSeen': now };
+
+        await Promise.all([
+          ...(shouldInvalidateToken ? [
+            this.manager.$('token').invalidate({ id: get(loginLinkToken, 'doc._id'), options: { session } }),
+          ] : []),
+          this.manager.$('user-event').create({
+            user,
+            action: 'magic-login',
+            date: now,
+            ip,
+            ua,
+            data: { loginLinkToken, authToken },
+            options: { session },
+          }),
+          this.updateOne({
+            query: { _id: user._id },
+            update: { $set, $inc: { loginCount: 1 } },
+            options: { session },
+          }),
+        ]);
+
+        await session.commitTransaction();
+        return {
+          authToken: authToken.signed,
+          userId: user._id,
+          authDoc: authToken.doc,
+        };
+      } catch (e) {
+        await session.abortTransaction();
+        throw e;
+      } finally {
+        session.endSession();
+      }
+    } catch (e) {
+      e.message = `Unable to login: ${e.message}`;
+      throw e;
+    }
   }
 }

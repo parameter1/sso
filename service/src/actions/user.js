@@ -17,6 +17,19 @@ export default {
   /**
    *
    * @param {object} params
+   * @param {string} params.authToken
+   * @param {string} [params.ip]
+   * @param {string} [params.ua]
+   */
+  logout: ({ authToken, ip, ua }) => repos.$('user').logout({
+    authToken,
+    ip,
+    ua,
+  }),
+
+  /**
+   *
+   * @param {object} params
    * @param {string} params.loginLinkToken
    * @param {string} [params.ip]
    * @param {string} [params.ua]
@@ -28,6 +41,7 @@ export default {
   }),
 
   /**
+   *
    * @param {object} params
    * @param {string} params.token
    * @param {object} [params.projection]

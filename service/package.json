@@ -1,0 +1,31 @@
+{
+  "name": "@tenancy/service",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "The tenancy microservice.",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/tenancy/tree/main/service#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/tenancy.git",
+    "directory": "service"
+  },
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.js",
+  "scripts": {
+    "dev": "gulp",
+    "lint": "eslint --ext .js ./",
+    "test": "yarn lint"
+  },
+  "dependencies": {
+    "@parameter1/micro": "^2.0.0",
+    "@parameter1/terminus": "^2.0.0",
+    "@parameter1/utils": "^2.0.0",
+    "@tenancy/db": "^0.0.0",
+    "envalid": "^7.2.2"
+  },
+  "devDependencies": {
+    "@parameter1/gulp": "^2.0.0"
+  }
+}

@@ -6,6 +6,7 @@ x-env-defaults: &env
 
 x-env-core: &env-core
   MONGO_URL: ${MONGO_URL-mongodb://root:password123@mongodb-primary:27017,mongodb-secondary:27017/?authSource=admin&readPreference=primary}
+  TOKEN_SECRET: ${TOKEN_SECRET-thisisnotsecretdonotuse}
 
 x-node-defaults: &node
   tty: true

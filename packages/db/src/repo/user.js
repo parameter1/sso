@@ -160,7 +160,7 @@ export default class UserRepo extends ManagedRepo {
       ip,
       ua,
     } = await validateAsync(Joi.object({
-      loginLinkToken: Joi.string().trim().required(),
+      loginLinkToken: Joi.string().required(),
       ip: eventAttrs.ip,
       ua: eventAttrs.ua,
     }).required(), params);

@@ -9,9 +9,7 @@ import registerOrg from './actions/register-org.js';
 
 const { log } = console;
 
-process.on('unhandledRejection', immediatelyThrow);
-
-(async () => {
+const run = async () => {
   const questions = [
     {
       type: 'list',
@@ -27,7 +25,6 @@ process.on('unhandledRejection', immediatelyThrow);
   ];
 
   const { action } = await inquirer.prompt(questions);
-  await connect();
 
   switch (action) {
     case 'createIndexes':
@@ -46,6 +43,24 @@ process.on('unhandledRejection', immediatelyThrow);
       throw new Error(`No action found for ${action}`);
   }
 
+  log(`Action '${action}' complete`);
+
+  const { runAnother } = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'runAnother',
+      message: 'Would you like to run another action?',
+      default: false,
+    },
+  ]);
+  if (runAnother) await run();
+};
+
+process.on('unhandledRejection', immediatelyThrow);
+
+(async () => {
+  await connect();
+  await run();
   await close();
   log('DONE');
 })().catch(immediatelyThrow);

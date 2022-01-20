@@ -1,0 +1,26 @@
+{
+  "name": "@tenancy/cli",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "The tenancy admin CLI.",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/tenancy/tree/main/cli#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/tenancy.git",
+    "directory": "cli"
+  },
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.js",
+  "scripts": {
+    "lint": "eslint --ext .js ./",
+    "test": "yarn lint"
+  },
+  "dependencies": {
+    "@parameter1/utils": "^2.0.0",
+    "@tenancy/db": "^0.0.0",
+    "envalid": "^7.2.2",
+    "inquirer": "^8.2.0"
+  }
+}

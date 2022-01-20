@@ -1,0 +1,25 @@
+{
+  "name": "@tenancy/db",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "The tenancy database repositories.",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/tenancy/tree/main/packages/db#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/tenancy.git",
+    "directory": "packages/db"
+  },
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.js",
+  "scripts": {
+    "lint": "eslint --ext .js ./",
+    "test": "yarn lint"
+  },
+  "dependencies": {
+    "@parameter1/email-utils": "^2.0.0",
+    "@parameter1/joi": "^2.1.1",
+    "@parameter1/mongodb": "^2.4.0"
+  }
+}

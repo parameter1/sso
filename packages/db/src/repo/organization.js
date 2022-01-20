@@ -10,7 +10,8 @@ export default class OrganizationRepo extends ManagedRepo {
         { key: { slug: 1 }, unique: true, collation: { locale: 'en_US' } },
 
         { key: { name: 1, _id: 1 }, collation: { locale: 'en_US' } },
-        { key: { updatedAt: 1, _id: 1 } },
+        { key: { 'date.created': 1, _id: 1 } },
+        { key: { 'date.updated': 1, _id: 1 } },
       ],
     });
   }

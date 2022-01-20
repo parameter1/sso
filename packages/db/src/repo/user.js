@@ -271,4 +271,31 @@ export default class UserRepo extends ManagedRepo {
       throw e;
     }
   }
+
+  /**
+   * @param {object} params
+   * @param {string} params.token
+   * @param {object} [params.projection]
+   */
+  async verifyAuthToken(params = {}) {
+    const { token, projection } = await validateAsync(Joi.object({
+      token: Joi.string().required(),
+      projection: Joi.object().default({}),
+    }).required(), params);
+    try {
+      const { doc } = await this.manager.$('token').verify({ token, subject: 'auth' });
+      const { audience: userId } = doc;
+      await this.updateOne({
+        query: { _id: userId },
+        update: { $set: { 'date.lastSeen': new Date() } },
+      });
+      const user = await this.findByObjectId({
+        id: userId,
+        options: { projection, strict: true },
+      });
+      return user;
+    } catch (e) {
+      throw ManagedRepo.createError(401, `Authentication failed: ${e.message}`);
+    }
+  }
 }

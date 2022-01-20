@@ -274,16 +274,16 @@ export default class UserRepo extends ManagedRepo {
 
   /**
    * @param {object} params
-   * @param {string} params.token
+   * @param {string} params.authToken
    * @param {object} [params.projection]
    */
   async verifyAuthToken(params = {}) {
-    const { token, projection } = await validateAsync(Joi.object({
-      token: Joi.string().required(),
+    const { authToken, projection } = await validateAsync(Joi.object({
+      authToken: Joi.string().required(),
       projection: Joi.object().default({}),
     }).required(), params);
     try {
-      const { doc } = await this.manager.$('token').verify({ token, subject: 'auth' });
+      const { doc } = await this.manager.$('token').verify({ token: authToken, subject: 'auth' });
       const { audience: userId } = doc;
       await this.updateOne({
         query: { _id: userId },

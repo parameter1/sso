@@ -32,8 +32,8 @@ export default {
    * @param {string} params.token
    * @param {object} [params.projection]
    */
-  verifyAuthToken: ({ token, projection }) => repos.$('user').verifyAuthToken({
-    token,
+  verifyAuthToken: ({ authToken, projection }) => repos.$('user').verifyAuthToken({
+    authToken,
     projection,
   }),
 };

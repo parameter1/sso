@@ -169,7 +169,7 @@ export default class UserRepo extends ManagedRepo {
     try {
       const user = await this.findByObjectId({
         id: userId,
-        options: { strict: true, projection: { email: 1, session } },
+        options: { strict: true, projection: { email: 1 }, session },
       });
 
       await Promise.all([

@@ -69,4 +69,15 @@ export default class InstanceRepo extends ManagedRepo {
       options,
     });
   }
+
+  /**
+   * Finds an application instance by namespace.
+   *
+   * @param {object} params
+   * @param {string} params.namespace
+   * @param {object} [params.options]
+   */
+  findByNamespace({ namespace, options } = {}) {
+    return this.findOne({ query: { namespace }, options });
+  }
 }

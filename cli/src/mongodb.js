@@ -1,4 +1,4 @@
-import { MongoDBClient, filterMongoURL } from '@tenancy/db';
+import { MongoDBClient, filterMongoURL } from '@parameter1/sso-db';
 import { MONGO_URL } from './env.js';
 import pkg from '../package.js';
 

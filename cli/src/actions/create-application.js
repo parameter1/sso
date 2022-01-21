@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { applicationAttributes as appAttrs } from '@tenancy/db/schema';
+import { applicationAttributes as appAttrs } from '@parameter1/sso-db/schema';
 import { sluggify } from '@parameter1/slug';
 import repos from '../repos.js';
 

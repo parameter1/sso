@@ -1,6 +1,6 @@
 import { bootService, log } from '@parameter1/terminus';
 import { immediatelyThrow } from '@parameter1/utils';
-import { filterMongoURL } from '@tenancy/db';
+import { filterMongoURL } from '@parameter1/sso-db';
 import mongodb from './mongodb.js';
 import server from './server.js';
 import pkg from '../package.js';

@@ -1,13 +1,13 @@
 {
-  "name": "@tenancy/cli",
+  "name": "@parameter1/sso-cli",
   "version": "0.0.0",
   "type": "module",
-  "description": "The tenancy admin CLI.",
+  "description": "The SSO admin CLI.",
   "author": "Jacob Bare <jacob@parameter1.com>",
-  "homepage": "https://github.com/parameter1/tenancy/tree/main/cli#readme",
+  "homepage": "https://github.com/parameter1/sso/tree/main/cli#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/parameter1/tenancy.git",
+    "url": "git+https://github.com/parameter1/sso.git",
     "directory": "cli"
   },
   "private": true,
@@ -19,8 +19,8 @@
   },
   "dependencies": {
     "@parameter1/slug": "^2.0.0",
+    "@parameter1/sso-db": "^0.0.0",
     "@parameter1/utils": "^2.0.0",
-    "@tenancy/db": "^0.0.0",
     "envalid": "^7.2.2",
     "inquirer": "^8.2.0"
   }

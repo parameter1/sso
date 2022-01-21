@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { userAttributes as userAttrs } from '@tenancy/db/schema';
+import { userAttributes as userAttrs } from '@parameter1/sso-db/schema';
 import repos from '../repos.js';
 
 const { log } = console;

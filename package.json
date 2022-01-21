@@ -1,8 +1,8 @@
 {
-  "name": "tenancy",
+  "name": "@parameter1/sso",
   "author": "Jacob Bare <jacob@parameter1.com>",
   "private": true,
-  "repository": "https://github.com/parameter1/tenancy.git",
+  "repository": "https://github.com/parameter1/sso.git",
   "license": "MIT",
   "scripts": {
     "test": "lerna run test",

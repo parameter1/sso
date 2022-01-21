@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { organizationAttributes as orgAttrs } from '@tenancy/db/schema';
+import { organizationAttributes as orgAttrs } from '@parameter1/sso-db/schema';
 import { sluggify } from '@parameter1/slug';
 import repos from '../repos.js';
 

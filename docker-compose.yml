@@ -12,10 +12,10 @@ x-node-defaults: &node
   tty: true
   init: true
   image: node:16.13-alpine
-  working_dir: /tenancy
+  working_dir: /sso
   volumes:
-    - .:/tenancy:cached
-    - ./node_modules:/tenancy/node_modules:delegated
+    - .:/sso:cached
+    - ./node_modules:/sso/node_modules:delegated
     - yarn-cache:/.yarn-cache
   environment:
     <<: *env
@@ -23,7 +23,7 @@ x-node-defaults: &node
 services:
   cli:
     <<: *node
-    working_dir: /tenancy/cli
+    working_dir: /sso/cli
     entrypoint: ["node"]
     command: ["src/index.js"]
     environment:
@@ -64,7 +64,7 @@ services:
 
   service:
     <<: *node
-    working_dir: /tenancy/service
+    working_dir: /sso/service
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:

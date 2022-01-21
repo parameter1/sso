@@ -1,13 +1,13 @@
 {
-  "name": "@tenancy/db",
+  "name": "@parameter1/sso-db",
   "version": "0.0.0",
   "type": "module",
-  "description": "The tenancy database repositories.",
+  "description": "The SSO database repositories.",
   "author": "Jacob Bare <jacob@parameter1.com>",
-  "homepage": "https://github.com/parameter1/tenancy/tree/main/packages/db#readme",
+  "homepage": "https://github.com/parameter1/sso/tree/main/packages/db#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/parameter1/tenancy.git",
+    "url": "git+https://github.com/parameter1/sso.git",
     "directory": "packages/db"
   },
   "private": true,

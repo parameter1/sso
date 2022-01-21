@@ -1,4 +1,4 @@
-import { Repos } from '@tenancy/db';
+import { Repos } from '@parameter1/sso-db';
 import client from './mongodb.js';
 import { MONGO_DB_NAME, TOKEN_SECRET } from './env.js';
 

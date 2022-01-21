@@ -5,6 +5,8 @@
 ### Applications
 Define high-level applications that are available in the P1 ecosystem.
 
+Model objects of this type _cannot_ be created or modified by external users.
+
 Unique key: `slug`
 
 ```js
@@ -33,6 +35,8 @@ const applications = [
 
 ### Organizations
 Define high-level organizations that exist within the P1 ecosystem. Organizations ultimately use applications via application instances (and workspaces).
+
+Model objects of this type _cannot_ be created or modified by external users.
 
 Unique key: `slug`
 
@@ -111,6 +115,8 @@ const managers = [
 ### Instances
 Define organization-to-application relationships that signify the applications that an organization is using within the P1 ecosystem.
 
+Model objects of this type _cannot_ be created or modified by external users.
+
 Unique key: `org._id + app._id`
 
 ```js
@@ -138,6 +144,8 @@ const instances = [
 
 ### Workspaces
 Define the sub-tenants of an organization application instance. All application instances have a `default` workspace. Users can be directly assigned as members of a workspace, or indirectly when the user is an organization manager.
+
+Model objects of this type _cannot_ be created or modified by external users.
 
 Unique key: `instance._id + slug`
 

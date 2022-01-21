@@ -3,6 +3,7 @@ import { immediatelyThrow } from '@parameter1/utils';
 import { connect, close } from './mongodb.js';
 
 import {
+  addManager,
   createApplication,
   createIndexes,
   createInstance,
@@ -24,6 +25,8 @@ const run = async () => {
         { name: 'Create organization', value: 'createOrganization' },
         { name: 'Create instance', value: 'createInstance' },
         { name: 'Create user', value: 'createUser' },
+
+        { name: 'Add organization manager', value: 'addManager' },
       ],
     },
   ];
@@ -45,6 +48,9 @@ const run = async () => {
       break;
     case 'createUser':
       await createUser();
+      break;
+    case 'addManager':
+      await addManager();
       break;
     default:
       throw new Error(`No action found for ${action}`);

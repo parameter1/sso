@@ -19,6 +19,20 @@ export default {
     /**
      *
      */
+    async logoutUser(_, __, {
+      auth,
+      ip,
+      repos,
+      ua,
+    }) {
+      const authToken = await auth.getAuthToken();
+      await repos.$('user').logout({ authToken, ip, ua });
+      return 'ok';
+    },
+
+    /**
+     *
+     */
     async sendUserLoginLink(_, { input }, { ip, repos, ua }) {
       const { email, redirectTo } = input;
       await repos.$('user').createLoginLinkToken({

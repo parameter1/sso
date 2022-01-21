@@ -11,6 +11,9 @@ extend type Query {
 extend type Mutation {
   "Logs a user in via a magic login link token."
   loginUserFromLink(input: MutateLoginUserFromLinkInput!): UserAuth!
+  "Logs out the currently logged-in user."
+  logoutUser: String!
+    @auth(needsRequiredUserFields: false)
   "Sends a magic login link to a user. The user must already exist."
   sendUserLoginLink(input: MutateSendUserLoginLinkInput!): String!
 }

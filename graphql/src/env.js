@@ -18,7 +18,7 @@ export const {
   TOKEN_SECRET,
 } = cleanEnv(process.env, {
   APP_URL: str({ desc: 'The single sign-on application/interace URL.' }),
-  EMAIL_FROM: str({ desc: 'The address to use when sending email.', default: 'Parameter1 Single Sign-On <no-reply@sso.parameter1.com>' }),
+  EMAIL_FROM: str({ desc: 'The address to use when sending email.', default: 'Parameter1 SSO <no-reply@sso.parameter1.com>' }),
   EMAIL_REPLY_TO: str({ desc: 'The reply-to email address when sending email', default: 'support@parameter1.com' }),
   EXPOSED_HOST: str({ desc: 'The host that the service is exposed on.', default: '0.0.0.0' }),
   EXPOSED_PORT: port({ desc: 'The port that the service is exposed on.', default: 80 }),

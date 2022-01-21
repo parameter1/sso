@@ -20,7 +20,26 @@ type User {
   id: ObjectID! @project(field: "_id")
   "The user's email address. This value is unique across all users."
   email: String! @project
+  "The user's given/first name."
+  givenName: String @project(field: "name.given")
+  "The user's family/last name."
+  familyName: String @project(field: "name.family")
+  "The user's full name."
+  name: String @project(field: "name.full")
+  "Whether the user email address has been verified."
+  verified: Boolean! @project
+  "The number of times the user has logged in."
+  loginCount: Int! @project
+  "The ISO date when the user was created."
+  createdAt: DateTime! @project(field: "date.created")
+  "The ISO date when the user was last updated."
+  updatedAt: DateTime! @project(field: "date.updated")
+  "The ISO date when the user last logged in."
+  lastLoggedInAt: DateTime @project(field: "date.lastLoggedIn")
+  "The ISO date when the user was last seen accessing the system."
+  lastSeenAt: DateTime @project(field: "date.lastSeen")
 }
+
 
 type UserAuth {
   "The user object."

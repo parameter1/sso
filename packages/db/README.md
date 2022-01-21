@@ -32,7 +32,7 @@ const applications = [
 ```
 
 ### Organizations
-Define high-level organizations that exist within the P1 ecosystem. Organizations ultimately use applications using application instances.
+Define high-level organizations that exist within the P1 ecosystem. Organizations ultimately use applications via application instances (and workspaces).
 
 Unique key: `slug`
 
@@ -60,7 +60,7 @@ const organizations = [
 ```
 
 ### Users
-Define the users within the P1 ecosystem. Users can manage organizations and be members of application instances. Users are unique by email and can log-in using a magic login link sent via email. Eventually passwords could be assigned as a secondary authentication method.
+Define the users within the P1 ecosystem. Users can manage organizations and be members of application instance workspaces. Users are unique by email and can log-in using a magic login link sent via email. Eventually passwords could be assigned as a secondary authentication method.
 
 Unique key: `email`
 
@@ -137,7 +137,7 @@ const instances = [
 ```
 
 ### Workspaces
-Define the sub-tenants of an organization application instance. All instances have a `default` workspace. Users can be directly assigned as members of a workspace, or indirectly when the user is an organization manager.
+Define the sub-tenants of an organization application instance. All application instances have a `default` workspace. Users can be directly assigned as members of a workspace, or indirectly when the user is an organization manager.
 
 Unique key: `instance._id + slug`
 
@@ -164,7 +164,7 @@ const workspaces = [
 
 
 ### Members
-Define user-to-workspace relationships that signify the instance workspaces that a user is a member of. Each member of an instance workspace can be assigned specific roles and permissions. Only users that are members of an instance workspace (either directly or indirectly as an org manager) can access the instance.
+Define user-to-workspace relationships that signify the instance workspaces that a user is a member of. Each member of an instance workspace can be assigned specific roles and permissions. Only users that are members of an instance workspace (or indirectly as an org manager) can access the instance.
 
 Unique key: `user._id + workspace._id`
 

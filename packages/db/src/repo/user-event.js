@@ -16,7 +16,7 @@ export default class UserEventRepo extends ManagedRepo {
       collectionName: 'user-events',
       collatableFields: [],
       indexes: [
-        { key: { 'user.node._id': 1, action: 1 } },
+        { key: { 'user._id': 1, action: 1 } },
       ],
     });
   }
@@ -53,7 +53,7 @@ export default class UserEventRepo extends ManagedRepo {
       options: Joi.object().default({}),
     }).required(), params);
     const doc = cleanDocument({
-      user: { node: user },
+      user,
       action,
       date,
       ip,

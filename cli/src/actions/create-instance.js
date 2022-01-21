@@ -25,8 +25,8 @@ export default async function createInstance() {
       choices: async ({ app }) => {
         // exclude instances that already exist.
         const excludeOrgIds = await repos.$('instance').distinct({
-          key: 'org.node._id',
-          query: { 'app.node._id': app._id },
+          key: 'org._id',
+          query: { 'app._id': app._id },
         });
         const cursor = await repos.$('organization').find({
           query: { _id: { $nin: excludeOrgIds } },

@@ -1,3 +1,4 @@
+import { getProjectionForType } from '@parameter1/graphql/projection';
 import createLoginLinkTemplate from '../email-templates/login-link.js';
 import { send } from '../sendgrid.js';
 import { APP_URL } from '../env.js';
@@ -7,6 +8,14 @@ export default {
    *
    */
   Mutation: {
+    /**
+     *
+     */
+    async loginUserFromLink(_, { input }, { ip, repos, ua }) {
+      const { loginLinkToken } = input;
+      return repos.$('user').magicLogin({ loginLinkToken, ip, ua });
+    },
+
     /**
      *
      */
@@ -31,6 +40,26 @@ export default {
         },
       });
       return 'ok';
+    },
+  },
+
+  /**
+   *
+   */
+  UserAuth: {
+    /**
+     *
+     */
+    expiresAt({ authDoc }) {
+      return authDoc.expiresAt;
+    },
+
+    /**
+     *
+     */
+    user({ userId }, _, { repos }, info) {
+      const options = { projection: getProjectionForType(info) };
+      return repos.$('user').findByObjectId({ id: userId, options });
     },
   },
 };

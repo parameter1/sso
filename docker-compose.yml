@@ -45,9 +45,11 @@ services:
     environment:
       <<: *env
       <<: *env-core
+      APP_URL: ${APP_URL-http://sso.dev.parameter1.com:7913/app}
       EXPOSED_HOST: sso.dev.parameter1.com
       EXPOSED_PORT: 7912
       HOST: sso.dev.parameter1.com
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY-}
     ports:
       - "7912:80"
     hostname: sso.dev.parameter1.com

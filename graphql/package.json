@@ -23,6 +23,7 @@
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/sso-db": "^0.0.0",
     "@parameter1/utils": "^2.0.0",
+    "@sendgrid/mail": "^7.6.0",
     "apollo-server-core": "^3.6.2",
     "apollo-server-fastify": "^3.6.2",
     "envalid": "^7.2.2",

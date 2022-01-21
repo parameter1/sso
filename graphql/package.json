@@ -1,0 +1,34 @@
+{
+  "name": "@parameter1/sso-graphql-server",
+  "version": "0.0.0",
+  "type": "module",
+  "description": "The SSO GraphQL API server.",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/sso/tree/main/graphql#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/sso.git",
+    "directory": "graphql"
+  },
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.js",
+  "scripts": {
+    "dev": "gulp",
+    "lint": "eslint --ext .js ./",
+    "test": "yarn lint"
+  },
+  "dependencies": {
+    "@parameter1/graphql": "^2.0.0",
+    "@parameter1/sso-db": "^0.0.0",
+    "@parameter1/utils": "^2.0.0",
+    "apollo-server-core": "^3.6.2",
+    "apollo-server-fastify": "^3.6.2",
+    "envalid": "^7.2.2",
+    "fastify": "^3.27.0",
+    "graphql": "^16.2.0"
+  },
+  "devDependencies": {
+    "@parameter1/gulp": "^2.0.0"
+  }
+}

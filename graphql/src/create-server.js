@@ -12,7 +12,7 @@ import {
   OnShutdownPlugin,
 } from '@parameter1/graphql/plugins';
 import schema from './schema.js';
-import repos from './repos.js';
+import context from './context/index.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -27,11 +27,7 @@ const codes = {
 export default async (options = {}) => {
   const app = fastify(options.fastify);
   const apollo = new ApolloServer({
-    context: ({ request }) => ({
-      repos,
-      ip: request.ip,
-      ua: request.headers['user-agent'],
-    }),
+    context,
     schema,
     introspection: true,
     debug: !isProduction,

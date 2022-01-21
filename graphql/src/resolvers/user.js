@@ -46,6 +46,20 @@ export default {
   /**
    *
    */
+  Query: {
+    /**
+     *
+     */
+    async currentUser(_, __, { auth, repos }, info) {
+      const id = await auth.getUserId();
+      const options = { projection: getProjectionForType(info) };
+      return repos.$('user').findByObjectId({ id, options });
+    },
+  },
+
+  /**
+   *
+   */
   UserAuth: {
     /**
      *

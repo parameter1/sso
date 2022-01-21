@@ -2,6 +2,12 @@ import { gql } from '@parameter1/graphql/tag';
 
 export default gql`
 
+extend type Query {
+  "Returns the currently logged-in user. Will return an authentication error if no user is currently logged-in."
+  currentUser: User!
+    @auth(needsRequiredUserFields: false)
+}
+
 extend type Mutation {
   "Logs a user in via a magic login link token."
   loginUserFromLink(input: MutateLoginUserFromLinkInput!): UserAuth!

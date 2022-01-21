@@ -97,7 +97,7 @@ const users = [
 ```
 
 ### Managers
-Define user-to-organization relationships that signify the organizations that a user can manage. Org managers are automatically members of the org's application instance workspaces, and also have the high-level permissions to add, remove and change instance workspace members. Org managers can also invite additional users to manage their orgs.
+Define user-to-organization relationships that signify the organizations that a user can manage. Managers have a specific role that defines what they can manage within their org. Managers - depending on their role - can add/remove/update instance workspace members, can change the roles of other managers, and can invite additional users to manage their orgs. Managers don't have implicit access to instance workspaces and, instead, must either give themself access (if able), have another manager give them access, or receive access from P1.
 
 Unique key: `user._id + org._id`
 
@@ -143,7 +143,7 @@ const instances = [
 ```
 
 ### Workspaces
-Define the sub-tenants of an organization application instance. All application instances have a `default` workspace. Users can be directly assigned as members of a workspace, or indirectly when the user is an organization manager.
+Define the sub-tenants of an organization application instance. All application instances have a `default` workspace. Users must be directly assigned as members of a workspace in order to gain access to the workspace.
 
 Model objects of this type _cannot_ be created or modified by external users.
 
@@ -172,7 +172,7 @@ const workspaces = [
 
 
 ### Members
-Define user-to-workspace relationships that signify the instance workspaces that a user is a member of. Each member of an instance workspace can be assigned specific roles and permissions. Only users that are members of an instance workspace (or indirectly as an org manager) can access the instance.
+Define user-to-workspace relationships that signify the instance workspaces that a user is a member of. Each member of an instance workspace can be assigned specific roles and permissions. Only users that are members of an instance workspace can access the instance.
 
 Unique key: `user._id + workspace._id`
 

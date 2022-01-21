@@ -37,6 +37,23 @@ services:
     entrypoint: ["tail"]
     command: ["-f", "/dev/null"]
 
+  graphql:
+    <<: *node
+    working_dir: /sso/graphql
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: *env
+      <<: *env-core
+      EXPOSED_HOST: sso.dev.parameter1.com
+      EXPOSED_PORT: 7912
+      HOST: sso.dev.parameter1.com
+    ports:
+      - "7912:80"
+    hostname: sso.dev.parameter1.com
+    depends_on:
+      - mongodb-secondary
+
   mongodb-primary:
     image: bitnami/mongodb:5.0
     environment:

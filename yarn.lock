@@ -1039,10 +1039,10 @@
   dependencies:
     burner-email-providers "^1.0.67"
 
-"@parameter1/graphql@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@parameter1/graphql/-/graphql-2.0.0.tgz#619499feba474a77cc940617c20cfb450c4d303d"
-  integrity sha512-HpE8jQiq+A4Fyj8RLxddq2Y34OohAWvW/xg9Pm8BzX8coBGPPf77GjSS4hjPozyuFCaFkaheHNfsGCL319KnIA==
+"@parameter1/graphql@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@parameter1/graphql/-/graphql-2.1.0.tgz#d7c4d2556dd2fb0f6d10cfcd0e3a55ba2914bc50"
+  integrity sha512-YvaGh+FnVqcvTX3XWP7qcAHA5pASCE2SsAYcMqTDWWmmwpgdaxO8WpRpV2X503XwVqymHV869iDVMMa8YFetgg==
   dependencies:
     "@graphql-tools/schema" "^8.3.1"
     "@graphql-tools/utils" "^8.6.1"

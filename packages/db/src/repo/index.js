@@ -7,6 +7,7 @@ import OrganizationRepo from './organization.js';
 import TokenRepo from './token.js';
 import UserEventRepo from './user-event.js';
 import UserRepo from './user.js';
+import WorkspaceRepo from './workspace.js';
 
 export default class Repos extends RepoManager {
   /**
@@ -25,6 +26,7 @@ export default class Repos extends RepoManager {
       .add({ key: 'organization', ManagedRepo: OrganizationRepo })
       .add({ key: 'token', ManagedRepo: TokenRepo, tokenSecret })
       .add({ key: 'user', ManagedRepo: UserRepo })
-      .add({ key: 'user-event', ManagedRepo: UserEventRepo });
+      .add({ key: 'user-event', ManagedRepo: UserEventRepo })
+      .add({ key: 'workspace', ManagedRepo: WorkspaceRepo });
   }
 }

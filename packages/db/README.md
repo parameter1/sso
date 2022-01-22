@@ -27,7 +27,7 @@ Define the users within the P1 ecosystem. Users can manage organizations and be 
 Unique key: `email`
 
 ```js
-const users = {
+const user = {
   _id: ObjectId(),
   email: 'jacob@parameter1.com',
   domain: 'parameter1.com',
@@ -47,7 +47,13 @@ const users = {
 
   // lists all organizations this user manages.
   // see `organization.managers` for more info
-  manages: [],
+  manages: [
+    {
+      org: { _id: ObjectId(), slug: 'acbm', name: 'AC Business Media' },
+      role: 'Owner',
+      date: { added: ISODate() },
+    }
+  ],
 
   // lists all workspaces this user is a member of.
   // see `workspace.members` for more info.
@@ -63,30 +69,24 @@ Model objects of this type _cannot_ be created or modified by external users.
 Unique key: `slug`
 
 ```js
-const organizations = [
-  {
-    _id: ObjectId(),
-    slug: 'acbm',
-    name: 'AC Business Media',
-    createdAt: ISODate(),
-    updatedAt: ISODate(),
+const organization = {
+  _id: ObjectId(),
+  slug: 'acbm',
+  name: 'AC Business Media',
+  date: {
+    created: ISODate(),
+    updated: ISODate(),
+  },
 
-    managers: [
-      {
-        user: { _id: ObjectId(), email: 'jacob@parameter1.com' },
-        role: 'Owner',
-        addedAt: now,
-      }
-    ],
-  },
-  {
-    _id: ObjectId(),
-    slug: 'ab-media',
-    name: 'AB Media',
-    createdAt: ISODate(),
-    updatedAt: ISODate(),
-  },
-];
+
+  managers: [
+    {
+      user: { _id: ObjectId(), email: 'jacob@parameter1.com', name: {} },
+      role: 'Owner',
+      date: { added: ISODate() },
+    }
+  ],
+};
 ```
 
 ### Organization Managers (via `organization.managers`)

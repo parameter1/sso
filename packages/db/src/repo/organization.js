@@ -42,8 +42,10 @@ export default class OrganizationRepo extends ManagedRepo {
       doc: cleanDocument({
         name,
         slug,
-        createdAt: now,
-        updatedAt: now,
+        date: {
+          created: now,
+          updated: now,
+        },
       }),
       options,
     });

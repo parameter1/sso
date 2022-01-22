@@ -34,6 +34,13 @@ export default class Repos extends RepoManager {
       .add({ key: 'workspace', ManagedRepo: WorkspaceRepo });
   }
 
+  /**
+   *
+   * @param {object} params
+   * @param {object} params.org
+   * @param {object} params.user
+   * @param {string} params.role
+   */
   async addOrgManager(params = {}) {
     const {
       org,
@@ -42,14 +49,19 @@ export default class Repos extends RepoManager {
     } = await validateAsync(Joi.object({
       org: Joi.object({
         _id: orgAttrs.id.required(),
+        name: orgAttrs.name.required(),
         slug: orgAttrs.slug.required(),
       }).required(),
       user: Joi.object({
         _id: userAttrs.id.required(),
         email: userAttrs.email.required(),
+        name: Joi.object({
+          given: userAttrs.givenName.required(),
+          family: userAttrs.familyName.required(),
+          full: Joi.string().required(),
+        }).required(),
       }).required(),
       role: orgAttrs.managerRole.required(),
-      options: Joi.object().default({}),
     }).required(), params);
 
     const session = await this.client.startSession();
@@ -62,16 +74,16 @@ export default class Repos extends RepoManager {
         this.$('organization').updateOne({
           query: { _id: org._id, 'managers.user._id': { $ne: user._id } },
           update: {
-            $set: { updatedAt: now },
-            $push: { managers: cleanDocument({ user, role, addedAt: now }) },
+            $set: { 'date.updated': now },
+            $push: { managers: cleanDocument({ user, role, 'date.added': now }) },
           },
           options,
         }),
         this.$('user').updateOne({
           query: { _id: user._id, 'manages.org._id': { $ne: org._id } },
           update: {
-            $set: { updatedAt: now },
-            $push: { manages: cleanDocument({ org, role, addedAt: now }) },
+            $set: { 'date.updated': now },
+            $push: { manages: cleanDocument({ org, role, 'date.added': now }) },
           },
           options,
         }),

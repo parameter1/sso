@@ -58,7 +58,7 @@ export default class Repos extends RepoManager {
         name: Joi.object({
           given: userAttrs.givenName.required(),
           family: userAttrs.familyName.required(),
-          full: Joi.string().required(),
+          default: Joi.string().required(),
         }).required(),
       }).required(),
       role: orgAttrs.managerRole.required(),
@@ -75,7 +75,7 @@ export default class Repos extends RepoManager {
           query: { _id: org._id, 'managers.user._id': { $ne: user._id } },
           update: {
             $set: { 'date.updated': now },
-            $push: { managers: cleanDocument({ user, role, 'date.added': now }) },
+            $push: { managers: cleanDocument({ user, role, date: { added: now } }) },
           },
           options,
         }),
@@ -83,7 +83,7 @@ export default class Repos extends RepoManager {
           query: { _id: user._id, 'manages.org._id': { $ne: org._id } },
           update: {
             $set: { 'date.updated': now },
-            $push: { manages: cleanDocument({ org, role, 'date.added': now }) },
+            $push: { manages: cleanDocument({ org, role, date: { added: now } }) },
           },
           options,
         }),
@@ -130,7 +130,7 @@ export default class Repos extends RepoManager {
         name: Joi.object().required({
           family: userAttrs.familyName.required(),
           given: userAttrs.givenName.required(),
-          full: Joi.string().required(),
+          default: Joi.string().required(),
         }),
       }).required(),
       role: Joi.string().required(),

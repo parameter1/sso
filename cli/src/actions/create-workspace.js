@@ -69,8 +69,8 @@ export default async function createInstance() {
   if (!confirm) return;
 
   const result = await repos.$('workspace').create({
-    app: { _id: app._id, slug: app.slug },
-    org: { _id: org._id, slug: org.slug },
+    app: { _id: app._id, slug: app.slug, name: app.name },
+    org: { _id: org._id, slug: org.slug, name: org.name },
     slug,
     name,
   });

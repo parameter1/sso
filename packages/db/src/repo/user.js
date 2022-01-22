@@ -65,7 +65,9 @@ export default class UserRepo extends ManagedRepo {
           created: now,
           updated: now,
         },
-      }),
+        manages: [],
+        memberships: [],
+      }, { preserveEmptyArrays: true }),
       options,
     });
   }

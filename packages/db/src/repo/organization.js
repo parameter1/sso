@@ -46,7 +46,8 @@ export default class OrganizationRepo extends ManagedRepo {
           created: now,
           updated: now,
         },
-      }),
+        managers: [],
+      }, { preserveEmptyArrays: true }),
       options,
     });
   }

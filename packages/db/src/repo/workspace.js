@@ -88,7 +88,8 @@ export default class WorkspaceRepo extends ManagedRepo {
           created: now,
           updated: now,
         },
-      }),
+        members: [],
+      }, { preserveEmptyArrays: true }),
       options,
     });
   }

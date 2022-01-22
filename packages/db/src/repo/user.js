@@ -17,11 +17,11 @@ export default class UserRepo extends ManagedRepo {
     super({
       ...params,
       collectionName: 'users',
-      collatableFields: ['email', 'familyName'],
+      collatableFields: ['email', 'name.family'],
       indexes: [
         { key: { email: 1 }, unique: true, collation: { locale: 'en_US' } },
 
-        { key: { familyName: 1, _id: 1 }, collation: { locale: 'en_US' } },
+        { key: { 'name.family': 1, _id: 1 }, collation: { locale: 'en_US' } },
       ],
     });
   }
@@ -54,13 +54,17 @@ export default class UserRepo extends ManagedRepo {
       doc: cleanDocument({
         email,
         domain: email.split('@')[1],
-        givenName,
-        familyName,
-        name: [givenName, familyName].filter((v) => v).join(' '),
+        name: {
+          default: [givenName, familyName].filter((v) => v).join(' '),
+          given: givenName,
+          family: familyName,
+        },
         verified,
         loginCount: 0,
-        createdAt: now,
-        updatedAt: now,
+        date: {
+          created: now,
+          updated: now,
+        },
       }),
       options,
     });

@@ -27,36 +27,32 @@ Define the users within the P1 ecosystem. Users can manage organizations and be 
 Unique key: `email`
 
 ```js
-const users = [
-  {
-    _id: ObjectId(),
-    email: 'jacob@parameter1.com',
-    domain: 'parameter1.com',
-    givenName: 'Jacob',
-    familyName: 'Bare',
-    name: 'Jacob Bare',
-    createdAt: ISODate(),
-    updatedAt: ISODate(),
-
-    // lists all organizations this user manages.
-    // see `organization.managers` for more info
-    manages: [],
-
-    // lists all workspaces this user is a member of.
-    // see `workspace.members` for more info.
-    memberships: [],
+const users = {
+  _id: ObjectId(),
+  email: 'jacob@parameter1.com',
+  domain: 'parameter1.com',
+  name: {
+    default: 'Jacob Bare',
+    given: 'Jacob',
+    family: 'Bare',
   },
-  {
-    _id: 'brandon@parameter1.com',
-    domain: 'parameter1.com',
-    givenName: 'Brandon',
-    familyName: 'Krigbaum',
-    name: 'Brandon Krigbaum',
-    createdAt: ISODate(),
-    updatedAt: ISODate(),
-
+  date: {
+    created: ISODate(),
+    updated: ISODate(),
+    lastSeen: ISODate(),
+    lastLoggedIn: ISODate(),
   },
-];
+  verified: true,
+  loginCount: 0,
+
+  // lists all organizations this user manages.
+  // see `organization.managers` for more info
+  manages: [],
+
+  // lists all workspaces this user is a member of.
+  // see `workspace.members` for more info.
+  memberships: [],
+};
 ```
 
 ### Organizations

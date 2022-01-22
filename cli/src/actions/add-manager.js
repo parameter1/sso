@@ -26,10 +26,10 @@ export default async function createInstance() {
       choices: async () => {
         const cursor = await repos.$('user').find({
           query: {},
-          options: { projection: { email: 1, givenName: 1, familyName: 1 }, sort: { email: 1 } },
+          options: { projection: { email: 1, name: 1 }, sort: { email: 1 } },
         });
         const docs = await cursor.toArray();
-        return docs.map((doc) => ({ name: `${doc.email} [${doc.givenName} ${doc.familyName}]`, value: doc }));
+        return docs.map((doc) => ({ name: `${doc.email} [${doc.name.default}]`, value: doc }));
       },
     },
     {
@@ -61,8 +61,8 @@ export default async function createInstance() {
   if (!confirm) return;
 
   const result = await repos.addOrgManager({
-    org: { _id: org._id, slug: org.slug },
-    user: { _id: user._id, email: user.email },
+    org: { _id: org._id, slug: org.slug, name: org.name },
+    user: { _id: user._id, email: user.email, name: user.name },
     role,
   });
   log(result);

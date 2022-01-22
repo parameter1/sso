@@ -4,6 +4,7 @@ import { connect, close } from './mongodb.js';
 
 import {
   addManager,
+  addMember,
   createApplication,
   createIndexes,
   createOrganization,
@@ -27,6 +28,7 @@ const run = async () => {
         { name: 'Create user', value: 'createUser' },
 
         { name: 'Add organization manager', value: 'addManager' },
+        { name: 'Add workspace member', value: 'addMember' },
       ],
     },
   ];
@@ -51,6 +53,9 @@ const run = async () => {
       break;
     case 'addManager':
       await addManager();
+      break;
+    case 'addMember':
+      await addMember();
       break;
     default:
       throw new Error(`No action found for ${action}`);

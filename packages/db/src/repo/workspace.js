@@ -28,10 +28,12 @@ export default class WorkspaceRepo extends ManagedRepo {
    * @param {object} params.app
    * @param {ObjectId} params.app._id
    * @param {string} params.app.slug
+   * @param {string} params.app.name
    *
    * @param {object} params.org
    * @param {ObjectId} params.org._id
    * @param {string} params.org.slug
+   * @param {string} params.org.name
    *
    * @param {string} params.slug
    * @param {string} params.name
@@ -52,10 +54,12 @@ export default class WorkspaceRepo extends ManagedRepo {
       app: Joi.object({
         _id: appAttrs.id.required(),
         slug: appAttrs.slug.required(),
+        name: appAttrs.name.required(),
       }).required(),
       org: Joi.object({
         _id: orgAttrs.id.required(),
         slug: orgAttrs.slug.required(),
+        name: orgAttrs.name.required(),
       }).required(),
       slug: workspaceAttrs.slug.required(),
       name: workspaceAttrs.name.required(),
@@ -75,10 +79,15 @@ export default class WorkspaceRepo extends ManagedRepo {
         org,
         namespace: `${app.slug}.${org.slug}`,
         slug,
-        name,
+        name: {
+          default: name,
+          full: [app.name, org.name, name].join(' > '),
+        },
         // urls,
-        createdAt: now,
-        updatedAt: now,
+        date: {
+          created: now,
+          updated: now,
+        },
       }),
       options,
     });

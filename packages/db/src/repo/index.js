@@ -102,6 +102,13 @@ export default class Repos extends RepoManager {
     }
   }
 
+  /**
+   *
+   * @param {object} params
+   * @param {object} params.workspace
+   * @param {object} params.user
+   * @param {string} params.role
+   */
   async addWorkspaceMember(params = {}) {
     const {
       workspace,
@@ -112,10 +119,19 @@ export default class Repos extends RepoManager {
         _id: workspaceAttrs.id.required(),
         namespace: workspaceAttributes.namespace.required(),
         slug: workspaceAttributes.slug.required(),
+        name: Joi.object({
+          default: Joi.string().required(),
+          full: Joi.string().required(),
+        }).required(),
       }).required(),
       user: Joi.object({
         _id: userAttrs.id.required(),
         email: userAttrs.email.required(),
+        name: Joi.object().required({
+          family: userAttrs.familyName.required(),
+          given: userAttrs.givenName.required(),
+          full: Joi.string().required(),
+        }),
       }).required(),
       role: Joi.string().required(),
     }).required(), params);
@@ -130,16 +146,16 @@ export default class Repos extends RepoManager {
         this.$('workspace').updateOne({
           query: { _id: workspace._id, 'members.user._id': { $ne: user._id } },
           update: {
-            $set: { updatedAt: now },
-            $push: { members: cleanDocument({ user, role, addedAt: now }) },
+            $set: { 'date.updated': now },
+            $push: { members: cleanDocument({ user, role, date: { added: now } }) },
           },
           options,
         }),
         this.$('user').updateOne({
           query: { _id: user._id, 'memberships.workspace._id': { $ne: workspace._id } },
           update: {
-            $set: { updatedAt: now },
-            $push: { memberships: cleanDocument({ workspace, role, addedAt: now }) },
+            $set: { 'date.updated': now },
+            $push: { memberships: cleanDocument({ workspace, role, date: { added: now } }) },
           },
           options,
         }),

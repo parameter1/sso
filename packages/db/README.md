@@ -43,7 +43,7 @@ const user = {
     lastLoggedIn: ISODate(),
   },
   verified: true,
-  loginCount: 0,
+  loginCount: 1,
 
   // lists all organizations this user manages.
   // see `organization.managers` for more info
@@ -57,7 +57,18 @@ const user = {
 
   // lists all workspaces this user is a member of.
   // see `workspace.members` for more info.
-  memberships: [],
+  memberships: [
+    {
+      workspace: {
+        _id: ObjectId(),
+        slug: 'default'
+        namespace: 'omeda.acbm',
+        name: {},
+      },
+      role: 'Admin',
+      date: { added: ISODate() },
+    },
+  ],
 };
 ```
 
@@ -77,7 +88,6 @@ const organization = {
     created: ISODate(),
     updated: ISODate(),
   },
-
 
   managers: [
     {
@@ -100,32 +110,36 @@ Model objects of this type _cannot_ be created or modified by external users.
 Unique key: `org._id, app._id + slug`
 
 ```js
-const workspaces = [
-  {
-    _id: ObjectId(),
-    app: { _id: ObjectId(), slug: 'omeda' },
-    org: { _id: ObjectId(), slug: 'acbm' },
-    namespace: 'omeda.acbm',
-    slug: 'default',
+const workspace = {
+  _id: ObjectId(),
+  app: { _id: ObjectId(), slug: 'omeda', name: 'Omeda' },
+  org: { _id: ObjectId(), slug: 'acbm', name: 'AC Business Media' },
+  namespace: 'omeda.acbm',
+  slug: 'default',
 
-    name: 'Default',
-    urls: [
-      { env: 'production', value: 'https://acbm.omeda.parameter1.com' },
-      { env: 'development', value: 'http://omeda-acbm.dev.parameter1.com' },
-    ],
+  name: {
+    default: 'Default',
+    full: 'Omeda > AC Business Media > Default',
+  },
 
-    members: [
-      {
-        user: { _id: ObjectId(), email: 'jacob@parameter1.com' },
-        role: 'Admin',
-        addedAt: ISODate(),
-      },
-    ],
+  urls: [
+    { env: 'production', value: 'https://acbm.omeda.parameter1.com' },
+    { env: 'development', value: 'http://omeda-acbm.dev.parameter1.com' },
+  ],
 
-    createdAt: ISODate(),
-    updatedAt: ISODate(),
-  }
-];
+  members: [
+    {
+      user: { _id: ObjectId(), email: 'jacob@parameter1.com', name: {} },
+      role: 'Admin',
+      date: { added: ISODate() },
+    },
+  ],
+
+  date: {
+    created: ISODate(),
+    updated: ISODate(),
+  },
+};
 ```
 
 #### Workspace Members (via `workspace.members`)

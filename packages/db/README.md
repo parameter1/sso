@@ -10,23 +10,15 @@ Model objects of this type _cannot_ be created or modified by external users.
 Unique key: `slug`
 
 ```js
-const applications = [
-  {
-    _id: ObjectId(),
-    slug: 'omeda',
-    name: 'Omeda',
-    createdAt: ISODate(),
-    updatedAt: ISODate(),
+const application = {
+  _id: ObjectId(),
+  slug: 'omeda',
+  name: 'Omeda',
+  date: {
+    created: ISODate(),
+    updated: ISODate(),
   },
-
-  {
-    _id: ObjectId(),
-    slug: 'ab-projects',
-    name: 'AB Projects',
-    createdAt: ISODate(),
-    updatedAt: ISODate(),
-  },
-];
+};
 ```
 
 ### Users

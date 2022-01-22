@@ -10,9 +10,16 @@ export default async function createUser() {
       type: 'input',
       name: 'email',
       message: 'Enter the new user\'s email address',
-      validate: (input) => {
+      validate: async (input) => {
         const { error } = userAttrs.email.required().validate(input);
         if (error) return error;
+
+        const doc = await repos.$('user').findByEmail({
+          email: input,
+          options: { projection: { _id: 1 } },
+        });
+        if (doc) return new Error('A user already exists with this email address');
+
         return true;
       },
     },

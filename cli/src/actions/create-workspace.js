@@ -10,7 +10,7 @@ export default async function createInstance() {
     {
       type: 'list',
       name: 'app',
-      message: 'Select the application to add the organization to',
+      message: 'Select the workspace application',
       choices: async () => {
         const cursor = await repos.$('application').find({
           query: {},
@@ -23,7 +23,7 @@ export default async function createInstance() {
     {
       type: 'list',
       name: 'org',
-      message: 'Select the organization to add',
+      message: 'Select the workspace organization',
       choices: async () => {
         const cursor = await repos.$('organization').find({
           query: {},
@@ -44,9 +44,20 @@ export default async function createInstance() {
       name: 'slug',
       message: 'Enter the workspace slug key',
       default: ({ name }) => sluggify(name),
-      validate: (input) => {
+      validate: async (input, { app, org }) => {
         const { error } = workspaceAttrs.slug.required().validate(input);
         if (error) return error;
+
+        const doc = await repos.$('workspace').findOne({
+          query: {
+            'app._id': app._id,
+            'org._id': org._id,
+            slug: input,
+          },
+          options: { projection: { _id: 1 } },
+        });
+        if (doc) return new Error('A workspace already exists with this slug');
+
         return true;
       },
     },

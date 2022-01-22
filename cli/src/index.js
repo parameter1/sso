@@ -21,15 +21,17 @@ const run = async () => {
       name: 'action',
       message: 'Choose an action',
       choices: [
-        { name: 'Create database indexes', value: 'createIndexes' },
         { name: 'Create application', value: 'createApplication' },
+        { name: 'Create user', value: 'createUser' },
         { name: 'Create organization', value: 'createOrganization' },
         { name: 'Create workspace', value: 'createWorkspace' },
-        { name: 'Create user', value: 'createUser' },
-
+        new inquirer.Separator(),
         { name: 'Add organization manager', value: 'addManager' },
         { name: 'Add workspace member', value: 'addMember' },
+        new inquirer.Separator(),
+        { name: 'Create database indexes', value: 'createIndexes' },
       ],
+      loop: false,
     },
   ];
 

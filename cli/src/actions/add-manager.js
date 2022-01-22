@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { managerAttributes as managerAttrs } from '@parameter1/sso-db/schema';
+import { organizationAttributes as orgAttrs } from '@parameter1/sso-db/schema';
 import repos from '../repos.js';
 
 const { log } = console;
@@ -26,20 +26,19 @@ export default async function createInstance() {
       choices: async () => {
         const cursor = await repos.$('user').find({
           query: {},
-          options: { projection: { email: 1, name: 1 }, sort: { email: 1 } },
+          options: { projection: { email: 1, givenName: 1, familyName: 1 }, sort: { email: 1 } },
         });
         const docs = await cursor.toArray();
-        return docs.map((doc) => ({ name: `${doc.email} [${doc.name.full}]`, value: doc }));
+        return docs.map((doc) => ({ name: `${doc.email} [${doc.givenName} ${doc.familyName}]`, value: doc }));
       },
     },
     {
       type: 'list',
       name: 'role',
       message: 'Select the manager role',
-      // eslint-disable-next-line
-      choices: () => ['Owner', 'Administrator', 'Member'],
+      choices: () => ['Owner', 'Administrator'],
       validate: (input) => {
-        const { error } = managerAttrs.role.required().validate(input);
+        const { error } = orgAttrs.managerRole.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -61,8 +60,8 @@ export default async function createInstance() {
 
   if (!confirm) return;
 
-  const result = await repos.$('manager').create({
-    org,
+  const result = await repos.addOrgManager({
+    org: { _id: org._id, slug: org.slug },
     user: { _id: user._id, email: user.email },
     role,
   });

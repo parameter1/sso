@@ -6,9 +6,9 @@ import {
   addManager,
   createApplication,
   createIndexes,
-  createInstance,
   createOrganization,
   createUser,
+  createWorkspace,
 } from './actions/index.js';
 
 const { log } = console;
@@ -23,7 +23,7 @@ const run = async () => {
         { name: 'Create database indexes', value: 'createIndexes' },
         { name: 'Create application', value: 'createApplication' },
         { name: 'Create organization', value: 'createOrganization' },
-        { name: 'Create instance', value: 'createInstance' },
+        { name: 'Create workspace', value: 'createWorkspace' },
         { name: 'Create user', value: 'createUser' },
 
         { name: 'Add organization manager', value: 'addManager' },
@@ -40,8 +40,8 @@ const run = async () => {
     case 'createApplication':
       await createApplication();
       break;
-    case 'createInstance':
-      await createInstance();
+    case 'createWorkspace':
+      await createWorkspace();
       break;
     case 'createOrganization':
       await createOrganization();

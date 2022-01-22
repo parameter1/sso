@@ -16,8 +16,6 @@ export default class ApplicationRepo extends ManagedRepo {
         { key: { slug: 1 }, unique: true, collation: { locale: 'en_US' } },
 
         { key: { name: 1, _id: 1 }, collation: { locale: 'en_US' } },
-        { key: { 'date.created': 1, _id: 1 } },
-        { key: { 'date.updated': 1, _id: 1 } },
       ],
     });
   }
@@ -44,7 +42,8 @@ export default class ApplicationRepo extends ManagedRepo {
       doc: cleanDocument({
         name,
         slug,
-        date: { created: now, updated: now },
+        createdAt: now,
+        updatedAt: now,
       }),
       options,
     });

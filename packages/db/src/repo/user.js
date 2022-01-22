@@ -17,13 +17,11 @@ export default class UserRepo extends ManagedRepo {
     super({
       ...params,
       collectionName: 'users',
-      collatableFields: ['email', 'name.family'],
+      collatableFields: ['email', 'familyName'],
       indexes: [
         { key: { email: 1 }, unique: true, collation: { locale: 'en_US' } },
 
-        { key: { 'name.family': 1, _id: 1 }, collation: { locale: 'en_US' } },
-        { key: { 'date.created': 1, _id: 1 } },
-        { key: { 'date.updated': 1, _id: 1 } },
+        { key: { familyName: 1, _id: 1 }, collation: { locale: 'en_US' } },
       ],
     });
   }
@@ -45,8 +43,8 @@ export default class UserRepo extends ManagedRepo {
       options,
     } = await validateAsync(Joi.object({
       email: attrs.email.required(),
-      familyName: attrs.familyName.allow(null).empty(null),
-      givenName: attrs.givenName.allow(null).empty(null),
+      familyName: attrs.familyName.required(),
+      givenName: attrs.givenName.required(),
       verified: attrs.verified.default(false),
       options: Joi.object().default({}),
     }).required(), params);
@@ -56,14 +54,13 @@ export default class UserRepo extends ManagedRepo {
       doc: cleanDocument({
         email,
         domain: email.split('@')[1],
-        name: {
-          given: givenName,
-          family: familyName,
-          full: [givenName, familyName].filter((v) => v).join(' '),
-        },
+        givenName,
+        familyName,
+        name: [givenName, familyName].filter((v) => v).join(' '),
         verified,
         loginCount: 0,
-        date: { created: now, updated: now },
+        createdAt: now,
+        updatedAt: now,
       }),
       options,
     });

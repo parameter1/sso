@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { asArray } from '@parameter1/utils';
 import { workspaceAttributes as workspaceAttrs } from '@parameter1/sso-db/schema';
-import getUserList from '../utils/get-user-list.js';
+import { getUserList, getWorkspaceList } from '../utils/index.js';
 import repos from '../../repos.js';
 
 const { log } = console;
@@ -12,33 +12,12 @@ export default async function createInstance() {
       type: 'list',
       name: 'workspace',
       message: 'Select the workspace',
-      choices: async () => {
-        const cursor = await repos.$('workspace').find({
-          query: {},
-          options: {
-            projection: {
-              app: 1,
-              org: 1,
-              members: 1,
-              name: 1,
-              slug: 1,
-            },
-            sort: { 'app.name': 1, 'org.name': 1, name: 1 },
-          },
-        });
-        const docs = await cursor.toArray();
-        return docs.map((ws) => {
-          const { app, org } = ws;
-          const name = [app.name, org.name, ws.name].join(' > ');
-          const ns = [app.slug, org.slug, ws.slug].join('.');
-          return { name: `${name} [${ns}]`, value: ws };
-        });
-      },
+      choices: () => getWorkspaceList({ projection: { members: 1 } }),
     },
     {
       type: 'list',
       name: 'user',
-      message: 'Select the user to add as a member',
+      message: 'Select the user',
       choices: async ({ workspace }) => {
         const memberEmails = asArray(workspace.members).reduce((set, member) => {
           set.add(member.user.email);

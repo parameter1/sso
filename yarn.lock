@@ -1069,15 +1069,15 @@
     joi "^17.5.0"
     mongodb "~4.1.4"
 
-"@parameter1/micro@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@parameter1/micro/-/micro-2.0.0.tgz#234133b229bf35b2327c7e7c6541b19fdd1f0ed7"
-  integrity sha512-JNudLKkM/VMFFZoFsp9X3+UENNKq3x0z0AHYo+zN0PDizEUf6Ofeed59cVoq6QcKOTW25NM1HeN6sVJVDgUhyg==
+"@parameter1/micro@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@parameter1/micro/-/micro-2.1.0.tgz#80d6609a03266e8c3d8b33f22638a7eb589dfde4"
+  integrity sha512-SvQbsXUY9Z5sDP20MoOY9TZSKOXcdUEnNkLuf+eHkS3eILDeptjY5/o2kelFuryKUssfJ4ts0jjFWlF9HyS96A==
   dependencies:
     "@parameter1/object-path" "^2.0.0"
     "@parameter1/utils" "^2.0.0"
     micro "^9.3.4"
-    node-fetch "^3.1.1"
+    node-fetch "^3.2.0"
 
 "@parameter1/mongodb@^2.6.0":
   version "2.6.0"
@@ -5397,7 +5397,7 @@ node-fetch@^2.6.1, node-fetch@^2.6.7:
   dependencies:
     whatwg-url "^5.0.0"
 
-node-fetch@^3.1.1:
+node-fetch@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-3.2.0.tgz#59390db4e489184fa35d4b74caf5510e8dfbaf3b"
   integrity sha512-8xeimMwMItMw8hRrOl3C9/xzU49HV/yE6ORew/l+dxWimO5A4Ra8ld2rerlJvc/O7et5Z1zrWsPX43v1QBjCxw==

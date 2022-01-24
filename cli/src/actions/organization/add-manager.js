@@ -12,12 +12,12 @@ export default async function createInstance() {
       type: 'list',
       name: 'org',
       message: 'Select the organization',
-      choices: getOrgList({ projection: { members: 1 } }),
+      choices: () => getOrgList({ projection: { managers: 1 } }),
     },
     {
       type: 'list',
       name: 'user',
-      message: 'Select the user to add as a mananger',
+      message: 'Select the user',
       choices: async ({ org }) => {
         const managerEmails = asArray(org.managers).reduce((set, manager) => {
           set.add(manager.user.email);

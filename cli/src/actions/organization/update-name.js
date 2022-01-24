@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { userAttributes as userAttrs } from '@parameter1/sso-db/schema';
+import { organizationAttributes as orgAttrs } from '@parameter1/sso-db/schema';
 import { getOrgList } from '../utils/index.js';
 import repos from '../../repos.js';
 
@@ -19,7 +19,7 @@ export default async function createInstance() {
       default: ({ org }) => org.name,
       message: 'Enter the new organization name',
       validate: async (input) => {
-        const { error } = userAttrs.givenName.required().validate(input);
+        const { error } = orgAttrs.name.required().validate(input);
         if (error) return error;
         return true;
       },

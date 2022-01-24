@@ -19,6 +19,7 @@ const run = async () => {
           key: 'application',
           choices: [
             { name: 'Create new application', fnName: 'create' },
+            { name: 'Update application name', fnName: 'updateName' },
           ],
         },
 

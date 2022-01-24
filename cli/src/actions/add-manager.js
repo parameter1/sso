@@ -1,6 +1,7 @@
 import inquirer from 'inquirer';
 import { asArray } from '@parameter1/utils';
 import { organizationAttributes as orgAttrs } from '@parameter1/sso-db/schema';
+import getUserList from './utils/get-user-list.js';
 import repos from '../repos.js';
 
 const { log } = console;
@@ -25,22 +26,14 @@ export default async function createInstance() {
       name: 'user',
       message: 'Select the user to add as a mananger',
       choices: async ({ org }) => {
-        const cursor = await repos.$('user').find({
-          query: {},
-          options: { projection: { email: 1, name: 1 }, sort: { email: 1 } },
-        });
-
         const managerEmails = asArray(org.managers).reduce((set, manager) => {
           set.add(manager.user.email);
           return set;
         }, new Set());
 
-        const users = await cursor.toArray();
-        return users.map((doc) => ({
-          name: `${doc.email} [${doc.name.default}]`,
-          value: doc,
-          disabled: managerEmails.has(doc.email),
-        }));
+        return getUserList({
+          disabledWhen: (user) => managerEmails.has(user.email),
+        });
       },
     },
     {

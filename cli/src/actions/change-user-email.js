@@ -1,5 +1,6 @@
 import inquirer from 'inquirer';
 import { userAttributes as userAttrs } from '@parameter1/sso-db/schema';
+import getUserList from './utils/get-user-list.js';
 import repos from '../repos.js';
 
 const { log } = console;
@@ -10,21 +11,7 @@ export default async function createInstance() {
       type: 'list',
       name: 'user',
       message: 'Select the user to change the email address for',
-      choices: async () => {
-        const cursor = await repos.$('user').find({
-          query: {},
-          options: {
-            projection: { email: 1, name: 1 },
-            sort: { 'name.family': 1 },
-          },
-        });
-
-        const users = await cursor.toArray();
-        return users.map((doc) => ({
-          name: `${doc.name.family}, ${doc.name.given} [${doc.email}]`,
-          value: doc,
-        }));
-      },
+      choices: getUserList,
     },
     {
       type: 'input',

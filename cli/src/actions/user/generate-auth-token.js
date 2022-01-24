@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
-import getUserList from './utils/get-user-list.js';
-import repos from '../repos.js';
+import getUserList from '../utils/get-user-list.js';
+import repos from '../../repos.js';
 
 const { log } = console;
 

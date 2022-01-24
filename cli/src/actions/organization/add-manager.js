@@ -1,8 +1,8 @@
 import inquirer from 'inquirer';
 import { asArray } from '@parameter1/utils';
 import { organizationAttributes as orgAttrs } from '@parameter1/sso-db/schema';
-import { getOrgList, getUserList } from './utils/index.js';
-import repos from '../repos.js';
+import { getOrgList, getUserList } from '../utils/index.js';
+import repos from '../../repos.js';
 
 const { log } = console;
 

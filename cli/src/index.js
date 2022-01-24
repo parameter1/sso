@@ -1,20 +1,9 @@
 import inquirer from 'inquirer';
 import { immediatelyThrow } from '@parameter1/utils';
+import { get } from '@parameter1/object-path';
 import { connect, close } from './mongodb.js';
 
-import {
-  addManager,
-  addMember,
-  changeUserEmail,
-  createApplication,
-  createIndexes,
-  createOrganization,
-  createUser,
-  createWorkspace,
-  generateAuthToken,
-  updateOrgName,
-  updateUserNames,
-} from './actions/index.js';
+import actions from './actions/index.js';
 
 const { log } = console;
 
@@ -22,70 +11,69 @@ const run = async () => {
   const questions = [
     {
       type: 'list',
-      name: 'action',
+      name: 'path',
       message: 'Choose an action',
+
       choices: [
-        { name: 'Create application', value: 'createApplication' },
-        { name: 'Create workspace', value: 'createWorkspace' },
-        new inquirer.Separator(),
-        { name: 'Create organization', value: 'createOrganization' },
-        { name: 'Update organization name', value: 'updateOrgName' },
-        new inquirer.Separator(),
-        { name: 'Add organization manager', value: 'addManager' },
-        { name: 'Add workspace member', value: 'addMember' },
-        new inquirer.Separator(),
-        { name: 'Create user', value: 'createUser' },
-        { name: 'Update user first/last names', value: 'updateUserNames' },
-        { name: 'Change user email address', value: 'changeUserEmail' },
-        { name: 'Generate user auth token (impersonate)', value: 'generateAuthToken' },
-        new inquirer.Separator(),
-        { name: 'Create database indexes', value: 'createIndexes' },
-      ],
+        {
+          key: 'application',
+          choices: [
+            { name: 'Create new application', fnName: 'create' },
+          ],
+        },
+
+        {
+          key: 'user',
+          choices: [
+            { name: 'Create new user', fnName: 'create' },
+            { name: 'Change user email address', fnName: 'changeEmail' },
+            { name: 'Update user first/last name', fnName: 'updateNames' },
+            { name: 'Generate user auth token (impersonate)', value: 'generateAuthToken' },
+          ],
+        },
+
+        {
+          key: 'organization',
+          choices: [
+            { name: 'Create new organization', fnName: 'create' },
+            { name: 'Update organization name', fnName: 'updateName' },
+            { name: 'Add organization manager', fnName: 'addManager' },
+          ],
+        },
+
+        {
+          key: 'workspace',
+          choices: [
+            { name: 'Create new workspace', fnName: 'create' },
+            { name: 'Add workspace member', fnName: 'addMember' },
+          ],
+        },
+
+        {
+          key: 'general',
+          choices: [
+            { name: 'Create database indexes', value: 'createIndexes' },
+          ],
+        },
+      ].reduce((arr, group) => {
+        group.choices.forEach((choice) => {
+          const value = `${group.key}.${choice.fnName}`;
+          arr.push({ name: choice.name, value });
+        });
+        arr.push(new inquirer.Separator());
+        return arr;
+      }, [new inquirer.Separator()]),
       loop: false,
     },
   ];
 
-  const { action } = await inquirer.prompt(questions);
+  const { path } = await inquirer.prompt(questions);
+  const action = get(actions, path);
+  if (!action) throw new Error(`No action found for ${path}`);
 
-  switch (action) {
-    case 'createIndexes':
-      await createIndexes();
-      break;
-    case 'createApplication':
-      await createApplication();
-      break;
-    case 'createWorkspace':
-      await createWorkspace();
-      break;
-    case 'createOrganization':
-      await createOrganization();
-      break;
-    case 'createUser':
-      await createUser();
-      break;
-    case 'addManager':
-      await addManager();
-      break;
-    case 'addMember':
-      await addMember();
-      break;
-    case 'changeUserEmail':
-      await changeUserEmail();
-      break;
-    case 'generateAuthToken':
-      await generateAuthToken();
-      break;
-    case 'updateUserNames':
-      await updateUserNames();
-      break;
-    case 'updateOrgName':
-      await updateOrgName();
-      break;
-    default:
-      throw new Error(`No action found for ${action}`);
-  }
+  await action();
 
-  log(`Action '${action}' complete`);
+  log(`Action '${path}' complete`);
 
   const { runAnother } = await inquirer.prompt([
     {

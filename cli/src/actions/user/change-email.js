@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { userAttributes as userAttrs } from '@parameter1/sso-db/schema';
-import getUserList from './utils/get-user-list.js';
-import repos from '../repos.js';
+import getUserList from '../utils/get-user-list.js';
+import repos from '../../repos.js';
 
 const { log } = console;
 

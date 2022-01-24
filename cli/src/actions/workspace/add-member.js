@@ -1,8 +1,8 @@
 import inquirer from 'inquirer';
 import { asArray } from '@parameter1/utils';
 import { workspaceAttributes as workspaceAttrs } from '@parameter1/sso-db/schema';
-import getUserList from './utils/get-user-list.js';
-import repos from '../repos.js';
+import getUserList from '../utils/get-user-list.js';
+import repos from '../../repos.js';
 
 const { log } = console;
 

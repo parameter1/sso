@@ -1,8 +1,8 @@
 import inquirer from 'inquirer';
 import { workspaceAttributes as workspaceAttrs } from '@parameter1/sso-db/schema';
 import { sluggify } from '@parameter1/slug';
-import { getAppList, getOrgList } from './utils/index.js';
-import repos from '../repos.js';
+import { getAppList, getOrgList } from '../utils/index.js';
+import repos from '../../repos.js';
 
 const { log } = console;
 

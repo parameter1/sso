@@ -53,6 +53,62 @@ export default class OrganizationRepo extends ManagedRepo {
   }
 
   /**
+   * @param {object} params
+   * @param {string} params.name
+   * @param {object} [params.options]
+   */
+  async updateName(params = {}) {
+    const {
+      id,
+      name,
+    } = await validateAsync(Joi.object({
+      id: attrs.id.required(),
+      name: attrs.name.required(),
+    }).required(), params);
+
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    try {
+      // attempt to update the org.
+      const result = await this.updateOne({
+        query: { _id: id },
+        update: { $set: { name, 'date.updated': new Date() } },
+        options: { strict: true, session },
+      });
+
+      // then update relationships.
+      await Promise.all([
+        // user managers
+        this.manager.$('user').updateMany({
+          query: { 'manages.org._id': id },
+          update: { $set: { 'manages.$[elem].org.name': name } },
+          options: {
+            arrayFilters: [{ 'elem.org._id': id }],
+            session,
+          },
+        }),
+        // workspaces
+        this.manager.$('workspace').updateMany({
+          query: { 'org._id': id },
+          update: { $set: { 'org.name': name } },
+          options: {
+            session,
+          },
+        }),
+      ]);
+
+      await session.commitTransaction();
+      return result;
+    } catch (e) {
+      await session.abortTransaction();
+      throw e;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
    * Finds an organization by slug.
    *
    * @param {object} params

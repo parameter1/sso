@@ -52,7 +52,7 @@ const run = async () => {
         {
           key: 'general',
           choices: [
-            { name: 'Create database indexes', value: 'createIndexes' },
+            { name: 'Create database indexes', fnName: 'createIndexes' },
           ],
         },
       ].reduce((arr, group) => {

@@ -1,4 +1,5 @@
 import inquirer from 'inquirer';
+import { asArray } from '@parameter1/utils';
 import { workspaceAttributes as workspaceAttrs } from '@parameter1/sso-db/schema';
 import repos from '../repos.js';
 
@@ -14,7 +15,12 @@ export default async function createInstance() {
         const cursor = await repos.$('workspace').find({
           query: {},
           options: {
-            projection: { namespace: 1, name: 1, slug: 1 },
+            projection: {
+              members: 1,
+              namespace: 1,
+              name: 1,
+              slug: 1,
+            },
             sort: { 'name.full': 1 },
           },
         });
@@ -26,13 +32,23 @@ export default async function createInstance() {
       type: 'list',
       name: 'user',
       message: 'Select the user to add as a member',
-      choices: async () => {
+      choices: async ({ workspace }) => {
         const cursor = await repos.$('user').find({
           query: {},
           options: { projection: { email: 1, name: 1 }, sort: { email: 1 } },
         });
-        const docs = await cursor.toArray();
-        return docs.map((doc) => ({ name: `${doc.email} [${doc.name.default}]`, value: doc }));
+
+        const memberEmails = asArray(workspace.members).reduce((set, member) => {
+          set.add(member.user.email);
+          return set;
+        }, new Set());
+
+        const users = await cursor.toArray();
+        return users.map((doc) => ({
+          name: `${doc.email} [${doc.name.default}]`,
+          value: doc,
+          disabled: memberEmails.has(doc.email),
+        }));
       },
     },
     {

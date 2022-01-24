@@ -1,4 +1,5 @@
 import inquirer from 'inquirer';
+import { asArray } from '@parameter1/utils';
 import { organizationAttributes as orgAttrs } from '@parameter1/sso-db/schema';
 import repos from '../repos.js';
 
@@ -13,7 +14,7 @@ export default async function createInstance() {
       choices: async () => {
         const cursor = await repos.$('organization').find({
           query: {},
-          options: { projection: { name: 1, slug: 1 }, sort: { name: 1 } },
+          options: { projection: { name: 1, slug: 1, managers: 1 }, sort: { name: 1 } },
         });
         const docs = await cursor.toArray();
         return docs.map((doc) => ({ name: `${doc.name} [${doc.slug}]`, value: doc }));
@@ -23,13 +24,23 @@ export default async function createInstance() {
       type: 'list',
       name: 'user',
       message: 'Select the user to add as a mananger',
-      choices: async () => {
+      choices: async ({ org }) => {
         const cursor = await repos.$('user').find({
           query: {},
           options: { projection: { email: 1, name: 1 }, sort: { email: 1 } },
         });
-        const docs = await cursor.toArray();
-        return docs.map((doc) => ({ name: `${doc.email} [${doc.name.default}]`, value: doc }));
+
+        const managerEmails = asArray(org.managers).reduce((set, manager) => {
+          set.add(manager.user.email);
+          return set;
+        }, new Set());
+
+        const users = await cursor.toArray();
+        return users.map((doc) => ({
+          name: `${doc.email} [${doc.name.default}]`,
+          value: doc,
+          disabled: managerEmails.has(doc.email),
+        }));
       },
     },
     {

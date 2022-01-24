@@ -1,6 +1,6 @@
 import { ManagedRepo, cleanDocument } from '@parameter1/mongodb';
 import Joi, { validateAsync } from '@parameter1/joi';
-import { isFunction as isFn } from '@parameter1/utils';
+import { isFunction as isFn, objectHasKeys } from '@parameter1/utils';
 import { get } from '@parameter1/object-path';
 import {
   userAttributes as attrs,
@@ -80,6 +80,7 @@ export default class UserRepo extends ManagedRepo {
    * @param {string} [params.ua]
    * @param {string} [params.ttl=3600]
    * @param {string} [params.scope]
+   * @param {boolean} [params.impersonated=false]
    * @param {function} [params.inTransaction]
    */
   async createLoginLinkToken(params = {}) {
@@ -89,6 +90,7 @@ export default class UserRepo extends ManagedRepo {
       ua,
       ttl,
       scope,
+      impersonated,
       session: currentSession,
       inTransaction,
     } = await validateAsync(Joi.object({
@@ -97,6 +99,7 @@ export default class UserRepo extends ManagedRepo {
       ua: eventAttrs.ua,
       ttl: tokenAttrs.ttl.default(3600),
       scope: Joi.string(),
+      impersonated: Joi.boolean().default(false),
       session: Joi.object(),
       inTransaction: Joi.function(),
     }).required(), params);
@@ -111,11 +114,16 @@ export default class UserRepo extends ManagedRepo {
         options: { strict: true, projection: { email: 1 }, session },
       });
 
+      const data = {
+        ...(scope && { scope }),
+        ...(impersonated && { impersonated }),
+      };
+
       const token = await this.manager.$('token').create({
         subject: 'login-link',
         audience: user._id,
         ttl,
-        ...(scope && { data: { scope } }),
+        ...(objectHasKeys(data) && { data }),
         options: { session },
       });
 
@@ -125,7 +133,7 @@ export default class UserRepo extends ManagedRepo {
         action: 'send-login-link',
         ip,
         ua,
-        data: { scope, loginToken: token },
+        data: { scope, loginToken: token, impersonated },
         options: { session },
       });
 
@@ -166,6 +174,7 @@ export default class UserRepo extends ManagedRepo {
 
     const authToken = await this.manager.$('token').verify({ token, subject: 'auth' });
     const userId = get(authToken, 'doc.audience');
+    const impersonated = get(authToken, 'doc.data.impersonated');
     const session = await this.client.startSession();
     session.startTransaction();
 
@@ -182,10 +191,10 @@ export default class UserRepo extends ManagedRepo {
           action: 'logout',
           ip,
           ua,
-          data: { authToken },
+          data: { authToken, impersonated },
           options: { session },
         }),
-        this.updateOne({
+        impersonated ? Promise.resolve() : this.updateOne({
           query: { _id: userId },
           update: { $set: { 'date.lastSeen': new Date() } },
           options: { session },
@@ -221,6 +230,7 @@ export default class UserRepo extends ManagedRepo {
     try {
       const loginLinkToken = await this.manager.$('token').verify({ token, subject: 'login-link' });
       const shouldInvalidateToken = get(loginLinkToken, 'doc.data.scope') !== 'invite';
+      const impersonated = get(loginLinkToken, 'doc.data.impersonated');
       const user = await this.findByObjectId({
         id: get(loginLinkToken, 'doc.audience'),
         options: { projection: { email: 1 }, strict: true },
@@ -231,6 +241,7 @@ export default class UserRepo extends ManagedRepo {
       try {
         const authToken = await this.manager.$('token').getOrCreateAuthToken({
           userId: user._id,
+          impersonated,
           options: { session },
           findOptions: { session },
         });
@@ -247,10 +258,10 @@ export default class UserRepo extends ManagedRepo {
             date: now,
             ip,
             ua,
-            data: { loginLinkToken, authToken },
+            data: { loginLinkToken, authToken, impersonated },
             options: { session },
           }),
-          this.updateOne({
+          impersonated ? Promise.resolve() : this.updateOne({
             query: { _id: user._id },
             update: { $set, $inc: { loginCount: 1 } },
             options: { session },
@@ -288,10 +299,13 @@ export default class UserRepo extends ManagedRepo {
     try {
       const { doc } = await this.manager.$('token').verify({ token: authToken, subject: 'auth' });
       const { audience: userId } = doc;
-      await this.updateOne({
-        query: { _id: userId },
-        update: { $set: { 'date.lastSeen': new Date() } },
-      });
+      const impersonated = get(doc, 'data.impersonated');
+      if (!impersonated) {
+        await this.updateOne({
+          query: { _id: userId },
+          update: { $set: { 'date.lastSeen': new Date() } },
+        });
+      }
       const user = await this.findByObjectId({
         id: userId,
         options: { projection, strict: true },

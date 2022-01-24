@@ -77,19 +77,36 @@ export default class TokenRepo extends ManagedRepo {
   /**
    * @param {object} params
    * @param {string|ObjectId} params.userId
+   * @param {boolean} [params.impersonated=false]
    * @param {object} [params.findOptions]
    * @param {object} [params.options]
    */
   async getOrCreateAuthToken(params = {}) {
-    const { userId, findOptions, options } = await validateAsync(Joi.object({
+    const {
+      userId,
+      impersonated,
+      findOptions,
+      options,
+    } = await validateAsync(Joi.object({
       userId: userAttrs.id.required(),
+      impersonated: Joi.boolean().default(false),
       findOptions: Joi.object().default({}),
       options: Joi.object().default({}),
     }).required(), params);
-    const query = { subject: 'auth', audience: userId };
+    const query = {
+      subject: 'auth',
+      audience: userId,
+      'data.impersonated': impersonated ? true : { $ne: true },
+    };
     const doc = await this.findOne({ query, options: findOptions });
     if (doc) return { doc, signed: this.signDocument(doc) };
-    return this.create({ ...query, ttl: 60 * 60 * 24, options });
+    return this.create({
+      subject: 'auth',
+      audience: userId,
+      data: { ...(impersonated && { impersonated: true }) },
+      ttl: 60 * 60 * 24,
+      options,
+    });
   }
 
   /**

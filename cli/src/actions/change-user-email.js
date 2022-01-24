@@ -1,0 +1,71 @@
+import inquirer from 'inquirer';
+import { userAttributes as userAttrs } from '@parameter1/sso-db/schema';
+import repos from '../repos.js';
+
+const { log } = console;
+
+export default async function createInstance() {
+  const questions = [
+    {
+      type: 'list',
+      name: 'user',
+      message: 'Select the user to change the email address for',
+      choices: async () => {
+        const cursor = await repos.$('user').find({
+          query: {},
+          options: {
+            projection: { email: 1, name: 1 },
+            sort: { 'name.family': 1 },
+          },
+        });
+
+        const users = await cursor.toArray();
+        return users.map((doc) => ({
+          name: `${doc.name.family}, ${doc.name.given} [${doc.email}]`,
+          value: doc,
+        }));
+      },
+    },
+    {
+      type: 'input',
+      name: 'email',
+      message: 'Enter the new email address',
+      validate: async (input, { user }) => {
+        const { error } = userAttrs.email.required().validate(input);
+        if (error) return error;
+
+        if (input === user.email) {
+          return new Error('The new email address cannot be the same as the old address');
+        }
+
+        const doc = await repos.$('user').findByEmail({
+          email: input,
+          options: { projection: { _id: 1 } },
+        });
+        if (doc) return new Error('A user already exists with this email address');
+
+        return true;
+      },
+    },
+    {
+      type: 'confirm',
+      name: 'confirm',
+      message: 'Are you sure you want to complete this action?',
+      default: false,
+    },
+  ];
+
+  const {
+    confirm,
+    user,
+    email,
+  } = await inquirer.prompt(questions);
+
+  if (!confirm) return;
+
+  const result = await repos.$('user').changeEmailAddress({
+    id: user._id,
+    email,
+  });
+  log(result);
+}

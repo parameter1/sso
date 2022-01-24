@@ -5,6 +5,7 @@ import { connect, close } from './mongodb.js';
 import {
   addManager,
   addMember,
+  changeUserEmail,
   createApplication,
   createIndexes,
   createOrganization,
@@ -30,6 +31,7 @@ const run = async () => {
         { name: 'Add organization manager', value: 'addManager' },
         { name: 'Add workspace member', value: 'addMember' },
         new inquirer.Separator(),
+        { name: 'Change user email address', value: 'changeUserEmail' },
         { name: 'Generate user auth token (impersonate)', value: 'generateAuthToken' },
         new inquirer.Separator(),
         { name: 'Create database indexes', value: 'createIndexes' },
@@ -61,6 +63,9 @@ const run = async () => {
       break;
     case 'addMember':
       await addMember();
+      break;
+    case 'changeUserEmail':
+      await changeUserEmail();
       break;
     case 'generateAuthToken':
       await generateAuthToken();

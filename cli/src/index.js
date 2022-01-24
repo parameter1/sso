@@ -86,7 +86,7 @@ const run = async () => {
       type: 'confirm',
       name: 'runAnother',
       message: 'Would you like to run another action?',
-      default: false,
+      default: true,
     },
   ]);
   if (runAnother) await run();

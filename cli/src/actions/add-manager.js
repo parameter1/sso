@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { asArray } from '@parameter1/utils';
 import { organizationAttributes as orgAttrs } from '@parameter1/sso-db/schema';
-import getUserList from './utils/get-user-list.js';
+import { getOrgList, getUserList } from './utils/index.js';
 import repos from '../repos.js';
 
 const { log } = console;
@@ -12,14 +12,7 @@ export default async function createInstance() {
       type: 'list',
       name: 'org',
       message: 'Select the organization',
-      choices: async () => {
-        const cursor = await repos.$('organization').find({
-          query: {},
-          options: { projection: { name: 1, slug: 1, managers: 1 }, sort: { name: 1 } },
-        });
-        const docs = await cursor.toArray();
-        return docs.map((doc) => ({ name: `${doc.name} [${doc.slug}]`, value: doc }));
-      },
+      choices: getOrgList({ projection: { members: 1 } }),
     },
     {
       type: 'list',

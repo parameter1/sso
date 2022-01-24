@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { workspaceAttributes as workspaceAttrs } from '@parameter1/sso-db/schema';
 import { sluggify } from '@parameter1/slug';
-import { getOrgList } from './utils/index.js';
+import { getAppList, getOrgList } from './utils/index.js';
 import repos from '../repos.js';
 
 const { log } = console;
@@ -11,15 +11,8 @@ export default async function createInstance() {
     {
       type: 'list',
       name: 'app',
-      message: 'Select the workspace application',
-      choices: async () => {
-        const cursor = await repos.$('application').find({
-          query: {},
-          options: { projection: { name: 1, slug: 1 }, sort: { name: 1 } },
-        });
-        const docs = await cursor.toArray();
-        return docs.map((doc) => ({ name: `${doc.name} [${doc.slug}]`, value: doc }));
-      },
+      message: 'Select the application',
+      choices: getAppList,
     },
     {
       type: 'list',
@@ -30,7 +23,7 @@ export default async function createInstance() {
     {
       type: 'input',
       name: 'name',
-      message: 'Enter the name for the workspace',
+      message: 'Enter the workspace name',
       default: 'Default',
     },
     {

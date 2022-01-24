@@ -45,6 +45,7 @@ const run = async () => {
           key: 'workspace',
           choices: [
             { name: 'Create new workspace', fnName: 'create' },
+            { name: 'Update workspace name', fnName: 'updateName' },
             { name: 'Add workspace member', fnName: 'addMember' },
           ],
         },

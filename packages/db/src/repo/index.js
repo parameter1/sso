@@ -9,6 +9,7 @@ import UserRepo from './user.js';
 import WorkspaceRepo from './workspace.js';
 
 import {
+  applicationAttributes as appAttrs,
   organizationAttributes as orgAttrs,
   userAttributes as userAttrs,
   workspaceAttributes,
@@ -106,6 +107,8 @@ export default class Repos extends RepoManager {
    *
    * @param {object} params
    * @param {object} params.workspace
+   * @param {object} params.workspace.app
+   * @param {object} params.workspace.org
    * @param {object} params.user
    * @param {string} params.role
    */
@@ -117,11 +120,17 @@ export default class Repos extends RepoManager {
     } = await validateAsync(Joi.object({
       workspace: Joi.object({
         _id: workspaceAttrs.id.required(),
-        namespace: workspaceAttributes.namespace.required(),
         slug: workspaceAttributes.slug.required(),
-        name: Joi.object({
-          default: Joi.string().required(),
-          full: Joi.string().required(),
+        name: Joi.string().required(),
+        app: Joi.object({
+          _id: appAttrs.id.required(),
+          slug: appAttrs.slug.required(),
+          name: appAttrs.name.required(),
+        }).required(),
+        org: Joi.object({
+          _id: orgAttrs.id.required(),
+          slug: orgAttrs.slug.required(),
+          name: orgAttrs.name.required(),
         }).required(),
       }).required(),
       user: Joi.object({

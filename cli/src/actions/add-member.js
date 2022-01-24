@@ -1,6 +1,7 @@
 import inquirer from 'inquirer';
 import { asArray } from '@parameter1/utils';
 import { workspaceAttributes as workspaceAttrs } from '@parameter1/sso-db/schema';
+import getUserList from './utils/get-user-list.js';
 import repos from '../repos.js';
 
 const { log } = console;
@@ -16,16 +17,22 @@ export default async function createInstance() {
           query: {},
           options: {
             projection: {
+              app: 1,
+              org: 1,
               members: 1,
-              namespace: 1,
               name: 1,
               slug: 1,
             },
-            sort: { 'name.full': 1 },
+            sort: { 'app.name': 1, 'org.name': 1, name: 1 },
           },
         });
         const docs = await cursor.toArray();
-        return docs.map((doc) => ({ name: `${doc.name.full} [${doc.namespace}.${doc.slug}]`, value: doc }));
+        return docs.map((ws) => {
+          const { app, org } = ws;
+          const name = [app.name, org.name, ws.name].join(' > ');
+          const ns = [app.slug, org.slug, ws.slug].join('.');
+          return { name: `${name} [${ns}]`, value: ws };
+        });
       },
     },
     {
@@ -33,22 +40,14 @@ export default async function createInstance() {
       name: 'user',
       message: 'Select the user to add as a member',
       choices: async ({ workspace }) => {
-        const cursor = await repos.$('user').find({
-          query: {},
-          options: { projection: { email: 1, name: 1 }, sort: { email: 1 } },
-        });
-
         const memberEmails = asArray(workspace.members).reduce((set, member) => {
           set.add(member.user.email);
           return set;
         }, new Set());
 
-        const users = await cursor.toArray();
-        return users.map((doc) => ({
-          name: `${doc.email} [${doc.name.default}]`,
-          value: doc,
-          disabled: memberEmails.has(doc.email),
-        }));
+        return getUserList({
+          disabledWhen: (user) => memberEmails.has(user.email),
+        });
       },
     },
     {
@@ -83,9 +82,10 @@ export default async function createInstance() {
   const result = await repos.addWorkspaceMember({
     workspace: {
       _id: workspace._id,
-      namespace: workspace.namespace,
       slug: workspace.slug,
       name: workspace.name,
+      app: workspace.app,
+      org: workspace.org,
     },
     user: { _id: user._id, email: user.email, name: user.name },
     role,

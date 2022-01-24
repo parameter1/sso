@@ -77,12 +77,8 @@ export default class WorkspaceRepo extends ManagedRepo {
       doc: cleanDocument({
         app,
         org,
-        namespace: `${app.slug}.${org.slug}`,
         slug,
-        name: {
-          default: name,
-          full: [app.name, org.name, name].join(' > '),
-        },
+        name,
         // urls,
         date: {
           created: now,

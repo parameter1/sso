@@ -61,4 +61,60 @@ export default class ApplicationRepo extends ManagedRepo {
   findBySlug({ slug, options } = {}) {
     return this.findOne({ query: { slug }, options });
   }
+
+  /**
+   * @param {object} params
+   * @param {string} params.name
+   * @param {object} [params.options]
+   */
+  async updateName(params = {}) {
+    const {
+      id,
+      name,
+    } = await validateAsync(Joi.object({
+      id: attrs.id.required(),
+      name: attrs.name.required(),
+    }).required(), params);
+
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    try {
+      // attempt to update the org.
+      const result = await this.updateOne({
+        query: { _id: id },
+        update: { $set: { name, 'date.updated': new Date() } },
+        options: { strict: true, session },
+      });
+
+      // then update relationships.
+      await Promise.all([
+        // user memberships
+        this.manager.$('user').updateMany({
+          query: { 'memberships.workspace.app._id': id },
+          update: { $set: { 'memberships.$[elem].workspace.app.name': name } },
+          options: {
+            arrayFilters: [{ 'elem.workspace.app._id': id }],
+            session,
+          },
+        }),
+        // workspaces
+        this.manager.$('workspace').updateMany({
+          query: { 'app._id': id },
+          update: { $set: { 'app.name': name } },
+          options: {
+            session,
+          },
+        }),
+      ]);
+
+      await session.commitTransaction();
+      return result;
+    } catch (e) {
+      await session.abortTransaction();
+      throw e;
+    } finally {
+      session.endSession();
+    }
+  }
 }

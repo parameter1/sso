@@ -27,6 +27,85 @@ export default class UserRepo extends ManagedRepo {
   }
 
   /**
+   *
+   * @param {object} params
+   * @param {string} params.id
+   * @param {string} params.email
+   * @param {boolean} [params.verfied=false]
+   */
+  async changeEmailAddress(params = {}) {
+    const {
+      id,
+      email,
+      verified,
+    } = await validateAsync(Joi.object({
+      id: attrs.id.required(),
+      email: attrs.email.required(),
+      verified: attrs.verified.default(false),
+    }).required(), params);
+
+    const user = await this.findByObjectId({ id, options: { projection: { email: 1 } } });
+    if (user.email === email) {
+      throw ManagedRepo.createError(400, 'The new email address is the same as the current email address.');
+    }
+
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    try {
+      // attempt to update the user email.
+      await this.updateOne({
+        query: { _id: user._id },
+        update: {
+          $set: cleanDocument({
+            email,
+            domain: email.split('@')[1],
+            'date.updated': new Date(),
+            verified,
+          }),
+        },
+        options: { strict: true, session },
+      });
+
+      // then update relationships.
+      await Promise.all([
+        // org managers
+        this.manager.$('organization').updateMany({
+          query: { 'managers.user._id': user._id },
+          update: { $set: { 'managers.$[elem].user.email': email } },
+          options: {
+            arrayFilters: [{ 'elem.user._id': user._id }],
+            session,
+          },
+        }),
+        // workspace members
+        this.manager.$('workspace').updateMany({
+          query: { 'members.user._id': user._id },
+          update: { $set: { 'members.$[elem].user.email': email } },
+          options: {
+            arrayFilters: [{ 'elem.user._id': user._id }],
+            session,
+          },
+        }),
+        // user events
+        this.manager.$('user-event').updateMany({
+          query: { 'user._id': user._id },
+          update: { $set: { 'user.email': email } },
+          options: { session },
+        }),
+      ]);
+
+      await session.commitTransaction();
+      return 'ok';
+    } catch (e) {
+      await session.abortTransaction();
+      throw e;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
    * @param {object} params
    * @param {string} params.email
    * @param {string} [params.givenName]

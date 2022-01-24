@@ -89,4 +89,52 @@ export default class WorkspaceRepo extends ManagedRepo {
       options,
     });
   }
+
+  /**
+   * @param {object} params
+   * @param {string} params.name
+   * @param {object} [params.options]
+   */
+  async updateName(params = {}) {
+    const {
+      id,
+      name,
+    } = await validateAsync(Joi.object({
+      id: workspaceAttrs.id.required(),
+      name: workspaceAttrs.name.required(),
+    }).required(), params);
+
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    try {
+      // attempt to update the org.
+      const result = await this.updateOne({
+        query: { _id: id },
+        update: { $set: { name, 'date.updated': new Date() } },
+        options: { strict: true, session },
+      });
+
+      // then update relationships.
+      await Promise.all([
+        // user memberships
+        this.manager.$('user').updateMany({
+          query: { 'memberships.workspace._id': id },
+          update: { $set: { 'memberships.$[elem].workspace.name': name } },
+          options: {
+            arrayFilters: [{ 'elem.workspace._id': id }],
+            session,
+          },
+        }),
+      ]);
+
+      await session.commitTransaction();
+      return result;
+    } catch (e) {
+      await session.abortTransaction();
+      throw e;
+    } finally {
+      session.endSession();
+    }
+  }
 }

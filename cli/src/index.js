@@ -12,6 +12,7 @@ import {
   createUser,
   createWorkspace,
   generateAuthToken,
+  updateOrgName,
   updateUserNames,
 } from './actions/index.js';
 
@@ -25,8 +26,10 @@ const run = async () => {
       message: 'Choose an action',
       choices: [
         { name: 'Create application', value: 'createApplication' },
-        { name: 'Create organization', value: 'createOrganization' },
         { name: 'Create workspace', value: 'createWorkspace' },
+        new inquirer.Separator(),
+        { name: 'Create organization', value: 'createOrganization' },
+        { name: 'Update organization name', value: 'updateOrgName' },
         new inquirer.Separator(),
         { name: 'Add organization manager', value: 'addManager' },
         { name: 'Add workspace member', value: 'addMember' },
@@ -74,6 +77,9 @@ const run = async () => {
       break;
     case 'updateUserNames':
       await updateUserNames();
+      break;
+    case 'updateOrgName':
+      await updateOrgName();
       break;
     default:
       throw new Error(`No action found for ${action}`);

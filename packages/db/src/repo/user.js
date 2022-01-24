@@ -17,11 +17,11 @@ export default class UserRepo extends ManagedRepo {
     super({
       ...params,
       collectionName: 'users',
-      collatableFields: ['email', 'name.family'],
+      collatableFields: ['email', 'familyName'],
       indexes: [
         { key: { email: 1 }, unique: true, collation: { locale: 'en_US' } },
 
-        { key: { 'name.family': 1, _id: 1 }, collation: { locale: 'en_US' } },
+        { key: { familyName: 1, _id: 1 }, collation: { locale: 'en_US' } },
       ],
     });
   }
@@ -133,11 +133,8 @@ export default class UserRepo extends ManagedRepo {
       doc: cleanDocument({
         email,
         domain: email.split('@')[1],
-        name: {
-          default: UserRepo.createFullName({ givenName, familyName }),
-          given: givenName,
-          family: familyName,
-        },
+        givenName,
+        familyName,
         verified,
         loginCount: 0,
         date: {
@@ -385,17 +382,11 @@ export default class UserRepo extends ManagedRepo {
     const session = await this.client.startSession();
     session.startTransaction();
 
-    const name = cleanDocument({
-      default: UserRepo.createFullName({ givenName, familyName }),
-      given: givenName,
-      family: familyName,
-    });
-
     try {
       // attempt to update the user.
       const result = await this.updateOne({
         query: { _id: id },
-        update: { $set: { name, 'date.updated': new Date() } },
+        update: { $set: { givenName, familyName, 'date.updated': new Date() } },
         options: { strict: true, session },
       });
 
@@ -404,7 +395,12 @@ export default class UserRepo extends ManagedRepo {
         // org managers
         this.manager.$('organization').updateMany({
           query: { 'managers.user._id': id },
-          update: { $set: { 'managers.$[elem].user.name': name } },
+          update: {
+            $set: {
+              'managers.$[elem].user.givenName': givenName,
+              'managers.$[elem].user.familyName': familyName,
+            },
+          },
           options: {
             arrayFilters: [{ 'elem.user._id': id }],
             session,
@@ -413,7 +409,12 @@ export default class UserRepo extends ManagedRepo {
         // workspace members
         this.manager.$('workspace').updateMany({
           query: { 'members.user._id': id },
-          update: { $set: { 'members.$[elem].user.name': name } },
+          update: {
+            $set: {
+              'members.$[elem].user.givenName': givenName,
+              'members.$[elem].user.familyName': familyName,
+            },
+          },
           options: {
             arrayFilters: [{ 'elem.user._id': id }],
             session,
@@ -459,9 +460,5 @@ export default class UserRepo extends ManagedRepo {
     } catch (e) {
       throw ManagedRepo.createError(401, `Authentication failed: ${e.message}`);
     }
-  }
-
-  static createFullName({ givenName, familyName } = {}) {
-    return [givenName, familyName].filter((v) => v).join(' ');
   }
 }

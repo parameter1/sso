@@ -16,7 +16,7 @@ export default async function createInstance() {
     {
       type: 'input',
       name: 'givenName',
-      default: ({ user }) => user.name.given,
+      default: ({ user }) => user.givenName,
       message: 'Enter the new first/given name',
       validate: async (input) => {
         const { error } = userAttrs.givenName.required().validate(input);
@@ -27,7 +27,7 @@ export default async function createInstance() {
     {
       type: 'input',
       name: 'familyName',
-      default: ({ user }) => user.name.family,
+      default: ({ user }) => user.familyName,
       message: 'Enter the new last/family name',
       validate: async (input) => {
         const { error } = userAttrs.familyName.required().validate(input);

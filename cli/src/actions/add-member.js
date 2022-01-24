@@ -87,7 +87,12 @@ export default async function createInstance() {
       app: workspace.app,
       org: workspace.org,
     },
-    user: { _id: user._id, email: user.email, name: user.name },
+    user: {
+      _id: user._id,
+      email: user.email,
+      givenName: user.givenName,
+      familyName: user.familyName,
+    },
     role,
   });
   log(result);

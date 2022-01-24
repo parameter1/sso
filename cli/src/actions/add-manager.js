@@ -66,7 +66,12 @@ export default async function createInstance() {
 
   const result = await repos.addOrgManager({
     org: { _id: org._id, slug: org.slug, name: org.name },
-    user: { _id: user._id, email: user.email, name: user.name },
+    user: {
+      _id: user._id,
+      email: user.email,
+      givenName: user.givenName,
+      familyName: user.familyName,
+    },
     role,
   });
   log(result);

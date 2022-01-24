@@ -1,12 +1,22 @@
 import { isFunction as isFn } from '@parameter1/utils';
 import repos from '../../repos.js';
 
-export default async ({ filter, disabledWhen, projection } = {}) => {
+export default async ({
+  filter,
+  disabledWhen,
+  query,
+  projection,
+} = {}) => {
   const cursor = await repos.$('user').find({
-    query: {},
+    query: { ...query },
     options: {
-      projection: { ...projection, email: 1, name: 1 },
-      sort: { 'name.family': 1 },
+      projection: {
+        ...projection,
+        email: 1,
+        givenName: 1,
+        familyName: 1,
+      },
+      sort: { familyName: 1 },
     },
   });
 
@@ -15,7 +25,7 @@ export default async ({ filter, disabledWhen, projection } = {}) => {
     if (isFn(filter)) return filter(doc);
     return true;
   }).map((doc) => ({
-    name: `${doc.name.family}, ${doc.name.given} [${doc.email}]`,
+    name: `${doc.familyName}, ${doc.givenName} [${doc.email}]`,
     value: doc,
     disabled: isFn(disabledWhen) ? disabledWhen(doc) : false,
   }));

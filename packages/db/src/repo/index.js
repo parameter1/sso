@@ -56,11 +56,8 @@ export default class Repos extends RepoManager {
       user: Joi.object({
         _id: userAttrs.id.required(),
         email: userAttrs.email.required(),
-        name: Joi.object({
-          given: userAttrs.givenName.required(),
-          family: userAttrs.familyName.required(),
-          default: Joi.string().required(),
-        }).required(),
+        givenName: userAttrs.givenName.required(),
+        familyName: userAttrs.familyName.required(),
       }).required(),
       role: orgAttrs.managerRole.required(),
     }).required(), params);
@@ -136,11 +133,8 @@ export default class Repos extends RepoManager {
       user: Joi.object({
         _id: userAttrs.id.required(),
         email: userAttrs.email.required(),
-        name: Joi.object().required({
-          family: userAttrs.familyName.required(),
-          given: userAttrs.givenName.required(),
-          default: Joi.string().required(),
-        }),
+        familyName: userAttrs.familyName.required(),
+        givenName: userAttrs.givenName.required(),
       }).required(),
       role: Joi.string().required(),
     }).required(), params);

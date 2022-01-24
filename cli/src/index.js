@@ -12,6 +12,7 @@ import {
   createUser,
   createWorkspace,
   generateAuthToken,
+  updateUserNames,
 } from './actions/index.js';
 
 const { log } = console;
@@ -31,6 +32,7 @@ const run = async () => {
         { name: 'Add workspace member', value: 'addMember' },
         new inquirer.Separator(),
         { name: 'Create user', value: 'createUser' },
+        { name: 'Update user first/last names', value: 'updateUserNames' },
         { name: 'Change user email address', value: 'changeUserEmail' },
         { name: 'Generate user auth token (impersonate)', value: 'generateAuthToken' },
         new inquirer.Separator(),
@@ -69,6 +71,9 @@ const run = async () => {
       break;
     case 'generateAuthToken':
       await generateAuthToken();
+      break;
+    case 'updateUserNames':
+      await updateUserNames();
       break;
     default:
       throw new Error(`No action found for ${action}`);

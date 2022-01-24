@@ -10,6 +10,7 @@ import {
   createOrganization,
   createUser,
   createWorkspace,
+  generateAuthToken,
 } from './actions/index.js';
 
 const { log } = console;
@@ -28,6 +29,8 @@ const run = async () => {
         new inquirer.Separator(),
         { name: 'Add organization manager', value: 'addManager' },
         { name: 'Add workspace member', value: 'addMember' },
+        new inquirer.Separator(),
+        { name: 'Generate user auth token (impersonate)', value: 'generateAuthToken' },
         new inquirer.Separator(),
         { name: 'Create database indexes', value: 'createIndexes' },
       ],
@@ -58,6 +61,9 @@ const run = async () => {
       break;
     case 'addMember':
       await addMember();
+      break;
+    case 'generateAuthToken':
+      await generateAuthToken();
       break;
     default:
       throw new Error(`No action found for ${action}`);

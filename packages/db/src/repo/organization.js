@@ -130,13 +130,7 @@ export default class OrganizationRepo extends ManagedRepo {
           },
         }),
         // workspaces
-        this.manager.$('workspace').updateMany({
-          query: { 'org._id': id },
-          update: { $set: { 'org.name': name } },
-          options: {
-            session,
-          },
-        }),
+        this.manager.$('workspace').updateRelatedOrgFields({ id, name, options: { session } }),
         // app workspaces
         this.manager.$('application').updateMany({
           query: { 'workspaces.org._id': id },
@@ -208,13 +202,7 @@ export default class OrganizationRepo extends ManagedRepo {
           },
         }),
         // workspaces
-        this.manager.$('workspace').updateMany({
-          query: { 'org._id': id },
-          update: { $set: { 'org.slug': slug } },
-          options: {
-            session,
-          },
-        }),
+        this.manager.$('workspace').updateRelatedOrgFields({ id, slug, options: { session } }),
         // app workspaces
         this.manager.$('application').updateMany({
           query: { 'workspaces.org._id': id },

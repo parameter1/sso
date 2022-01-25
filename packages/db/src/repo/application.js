@@ -121,13 +121,7 @@ export default class ApplicationRepo extends ManagedRepo {
           },
         }),
         // workspaces
-        this.manager.$('workspace').updateMany({
-          query: { 'app._id': id },
-          update: { $set: { 'app.name': name } },
-          options: {
-            session,
-          },
-        }),
+        this.manager.$('workspace').updateRelatedAppFields({ id, name, options: { session } }),
         // org workspaces
         this.manager.$('organization').updateMany({
           query: { 'workspaces.app._id': id },
@@ -192,13 +186,7 @@ export default class ApplicationRepo extends ManagedRepo {
           },
         }),
         // workspaces
-        this.manager.$('workspace').updateMany({
-          query: { 'app._id': id },
-          update: { $set: { 'app.slug': slug } },
-          options: {
-            session,
-          },
-        }),
+        this.manager.$('workspace').updateRelatedAppFields({ id, slug, options: { session } }),
         // org workspaces
         this.manager.$('organization').updateMany({
           query: { 'workspaces.app._id': id },

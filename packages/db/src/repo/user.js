@@ -79,14 +79,7 @@ export default class UserRepo extends ManagedRepo {
           },
         }),
         // workspace members
-        this.manager.$('workspace').updateMany({
-          query: { 'members.user._id': user._id },
-          update: { $set: { 'members.$[elem].user.email': email } },
-          options: {
-            arrayFilters: [{ 'elem.user._id': user._id }],
-            session,
-          },
-        }),
+        this.manager.$('workspace').updateRelatedMembersFields({ user: { id: user._id, email }, options: { session } }),
         // user events
         this.manager.$('user-event').updateMany({
           query: { 'user._id': user._id },
@@ -407,19 +400,7 @@ export default class UserRepo extends ManagedRepo {
           },
         }),
         // workspace members
-        this.manager.$('workspace').updateMany({
-          query: { 'members.user._id': id },
-          update: {
-            $set: {
-              'members.$[elem].user.givenName': givenName,
-              'members.$[elem].user.familyName': familyName,
-            },
-          },
-          options: {
-            arrayFilters: [{ 'elem.user._id': id }],
-            session,
-          },
-        }),
+        this.manager.$('workspace').updateRelatedMembersFields({ user: { id, givenName, familyName }, options: { session } }),
       ]);
 
       await session.commitTransaction();

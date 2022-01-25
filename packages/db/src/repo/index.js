@@ -66,7 +66,7 @@ export default class Repos extends RepoManager {
     session.startTransaction();
 
     const now = new Date();
-    const options = { strict: true };
+    const options = { strict: true, session };
     try {
       const results = await Promise.all([
         this.$('organization').updateOne({

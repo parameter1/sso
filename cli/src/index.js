@@ -49,17 +49,17 @@ const run = async () => {
             {
               name: 'Change user email address',
               fnName: 'changeEmail',
-              disabled: !documents.has('user') ? 'disabled: no users exist' : false,
+              disabled: !documents.has('user'),
             },
             {
               name: 'Update user first/last name',
               fnName: 'updateNames',
-              disabled: !documents.has('user') ? 'disabled: no users exist' : false,
+              disabled: !documents.has('user'),
             },
             {
               name: 'Generate user auth token (impersonate)',
               value: 'generateAuthToken',
-              disabled: !documents.has('user') ? 'disabled: no users exist' : false,
+              disabled: !documents.has('user'),
             },
           ],
         },
@@ -71,12 +71,12 @@ const run = async () => {
             {
               name: 'Update organization name',
               fnName: 'updateName',
-              disabled: !documents.has('organization') ? 'disabled: no orgs exist' : false,
+              disabled: !documents.has('organization'),
             },
             {
               name: 'Add organization manager',
               fnName: 'addManager',
-              disabled: !documents.has('organization') || !documents.has('user') ? 'disabled: no orgs or users exist' : false,
+              disabled: !documents.has('organization') || !documents.has('user'),
             },
           ],
         },
@@ -87,17 +87,17 @@ const run = async () => {
             {
               name: 'Create new workspace',
               fnName: 'create',
-              disabled: !documents.has('application') || !documents.has('organization') ? 'disabled: no apps or orgs exist' : false,
+              disabled: !documents.has('application') || !documents.has('organization'),
             },
             {
               name: 'Update workspace name',
               fnName: 'updateName',
-              disabled: !documents.has('workspace') ? 'disabled: no workspaces exist' : false,
+              disabled: !documents.has('workspace'),
             },
             {
               name: 'Add workspace member',
               fnName: 'addMember',
-              disabled: !documents.has('workspace') || !documents.has('user') ? 'disabled: no workspaces or users exist' : false,
+              disabled: !documents.has('workspace') || !documents.has('user'),
             },
           ],
         },
@@ -109,11 +109,15 @@ const run = async () => {
           ],
         },
       ].reduce((arr, group) => {
+        let count = 0;
         group.choices.forEach((choice) => {
           const value = `${group.key}.${choice.fnName}`;
-          arr.push({ name: choice.name, value, disabled: choice.disabled });
+          if (!choice.disabled) {
+            arr.push({ name: choice.name, value });
+            count += 1;
+          }
         });
-        arr.push(new inquirer.Separator());
+        if (count) arr.push(new inquirer.Separator());
         return arr;
       }, [new inquirer.Separator()]),
       loop: false,

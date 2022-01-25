@@ -131,15 +131,8 @@ export default class OrganizationRepo extends ManagedRepo {
         }),
         // workspaces
         this.manager.$('workspace').updateRelatedOrgFields({ id, name, options: { session } }),
-        // app workspaces
-        this.manager.$('application').updateMany({
-          query: { 'workspaces.org._id': id },
-          update: { $set: { 'workspaces.$[elem].org.name': name } },
-          options: {
-            arrayFilters: [{ 'elem.org._id': id }],
-            session,
-          },
-        }),
+        // app workspace orgs
+        this.manager.$('application').updatedRelatedWorkspaceOrgs({ id, name, options: { session } }),
       ]);
 
       await session.commitTransaction();
@@ -203,15 +196,8 @@ export default class OrganizationRepo extends ManagedRepo {
         }),
         // workspaces
         this.manager.$('workspace').updateRelatedOrgFields({ id, slug, options: { session } }),
-        // app workspaces
-        this.manager.$('application').updateMany({
-          query: { 'workspaces.org._id': id },
-          update: { $set: { 'workspaces.$[elem].org.slug': slug } },
-          options: {
-            arrayFilters: [{ 'elem.org._id': id }],
-            session,
-          },
-        }),
+        // app workspace orgs
+        this.manager.$('application').updatedRelatedWorkspaceOrgs({ id, slug, options: { session } }),
       ]);
 
       await session.commitTransaction();

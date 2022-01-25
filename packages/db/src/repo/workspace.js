@@ -98,11 +98,9 @@ export default class WorkspaceRepo extends ManagedRepo {
       const commonRel = { _id: workspace._id, name: workspace.name, slug: workspace.slug };
 
       await Promise.all([
-        this.manager.$('application').updateOne({
-          query: { _id: app._id, 'workspaces._id': { $ne: workspace._id } },
-          update: {
-            $push: { workspaces: cleanDocument({ ...commonRel, org: workspace.org }) },
-          },
+        this.manager.$('application').pushRelatedWorkspace({
+          appId: app._id,
+          workspace: { ...commonRel, org: workspace.org },
           options,
         }),
         this.manager.$('organization').updateOne({
@@ -193,14 +191,7 @@ export default class WorkspaceRepo extends ManagedRepo {
           },
         }),
         // app workspaces
-        this.manager.$('application').updateMany({
-          query: { 'workspaces._id': id },
-          update: { $set: { 'workspaces.$[elem].name': name } },
-          options: {
-            arrayFilters: [{ 'elem._id': id }],
-            session,
-          },
-        }),
+        this.manager.$('application').updatedRelatedWorkspaces({ id, name, options: { session } }),
         // org workspaces
         this.manager.$('organization').updateMany({
           query: { 'workspaces._id': id },
@@ -383,14 +374,7 @@ export default class WorkspaceRepo extends ManagedRepo {
           },
         }),
         // app workspaces
-        this.manager.$('application').updateMany({
-          query: { 'workspaces._id': id },
-          update: { $set: { 'workspaces.$[elem].slug': slug } },
-          options: {
-            arrayFilters: [{ 'elem._id': id }],
-            session,
-          },
-        }),
+        this.manager.$('application').updatedRelatedWorkspaces({ id, slug, options: { session } }),
         // org workspaces
         this.manager.$('organization').updateMany({
           query: { 'workspaces._id': id },

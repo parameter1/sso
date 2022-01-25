@@ -1,6 +1,10 @@
 import { ManagedRepo, cleanDocument } from '@parameter1/mongodb';
 import Joi, { validateAsync } from '@parameter1/joi';
-import { applicationAttributes as attrs } from '../schema/attributes/index.js';
+import {
+  applicationAttributes as attrs,
+  organizationAttributes as orgAttrs,
+  workspaceAttributes as workspaceAttrs,
+} from '../schema/attributes/index.js';
 
 import { buildUpdateNamePipeline } from './pipelines/index.js';
 
@@ -67,6 +71,44 @@ export default class ApplicationRepo extends ManagedRepo {
    */
   findBySlug({ slug, options } = {}) {
     return this.findOne({ query: { slug }, options });
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId} params.appId
+   * @param {object} params.workspace
+   * @param {ObjectId} params.workspace._id
+   * @param {string} params.workspace.name
+   * @param {string} params.workspace.slug
+   * @param {object} params.workspace.org
+   * @param {object} [params.options={}]
+   */
+  async pushRelatedWorkspace(params = {}) {
+    const {
+      appId,
+      workspace,
+      options,
+    } = await validateAsync(Joi.object({
+      appId: attrs.id.required(),
+      workspace: Joi.object({
+        _id: workspaceAttrs.id.required(),
+        slug: workspaceAttrs.slug.required(),
+        name: workspaceAttrs.name.required(),
+        org: Joi.object({
+          _id: orgAttrs.id.required(),
+          slug: orgAttrs.slug.required(),
+          name: orgAttrs.name.required(),
+        }).required(),
+      }).required(),
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    return this.updateOne({
+      query: { _id: appId, 'workspaces._id': { $ne: workspace._id } },
+      update: { $addToSet: { workspaces: cleanDocument(workspace) } },
+      options,
+    });
   }
 
   /**
@@ -141,6 +183,80 @@ export default class ApplicationRepo extends ManagedRepo {
     } finally {
       session.endSession();
     }
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId} params.id
+   * @param {string} [params.name]
+   * @param {string} [params.slug]
+   * @param {object} [params.options={}]
+   */
+  async updatedRelatedWorkspaces(params = {}) {
+    const {
+      id,
+      name,
+      slug,
+      options,
+    } = await validateAsync(Joi.object({
+      id: workspaceAttrs.id.required(),
+      name: workspaceAttrs.name,
+      slug: workspaceAttrs.slug,
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    if ([name, slug].every((v) => !v)) return null;
+    return this.updateMany({
+      query: { 'workspaces._id': id },
+      update: {
+        $set: {
+          ...(name && { 'workspaces.$[elem].name': name }),
+          ...(slug && { 'workspaces.$[elem].slug': slug }),
+        },
+      },
+      options: {
+        ...options,
+        arrayFilters: [{ 'elem._id': id }],
+      },
+    });
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId} params.id
+   * @param {string} [params.name]
+   * @param {string} [params.slug]
+   * @param {object} [params.options={}]
+   */
+  async updatedRelatedWorkspaceOrgs(params = {}) {
+    const {
+      id,
+      name,
+      slug,
+      options,
+    } = await validateAsync(Joi.object({
+      id: orgAttrs.id.required(),
+      name: orgAttrs.name,
+      slug: orgAttrs.slug,
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    if ([name, slug].every((v) => !v)) return null;
+    return this.updateMany({
+      query: { 'workspaces.org._id': id },
+      update: {
+        $set: {
+          ...(name && { 'workspaces.$[elem].org.name': name }),
+          ...(slug && { 'workspaces.$[elem].org.slug': slug }),
+        },
+      },
+      options: {
+        ...options,
+        arrayFilters: [{ 'elem.org._id': id }],
+      },
+    });
   }
 
   /**

@@ -8,6 +8,8 @@ import UserEventRepo from './user-event.js';
 import UserRepo from './user.js';
 import WorkspaceRepo from './workspace.js';
 
+import { buildUpdateSlugPipeline } from './pipelines/index.js';
+
 import {
   applicationAttributes as appAttrs,
   organizationAttributes as orgAttrs,
@@ -203,7 +205,7 @@ export default class Repos extends RepoManager {
       slug,
       query,
     });
-    return Repos.createSlugUpdatePipeline({ slug });
+    return buildUpdateSlugPipeline({ slug });
   }
 
   /**
@@ -266,47 +268,5 @@ export default class Repos extends RepoManager {
       query,
     });
     if (hasRedirect) throw ManagedRepo.createError(409, 'An existing record is already using this slug as a redirect.');
-  }
-
-  /**
-   *
-   * @param {object} params
-   * @param {string} params.slug
-   */
-  static async createSlugUpdatePipeline(params = {}) {
-    const {
-      slug,
-    } = await validateAsync(Joi.object({
-      slug: Joi.slug().required(),
-    }).required(), params);
-
-    return [
-      {
-        $addFields: {
-          currentSlug: '$slug',
-          hasChanged: { $ne: ['$slug', slug] },
-        },
-      },
-      {
-        $set: {
-          slug,
-          'date.updated': { $cond: ['$hasChanged', new Date(), '$date.updated'] },
-          redirects: {
-            $cond: {
-              if: '$hasChanged',
-              then: {
-                $filter: {
-                  input: { $concatArrays: ['$redirects', ['$currentSlug']] },
-                  as: 'slug',
-                  cond: { $ne: ['$$slug', slug] },
-                },
-              },
-              else: '$redirects',
-            },
-          },
-        },
-      },
-      { $unset: ['currentSlug', 'hasChanged'] },
-    ];
   }
 }

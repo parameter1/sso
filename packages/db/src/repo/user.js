@@ -3,9 +3,12 @@ import Joi, { validateAsync } from '@parameter1/joi';
 import { isFunction as isFn, objectHasKeys } from '@parameter1/utils';
 import { get } from '@parameter1/object-path';
 import {
+  applicationAttributes as appAttrs,
+  organizationAttributes as orgAttrs,
   userAttributes as attrs,
   userEventAttributes as eventAttrs,
   tokenAttributes as tokenAttrs,
+  workspaceAttributes as workspaceAttrs,
 } from '../schema/attributes/index.js';
 
 export default class UserRepo extends ManagedRepo {
@@ -342,6 +345,154 @@ export default class UserRepo extends ManagedRepo {
       e.message = `Unable to login: ${e.message}`;
       throw e;
     }
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId} params.id
+   * @param {string} params.name
+   * @param {string} params.slug
+   * @param {object} [params.options={}]
+   */
+  async updateRelatedManagedOrgs(params = {}) {
+    const {
+      id,
+      name,
+      slug,
+      options,
+    } = await validateAsync(Joi.object({
+      id: orgAttrs.id.required(),
+      name: orgAttrs.name.required(),
+      slug: orgAttrs.slug.required(),
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    if ([name, slug].every((v) => !v)) return null;
+    return this.updateMany({
+      query: { 'manages.org._id': id },
+      update: {
+        $set: {
+          ...(name && { 'manages.$[elem].org.name': name }),
+          ...(slug && { 'manages.$[elem].org.slug': slug }),
+        },
+      },
+      options: {
+        ...options,
+        arrayFilters: [{ 'elem.org._id': id }],
+      },
+    });
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId} params.id
+   * @param {string} params.name
+   * @param {string} params.slug
+   * @param {object} [params.options={}]
+   */
+  async updateRelatedMembershipWorkspaces(params = {}) {
+    const {
+      id,
+      name,
+      slug,
+      options,
+    } = await validateAsync(Joi.object({
+      id: workspaceAttrs.id.required(),
+      name: workspaceAttrs.name.required(),
+      slug: workspaceAttrs.slug.required(),
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    if ([name, slug].every((v) => !v)) return null;
+    return this.updateMany({
+      query: { 'memberships.workspace._id': id },
+      update: {
+        $set: {
+          ...(name && { 'memberships.$[elem].workspace.name': name }),
+          ...(slug && { 'memberships.$[elem].workspace.slug': slug }),
+        },
+      },
+      options: {
+        ...options,
+        arrayFilters: [{ 'elem.workspace._id': id }],
+      },
+    });
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId} params.id
+   * @param {string} params.name
+   * @param {string} params.slug
+   * @param {object} [params.options={}]
+   */
+  async updateRelatedMembershipWorkspaceApps(params = {}) {
+    const {
+      id,
+      name,
+      slug,
+      options,
+    } = await validateAsync(Joi.object({
+      id: appAttrs.id.required(),
+      name: appAttrs.name.required(),
+      slug: appAttrs.slug.required(),
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    if ([name, slug].every((v) => !v)) return null;
+    return this.updateMany({
+      query: { 'memberships.workspace.app._id': id },
+      update: {
+        $set: {
+          ...(name && { 'memberships.$[elem].workspace.app.name': name }),
+          ...(slug && { 'memberships.$[elem].workspace.app.slug': slug }),
+        },
+      },
+      options: {
+        ...options,
+        arrayFilters: [{ 'elem.workspace.app._id': id }],
+      },
+    });
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId} params.id
+   * @param {string} params.name
+   * @param {string} params.slug
+   * @param {object} [params.options={}]
+   */
+  async updateRelatedMembershipWorkspaceOrgs(params = {}) {
+    const {
+      id,
+      name,
+      slug,
+      options,
+    } = await validateAsync(Joi.object({
+      id: orgAttrs.id.required(),
+      name: orgAttrs.name.required(),
+      slug: orgAttrs.slug.required(),
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    if ([name, slug].every((v) => !v)) return null;
+    return this.updateMany({
+      query: { 'memberships.workspace.org._id': id },
+      update: {
+        $set: {
+          ...(name && { 'memberships.$[elem].workspace.org.name': name }),
+          ...(slug && { 'memberships.$[elem].workspace.org.slug': slug }),
+        },
+      },
+      options: {
+        ...options,
+        arrayFilters: [{ 'elem.workspace.org._id': id }],
+      },
+    });
   }
 
   /**

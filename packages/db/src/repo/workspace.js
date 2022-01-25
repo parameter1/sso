@@ -180,13 +180,10 @@ export default class WorkspaceRepo extends ManagedRepo {
       // then update relationships.
       await Promise.all([
         // user memberships
-        this.manager.$('user').updateMany({
-          query: { 'memberships.workspace._id': id },
-          update: { $set: { 'memberships.$[elem].workspace.name': name } },
-          options: {
-            arrayFilters: [{ 'elem.workspace._id': id }],
-            session,
-          },
+        this.manager.$('user').updateRelatedMembershipWorkspaces({
+          id,
+          name,
+          options: { session },
         }),
         // app workspaces
         this.manager.$('application').updateRelatedWorkspaces({ id, name, options: { session } }),
@@ -356,13 +353,10 @@ export default class WorkspaceRepo extends ManagedRepo {
       // then update relationships.
       await Promise.all([
         // user memberships
-        this.manager.$('user').updateMany({
-          query: { 'memberships.workspace._id': id },
-          update: { $set: { 'memberships.$[elem].workspace.slug': slug } },
-          options: {
-            arrayFilters: [{ 'elem.workspace._id': id }],
-            session,
-          },
+        this.manager.$('user').updateRelatedMembershipWorkspaces({
+          id,
+          slug,
+          options: { session },
         }),
         // app workspaces
         this.manager.$('application').updateRelatedWorkspaces({ id, slug, options: { session } }),

@@ -154,13 +154,10 @@ export default class ApplicationRepo extends ManagedRepo {
       // then update relationships.
       await Promise.all([
         // user memberships
-        this.manager.$('user').updateMany({
-          query: { 'memberships.workspace.app._id': id },
-          update: { $set: { 'memberships.$[elem].workspace.app.name': name } },
-          options: {
-            arrayFilters: [{ 'elem.workspace.app._id': id }],
-            session,
-          },
+        this.manager.$('user').updateRelatedMembershipWorkspaceApps({
+          id,
+          name,
+          options: { session },
         }),
         // workspaces
         this.manager.$('workspace').updateRelatedApps({ id, name, options: { session } }),
@@ -286,13 +283,10 @@ export default class ApplicationRepo extends ManagedRepo {
       // then update relationships.
       await Promise.all([
         // user memberships
-        this.manager.$('user').updateMany({
-          query: { 'memberships.workspace.app._id': id },
-          update: { $set: { 'memberships.$[elem].workspace.app.slug': slug } },
-          options: {
-            arrayFilters: [{ 'elem.workspace.app._id': id }],
-            session,
-          },
+        this.manager.$('user').updateRelatedMembershipWorkspaceApps({
+          id,
+          slug,
+          options: { session },
         }),
         // workspaces
         this.manager.$('workspace').updateRelatedApps({ id, slug, options: { session } }),

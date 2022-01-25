@@ -154,23 +154,13 @@ export default class OrganizationRepo extends ManagedRepo {
 
       // then update relationships.
       await Promise.all([
-        // user managers
-        this.manager.$('user').updateMany({
-          query: { 'manages.org._id': id },
-          update: { $set: { 'manages.$[elem].org.name': name } },
-          options: {
-            arrayFilters: [{ 'elem.org._id': id }],
-            session,
-          },
-        }),
-        // user memberships
-        this.manager.$('user').updateMany({
-          query: { 'memberships.workspace.org._id': id },
-          update: { $set: { 'memberships.$[elem].workspace.org.name': name } },
-          options: {
-            arrayFilters: [{ 'elem.workspace.org._id': id }],
-            session,
-          },
+        // user managed orgs
+        this.manager.$('user').updateRelatedManagedOrgs({ id, name, options: { session } }),
+        // user membership workspace orgs
+        this.manager.$('user').updateRelatedMembershipWorkspaceOrgs({
+          id,
+          name,
+          options: { session },
         }),
         // workspaces
         this.manager.$('workspace').updateRelatedOrgs({ id, name, options: { session } }),
@@ -334,23 +324,13 @@ export default class OrganizationRepo extends ManagedRepo {
 
       // then update relationships.
       await Promise.all([
-        // user managers
-        this.manager.$('user').updateMany({
-          query: { 'manages.org._id': id },
-          update: { $set: { 'manages.$[elem].org.slug': slug } },
-          options: {
-            arrayFilters: [{ 'elem.org._id': id }],
-            session,
-          },
-        }),
-        // user memberships
-        this.manager.$('user').updateMany({
-          query: { 'memberships.workspace.org._id': id },
-          update: { $set: { 'memberships.$[elem].workspace.org.slug': slug } },
-          options: {
-            arrayFilters: [{ 'elem.workspace.org._id': id }],
-            session,
-          },
+        // user managed orgs
+        this.manager.$('user').updateRelatedManagedOrgs({ id, slug, options: { session } }),
+        // user membership workspace orgs
+        this.manager.$('user').updateRelatedMembershipWorkspaceOrgs({
+          id,
+          slug,
+          options: { session },
         }),
         // workspaces
         this.manager.$('workspace').updateRelatedOrgs({ id, slug, options: { session } }),

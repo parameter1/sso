@@ -121,6 +121,48 @@ export default class ApplicationRepo extends ManagedRepo {
     return this.manager.throwIfSlugHasRedirect({ repo: 'application', id, slug });
   }
 
+  async updateForeignNameValues(params = {}) {
+    const {
+      id,
+      name,
+      options,
+    } = await validateAsync(Joi.object({
+      id: attrs.id.required(),
+      name: attrs.name.required(),
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    return Promise.all([
+      // user memberships
+      this.manager.$('user').updateRelatedMembershipWorkspaceApps({ id, name, options }),
+      // workspaces
+      this.manager.$('workspace').updateRelatedApps({ id, name, options }),
+      // org workspaces
+      this.manager.$('organization').updateRelatedWorkspaceApps({ id, name, options }),
+    ]);
+  }
+
+  async updateForiegnSlugValues(params = {}) {
+    const {
+      id,
+      slug,
+      options,
+    } = await validateAsync(Joi.object({
+      id: attrs.id.required(),
+      slug: attrs.slug.required(),
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    return Promise.all([
+      // user memberships
+      this.manager.$('user').updateRelatedMembershipWorkspaceApps({ id, slug, options }),
+      // workspaces
+      this.manager.$('workspace').updateRelatedApps({ id, slug, options }),
+      // org workspaces
+      this.manager.$('organization').updateRelatedWorkspaceApps({ id, slug, options }),
+    ]);
+  }
+
   /**
    * @param {object} params
    * @param {ObjectId} params.id
@@ -152,18 +194,7 @@ export default class ApplicationRepo extends ManagedRepo {
       if (!result.modifiedCount) return result;
 
       // then update relationships.
-      await Promise.all([
-        // user memberships
-        this.manager.$('user').updateRelatedMembershipWorkspaceApps({
-          id,
-          name,
-          options: { session },
-        }),
-        // workspaces
-        this.manager.$('workspace').updateRelatedApps({ id, name, options: { session } }),
-        // org workspaces
-        this.manager.$('organization').updateRelatedWorkspaceApps({ id, name, options: { session } }),
-      ]);
+      await this.updateForeignNameValues({ id, name, options: { session } });
 
       await session.commitTransaction();
       return result;
@@ -281,18 +312,7 @@ export default class ApplicationRepo extends ManagedRepo {
       if (!result.modifiedCount) return result;
 
       // then update relationships.
-      await Promise.all([
-        // user memberships
-        this.manager.$('user').updateRelatedMembershipWorkspaceApps({
-          id,
-          slug,
-          options: { session },
-        }),
-        // workspaces
-        this.manager.$('workspace').updateRelatedApps({ id, slug, options: { session } }),
-        // org workspaces
-        this.manager.$('organization').updateRelatedWorkspaceApps({ id, slug, options: { session } }),
-      ]);
+      await this.updateForiegnSlugValues({ id, slug, options: { session } });
 
       await session.commitTransaction();
       return result;

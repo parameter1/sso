@@ -165,14 +165,7 @@ export default class ApplicationRepo extends ManagedRepo {
         // workspaces
         this.manager.$('workspace').updateRelatedApps({ id, name, options: { session } }),
         // org workspaces
-        this.manager.$('organization').updateMany({
-          query: { 'workspaces.app._id': id },
-          update: { $set: { 'workspaces.$[elem].app.name': name } },
-          options: {
-            arrayFilters: [{ 'elem.app._id': id }],
-            session,
-          },
-        }),
+        this.manager.$('organization').updateRelatedWorkspaceApps({ id, name, options: { session } }),
       ]);
 
       await session.commitTransaction();
@@ -193,7 +186,7 @@ export default class ApplicationRepo extends ManagedRepo {
    * @param {string} [params.slug]
    * @param {object} [params.options={}]
    */
-  async updatedRelatedWorkspaces(params = {}) {
+  async updateRelatedWorkspaces(params = {}) {
     const {
       id,
       name,
@@ -230,7 +223,7 @@ export default class ApplicationRepo extends ManagedRepo {
    * @param {string} [params.slug]
    * @param {object} [params.options={}]
    */
-  async updatedRelatedWorkspaceOrgs(params = {}) {
+  async updateRelatedWorkspaceOrgs(params = {}) {
     const {
       id,
       name,
@@ -304,14 +297,7 @@ export default class ApplicationRepo extends ManagedRepo {
         // workspaces
         this.manager.$('workspace').updateRelatedApps({ id, slug, options: { session } }),
         // org workspaces
-        this.manager.$('organization').updateMany({
-          query: { 'workspaces.app._id': id },
-          update: { $set: { 'workspaces.$[elem].app.slug': slug } },
-          options: {
-            arrayFilters: [{ 'elem.app._id': id }],
-            session,
-          },
-        }),
+        this.manager.$('organization').updateRelatedWorkspaceApps({ id, slug, options: { session } }),
       ]);
 
       await session.commitTransaction();

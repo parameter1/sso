@@ -95,19 +95,17 @@ export default class WorkspaceRepo extends ManagedRepo {
     const options = { strict: true, session };
     try {
       const workspace = await this.insertOne({ doc, options });
-      const commonRel = { _id: workspace._id, name: workspace.name, slug: workspace.slug };
+      const rel = { _id: workspace._id, name: workspace.name, slug: workspace.slug };
 
       await Promise.all([
         this.manager.$('application').pushRelatedWorkspace({
           appId: app._id,
-          workspace: { ...commonRel, org: workspace.org },
+          workspace: { ...rel, org: workspace.org },
           options,
         }),
-        this.manager.$('organization').updateOne({
-          query: { _id: org._id, 'workspaces._id': { $ne: workspace._id } },
-          update: {
-            $push: { workspaces: cleanDocument({ ...commonRel, app: workspace.app }) },
-          },
+        this.manager.$('organization').pushRelatedWorkspace({
+          orgId: org._id,
+          workspace: { ...rel, app: workspace.app },
           options,
         }),
       ]);
@@ -191,16 +189,9 @@ export default class WorkspaceRepo extends ManagedRepo {
           },
         }),
         // app workspaces
-        this.manager.$('application').updatedRelatedWorkspaces({ id, name, options: { session } }),
+        this.manager.$('application').updateRelatedWorkspaces({ id, name, options: { session } }),
         // org workspaces
-        this.manager.$('organization').updateMany({
-          query: { 'workspaces._id': id },
-          update: { $set: { 'workspaces.$[elem].name': name } },
-          options: {
-            arrayFilters: [{ 'elem._id': id }],
-            session,
-          },
-        }),
+        this.manager.$('organization').updateRelatedWorkspaces({ id, name, options: { session } }),
       ]);
 
       await session.commitTransaction();
@@ -251,7 +242,7 @@ export default class WorkspaceRepo extends ManagedRepo {
    *
    * @param {object} params
    * @param {object} params.user
-   * @param {ObjectId} params.user.id
+   * @param {ObjectId} params.user._id
    * @param {string} [params.user.email]
    * @param {string} [params.user.givenName]
    * @param {string} [params.user.familyName]
@@ -263,7 +254,7 @@ export default class WorkspaceRepo extends ManagedRepo {
       options,
     } = await validateAsync(Joi.object({
       user: Joi.object({
-        id: userAttrs.id.required(),
+        _id: userAttrs.id.required(),
         email: userAttrs.email,
         givenName: userAttrs.givenName,
         familyName: userAttrs.familyName,
@@ -273,7 +264,7 @@ export default class WorkspaceRepo extends ManagedRepo {
 
     if ([user.email, user.givenName, user.familyName].every((v) => !v)) return null;
     return this.updateMany({
-      query: { 'members.user._id': user.id },
+      query: { 'members.user._id': user._id },
       update: {
         $set: {
           ...(user.email && { 'members.$[elem].user.email': user.email }),
@@ -283,7 +274,7 @@ export default class WorkspaceRepo extends ManagedRepo {
       },
       options: {
         ...options,
-        arrayFilters: [{ 'elem.user._id': user.id }],
+        arrayFilters: [{ 'elem.user._id': user._id }],
       },
     });
   }
@@ -374,16 +365,9 @@ export default class WorkspaceRepo extends ManagedRepo {
           },
         }),
         // app workspaces
-        this.manager.$('application').updatedRelatedWorkspaces({ id, slug, options: { session } }),
+        this.manager.$('application').updateRelatedWorkspaces({ id, slug, options: { session } }),
         // org workspaces
-        this.manager.$('organization').updateMany({
-          query: { 'workspaces._id': id },
-          update: { $set: { 'workspaces.$[elem].slug': slug } },
-          options: {
-            arrayFilters: [{ 'elem._id': id }],
-            session,
-          },
-        }),
+        this.manager.$('organization').updateRelatedWorkspaces({ id, slug, options: { session } }),
       ]);
 
       await session.commitTransaction();

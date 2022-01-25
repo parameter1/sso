@@ -1,6 +1,11 @@
 import { ManagedRepo, cleanDocument } from '@parameter1/mongodb';
 import Joi, { validateAsync } from '@parameter1/joi';
-import { organizationAttributes as attrs } from '../schema/attributes/index.js';
+import {
+  applicationAttributes as appAttrs,
+  organizationAttributes as attrs,
+  userAttributes as userAttrs,
+  workspaceAttributes as workspaceAttrs,
+} from '../schema/attributes/index.js';
 
 import { buildUpdateNamePipeline } from './pipelines/index.js';
 
@@ -73,6 +78,44 @@ export default class OrganizationRepo extends ManagedRepo {
   /**
    *
    * @param {object} params
+   * @param {ObjectId} params.appId
+   * @param {object} params.workspace
+   * @param {ObjectId} params.workspace._id
+   * @param {string} params.workspace.name
+   * @param {string} params.workspace.slug
+   * @param {object} params.workspace.org
+   * @param {object} [params.options={}]
+   */
+  async pushRelatedWorkspace(params = {}) {
+    const {
+      orgId,
+      workspace,
+      options,
+    } = await validateAsync(Joi.object({
+      orgId: attrs.id.required(),
+      workspace: Joi.object({
+        _id: workspaceAttrs.id.required(),
+        slug: workspaceAttrs.slug.required(),
+        name: workspaceAttrs.name.required(),
+        app: Joi.object({
+          _id: appAttrs.id.required(),
+          slug: appAttrs.slug.required(),
+          name: appAttrs.name.required(),
+        }).required(),
+      }).required(),
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    return this.updateOne({
+      query: { _id: orgId, 'workspaces._id': { $ne: workspace._id } },
+      update: { $addToSet: { workspaces: cleanDocument(workspace) } },
+      options,
+    });
+  }
+
+  /**
+   *
+   * @param {object} params
    * @param {ObjectId} [params.id]
    * @param {string} [params.slug]
    */
@@ -132,7 +175,7 @@ export default class OrganizationRepo extends ManagedRepo {
         // workspaces
         this.manager.$('workspace').updateRelatedOrgs({ id, name, options: { session } }),
         // app workspace orgs
-        this.manager.$('application').updatedRelatedWorkspaceOrgs({ id, name, options: { session } }),
+        this.manager.$('application').updateRelatedWorkspaceOrgs({ id, name, options: { session } }),
       ]);
 
       await session.commitTransaction();
@@ -143,6 +186,121 @@ export default class OrganizationRepo extends ManagedRepo {
     } finally {
       session.endSession();
     }
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {object} params.user
+   * @param {ObjectId} params.user._id
+   * @param {string} [params.user.email]
+   * @param {string} [params.user.givenName]
+   * @param {string} [params.user.familyName]
+   * @param {object} [params.options={}]
+   */
+  async updateRelatedManagers(params = {}) {
+    const {
+      user,
+      options,
+    } = await validateAsync(Joi.object({
+      user: Joi.object({
+        _id: userAttrs.id.required(),
+        email: userAttrs.email,
+        givenName: userAttrs.givenName,
+        familyName: userAttrs.familyName,
+      }).required(),
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    if ([user.email, user.givenName, user.familyName].every((v) => !v)) return null;
+    return this.updateMany({
+      query: { 'managers.user._id': user._id },
+      update: {
+        $set: {
+          ...(user.email && { 'managers.$[elem].user.email': user.email }),
+          ...(user.givenName && { 'managers.$[elem].user.givenName': user.givenName }),
+          ...(user.familyName && { 'managers.$[elem].user.familyName': user.familyName }),
+        },
+      },
+      options: {
+        ...options,
+        arrayFilters: [{ 'elem.user._id': user._id }],
+      },
+    });
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId} params.id
+   * @param {string} [params.name]
+   * @param {string} [params.slug]
+   * @param {object} [params.options={}]
+   */
+  async updateRelatedWorkspaces(params = {}) {
+    const {
+      id,
+      name,
+      slug,
+      options,
+    } = await validateAsync(Joi.object({
+      id: workspaceAttrs.id.required(),
+      name: workspaceAttrs.name,
+      slug: workspaceAttrs.slug,
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    if ([name, slug].every((v) => !v)) return null;
+    return this.updateMany({
+      query: { 'workspaces._id': id },
+      update: {
+        $set: {
+          ...(name && { 'workspaces.$[elem].name': name }),
+          ...(slug && { 'workspaces.$[elem].slug': slug }),
+        },
+      },
+      options: {
+        ...options,
+        arrayFilters: [{ 'elem._id': id }],
+      },
+    });
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId} params.id
+   * @param {string} [params.name]
+   * @param {string} [params.slug]
+   * @param {object} [params.options={}]
+   */
+  async updateRelatedWorkspaceApps(params = {}) {
+    const {
+      id,
+      name,
+      slug,
+      options,
+    } = await validateAsync(Joi.object({
+      id: appAttrs.id.required(),
+      name: appAttrs.name,
+      slug: appAttrs.slug,
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    if ([name, slug].every((v) => !v)) return null;
+    return this.updateMany({
+      query: { 'workspaces.app._id': id },
+      update: {
+        $set: {
+          ...(name && { 'workspaces.$[elem].app.name': name }),
+          ...(slug && { 'workspaces.$[elem].app.slug': slug }),
+        },
+      },
+      options: {
+        ...options,
+        arrayFilters: [{ 'elem.app._id': id }],
+      },
+    });
   }
 
   /**
@@ -197,7 +355,7 @@ export default class OrganizationRepo extends ManagedRepo {
         // workspaces
         this.manager.$('workspace').updateRelatedOrgs({ id, slug, options: { session } }),
         // app workspace orgs
-        this.manager.$('application').updatedRelatedWorkspaceOrgs({ id, slug, options: { session } }),
+        this.manager.$('application').updateRelatedWorkspaceOrgs({ id, slug, options: { session } }),
       ]);
 
       await session.commitTransaction();

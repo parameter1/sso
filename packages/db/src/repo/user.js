@@ -70,22 +70,11 @@ export default class UserRepo extends ManagedRepo {
       // then update relationships.
       await Promise.all([
         // org managers
-        this.manager.$('organization').updateMany({
-          query: { 'managers.user._id': user._id },
-          update: { $set: { 'managers.$[elem].user.email': email } },
-          options: {
-            arrayFilters: [{ 'elem.user._id': user._id }],
-            session,
-          },
-        }),
+        this.manager.$('organization').updateRelatedManagers({ user: { _id: user._id, email }, options: { session } }),
         // workspace members
-        this.manager.$('workspace').updateRelatedMembers({ user: { id: user._id, email }, options: { session } }),
+        this.manager.$('workspace').updateRelatedMembers({ user: { _id: user._id, email }, options: { session } }),
         // user events
-        this.manager.$('user-event').updateMany({
-          query: { 'user._id': user._id },
-          update: { $set: { 'user.email': email } },
-          options: { session },
-        }),
+        this.manager.$('user-event').updateRelatedUser({ id: user._id, email, options: { session } }),
       ]);
 
       await session.commitTransaction();
@@ -386,21 +375,9 @@ export default class UserRepo extends ManagedRepo {
       // then update relationships.
       await Promise.all([
         // org managers
-        this.manager.$('organization').updateMany({
-          query: { 'managers.user._id': id },
-          update: {
-            $set: {
-              'managers.$[elem].user.givenName': givenName,
-              'managers.$[elem].user.familyName': familyName,
-            },
-          },
-          options: {
-            arrayFilters: [{ 'elem.user._id': id }],
-            session,
-          },
-        }),
+        this.manager.$('organization').updateRelatedManagers({ user: { _id: id, givenName, familyName }, options: { session } }),
         // workspace members
-        this.manager.$('workspace').updateRelatedMembers({ user: { id, givenName, familyName }, options: { session } }),
+        this.manager.$('workspace').updateRelatedMembers({ user: { _id: id, givenName, familyName }, options: { session } }),
       ]);
 
       await session.commitTransaction();

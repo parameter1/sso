@@ -62,4 +62,31 @@ export default class UserEventRepo extends ManagedRepo {
     });
     return this.insertOne({ doc, options });
   }
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId} params.id
+   * @param {string} [params.email]
+   * @param {object} [params.options={}]
+   */
+  async updateRelatedUser(params = {}) {
+    const {
+      id,
+      email,
+      options,
+    } = await validateAsync(Joi.object({
+      id: userAttrs.id.required(),
+      email: userAttrs.email.required(),
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    if (!email) return null;
+
+    return this.updateMany({
+      query: { 'user._id': id },
+      update: { $set: { 'user.email': email } },
+      options,
+    });
+  }
 }

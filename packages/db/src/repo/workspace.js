@@ -6,6 +6,8 @@ import {
   workspaceAttributes as workspaceAttrs,
 } from '../schema/attributes/index.js';
 
+import { buildUpdateNamePipeline } from './pipelines/index.js';
+
 export default class WorkspaceRepo extends ManagedRepo {
   /**
    *
@@ -163,6 +165,7 @@ export default class WorkspaceRepo extends ManagedRepo {
       name: workspaceAttrs.name.required(),
     }).required(), params);
 
+    const update = await buildUpdateNamePipeline({ name });
     const session = await this.client.startSession();
     session.startTransaction();
 
@@ -170,7 +173,7 @@ export default class WorkspaceRepo extends ManagedRepo {
       // attempt to update the workspace.
       const result = await this.updateOne({
         query: { _id: id },
-        update: { $set: { name, 'date.updated': new Date() } },
+        update,
         options: { strict: true, session },
       });
 

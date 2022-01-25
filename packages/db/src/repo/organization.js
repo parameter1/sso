@@ -2,6 +2,8 @@ import { ManagedRepo, cleanDocument } from '@parameter1/mongodb';
 import Joi, { validateAsync } from '@parameter1/joi';
 import { organizationAttributes as attrs } from '../schema/attributes/index.js';
 
+import { buildUpdateNamePipeline } from './pipelines/index.js';
+
 export default class OrganizationRepo extends ManagedRepo {
   /**
    *
@@ -82,7 +84,6 @@ export default class OrganizationRepo extends ManagedRepo {
    * @param {object} params
    * @param {ObjectId} params.id
    * @param {string} params.name
-   * @param {object} [params.options]
    */
   async updateName(params = {}) {
     const {
@@ -93,6 +94,7 @@ export default class OrganizationRepo extends ManagedRepo {
       name: attrs.name.required(),
     }).required(), params);
 
+    const update = await buildUpdateNamePipeline({ name });
     const session = await this.client.startSession();
     session.startTransaction();
 
@@ -100,7 +102,7 @@ export default class OrganizationRepo extends ManagedRepo {
       // attempt to update the org.
       const result = await this.updateOne({
         query: { _id: id },
-        update: { $set: { name, 'date.updated': new Date() } },
+        update,
         options: { strict: true, session },
       });
 
@@ -157,7 +159,6 @@ export default class OrganizationRepo extends ManagedRepo {
    * @param {object} params
    * @param {ObjectId} params.id
    * @param {string} params.slug
-   * @param {object} [params.options]
    */
   async updateSlug(params = {}) {
     const {

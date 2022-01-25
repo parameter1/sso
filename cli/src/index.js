@@ -37,7 +37,12 @@ const run = async () => {
             {
               name: 'Update application name',
               fnName: 'updateName',
-              disabled: !documents.has('application') ? 'disabled: no apps exist' : false,
+              disabled: !documents.has('application'),
+            },
+            {
+              name: 'Update application slug',
+              fnName: 'updateSlug',
+              disabled: !documents.has('application'),
             },
           ],
         },

@@ -23,16 +23,22 @@ export default async () => {
       message: 'Enter the application slug key',
       default: ({ name }) => sluggify(name),
       validate: async (input) => {
+        const appRepo = repos.$('application');
         const { error } = appAttrs.slug.required().validate(input);
         if (error) return error;
 
-        const doc = await repos.$('application').findBySlug({
+        const doc = await appRepo.findBySlug({
           slug: input,
           options: { projection: { _id: 1 } },
         });
         if (doc) return new Error('An application already exists with this slug');
 
-        return true;
+        try {
+          await appRepo.throwIfSlugHasRedirect({ slug: input });
+          return true;
+        } catch (e) {
+          return e;
+        }
       },
     },
     {

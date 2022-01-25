@@ -79,7 +79,7 @@ export default class UserRepo extends ManagedRepo {
           },
         }),
         // workspace members
-        this.manager.$('workspace').updateRelatedMembersFields({ user: { id: user._id, email }, options: { session } }),
+        this.manager.$('workspace').updateRelatedMembers({ user: { id: user._id, email }, options: { session } }),
         // user events
         this.manager.$('user-event').updateMany({
           query: { 'user._id': user._id },
@@ -400,7 +400,7 @@ export default class UserRepo extends ManagedRepo {
           },
         }),
         // workspace members
-        this.manager.$('workspace').updateRelatedMembersFields({ user: { id, givenName, familyName }, options: { session } }),
+        this.manager.$('workspace').updateRelatedMembers({ user: { id, givenName, familyName }, options: { session } }),
       ]);
 
       await session.commitTransaction();

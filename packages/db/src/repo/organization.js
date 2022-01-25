@@ -130,7 +130,7 @@ export default class OrganizationRepo extends ManagedRepo {
           },
         }),
         // workspaces
-        this.manager.$('workspace').updateRelatedOrgFields({ id, name, options: { session } }),
+        this.manager.$('workspace').updateRelatedOrgs({ id, name, options: { session } }),
         // app workspace orgs
         this.manager.$('application').updatedRelatedWorkspaceOrgs({ id, name, options: { session } }),
       ]);
@@ -195,7 +195,7 @@ export default class OrganizationRepo extends ManagedRepo {
           },
         }),
         // workspaces
-        this.manager.$('workspace').updateRelatedOrgFields({ id, slug, options: { session } }),
+        this.manager.$('workspace').updateRelatedOrgs({ id, slug, options: { session } }),
         // app workspace orgs
         this.manager.$('application').updatedRelatedWorkspaceOrgs({ id, slug, options: { session } }),
       ]);

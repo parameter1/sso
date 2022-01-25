@@ -221,7 +221,7 @@ export default class WorkspaceRepo extends ManagedRepo {
    * @param {string} [params.slug]
    * @param {object} [params.options={}]
    */
-  async updateRelatedAppFields(params = {}) {
+  async updateRelatedApps(params = {}) {
     const {
       id,
       name,
@@ -257,7 +257,7 @@ export default class WorkspaceRepo extends ManagedRepo {
    * @param {string} [params.user.familyName]
    * @param {object} [params.options={}]
    */
-  async updateRelatedMembersFields(params = {}) {
+  async updateRelatedMembers(params = {}) {
     const {
       user,
       options,
@@ -296,7 +296,7 @@ export default class WorkspaceRepo extends ManagedRepo {
    * @param {string} [params.slug]
    * @param {object} [params.options={}]
    */
-  async updateRelatedOrgFields(params = {}) {
+  async updateRelatedOrgs(params = {}) {
     const {
       id,
       name,

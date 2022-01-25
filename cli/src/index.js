@@ -75,7 +75,7 @@ const run = async () => {
 
   await action();
 
-  log(`Action '${path}' complete`);
+  log(`> Action '${path}' complete`);
 
   const { runAnother } = await inquirer.prompt([
     {
@@ -94,5 +94,5 @@ process.on('unhandledRejection', immediatelyThrow);
   await connect();
   await run();
   await close();
-  log('DONE');
+  log('> DONE');
 })().catch(immediatelyThrow);

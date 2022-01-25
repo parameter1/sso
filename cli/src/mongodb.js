@@ -12,13 +12,13 @@ const mongodb = new MongoDBClient({
 export default mongodb;
 
 export const connect = async () => {
-  log('Conecting to MongoDB...');
+  log('> Conecting to MongoDB...');
   const client = await mongodb.connect();
-  log(`MongoDB connected. ${filterMongoURL(client)}`);
+  log(`> MongoDB connected. ${filterMongoURL(client)}`);
 };
 
 export const close = async () => {
-  log('Closing MongoDB...');
+  log('> Closing MongoDB...');
   await mongodb.close();
-  log('MongoDB closed.');
+  log('> MongoDB closed.');
 };

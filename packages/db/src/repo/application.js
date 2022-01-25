@@ -79,6 +79,7 @@ export default class ApplicationRepo extends ManagedRepo {
 
   /**
    * @param {object} params
+   * @param {ObjectId} params.id
    * @param {string} params.name
    * @param {object} [params.options]
    */
@@ -95,7 +96,7 @@ export default class ApplicationRepo extends ManagedRepo {
     session.startTransaction();
 
     try {
-      // attempt to update the org.
+      // attempt to update the app.
       const result = await this.updateOne({
         query: { _id: id },
         update: { $set: { name, 'date.updated': new Date() } },
@@ -144,6 +145,7 @@ export default class ApplicationRepo extends ManagedRepo {
 
   /**
    * @param {object} params
+   * @param {ObjectId} params.id
    * @param {string} params.slug
    * @param {object} [params.options]
    */
@@ -162,7 +164,7 @@ export default class ApplicationRepo extends ManagedRepo {
     session.startTransaction();
 
     try {
-      // attempt to update the org.
+      // attempt to update the app.
       const result = await this.updateOne({
         query: { _id: id },
         update,

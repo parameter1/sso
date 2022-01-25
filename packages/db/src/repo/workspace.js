@@ -148,6 +148,48 @@ export default class WorkspaceRepo extends ManagedRepo {
     });
   }
 
+  async updateForeignNameValues(params = {}) {
+    const {
+      id,
+      name,
+      options,
+    } = await validateAsync(Joi.object({
+      id: workspaceAttrs.id.required(),
+      name: workspaceAttrs.name.required(),
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    return Promise.all([
+      // user memberships
+      this.manager.$('user').updateRelatedMembershipWorkspaces({ id, name, options }),
+      // app workspaces
+      this.manager.$('application').updateRelatedWorkspaces({ id, name, options }),
+      // org workspaces
+      this.manager.$('organization').updateRelatedWorkspaces({ id, name, options }),
+    ]);
+  }
+
+  async updateForiegnSlugValues(params = {}) {
+    const {
+      id,
+      slug,
+      options,
+    } = await validateAsync(Joi.object({
+      id: workspaceAttrs.id.required(),
+      slug: workspaceAttrs.slug.required(),
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    return Promise.all([
+      // user memberships
+      this.manager.$('user').updateRelatedMembershipWorkspaces({ id, slug, options }),
+      // app workspaces
+      this.manager.$('application').updateRelatedWorkspaces({ id, slug, options }),
+      // org workspaces
+      this.manager.$('organization').updateRelatedWorkspaces({ id, slug, options }),
+    ]);
+  }
+
   /**
    * @param {object} params
    * @param {ObjectId} params.id
@@ -178,18 +220,7 @@ export default class WorkspaceRepo extends ManagedRepo {
       if (!result.modifiedCount) return result;
 
       // then update relationships.
-      await Promise.all([
-        // user memberships
-        this.manager.$('user').updateRelatedMembershipWorkspaces({
-          id,
-          name,
-          options: { session },
-        }),
-        // app workspaces
-        this.manager.$('application').updateRelatedWorkspaces({ id, name, options: { session } }),
-        // org workspaces
-        this.manager.$('organization').updateRelatedWorkspaces({ id, name, options: { session } }),
-      ]);
+      await this.updateForeignNameValues({ id, name, options: { session } });
 
       await session.commitTransaction();
       return result;
@@ -351,18 +382,7 @@ export default class WorkspaceRepo extends ManagedRepo {
       if (!result.modifiedCount) return result;
 
       // then update relationships.
-      await Promise.all([
-        // user memberships
-        this.manager.$('user').updateRelatedMembershipWorkspaces({
-          id,
-          slug,
-          options: { session },
-        }),
-        // app workspaces
-        this.manager.$('application').updateRelatedWorkspaces({ id, slug, options: { session } }),
-        // org workspaces
-        this.manager.$('organization').updateRelatedWorkspaces({ id, slug, options: { session } }),
-      ]);
+      await this.updateForiegnSlugValues({ id, slug, options: { session } });
 
       await session.commitTransaction();
       return result;

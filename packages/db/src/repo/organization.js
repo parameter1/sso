@@ -14,6 +14,7 @@ export default class OrganizationRepo extends ManagedRepo {
       collatableFields: ['name'],
       indexes: [
         { key: { slug: 1 }, unique: true, collation: { locale: 'en_US' } },
+        { key: { redirects: 1 } },
 
         { key: { name: 1, _id: 1 }, collation: { locale: 'en_US' } },
       ],
@@ -37,6 +38,8 @@ export default class OrganizationRepo extends ManagedRepo {
       options: Joi.object().default({}),
     }).required(), params);
 
+    await this.throwIfSlugHasRedirect({ slug });
+
     const now = new Date();
     return this.insertOne({
       doc: cleanDocument({
@@ -48,13 +51,36 @@ export default class OrganizationRepo extends ManagedRepo {
         },
         managers: [],
         workspaces: [],
+        redirects: [],
       }, { preserveEmptyArrays: true }),
       options,
     });
   }
 
   /**
+   * Finds an organization by slug.
+   *
    * @param {object} params
+   * @param {string} params.slug
+   * @param {object} [params.options]
+   */
+  findBySlug({ slug, options } = {}) {
+    return this.findOne({ query: { slug }, options });
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId} [params.id]
+   * @param {string} [params.slug]
+   */
+  throwIfSlugHasRedirect({ id, slug } = {}) {
+    return this.manager.throwIfSlugHasRedirect({ repo: 'organization', id, slug });
+  }
+
+  /**
+   * @param {object} params
+   * @param {ObjectId} params.id
    * @param {string} params.name
    * @param {object} [params.options]
    */
@@ -128,13 +154,79 @@ export default class OrganizationRepo extends ManagedRepo {
   }
 
   /**
-   * Finds an organization by slug.
-   *
    * @param {object} params
+   * @param {ObjectId} params.id
    * @param {string} params.slug
    * @param {object} [params.options]
    */
-  findBySlug({ slug, options } = {}) {
-    return this.findOne({ query: { slug }, options });
+  async updateSlug(params = {}) {
+    const {
+      id,
+      slug,
+    } = await validateAsync(Joi.object({
+      id: attrs.id.required(),
+      slug: attrs.slug.required(),
+    }).required(), params);
+
+    const update = await this.manager.prepareSlugUpdatePipeline({ repo: 'organization', id, slug });
+
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    try {
+      // attempt to update the org.
+      const result = await this.updateOne({
+        query: { _id: id },
+        update,
+        options: { strict: true, session },
+      });
+
+      // then update relationships.
+      await Promise.all([
+        // user managers
+        this.manager.$('user').updateMany({
+          query: { 'manages.org._id': id },
+          update: { $set: { 'manages.$[elem].org.slug': slug } },
+          options: {
+            arrayFilters: [{ 'elem.org._id': id }],
+            session,
+          },
+        }),
+        // user memberships
+        this.manager.$('user').updateMany({
+          query: { 'memberships.workspace.org._id': id },
+          update: { $set: { 'memberships.$[elem].workspace.org.slug': slug } },
+          options: {
+            arrayFilters: [{ 'elem.workspace.org._id': id }],
+            session,
+          },
+        }),
+        // workspaces
+        this.manager.$('workspace').updateMany({
+          query: { 'org._id': id },
+          update: { $set: { 'org.slug': slug } },
+          options: {
+            session,
+          },
+        }),
+        // app workspaces
+        this.manager.$('application').updateMany({
+          query: { 'workspaces.org._id': id },
+          update: { $set: { 'workspaces.$[elem].org.slug': slug } },
+          options: {
+            arrayFilters: [{ 'elem.org._id': id }],
+            session,
+          },
+        }),
+      ]);
+
+      await session.commitTransaction();
+      return result;
+    } catch (e) {
+      await session.abortTransaction();
+      throw e;
+    } finally {
+      session.endSession();
+    }
   }
 }

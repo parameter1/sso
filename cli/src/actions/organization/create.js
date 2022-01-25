@@ -23,16 +23,22 @@ export default async () => {
       message: 'Enter the organization slug key',
       default: ({ name }) => sluggify(name),
       validate: async (input) => {
+        const orgRepo = repos.$('organization');
         const { error } = orgAttrs.slug.required().validate(input);
         if (error) return error;
 
-        const doc = await repos.$('organization').findBySlug({
+        const doc = await orgRepo.findBySlug({
           slug: input,
           options: { projection: { _id: 1 } },
         });
         if (doc) return new Error('An organization already exists with this slug');
 
-        return true;
+        try {
+          await orgRepo.throwIfSlugHasRedirect({ slug: input });
+          return true;
+        } catch (e) {
+          return e;
+        }
       },
     },
     {

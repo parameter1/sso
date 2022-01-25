@@ -79,6 +79,11 @@ const run = async () => {
               disabled: !documents.has('organization'),
             },
             {
+              name: 'Update organization slug',
+              fnName: 'updateSlug',
+              disabled: !documents.has('organization'),
+            },
+            {
               name: 'Add organization manager',
               fnName: 'addManager',
               disabled: !documents.has('organization') || !documents.has('user'),

@@ -32,10 +32,11 @@ export default async () => {
       message: 'Enter the workspace slug key',
       default: ({ name }) => sluggify(name),
       validate: async (input, { app, org }) => {
+        const repo = repos.$('workspace');
         const { error } = workspaceAttrs.slug.required().validate(input);
         if (error) return error;
 
-        const doc = await repos.$('workspace').findOne({
+        const doc = await repo.findOne({
           query: {
             'app._id': app._id,
             'org._id': org._id,
@@ -45,7 +46,12 @@ export default async () => {
         });
         if (doc) return new Error('A workspace already exists with this slug');
 
-        return true;
+        try {
+          await repo.throwIfSlugHasRedirect({ slug: input });
+          return true;
+        } catch (e) {
+          return e;
+        }
       },
     },
     {

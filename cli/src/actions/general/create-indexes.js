@@ -1,5 +1,5 @@
 import repos from '../../repos.js';
 
-export default async function createIndexes() {
+export default async () => {
   await repos.createAllIndexes();
-}
+};

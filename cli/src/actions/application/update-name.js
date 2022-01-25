@@ -6,7 +6,7 @@ import create from './create.js';
 
 const { log } = console;
 
-export default async function createInstance() {
+export default async () => {
   const appList = await getAppList();
   const questions = [
     {
@@ -62,4 +62,4 @@ export default async function createInstance() {
     name,
   });
   return log(result);
-}
+};

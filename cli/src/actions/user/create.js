@@ -4,7 +4,7 @@ import repos from '../../repos.js';
 
 const { log } = console;
 
-export default async function createUser() {
+export default async () => {
   const questions = [
     {
       type: 'input',
@@ -62,4 +62,4 @@ export default async function createUser() {
 
   const result = await repos.$('user').create({ email, givenName, familyName });
   log(result);
-}
+};

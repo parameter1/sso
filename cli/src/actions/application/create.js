@@ -5,7 +5,7 @@ import repos from '../../repos.js';
 
 const { log } = console;
 
-export default async function createApplication() {
+export default async () => {
   const questions = [
     {
       type: 'input',
@@ -53,4 +53,4 @@ export default async function createApplication() {
 
   const result = await repos.$('application').create({ name, slug });
   log(result);
-}
+};

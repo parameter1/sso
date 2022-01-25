@@ -6,7 +6,7 @@ import repos from '../../repos.js';
 
 const { log } = console;
 
-export default async function createInstance() {
+export default async () => {
   const questions = [
     {
       type: 'list',
@@ -68,4 +68,4 @@ export default async function createInstance() {
     role,
   });
   log(result);
-}
+};

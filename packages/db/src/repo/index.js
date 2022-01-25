@@ -1,4 +1,4 @@
-import { RepoManager, cleanDocument } from '@parameter1/mongodb';
+import { RepoManager, cleanDocument, ManagedRepo } from '@parameter1/mongodb';
 import Joi, { validateAsync } from '@parameter1/joi';
 
 import ApplicationRepo from './application.js';
@@ -175,5 +175,118 @@ export default class Repos extends RepoManager {
     } finally {
       session.endSession();
     }
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {string} params.repo
+   * @param {string} params.slug
+   */
+  async prepareSlugUpdatePipeline(params = {}) {
+    const {
+      repo,
+      id,
+      slug,
+    } = await validateAsync(Joi.object({
+      repo: Joi.string().required(),
+      id: Joi.objectId().required(),
+      slug: Joi.slug().required(),
+    }).required(), params);
+
+    await this.throwIfSlugHasRedirect({ repo, id, slug });
+    return Repos.createSlugUpdatePipeline({ slug });
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {string} params.repo The repository key name to query
+   * @param {ObjectId} [params.id] If passed, will exclude the related doc from the query
+   * @param {string} params.slug The slug to check
+   */
+  async slugHasRedirect(params = {}) {
+    const {
+      repo,
+      id,
+      slug,
+    } = await validateAsync(Joi.object({
+      repo: Joi.string().required(),
+      id: Joi.objectId(),
+      slug: Joi.slug().required(),
+    }).required(), params);
+
+    const doc = await this.$(repo).findOne({
+      query: {
+        redirects: slug,
+        ...(id && { _id: { $ne: id } }),
+      },
+      options: { projection: { _id: 1 } },
+    });
+    return Boolean(doc);
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {string} params.repo The repository key name to query
+   * @param {ObjectId} [params.id] If passed, will exclude the related doc from the check
+   * @param {string} params.slug The slug to check
+   */
+  async throwIfSlugHasRedirect(params = {}) {
+    const {
+      repo,
+      id,
+      slug,
+    } = await validateAsync(Joi.object({
+      repo: Joi.string().required(),
+      id: Joi.objectId(),
+      slug: Joi.slug().required(),
+    }).required(), params);
+
+    const hasRedirect = await this.slugHasRedirect({ repo, id, slug });
+    if (hasRedirect) throw ManagedRepo.createError(409, 'An existing record is already using this slug as a redirect.');
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {string} params.slug
+   */
+  static async createSlugUpdatePipeline(params = {}) {
+    const {
+      slug,
+    } = await validateAsync(Joi.object({
+      slug: Joi.slug().required(),
+    }).required(), params);
+
+    return [
+      {
+        $addFields: {
+          currentSlug: '$slug',
+          hasChanged: { $ne: ['$slug', slug] },
+        },
+      },
+      {
+        $set: {
+          slug,
+          'date.updated': { $cond: ['$hasChanged', new Date(), '$date.updated'] },
+          redirects: {
+            $cond: {
+              if: '$hasChanged',
+              then: {
+                $filter: {
+                  input: { $concatArrays: ['$redirects', ['$currentSlug']] },
+                  as: 'slug',
+                  cond: { $ne: ['$$slug', slug] },
+                },
+              },
+              else: '$redirects',
+            },
+          },
+        },
+      },
+      { $unset: ['currentSlug', 'hasChanged'] },
+    ];
   }
 }

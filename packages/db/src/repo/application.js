@@ -14,6 +14,7 @@ export default class ApplicationRepo extends ManagedRepo {
       collatableFields: ['name'],
       indexes: [
         { key: { slug: 1 }, unique: true, collation: { locale: 'en_US' } },
+        { key: { redirects: 1 } },
 
         { key: { name: 1, _id: 1 }, collation: { locale: 'en_US' } },
       ],
@@ -37,6 +38,8 @@ export default class ApplicationRepo extends ManagedRepo {
       options: Joi.object().default({}),
     }).required(), params);
 
+    await this.throwIfSlugHasRedirect({ slug });
+
     const now = new Date();
     return this.insertOne({
       doc: cleanDocument({
@@ -47,6 +50,7 @@ export default class ApplicationRepo extends ManagedRepo {
           updated: now,
         },
         workspaces: [],
+        redirects: [],
       }, { preserveEmptyArrays: true }),
       options,
     });
@@ -61,6 +65,16 @@ export default class ApplicationRepo extends ManagedRepo {
    */
   findBySlug({ slug, options } = {}) {
     return this.findOne({ query: { slug }, options });
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId} [params.id]
+   * @param {string} [params.slug]
+   */
+  throwIfSlugHasRedirect({ id, slug } = {}) {
+    return this.manager.throwIfSlugHasRedirect({ repo: 'application', id, slug });
   }
 
   /**
@@ -111,6 +125,73 @@ export default class ApplicationRepo extends ManagedRepo {
         this.manager.$('organization').updateMany({
           query: { 'workspaces.app._id': id },
           update: { $set: { 'workspaces.$[elem].app.name': name } },
+          options: {
+            arrayFilters: [{ 'elem.app._id': id }],
+            session,
+          },
+        }),
+      ]);
+
+      await session.commitTransaction();
+      return result;
+    } catch (e) {
+      await session.abortTransaction();
+      throw e;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
+   * @param {object} params
+   * @param {string} params.slug
+   * @param {object} [params.options]
+   */
+  async updateSlug(params = {}) {
+    const {
+      id,
+      slug,
+    } = await validateAsync(Joi.object({
+      id: attrs.id.required(),
+      slug: attrs.slug.required(),
+    }).required(), params);
+
+    const update = await this.manager.prepareSlugUpdatePipeline({ repo: 'application', id, slug });
+
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    try {
+      // attempt to update the org.
+      const result = await this.updateOne({
+        query: { _id: id },
+        update,
+        options: { strict: true, session },
+      });
+
+      // then update relationships.
+      await Promise.all([
+        // user memberships
+        this.manager.$('user').updateMany({
+          query: { 'memberships.workspace.app._id': id },
+          update: { $set: { 'memberships.$[elem].workspace.app.slug': slug } },
+          options: {
+            arrayFilters: [{ 'elem.workspace.app._id': id }],
+            session,
+          },
+        }),
+        // workspaces
+        this.manager.$('workspace').updateMany({
+          query: { 'app._id': id },
+          update: { $set: { 'app.slug': slug } },
+          options: {
+            session,
+          },
+        }),
+        // org workspaces
+        this.manager.$('organization').updateMany({
+          query: { 'workspaces.app._id': id },
+          update: { $set: { 'workspaces.$[elem].app.slug': slug } },
           options: {
             arrayFilters: [{ 'elem.app._id': id }],
             session,

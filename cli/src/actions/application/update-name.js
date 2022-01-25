@@ -51,10 +51,7 @@ export default async () => {
     name,
   } = await inquirer.prompt(questions);
 
-  if (createApp) {
-    return create();
-  }
-
+  if (createApp) return create();
   if (!confirm || !app) return null;
 
   const result = await repos.$('application').updateName({

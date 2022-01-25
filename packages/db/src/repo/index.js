@@ -182,19 +182,27 @@ export default class Repos extends RepoManager {
    * @param {object} params
    * @param {string} params.repo
    * @param {string} params.slug
+   * @param {object} [params.query] Optional query criteria to apply
    */
   async prepareSlugUpdatePipeline(params = {}) {
     const {
       repo,
       id,
       slug,
+      query,
     } = await validateAsync(Joi.object({
       repo: Joi.string().required(),
       id: Joi.objectId().required(),
       slug: Joi.slug().required(),
+      query: Joi.object().default({}),
     }).required(), params);
 
-    await this.throwIfSlugHasRedirect({ repo, id, slug });
+    await this.throwIfSlugHasRedirect({
+      repo,
+      id,
+      slug,
+      query,
+    });
     return Repos.createSlugUpdatePipeline({ slug });
   }
 
@@ -204,20 +212,24 @@ export default class Repos extends RepoManager {
    * @param {string} params.repo The repository key name to query
    * @param {ObjectId} [params.id] If passed, will exclude the related doc from the query
    * @param {string} params.slug The slug to check
+   * @param {object} [params.query] Optional query criteria to apply
    */
   async slugHasRedirect(params = {}) {
     const {
       repo,
       id,
       slug,
+      query,
     } = await validateAsync(Joi.object({
       repo: Joi.string().required(),
       id: Joi.objectId(),
       slug: Joi.slug().required(),
+      query: Joi.object().default({}),
     }).required(), params);
 
     const doc = await this.$(repo).findOne({
       query: {
+        ...query,
         redirects: slug,
         ...(id && { _id: { $ne: id } }),
       },
@@ -232,19 +244,27 @@ export default class Repos extends RepoManager {
    * @param {string} params.repo The repository key name to query
    * @param {ObjectId} [params.id] If passed, will exclude the related doc from the check
    * @param {string} params.slug The slug to check
+   * @param {object} [params.query] Optional query criteria to apply
    */
   async throwIfSlugHasRedirect(params = {}) {
     const {
       repo,
       id,
       slug,
+      query,
     } = await validateAsync(Joi.object({
       repo: Joi.string().required(),
       id: Joi.objectId(),
       slug: Joi.slug().required(),
+      query: Joi.object().default({}),
     }).required(), params);
 
-    const hasRedirect = await this.slugHasRedirect({ repo, id, slug });
+    const hasRedirect = await this.slugHasRedirect({
+      repo,
+      id,
+      slug,
+      query,
+    });
     if (hasRedirect) throw ManagedRepo.createError(409, 'An existing record is already using this slug as a redirect.');
   }
 

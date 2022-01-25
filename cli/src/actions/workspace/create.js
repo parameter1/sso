@@ -47,7 +47,7 @@ export default async () => {
         if (doc) return new Error('A workspace already exists with this slug');
 
         try {
-          await repo.throwIfSlugHasRedirect({ slug: input });
+          await repo.throwIfSlugHasRedirect({ slug: input, appId: app._id, orgId: org._id });
           return true;
         } catch (e) {
           return e;

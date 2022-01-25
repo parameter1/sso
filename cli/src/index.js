@@ -105,6 +105,11 @@ const run = async () => {
               disabled: !documents.has('workspace'),
             },
             {
+              name: 'Update workspace slug',
+              fnName: 'updateSlug',
+              disabled: !documents.has('workspace'),
+            },
+            {
               name: 'Add workspace member',
               fnName: 'addMember',
               disabled: !documents.has('workspace') || !documents.has('user'),

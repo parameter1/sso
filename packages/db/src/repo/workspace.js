@@ -18,6 +18,7 @@ export default class WorkspaceRepo extends ManagedRepo {
       collatableFields: [],
       indexes: [
         { key: { 'org._id': 1, 'app._id': 1, slug: 1 }, unique: true },
+        { key: { redirects: 1 } },
       ],
     });
   }
@@ -68,6 +69,8 @@ export default class WorkspaceRepo extends ManagedRepo {
       // ).required(),
     }).required(), params);
 
+    await this.throwIfSlugHasRedirect({ slug, appId: app._id, orgId: org._id });
+
     const now = new Date();
     const doc = cleanDocument({
       app,
@@ -80,6 +83,7 @@ export default class WorkspaceRepo extends ManagedRepo {
         updated: now,
       },
       members: [],
+      redirects: [],
     }, { preserveEmptyArrays: true });
 
     const session = await this.client.startSession();
@@ -118,9 +122,37 @@ export default class WorkspaceRepo extends ManagedRepo {
   }
 
   /**
+   *
    * @param {object} params
+   * @param {ObjectId} [params.id]
+   * @param {string} params.slug
+   * @param {ObjectId} params.appId
+   * @param {ObjectId} params.orgId
+   */
+  async throwIfSlugHasRedirect(params = {}) {
+    const {
+      id,
+      slug,
+      appId,
+      orgId,
+    } = await validateAsync(Joi.object({
+      id: workspaceAttrs.id,
+      slug: workspaceAttrs.slug.required(),
+      appId: appAttrs.id.required(),
+      orgId: orgAttrs.id.required(),
+    }).required(), params);
+    return this.manager.throwIfSlugHasRedirect({
+      repo: 'workspace',
+      id,
+      slug,
+      query: { 'app._id': appId, 'org._id': orgId },
+    });
+  }
+
+  /**
+   * @param {object} params
+   * @param {ObjectId} params.id
    * @param {string} params.name
-   * @param {object} [params.options]
    */
   async updateName(params = {}) {
     const {
@@ -135,7 +167,7 @@ export default class WorkspaceRepo extends ManagedRepo {
     session.startTransaction();
 
     try {
-      // attempt to update the org.
+      // attempt to update the workspace.
       const result = await this.updateOne({
         query: { _id: id },
         update: { $set: { name, 'date.updated': new Date() } },
@@ -166,6 +198,85 @@ export default class WorkspaceRepo extends ManagedRepo {
         this.manager.$('organization').updateMany({
           query: { 'workspaces._id': id },
           update: { $set: { 'workspaces.$[elem].name': name } },
+          options: {
+            arrayFilters: [{ 'elem._id': id }],
+            session,
+          },
+        }),
+      ]);
+
+      await session.commitTransaction();
+      return result;
+    } catch (e) {
+      await session.abortTransaction();
+      throw e;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
+   * @param {object} params
+   * @param {ObjectId} params.id
+   * @param {string} params.slug
+   * @param {ObjectId} params.appId
+   * @param {ObjectId} params.orgId
+   */
+  async updateSlug(params = {}) {
+    const {
+      id,
+      slug,
+      appId,
+      orgId,
+    } = await validateAsync(Joi.object({
+      id: workspaceAttrs.id,
+      slug: workspaceAttrs.slug.required(),
+      appId: appAttrs.id.required(),
+      orgId: orgAttrs.id.required(),
+    }).required(), params);
+
+    const update = await this.manager.prepareSlugUpdatePipeline({
+      repo: 'workspace',
+      id,
+      slug,
+      query: { 'app._id': appId, 'org._id': orgId },
+    });
+
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    try {
+      // attempt to update the workspace.
+      const result = await this.updateOne({
+        query: { _id: id },
+        update,
+        options: { strict: true, session },
+      });
+
+      // then update relationships.
+      await Promise.all([
+        // user memberships
+        this.manager.$('user').updateMany({
+          query: { 'memberships.workspace._id': id },
+          update: { $set: { 'memberships.$[elem].workspace.slug': slug } },
+          options: {
+            arrayFilters: [{ 'elem.workspace._id': id }],
+            session,
+          },
+        }),
+        // app workspaces
+        this.manager.$('application').updateMany({
+          query: { 'workspaces._id': id },
+          update: { $set: { 'workspaces.$[elem].slug': slug } },
+          options: {
+            arrayFilters: [{ 'elem._id': id }],
+            session,
+          },
+        }),
+        // org workspaces
+        this.manager.$('organization').updateMany({
+          query: { 'workspaces._id': id },
+          update: { $set: { 'workspaces.$[elem].slug': slug } },
           options: {
             arrayFilters: [{ 'elem._id': id }],
             session,

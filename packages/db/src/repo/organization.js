@@ -47,6 +47,7 @@ export default class OrganizationRepo extends ManagedRepo {
           updated: now,
         },
         managers: [],
+        workspaces: [],
       }, { preserveEmptyArrays: true }),
       options,
     });
@@ -88,11 +89,29 @@ export default class OrganizationRepo extends ManagedRepo {
             session,
           },
         }),
+        // user memberships
+        this.manager.$('user').updateMany({
+          query: { 'memberships.workspace.org._id': id },
+          update: { $set: { 'memberships.$[elem].workspace.org.name': name } },
+          options: {
+            arrayFilters: [{ 'elem.workspace.org._id': id }],
+            session,
+          },
+        }),
         // workspaces
         this.manager.$('workspace').updateMany({
           query: { 'org._id': id },
           update: { $set: { 'org.name': name } },
           options: {
+            session,
+          },
+        }),
+        // app workspaces
+        this.manager.$('application').updateMany({
+          query: { 'workspaces.org._id': id },
+          update: { $set: { 'workspaces.$[elem].org.name': name } },
+          options: {
+            arrayFilters: [{ 'elem.org._id': id }],
             session,
           },
         }),

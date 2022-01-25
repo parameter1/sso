@@ -46,7 +46,8 @@ export default class ApplicationRepo extends ManagedRepo {
           created: now,
           updated: now,
         },
-      }),
+        workspaces: [],
+      }, { preserveEmptyArrays: true }),
       options,
     });
   }
@@ -103,6 +104,15 @@ export default class ApplicationRepo extends ManagedRepo {
           query: { 'app._id': id },
           update: { $set: { 'app.name': name } },
           options: {
+            session,
+          },
+        }),
+        // org workspaces
+        this.manager.$('organization').updateMany({
+          query: { 'workspaces.app._id': id },
+          update: { $set: { 'workspaces.$[elem].app.name': name } },
+          options: {
+            arrayFilters: [{ 'elem.app._id': id }],
             session,
           },
         }),

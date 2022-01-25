@@ -39,8 +39,6 @@ export default class WorkspaceRepo extends ManagedRepo {
    * @param {string} params.name
    *
    * @param {object[]} params.urls
-   *
-   * @param {object} [params.options]
    */
   async create(params = {}) {
     const {
@@ -49,7 +47,6 @@ export default class WorkspaceRepo extends ManagedRepo {
       slug,
       name,
       // urls,
-      options,
     } = await validateAsync(Joi.object({
       app: Joi.object({
         _id: appAttrs.id.required(),
@@ -69,25 +66,55 @@ export default class WorkspaceRepo extends ManagedRepo {
       //     value: workspaceAttrs.url.required(),
       //   }).required(),
       // ).required(),
-      // options: Joi.object().default({}),
     }).required(), params);
 
     const now = new Date();
-    return this.insertOne({
-      doc: cleanDocument({
-        app,
-        org,
-        slug,
-        name,
-        // urls,
-        date: {
-          created: now,
-          updated: now,
-        },
-        members: [],
-      }, { preserveEmptyArrays: true }),
-      options,
-    });
+    const doc = cleanDocument({
+      app,
+      org,
+      slug,
+      name,
+      // urls,
+      date: {
+        created: now,
+        updated: now,
+      },
+      members: [],
+    }, { preserveEmptyArrays: true });
+
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    const options = { strict: true, session };
+    try {
+      const workspace = await this.insertOne({ doc, options });
+      const commonRel = { _id: workspace._id, name: workspace.name, slug: workspace.slug };
+
+      await Promise.all([
+        this.manager.$('application').updateOne({
+          query: { _id: app._id, 'workspaces._id': { $ne: workspace._id } },
+          update: {
+            $push: { workspaces: cleanDocument({ ...commonRel, org: workspace.org }) },
+          },
+          options,
+        }),
+        this.manager.$('organization').updateOne({
+          query: { _id: org._id, 'workspaces._id': { $ne: workspace._id } },
+          update: {
+            $push: { workspaces: cleanDocument({ ...commonRel, app: workspace.app }) },
+          },
+          options,
+        }),
+      ]);
+
+      await session.commitTransaction();
+      return workspace;
+    } catch (e) {
+      await session.abortTransaction();
+      throw e;
+    } finally {
+      session.endSession();
+    }
   }
 
   /**
@@ -123,6 +150,24 @@ export default class WorkspaceRepo extends ManagedRepo {
           update: { $set: { 'memberships.$[elem].workspace.name': name } },
           options: {
             arrayFilters: [{ 'elem.workspace._id': id }],
+            session,
+          },
+        }),
+        // app workspaces
+        this.manager.$('application').updateMany({
+          query: { 'workspaces._id': id },
+          update: { $set: { 'workspaces.$[elem].name': name } },
+          options: {
+            arrayFilters: [{ 'elem._id': id }],
+            session,
+          },
+        }),
+        // org workspaces
+        this.manager.$('organization').updateMany({
+          query: { 'workspaces._id': id },
+          update: { $set: { 'workspaces.$[elem].name': name } },
+          options: {
+            arrayFilters: [{ 'elem._id': id }],
             session,
           },
         }),

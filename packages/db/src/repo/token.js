@@ -104,7 +104,7 @@ export default class TokenRepo extends ManagedRepo {
       subject: 'auth',
       audience: userId,
       data: { ...(impersonated && { impersonated: true }) },
-      ttl: 60 * 60 * 24,
+      ttl: impersonated ? 60 * 60 : 60 * 60 * 24,
       options,
     });
   }

@@ -198,7 +198,7 @@ export default class UserRepo extends ManagedRepo {
       const token = await this.manager.$('token').create({
         subject: 'login-link',
         audience: user._id,
-        ttl,
+        ttl: impersonated ? 60 : ttl,
         ...(objectHasKeys(data) && { data }),
         options: { session },
       });

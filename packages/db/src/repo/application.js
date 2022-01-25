@@ -106,6 +106,9 @@ export default class ApplicationRepo extends ManagedRepo {
         options: { strict: true, session },
       });
 
+      // if nothing changed, skip updating related fields
+      if (!result.modifiedCount) return result;
+
       // then update relationships.
       await Promise.all([
         // user memberships
@@ -173,6 +176,9 @@ export default class ApplicationRepo extends ManagedRepo {
         update,
         options: { strict: true, session },
       });
+
+      // if nothing changed, skip updating related fields
+      if (!result.modifiedCount) return result;
 
       // then update relationships.
       await Promise.all([

@@ -106,6 +106,9 @@ export default class OrganizationRepo extends ManagedRepo {
         options: { strict: true, session },
       });
 
+      // if nothing changed, skip updating related fields
+      if (!result.modifiedCount) return result;
+
       // then update relationships.
       await Promise.all([
         // user managers
@@ -170,7 +173,6 @@ export default class OrganizationRepo extends ManagedRepo {
     }).required(), params);
 
     const update = await this.manager.prepareSlugUpdatePipeline({ repo: 'organization', id, slug });
-
     const session = await this.client.startSession();
     session.startTransaction();
 
@@ -181,6 +183,9 @@ export default class OrganizationRepo extends ManagedRepo {
         update,
         options: { strict: true, session },
       });
+
+      // if nothing changed, skip updating related fields
+      if (!result.modifiedCount) return result;
 
       // then update relationships.
       await Promise.all([

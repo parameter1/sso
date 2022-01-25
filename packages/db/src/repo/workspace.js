@@ -177,6 +177,9 @@ export default class WorkspaceRepo extends ManagedRepo {
         options: { strict: true, session },
       });
 
+      // if nothing changed, skip updating related fields
+      if (!result.modifiedCount) return result;
+
       // then update relationships.
       await Promise.all([
         // user memberships
@@ -244,7 +247,6 @@ export default class WorkspaceRepo extends ManagedRepo {
       slug,
       query: { 'app._id': appId, 'org._id': orgId },
     });
-
     const session = await this.client.startSession();
     session.startTransaction();
 
@@ -255,6 +257,9 @@ export default class WorkspaceRepo extends ManagedRepo {
         update,
         options: { strict: true, session },
       });
+
+      // if nothing changed, skip updating related fields
+      if (!result.modifiedCount) return result;
 
       // then update relationships.
       await Promise.all([

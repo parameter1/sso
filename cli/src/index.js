@@ -35,12 +35,12 @@ const run = async () => {
           choices: [
             { name: 'Create new application', fnName: 'create' },
             {
-              name: 'Update application name',
+              name: 'Change application name',
               fnName: 'updateName',
               disabled: !documents.has('application'),
             },
             {
-              name: 'Update application slug',
+              name: 'Change application slug',
               fnName: 'updateSlug',
               disabled: !documents.has('application'),
             },
@@ -57,7 +57,7 @@ const run = async () => {
               disabled: !documents.has('user'),
             },
             {
-              name: 'Update user first/last name',
+              name: 'Change user first/last name',
               fnName: 'updateNames',
               disabled: !documents.has('user'),
             },
@@ -74,12 +74,12 @@ const run = async () => {
           choices: [
             { name: 'Create new organization', fnName: 'create' },
             {
-              name: 'Update organization name',
+              name: 'Change organization name',
               fnName: 'updateName',
               disabled: !documents.has('organization'),
             },
             {
-              name: 'Update organization slug',
+              name: 'Change organization slug',
               fnName: 'updateSlug',
               disabled: !documents.has('organization'),
             },
@@ -100,12 +100,12 @@ const run = async () => {
               disabled: !documents.has('application') || !documents.has('organization'),
             },
             {
-              name: 'Update workspace name',
+              name: 'Change workspace name',
               fnName: 'updateName',
               disabled: !documents.has('workspace'),
             },
             {
-              name: 'Update workspace slug',
+              name: 'Change workspace slug',
               fnName: 'updateSlug',
               disabled: !documents.has('workspace'),
             },

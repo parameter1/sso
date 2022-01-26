@@ -5,7 +5,30 @@ const routes = [
   {
     path: '/',
     name: 'index',
-    component: () => import('../pages/index.vue'),
+    redirect: '/login',
+  },
+  {
+    path: '/authenticate',
+    name: 'authenticate',
+    component: () => import('../pages/authenticate.vue'),
+  },
+  {
+    path: '/manage',
+    name: 'manage',
+    meta: { whenAuthed: { then: true, otherwise: 'login' } },
+    component: () => import('../pages/manage.vue'),
+  },
+  {
+    path: '/login',
+    name: 'login',
+    meta: { whenAuthed: { then: 'manage', otherwise: true } },
+    component: () => import('../pages/login.vue'),
+  },
+  {
+    path: '/logout',
+    name: 'logout',
+    meta: { whenAuthed: { then: true, otherwise: 'login' } },
+    component: () => import('../pages/logout.vue'),
   },
   {
     path: '/_style',
@@ -35,6 +58,7 @@ router.beforeEach(async (to, from, next) => {
   if (matched) {
     try {
       const isLoggedIn = await userService.isLoggedIn();
+      console.log({ isLoggedIn });
       const { then, otherwise } = matched.meta.whenAuthed;
 
       if (isLoggedIn) {

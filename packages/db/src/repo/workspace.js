@@ -108,6 +108,81 @@ export default class WorkspaceRepo extends ManagedRepo {
   }
 
   /**
+   *
+   * @param {object} params
+   * @param {ObjectId} params.workspaceId
+   * @param {ObjectId} params.userId
+   * @param {string} params.role
+   */
+  async changeMemberRole(params = {}) {
+    const {
+      workspaceId,
+      userId,
+      role,
+    } = await validateAsync(Joi.object({
+      workspaceId: workspaceAttrs.id.required(),
+      userId: userAttrs.id.required(),
+      role: workspaceAttrs.role.require(),
+    }).required(), params);
+
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    const now = new Date();
+    const options = { strict: true, session };
+
+    try {
+      const results = await Promise.all([
+        this.updateOne({
+          query: {
+            _id: workspaceId,
+            members: { $elemMatch: { 'user._id': userId, role: { $ne: role } } },
+          },
+          update: {
+            $set: {
+              'members.$[elem].role': role,
+              'members.$[elem].date.updated': now,
+              'date.updated': now,
+            },
+          },
+          options: {
+            ...options,
+            arrayFilters: [{ 'elem.user._id': userId }],
+          },
+        }),
+        this.manager.$('user').updateOne({
+          query: {
+            _id: userId,
+            memberships: { $elemMatch: { 'workspace._id': workspaceId, role: { $ne: role } } },
+          },
+          update: {
+            $set: {
+              'memberships.$[elem].role': role,
+              'memberships.$[elem].date.updated': now,
+              'date.updated': now,
+            },
+          },
+          options: {
+            ...options,
+            arrayFilters: [{ 'elem.workspace._id': workspaceId }],
+          },
+        }),
+      ]);
+      await session.commitTransaction();
+      return results;
+    } catch (e) {
+      await session.abortTransaction();
+      if (e.statusCode === 404) {
+        e.statusCode = 400;
+        e.message = 'Either no record was found for the provided criteria or this user does not a have the requested management role for this org.';
+      }
+      throw e;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
    * @param {object} params
    *
    * @param {object} params.app

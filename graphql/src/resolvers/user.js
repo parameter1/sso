@@ -1,7 +1,6 @@
 import { getProjectionForType } from '@parameter1/graphql/projection';
 import createLoginLinkTemplate from '../email-templates/login-link.js';
 import { send } from '../sendgrid.js';
-import { APP_URL } from '../env.js';
 
 export default {
   /**
@@ -41,7 +40,6 @@ export default {
         ua,
         inTransaction: async (data) => {
           const { subject, html, text } = createLoginLinkTemplate({
-            appUrl: APP_URL,
             loginToken: data.token.signed,
             redirectTo,
           });

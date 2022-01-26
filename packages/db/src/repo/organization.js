@@ -176,16 +176,19 @@ export default class OrganizationRepo extends ManagedRepo {
    * @param {object} params
    * @param {string} params.name
    * @param {string} params.slug
+   * @param {string[]} [params.emailDomains]
    * @param {object} [params.options]
    */
   async create(params = {}) {
     const {
       name,
       slug,
+      emailDomains,
       options,
     } = await validateAsync(Joi.object({
       name: attrs.name.required(),
       slug: attrs.slug.required(),
+      emailDomains: attrs.emailDomains.default([]),
       options: Joi.object().default({}),
     }).required(), params);
 
@@ -203,6 +206,7 @@ export default class OrganizationRepo extends ManagedRepo {
         managers: [],
         workspaces: [],
         redirects: [],
+        emailDomains,
       }, { preserveEmptyArrays: true }),
       options,
     });

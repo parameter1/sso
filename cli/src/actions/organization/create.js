@@ -42,6 +42,17 @@ export default async () => {
       },
     },
     {
+      type: 'input',
+      name: 'emailDomains',
+      message: 'Enter comma separated list of organization email domains',
+      filter: (list) => list.split(',').map((v) => v.trim()).filter((v) => v),
+      validate: (domains) => {
+        const { error } = orgAttrs.emailDomains.validate(domains);
+        if (error) return error;
+        return true;
+      },
+    },
+    {
       type: 'confirm',
       name: 'confirm',
       message: 'Are you sure you want to complete this action?',
@@ -53,10 +64,15 @@ export default async () => {
     confirm,
     name,
     slug,
+    emailDomains,
   } = await inquirer.prompt(questions);
 
   if (!confirm) return;
 
-  const result = await repos.$('organization').create({ name, slug });
+  const result = await repos.$('organization').create({
+    name,
+    slug,
+    emailDomains,
+  });
   log(result);
 };

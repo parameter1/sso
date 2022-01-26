@@ -88,6 +88,11 @@ const run = async () => {
               fnName: 'addManager',
               disabled: !documents.has('organization') || !documents.has('user'),
             },
+            {
+              name: 'Remove organization manager',
+              fnName: 'removeManager',
+              disabled: !documents.has('organization') || !documents.has('user'),
+            },
           ],
         },
 

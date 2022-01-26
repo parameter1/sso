@@ -181,6 +181,59 @@ export default class OrganizationRepo extends ManagedRepo {
   /**
    *
    * @param {object} params
+   * @param {object} params.org
+   * @param {object} params.user
+   */
+  async removeManager(params = {}) {
+    const {
+      orgId,
+      userId,
+    } = await validateAsync(Joi.object({
+      orgId: attrs.id.required(),
+      userId: userAttrs.id.required(),
+    }).required(), params);
+
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    const now = new Date();
+    const options = { strict: true, session };
+    try {
+      const results = await Promise.all([
+        this.updateOne({
+          query: { _id: orgId, 'managers.user._id': userId },
+          update: {
+            $set: { 'date.updated': now },
+            $pull: { managers: { 'user._id': userId } },
+          },
+          options,
+        }),
+        this.manager.$('user').updateOne({
+          query: { _id: userId, 'manages.org._id': orgId },
+          update: {
+            $set: { 'date.updated': now },
+            $pull: { manages: { 'org._id': orgId } },
+          },
+          options,
+        }),
+      ]);
+      await session.commitTransaction();
+      return results;
+    } catch (e) {
+      await session.abortTransaction();
+      if (e.statusCode === 404) {
+        e.statusCode = 400;
+        e.message = 'Either no records were found for the provided criteria or this user is not a manager of this org.';
+      }
+      throw e;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
+   *
+   * @param {object} params
    * @param {ObjectId} [params.id]
    * @param {string} [params.slug]
    */

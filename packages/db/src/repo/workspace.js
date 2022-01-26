@@ -27,6 +27,83 @@ export default class WorkspaceRepo extends ManagedRepo {
   }
 
   /**
+   *
+   * @param {object} params
+   * @param {object} params.workspace
+   * @param {object} params.workspace.app
+   * @param {object} params.workspace.org
+   * @param {object} params.user
+   * @param {string} params.role
+   */
+  async addMember(params = {}) {
+    const {
+      workspace,
+      user,
+      role,
+    } = await validateAsync(Joi.object({
+      workspace: Joi.object({
+        _id: workspaceAttrs.id.required(),
+        slug: workspaceAttrs.slug.required(),
+        name: Joi.string().required(),
+        app: Joi.object({
+          _id: appAttrs.id.required(),
+          slug: appAttrs.slug.required(),
+          name: appAttrs.name.required(),
+        }).required(),
+        org: Joi.object({
+          _id: orgAttrs.id.required(),
+          slug: orgAttrs.slug.required(),
+          name: orgAttrs.name.required(),
+        }).required(),
+      }).required(),
+      user: Joi.object({
+        _id: userAttrs.id.required(),
+        email: userAttrs.email.required(),
+        familyName: userAttrs.familyName.required(),
+        givenName: userAttrs.givenName.required(),
+      }).required(),
+      role: Joi.string().required(),
+    }).required(), params);
+
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    const now = new Date();
+    const options = { strict: true };
+    try {
+      const results = await Promise.all([
+        this.updateOne({
+          query: { _id: workspace._id, 'members.user._id': { $ne: user._id } },
+          update: {
+            $set: { 'date.updated': now },
+            $addToSet: { members: cleanDocument({ user, role, date: { added: now } }) },
+          },
+          options,
+        }),
+        this.manager.$('user').updateOne({
+          query: { _id: user._id, 'memberships.workspace._id': { $ne: workspace._id } },
+          update: {
+            $set: { 'date.updated': now },
+            $addToSet: { memberships: cleanDocument({ workspace, role, date: { added: now } }) },
+          },
+          options,
+        }),
+      ]);
+      await session.commitTransaction();
+      return results;
+    } catch (e) {
+      await session.abortTransaction();
+      if (e.statusCode === 404) {
+        e.statusCode = 400;
+        e.message = 'Either no records were found for the provided criteria or this user is already a member of this workspace.';
+      }
+      throw e;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
    * @param {object} params
    *
    * @param {object} params.app

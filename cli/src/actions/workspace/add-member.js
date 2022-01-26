@@ -58,7 +58,7 @@ export default async () => {
 
   if (!confirm) return;
 
-  const result = await repos.addWorkspaceMember({
+  const result = await repos.$('workspace').addMember({
     workspace: {
       _id: workspace._id,
       slug: workspace.slug,

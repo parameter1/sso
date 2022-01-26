@@ -21,6 +21,21 @@ x-node-defaults: &node
     <<: *env
 
 services:
+  app:
+    <<: *node
+    working_dir: /sso/app
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: *env
+      HOST: sso.dev.parameter1.com
+      PORT: 7913
+    depends_on:
+      - graphql
+    ports:
+      - "7913:7913"
+    hostname: sso.dev.parameter1.com
+
   cli:
     <<: *node
     working_dir: /sso/cli

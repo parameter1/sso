@@ -1,0 +1,30 @@
+{
+  "name": "@parameter1/sso-app",
+  "version": "0.0.0",
+  "description": "The SSO management application.",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/sso/tree/main/app#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/sso.git",
+    "directory": "app"
+  },
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "eslint --ext .js --ext .vue --max-warnings 5 ./"
+  },
+  "dependencies": {
+    "object-path": "^0.11.8",
+    "vue": "^3.2.29",
+    "vue-router": "^4.0.12"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^2.1.0",
+    "@vue/compiler-sfc": "^3.2.29",
+    "eslint-plugin-vue": "^8.3.0",
+    "vite": "^2.7.13"
+  }
+}

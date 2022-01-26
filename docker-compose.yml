@@ -30,6 +30,7 @@ services:
       <<: *env
       HOST: sso.dev.parameter1.com
       PORT: 7913
+      VITE_GRAPHQL_URL: ${VITE_GRAPHQL_URL-http://sso.dev.parameter1.com:7912/graphql}
     depends_on:
       - graphql
     ports:

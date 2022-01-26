@@ -29,6 +29,71 @@ export default class OrganizationRepo extends ManagedRepo {
   }
 
   /**
+   *
+   * @param {object} params
+   * @param {object} params.org
+   * @param {object} params.user
+   * @param {string} params.role
+   */
+  async addManager(params = {}) {
+    const {
+      org,
+      user,
+      role,
+    } = await validateAsync(Joi.object({
+      org: Joi.object({
+        _id: attrs.id.required(),
+        name: attrs.name.required(),
+        slug: attrs.slug.required(),
+      }).required(),
+      user: Joi.object({
+        _id: userAttrs.id.required(),
+        email: userAttrs.email.required(),
+        givenName: userAttrs.givenName.required(),
+        familyName: userAttrs.familyName.required(),
+      }).required(),
+      role: attrs.managerRole.required(),
+    }).required(), params);
+
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    const now = new Date();
+    const options = { strict: true, session };
+    try {
+      const results = await Promise.all([
+        this.updateOne({
+          query: { _id: org._id, 'managers.user._id': { $ne: user._id } },
+          update: {
+            $set: { 'date.updated': now },
+            $addToSet: { managers: cleanDocument({ user, role, date: { added: now } }) },
+          },
+          options,
+        }),
+        this.manager.$('user').updateOne({
+          query: { _id: user._id, 'manages.org._id': { $ne: org._id } },
+          update: {
+            $set: { 'date.updated': now },
+            $addToSet: { manages: cleanDocument({ org, role, date: { added: now } }) },
+          },
+          options,
+        }),
+      ]);
+      await session.commitTransaction();
+      return results;
+    } catch (e) {
+      await session.abortTransaction();
+      if (e.statusCode === 404) {
+        e.statusCode = 400;
+        e.message = 'Either no records were found for the provided criteria or this user is already a manager of this org.';
+      }
+      throw e;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
    * @param {object} params
    * @param {string} params.name
    * @param {string} params.slug

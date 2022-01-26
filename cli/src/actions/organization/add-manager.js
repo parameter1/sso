@@ -57,7 +57,7 @@ export default async () => {
 
   if (!confirm) return;
 
-  const result = await repos.addOrgManager({
+  const result = await repos.$('organization').addManager({
     org: { _id: org._id, slug: org.slug, name: org.name },
     user: {
       _id: user._id,

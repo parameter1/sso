@@ -47,41 +47,49 @@ export default class UserRepo extends ManagedRepo {
       verified: attrs.verified.default(false),
     }).required(), params);
 
-    const user = await this.findByObjectId({ id, options: { projection: { email: 1 } } });
-    if (user.email === email) {
-      throw ManagedRepo.createError(400, 'The new email address is the same as the current email address.');
-    }
+    const update = [
+      {
+        $addFields: {
+          __didChange: { $ne: ['$email', email] },
+        },
+      },
+      {
+        $set: {
+          email,
+          domain: email.split('@')[1],
+          verified: { $cond: ['$__didChange', verified, '$verified'] },
+          'date.updated': { $cond: ['$__didChange', new Date(), '$date.updated'] },
+        },
+      },
+      { $unset: ['__didChange'] },
+    ];
 
     const session = await this.client.startSession();
     session.startTransaction();
 
     try {
       // attempt to update the user email.
-      await this.updateOne({
-        query: { _id: user._id },
-        update: {
-          $set: cleanDocument({
-            email,
-            domain: email.split('@')[1],
-            'date.updated': new Date(),
-            verified,
-          }),
-        },
+      const result = await this.updateOne({
+        query: { _id: id },
+        update,
         options: { strict: true, session },
       });
+
+      // if nothing changed, skip updating related fields
+      if (!result.modifiedCount) return result;
 
       // then update relationships.
       await Promise.all([
         // org managers
-        this.manager.$('organization').updateRelatedManagers({ user: { _id: user._id, email }, options: { session } }),
+        this.manager.$('organization').updateRelatedManagers({ user: { _id: id, email }, options: { session } }),
         // workspace members
-        this.manager.$('workspace').updateRelatedMembers({ user: { _id: user._id, email }, options: { session } }),
+        this.manager.$('workspace').updateRelatedMembers({ user: { _id: id, email }, options: { session } }),
         // user events
-        this.manager.$('user-event').updateRelatedUser({ id: user._id, email, options: { session } }),
+        this.manager.$('user-event').updateRelatedUser({ id, email, options: { session } }),
       ]);
 
       await session.commitTransaction();
-      return 'ok';
+      return result;
     } catch (e) {
       await session.abortTransaction();
       throw e;

@@ -17,13 +17,9 @@ export default async () => {
       type: 'input',
       name: 'email',
       message: 'Enter the new email address',
-      validate: async (input, { user }) => {
+      validate: async (input) => {
         const { error } = userAttrs.email.required().validate(input);
         if (error) return error;
-
-        if (input === user.email) {
-          return new Error('The new email address cannot be the same as the old address');
-        }
 
         const doc = await repos.$('user').findByEmail({
           email: input,

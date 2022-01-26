@@ -10,30 +10,34 @@ export default async () => {
   const questions = [
     {
       type: 'list',
-      name: 'workspace',
+      name: 'eligible',
       message: 'Select the workspace',
       choices: () => getWorkspaceList({ projection: { members: 1 } }),
-    },
-    {
-      type: 'list',
-      name: 'user',
-      message: 'Select the user',
-      choices: async ({ workspace }) => {
+      filter: async (workspace) => {
         const memberEmails = asArray(workspace.members).reduce((set, member) => {
           set.add(member.user.email);
           return set;
         }, new Set());
 
-        return getUserList({
-          disabledWhen: (user) => memberEmails.has(user.email),
+        const users = await getUserList({
+          query: { email: { $nin: [...memberEmails] } },
         });
+        return { workspace, users };
       },
+    },
+    {
+      type: 'list',
+      name: 'user',
+      message: 'Select the user',
+      when: ({ eligible }) => Boolean(eligible.users.length),
+      choices: async ({ eligible }) => eligible.users,
     },
     {
       type: 'list',
       name: 'role',
       message: 'Select the member role',
       // @todo these need to come from the possible app roles
+      when: ({ eligible }) => Boolean(eligible.users.length),
       choices: () => ['Administrator', 'Member'],
       validate: (input) => {
         const { error } = workspaceAttrs.role().required().validate(input);
@@ -46,17 +50,25 @@ export default async () => {
       name: 'confirm',
       message: 'Are you sure you want to complete this action?',
       default: false,
+      when: ({ eligible }) => Boolean(eligible.users.length),
     },
   ];
 
   const {
     confirm,
-    workspace,
+    eligible,
     user,
     role,
   } = await inquirer.prompt(questions);
 
+  if (!user) {
+    log('> No eligible users were found for this workspace');
+    return;
+  }
+
   if (!confirm) return;
+
+  const { workspace } = eligible;
 
   const result = await repos.$('workspace').addMember({
     workspace: {

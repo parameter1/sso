@@ -98,6 +98,16 @@ const run = async () => {
               fnName: 'removeManager',
               disabled: !documents.has('organization') || !documents.has('user'),
             },
+            {
+              name: 'Add organization email domains',
+              fnName: 'addEmailDomains',
+              disabled: !documents.has('organization'),
+            },
+            {
+              name: 'Remove organization email domains',
+              fnName: 'removeEmailDomains',
+              disabled: !documents.has('organization'),
+            },
           ],
         },
 

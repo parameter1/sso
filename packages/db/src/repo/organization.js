@@ -31,6 +31,31 @@ export default class OrganizationRepo extends ManagedRepo {
   /**
    *
    * @param {object} params
+   * @param {string} params.id
+   * @param {string[]} params.emailDomains
+   */
+  async addEmailDomains(params = {}) {
+    const {
+      id,
+      emailDomains,
+    } = await validateAsync(Joi.object({
+      id: attrs.id.required(),
+      emailDomains: Joi.array().items(attrs.emailDomain.required()).required(),
+    }).required(), params);
+
+    const $or = emailDomains.map((domain) => ({ emailDomains: { $ne: domain } }));
+    return this.updateOne({
+      query: { _id: id, $or },
+      update: {
+        $set: { 'date.updated': new Date() },
+        $addToSet: { emailDomains: { $each: emailDomains } },
+      },
+    });
+  }
+
+  /**
+   *
+   * @param {object} params
    * @param {object} params.org
    * @param {object} params.user
    * @param {string} params.role
@@ -176,7 +201,7 @@ export default class OrganizationRepo extends ManagedRepo {
    * @param {object} params
    * @param {string} params.name
    * @param {string} params.slug
-   * @param {string[]} [params.emailDomains]
+   * @param {string[]} [params.emailDomains=[]]
    * @param {object} [params.options]
    */
   async create(params = {}) {
@@ -258,6 +283,31 @@ export default class OrganizationRepo extends ManagedRepo {
       query: { _id: orgId, 'workspaces._id': { $ne: workspace._id } },
       update: { $addToSet: { workspaces: cleanDocument(workspace) } },
       options,
+    });
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {string} params.id
+   * @param {string[]} params.emailDomains
+   */
+  async removeEmailDomains(params = {}) {
+    const {
+      id,
+      emailDomains,
+    } = await validateAsync(Joi.object({
+      id: attrs.id.required(),
+      emailDomains: Joi.array().items(attrs.emailDomain.required()).required(),
+    }).required(), params);
+
+    const $or = emailDomains.map((domain) => ({ emailDomains: domain }));
+    return this.updateOne({
+      query: { _id: id, $or },
+      update: {
+        $set: { 'date.updated': new Date() },
+        $pull: { emailDomains: { $in: emailDomains } },
+      },
     });
   }
 

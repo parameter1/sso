@@ -31,16 +31,19 @@ export default class ApplicationRepo extends ManagedRepo {
    * @param {object} params
    * @param {string} params.name
    * @param {string} params.slug
+   * @param {string[]} [params.roles=[Administrator, Member]]
    * @param {object} [params.options]
    */
   async create(params = {}) {
     const {
       name,
       slug,
+      roles,
       options,
     } = await validateAsync(Joi.object({
       name: attrs.name.required(),
       slug: attrs.slug.required(),
+      roles: Joi.array().items(Joi.string().required()).default([]),
       options: Joi.object().default({}),
     }).required(), params);
 
@@ -55,6 +58,7 @@ export default class ApplicationRepo extends ManagedRepo {
           created: now,
           updated: now,
         },
+        roles,
         workspaces: [],
         redirects: [],
       }, { preserveEmptyArrays: true }),

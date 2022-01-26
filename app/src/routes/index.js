@@ -6,6 +6,11 @@ const routes = [
     name: 'index',
     component: () => import('../pages/index.vue'),
   },
+  {
+    path: '/_style',
+    name: 'style-guide',
+    component: () => import('../pages/style-guide.vue'),
+  },
 ];
 
 const router = createRouter({

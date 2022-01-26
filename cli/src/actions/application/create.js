@@ -1,4 +1,5 @@
 import inquirer from 'inquirer';
+import Joi from '@parameter1/joi';
 import { applicationAttributes as appAttrs } from '@parameter1/sso-db/schema';
 import { sluggify } from '@parameter1/slug';
 import repos from '../../repos.js';
@@ -42,6 +43,18 @@ export default async () => {
       },
     },
     {
+      type: 'input',
+      name: 'roles',
+      message: 'Enter comma separated list of roles the application supports',
+      default: 'Administrator, Member',
+      filter: (list) => list.split(',').map((v) => v.trim()).filter((v) => v),
+      validate: (roles) => {
+        const { error } = Joi.array().items(Joi.string().required()).validate(roles);
+        if (error) return error;
+        return true;
+      },
+    },
+    {
       type: 'confirm',
       name: 'confirm',
       message: 'Are you sure you want to complete this action?',
@@ -53,10 +66,11 @@ export default async () => {
     confirm,
     name,
     slug,
+    roles,
   } = await inquirer.prompt(questions);
 
   if (!confirm) return;
 
-  const result = await repos.$('application').create({ name, slug });
+  const result = await repos.$('application').create({ name, slug, roles });
   log(result);
 };

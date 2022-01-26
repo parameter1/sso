@@ -43,7 +43,7 @@ export default class ApplicationRepo extends ManagedRepo {
     } = await validateAsync(Joi.object({
       name: attrs.name.required(),
       slug: attrs.slug.required(),
-      roles: Joi.array().items(Joi.string().required()).default([]),
+      roles: Joi.array().items(Joi.string().required()).default(['Administrator', 'Member']),
       options: Joi.object().default({}),
     }).required(), params);
 

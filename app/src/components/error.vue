@@ -1,6 +1,6 @@
 <template>
   <alert-element v-if="error" :header="header">
-    {{ error }}
+    {{ error.message }}
   </alert-element>
 </template>
 

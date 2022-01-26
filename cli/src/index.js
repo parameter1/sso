@@ -124,6 +124,11 @@ const run = async () => {
               fnName: 'addMember',
               disabled: !documents.has('workspace') || !documents.has('user'),
             },
+            {
+              name: 'Remove workspace member',
+              fnName: 'removeMember',
+              disabled: !documents.has('workspace') || !documents.has('user'),
+            },
           ],
         },
 
@@ -145,7 +150,6 @@ const run = async () => {
         if (count) arr.push(new inquirer.Separator());
         return arr;
       }, [new inquirer.Separator()]),
-      loop: false,
     },
   ];
 

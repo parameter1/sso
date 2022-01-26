@@ -76,7 +76,9 @@ export default class WorkspaceRepo extends ManagedRepo {
           query: { _id: workspace._id, 'members.user._id': { $ne: user._id } },
           update: {
             $set: { 'date.updated': now },
-            $addToSet: { members: cleanDocument({ user, role, date: { added: now } }) },
+            $addToSet: {
+              members: cleanDocument({ user, role, date: { added: now, updated: now } }),
+            },
           },
           options,
         }),
@@ -84,7 +86,9 @@ export default class WorkspaceRepo extends ManagedRepo {
           query: { _id: user._id, 'memberships.workspace._id': { $ne: workspace._id } },
           update: {
             $set: { 'date.updated': now },
-            $addToSet: { memberships: cleanDocument({ workspace, role, date: { added: now } }) },
+            $addToSet: {
+              memberships: cleanDocument({ workspace, role, date: { added: now, updated: now } }),
+            },
           },
           options,
         }),
@@ -191,6 +195,59 @@ export default class WorkspaceRepo extends ManagedRepo {
       return workspace;
     } catch (e) {
       await session.abortTransaction();
+      throw e;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId} params.workspaceId
+   * @param {ObjectId} params.userId
+   */
+  async removeMember(params = {}) {
+    const {
+      workspaceId,
+      userId,
+    } = await validateAsync(Joi.object({
+      workspaceId: workspaceAttrs.id.required(),
+      userId: userAttrs.id.required(),
+    }).required(), params);
+
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    const now = new Date();
+    const options = { strict: true, session };
+    try {
+      const results = await Promise.all([
+        this.updateOne({
+          query: { _id: workspaceId, 'members.user._id': userId },
+          update: {
+            $set: { 'date.updated': now },
+            $pull: { members: { 'user._id': userId } },
+          },
+          options,
+        }),
+        this.manager.$('user').updateOne({
+          query: { _id: userId, 'memberships.workspace._id': workspaceId },
+          update: {
+            $set: { 'date.updated': now },
+            $pull: { memberships: { 'workspace._id': workspaceId } },
+          },
+          options,
+        }),
+      ]);
+      await session.commitTransaction();
+      return results;
+    } catch (e) {
+      await session.abortTransaction();
+      if (e.statusCode === 404) {
+        e.statusCode = 400;
+        e.message = 'Either no record was found for the provided criteria or this user is not a member of this workspace.';
+      }
       throw e;
     } finally {
       session.endSession();

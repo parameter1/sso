@@ -79,14 +79,7 @@ export default class UserRepo extends ManagedRepo {
       if (!result.modifiedCount) return result;
 
       // then update relationships.
-      await Promise.all([
-        // org managers
-        this.manager.$('organization').updateRelatedManagers({ user: { _id: id, email }, options: { session } }),
-        // workspace members
-        this.manager.$('workspace').updateRelatedMembers({ user: { _id: id, email }, options: { session } }),
-        // user events
-        this.manager.$('user-event').updateRelatedUser({ id, email, options: { session } }),
-      ]);
+      await this.updateForiegnEmailValues({ id, email, options: { session } });
 
       await session.commitTransaction();
       return result;
@@ -355,6 +348,48 @@ export default class UserRepo extends ManagedRepo {
     }
   }
 
+  async updateForiegnEmailValues(params = {}) {
+    const {
+      id,
+      email,
+      options,
+    } = await validateAsync(Joi.object({
+      id: attrs.id.required(),
+      email: attrs.email.required(),
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    return Promise.all([
+      // org managers
+      this.manager.$('organization').updateRelatedManagers({ user: { _id: id, email }, options }),
+      // workspace members
+      this.manager.$('workspace').updateRelatedMembers({ user: { _id: id, email }, options }),
+      // user events
+      this.manager.$('user-event').updateRelatedUser({ id, email, options }),
+    ]);
+  }
+
+  async updateForiegnNameValues(params = {}) {
+    const {
+      id,
+      givenName,
+      familyName,
+      options,
+    } = await validateAsync(Joi.object({
+      id: attrs.id.required(),
+      givenName: attrs.givenName.required(),
+      familyName: attrs.familyName.required(),
+      options: Joi.object().default({}),
+    }).required(), params);
+
+    return Promise.all([
+      // org managers
+      this.manager.$('organization').updateRelatedManagers({ user: { _id: id, givenName, familyName }, options }),
+      // workspace members
+      this.manager.$('workspace').updateRelatedMembers({ user: { _id: id, givenName, familyName }, options }),
+    ]);
+  }
+
   /**
    *
    * @param {object} params
@@ -556,12 +591,12 @@ export default class UserRepo extends ManagedRepo {
       if (!result.modifiedCount) return result;
 
       // then update relationships.
-      await Promise.all([
-        // org managers
-        this.manager.$('organization').updateRelatedManagers({ user: { _id: id, givenName, familyName }, options: { session } }),
-        // workspace members
-        this.manager.$('workspace').updateRelatedMembers({ user: { _id: id, givenName, familyName }, options: { session } }),
-      ]);
+      await this.updateForiegnNameValues({
+        id,
+        givenName,
+        familyName,
+        options: { session },
+      });
 
       await session.commitTransaction();
       return result;

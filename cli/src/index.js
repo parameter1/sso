@@ -63,7 +63,7 @@ const run = async () => {
             },
             {
               name: 'Generate user auth token (impersonate)',
-              value: 'generateAuthToken',
+              fnName: 'generateAuthToken',
               disabled: !documents.has('user'),
             },
           ],

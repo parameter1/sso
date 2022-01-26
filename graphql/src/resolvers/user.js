@@ -76,6 +76,18 @@ export default {
   /**
    *
    */
+  User: {
+    /**
+     *
+     */
+    name({ givenName, familyName }) {
+      return [givenName, familyName].join(' ');
+    },
+  },
+
+  /**
+   *
+   */
   UserAuth: {
     /**
      *

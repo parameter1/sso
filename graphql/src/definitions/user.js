@@ -23,11 +23,11 @@ type User {
   "The user's email address. This value is unique across all users."
   email: String! @project
   "The user's given/first name."
-  givenName: String @project(field: "name.given")
+  givenName: String! @project
   "The user's family/last name."
-  familyName: String @project(field: "name.family")
+  familyName: String! @project
   "The user's full name."
-  name: String @project(field: "name.full")
+  name: String! @project(field: "givenName", needs: ["familyName"])
   "Whether the user email address has been verified."
   verified: Boolean! @project
   "The number of times the user has logged in."

@@ -3,9 +3,8 @@ import { gql } from '@parameter1/graphql/tag';
 export default gql`
 
 extend type Query {
-  "Returns the currently logged-in user. Will return an authentication error if no user is currently logged-in."
-  currentUser: User!
-    @auth(needsRequiredUserFields: false)
+  "Returns the currently logged-in user. Will return null if no user is currently logged-in or the auth credentials are invalid."
+  currentUser: User
 }
 
 extend type Mutation {
@@ -13,7 +12,7 @@ extend type Mutation {
   loginUserFromLink(input: MutateLoginUserFromLinkInput!): UserAuth!
   "Logs out the currently logged-in user."
   logoutUser: String!
-    @auth(needsRequiredUserFields: false)
+    @auth
   "Sends a magic login link to a user. The user must already exist."
   sendUserLoginLink(input: MutateSendUserLoginLinkInput!): String!
 }

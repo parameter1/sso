@@ -65,6 +65,8 @@ export default {
      *
      */
     async currentUser(_, __, { auth, repos }, info) {
+      const isAuthenticated = await auth.isAuthenticated();
+      if (!isAuthenticated) return null;
       const id = await auth.getUserId();
       const options = { projection: getProjectionForType(info) };
       return repos.$('user').findByObjectId({ id, options });

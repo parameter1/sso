@@ -58,7 +58,6 @@ router.beforeEach(async (to, from, next) => {
   if (matched) {
     try {
       const isLoggedIn = await userService.isLoggedIn();
-      console.log({ isLoggedIn });
       const { then, otherwise } = matched.meta.whenAuthed;
 
       if (isLoggedIn) {

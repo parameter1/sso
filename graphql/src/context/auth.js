@@ -1,4 +1,4 @@
-import { ApolloError, AuthenticationError } from 'apollo-server-fastify';
+import { AuthenticationError } from 'apollo-server-fastify';
 import repos from '../repos.js';
 
 const requiredUserFields = ['name'];
@@ -11,11 +11,11 @@ const parseHeader = (header) => {
   return { type, value };
 };
 
-const forbidden = (message) => {
-  const e = new ApolloError(message);
-  e.statusCode = 403;
-  return e;
-};
+// const forbidden = (message) => {
+//   const e = new ApolloError(message);
+//   e.statusCode = 403;
+//   return e;
+// };
 
 export default function AuthContext({ header } = {}) {
   let authToken;
@@ -44,28 +44,25 @@ export default function AuthContext({ header } = {}) {
     }
   };
 
-  const check = async ({ needsRequiredUserFields } = {}) => {
+  const check = async () => {
     await load();
     if (error) throw new AuthenticationError(error.message);
     if (!user) throw new AuthenticationError('You must be logged-in to access this resource.');
-    if (needsRequiredUserFields && requiredUserFields.some((field) => !user[field])) {
-      throw forbidden('You must complete your user profile before performing this operation');
-    }
     return true;
   };
 
-  const getAuthToken = async ({ needsRequiredUserFields } = {}) => {
-    await check({ needsRequiredUserFields });
+  const getAuthToken = async () => {
+    await check();
     return authToken;
   };
 
-  const getUser = async ({ needsRequiredUserFields } = {}) => {
-    await check({ needsRequiredUserFields });
+  const getUser = async () => {
+    await check();
     return user;
   };
 
-  const getUserId = async ({ needsRequiredUserFields } = {}) => {
-    const u = await getUser({ needsRequiredUserFields });
+  const getUserId = async () => {
+    const u = await getUser();
     return u._id;
   };
 

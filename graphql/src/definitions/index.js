@@ -7,7 +7,7 @@ export default gql`
 scalar DateTime
 scalar ObjectID
 
-directive @auth(needsRequiredUserFields: Boolean = true) on FIELD_DEFINITION
+directive @auth on FIELD_DEFINITION
 directive @project(field: String, needs: [String!]! = []) on FIELD_DEFINITION
 
 type Query {

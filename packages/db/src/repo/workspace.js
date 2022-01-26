@@ -122,7 +122,7 @@ export default class WorkspaceRepo extends ManagedRepo {
     } = await validateAsync(Joi.object({
       workspaceId: workspaceAttrs.id.required(),
       userId: userAttrs.id.required(),
-      role: workspaceAttrs.role.require(),
+      role: workspaceAttrs.role.required(),
     }).required(), params);
 
     const session = await this.client.startSession();

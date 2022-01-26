@@ -36,9 +36,11 @@ export default async () => {
       type: 'list',
       name: 'role',
       message: 'Select the member role',
-      // @todo these need to come from the possible app roles
       when: ({ eligible }) => Boolean(eligible.users.length),
-      choices: () => ['Administrator', 'Member'],
+      choices: async ({ eligible }) => {
+        const app = await repos.$('application').findBySlug({ slug: eligible.workspace.app.slug });
+        return app.roles;
+      },
       validate: (input) => {
         const { error } = workspaceAttrs.role().required().validate(input);
         if (error) return error;

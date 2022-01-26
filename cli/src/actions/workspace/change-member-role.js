@@ -37,10 +37,10 @@ export default async () => {
       name: 'role',
       message: 'Select the member role',
       when: ({ eligible }) => Boolean(eligible.users.length),
-      // @todo these need to come from the possible app roles
-      choices: ({ user, eligible }) => {
+      choices: async ({ user, eligible }) => {
+        const app = await repos.$('application').findBySlug({ slug: eligible.workspace.app.slug });
         const { role } = eligible.workspace.members.find(({ user: u }) => `${u._id}` === `${user._id}`);
-        return ['Administrator', 'Member'].map((r) => ({
+        return app.roles.map((r) => ({
           name: r,
           value: r,
           disabled: r === role ? 'current role' : false,

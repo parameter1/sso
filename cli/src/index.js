@@ -89,6 +89,11 @@ const run = async () => {
               disabled: !documents.has('organization') || !documents.has('user'),
             },
             {
+              name: 'Change organization manager role',
+              fnName: 'changeManagerRole',
+              disabled: !documents.has('organization') || !documents.has('user'),
+            },
+            {
               name: 'Remove organization manager',
               fnName: 'removeManager',
               disabled: !documents.has('organization') || !documents.has('user'),

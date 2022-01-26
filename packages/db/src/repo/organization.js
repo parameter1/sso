@@ -66,7 +66,9 @@ export default class OrganizationRepo extends ManagedRepo {
           query: { _id: org._id, 'managers.user._id': { $ne: user._id } },
           update: {
             $set: { 'date.updated': now },
-            $addToSet: { managers: cleanDocument({ user, role, date: { added: now } }) },
+            $addToSet: {
+              managers: cleanDocument({ user, role, date: { added: now, updated: now } }),
+            },
           },
           options,
         }),
@@ -74,7 +76,9 @@ export default class OrganizationRepo extends ManagedRepo {
           query: { _id: user._id, 'manages.org._id': { $ne: org._id } },
           update: {
             $set: { 'date.updated': now },
-            $addToSet: { manages: cleanDocument({ org, role, date: { added: now } }) },
+            $addToSet: {
+              manages: cleanDocument({ org, role, date: { added: now, updated: now } }),
+            },
           },
           options,
         }),
@@ -86,6 +90,81 @@ export default class OrganizationRepo extends ManagedRepo {
       if (e.statusCode === 404) {
         e.statusCode = 400;
         e.message = 'Either no records were found for the provided criteria or this user is already a manager of this org.';
+      }
+      throw e;
+    } finally {
+      session.endSession();
+    }
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId} params.orgId
+   * @param {ObjectId} params.userId
+   * @param {string} params.role
+   */
+  async changeManagerRole(params = {}) {
+    const {
+      orgId,
+      userId,
+      role,
+    } = await validateAsync(Joi.object({
+      orgId: attrs.id.required(),
+      userId: userAttrs.id.required(),
+      role: attrs.managerRole.required(),
+    }).required(), params);
+
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    const now = new Date();
+    const options = { strict: true, session };
+
+    try {
+      const results = await Promise.all([
+        this.updateOne({
+          query: {
+            _id: orgId,
+            managers: { $elemMatch: { 'user._id': userId, role: { $ne: role } } },
+          },
+          update: {
+            $set: {
+              'managers.$[elem].role': role,
+              'managers.$[elem].date.updated': now,
+              'date.updated': now,
+            },
+          },
+          options: {
+            ...options,
+            arrayFilters: [{ 'elem.user._id': userId }],
+          },
+        }),
+        this.manager.$('user').updateOne({
+          query: {
+            _id: userId,
+            manages: { $elemMatch: { 'org._id': orgId, role: { $ne: role } } },
+          },
+          update: {
+            $set: {
+              'manages.$[elem].role': role,
+              'manages.$[elem].date.updated': now,
+              'date.updated': now,
+            },
+          },
+          options: {
+            ...options,
+            arrayFilters: [{ 'elem.org._id': orgId }],
+          },
+        }),
+      ]);
+      await session.commitTransaction();
+      return results;
+    } catch (e) {
+      await session.abortTransaction();
+      if (e.statusCode === 404) {
+        e.statusCode = 400;
+        e.message = 'Either no record was found for the provided criteria or this user does not a have the requested management role for this org.';
       }
       throw e;
     } finally {
@@ -181,8 +260,8 @@ export default class OrganizationRepo extends ManagedRepo {
   /**
    *
    * @param {object} params
-   * @param {object} params.org
-   * @param {object} params.user
+   * @param {ObjectId} params.orgId
+   * @param {ObjectId} params.userId
    */
   async removeManager(params = {}) {
     const {

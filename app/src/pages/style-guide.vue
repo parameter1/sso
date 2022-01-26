@@ -1,5 +1,6 @@
 <template>
   <main>
+    <h1>Style Guide</h1>
     <section>
       <h1>Alerts</h1>
 

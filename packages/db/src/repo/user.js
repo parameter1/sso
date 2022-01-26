@@ -512,6 +512,27 @@ export default class UserRepo extends ManagedRepo {
       options: Joi.object().default({}),
     }).required(), params);
 
+    const update = [
+      {
+        $addFields: {
+          __didChange: {
+            $or: [
+              { $ne: ['$givenName', givenName] },
+              { $ne: ['$familyName', familyName] },
+            ],
+          },
+        },
+      },
+      {
+        $set: {
+          givenName,
+          familyName,
+          'date.updated': { $cond: ['$__didChange', new Date(), '$date.updated'] },
+        },
+      },
+      { $unset: ['__didChange'] },
+    ];
+
     const session = await this.client.startSession();
     session.startTransaction();
 
@@ -519,9 +540,12 @@ export default class UserRepo extends ManagedRepo {
       // attempt to update the user.
       const result = await this.updateOne({
         query: { _id: id },
-        update: { $set: { givenName, familyName, 'date.updated': new Date() } },
+        update,
         options: { strict: true, session },
       });
+
+      // if nothing changed, skip updating related fields
+      if (!result.modifiedCount) return result;
 
       // then update relationships.
       await Promise.all([

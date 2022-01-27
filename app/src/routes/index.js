@@ -27,6 +27,9 @@ const routes = [
     name: 'login',
     meta: { whenAuthed: { then: 'manage', otherwise: true } },
     component: () => import('../pages/login.vue'),
+    props: ({ query }) => ({
+      next: query.next,
+    }),
   },
   {
     path: '/logout',

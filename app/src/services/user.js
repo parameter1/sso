@@ -30,11 +30,11 @@ const LOGOUT = gql`
   }
 `;
 
-const clearTokensAndReload = () => {
+const clearTokensAndReload = ({ redirectTo } = {}) => {
   tokenStorage.remove();
   loggedIn(false);
   apollo.clearStore();
-  window.location.href = '/app/';
+  window.location.href = redirectTo || '/app/';
 };
 
 export default {
@@ -77,14 +77,14 @@ export default {
     return loginUserFromLink;
   },
 
-  logout: async () => {
+  logout: async ({ redirectTo } = {}) => {
     try {
       await apollo.mutate({ mutation: LOGOUT });
     } catch (e) {
       // @todo how should this be handled??
     } finally {
       // always clear tokens, even on error
-      clearTokensAndReload();
+      clearTokensAndReload({ redirectTo });
     }
   },
 

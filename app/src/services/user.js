@@ -37,27 +37,45 @@ const clearTokensAndReload = ({ redirectTo } = {}) => {
   window.location.href = redirectTo || BASE;
 };
 
+const addTokenListener = ({ onAdd, onRemove } = {}) => {
+  window.addEventListener('storage', (event) => {
+    const { key, newValue } = event;
+    // if key is null, all of local storage was cleared. user should be logged out
+    if (key === null) {
+      onRemove({ value: null, event });
+      return;
+    }
+    // only act on the token key...
+    if (key === TOKEN_KEY) {
+      // if a new value is set. this effectively logs the user in.
+      if (newValue) {
+        onAdd({ value: newValue, event });
+        return;
+      }
+      // otherwise treat as a clear/logout
+      onRemove({ value: null, event });
+    }
+  });
+};
+
 export default {
   isLoggedIn: () => loggedIn(),
+
+  addTokenListener,
 
   /**
    *
    */
   attachStorageListener: () => {
-    window.addEventListener('storage', (event) => {
-      const { key, newValue } = event;
-      // if key is null, all of local storage was cleared. log user out.
-      if (key === null) clearTokensAndReload();
-      // only act on the token key...
-      if (key === TOKEN_KEY) {
-        // if a new value is set, reload. this effectively logs the user in.
-        if (newValue) {
-          window.location.href = BASE;
-        } else {
-          // otherwise clear tokens and reload.
-          clearTokensAndReload();
-        }
-      }
+    addTokenListener({
+      onAdd: () => {
+        // user has likely logged in. relaod the app.
+        window.location.href = BASE;
+      },
+      onRemove: () => {
+        // user should be logged out
+        clearTokensAndReload();
+      },
     });
   },
 

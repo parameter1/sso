@@ -36,6 +36,9 @@ const routes = [
     name: 'logout',
     meta: { whenAuthed: { then: true, otherwise: 'login' } },
     component: () => import('../pages/logout.vue'),
+    props: ({ query }) => ({
+      next: query.next,
+    }),
   },
   {
     path: '/_style',

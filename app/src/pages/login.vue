@@ -39,6 +39,13 @@ export default {
     UserEmailField,
   },
 
+  props: {
+    next: {
+      type: String,
+      default: null,
+    },
+  },
+
   data: () => ({
     email: null,
     error: null,
@@ -51,7 +58,7 @@ export default {
       try {
         this.error = null;
         this.isSendingLink = true;
-        await userService.sendUserLoginLink({ email: this.email });
+        await userService.sendUserLoginLink({ email: this.email, redirectTo: this.next });
         this.linkWasSent = true;
       } catch (e) {
         this.error = new GraphQLError(e);

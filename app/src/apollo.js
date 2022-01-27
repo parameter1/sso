@@ -24,7 +24,7 @@ const client = new ApolloClient({
     }),
     setContext(() => {
       const headers = {};
-      const { value } = get(tokenStorage.get(), 'value');
+      const value = get(tokenStorage.get(), 'value');
       if (value) headers.authorization = `Bearer ${value}`;
       return { headers };
     }),

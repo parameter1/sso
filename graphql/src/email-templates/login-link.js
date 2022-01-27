@@ -9,7 +9,7 @@ import { APP_URL } from '../env.js';
 export default (params = {}) => {
   const { loginToken, redirectTo } = validate(Joi.object({
     loginToken: Joi.string().required(),
-    redirectTo: Joi.string(),
+    redirectTo: Joi.string().allow(null),
   }).required(), params);
 
   let url = `${APP_URL}/authenticate?token=${loginToken}`;

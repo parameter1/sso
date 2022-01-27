@@ -23,8 +23,8 @@
   },
   "dependencies": {
     "@parameter1/email-utils": "^2.0.0",
-    "@parameter1/joi": "^2.1.1",
-    "@parameter1/mongodb": "^2.7.0",
+    "@parameter1/joi": "^2.2.0",
+    "@parameter1/mongodb": "^2.8.0",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/utils": "^2.0.0",
     "jsonwebtoken": "^8.5.1"

@@ -19,8 +19,8 @@
     "test": "yarn lint"
   },
   "dependencies": {
-    "@parameter1/graphql": "^2.1.0",
-    "@parameter1/joi": "^2.1.1",
+    "@parameter1/graphql": "^2.2.0",
+    "@parameter1/joi": "^2.2.0",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/sso-db": "^0.0.1",
     "@parameter1/utils": "^2.0.0",
@@ -29,7 +29,7 @@
     "apollo-server-fastify": "^3.6.2",
     "envalid": "^7.2.2",
     "fastify": "^3.27.0",
-    "graphql": "^16.2.0",
+    "graphql": "^16.3.0",
     "lodash.merge": "^4.6.2"
   },
   "devDependencies": {

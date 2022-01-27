@@ -1067,17 +1067,17 @@
   dependencies:
     burner-email-providers "^1.0.67"
 
-"@parameter1/graphql@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@parameter1/graphql/-/graphql-2.1.0.tgz#d7c4d2556dd2fb0f6d10cfcd0e3a55ba2914bc50"
-  integrity sha512-YvaGh+FnVqcvTX3XWP7qcAHA5pASCE2SsAYcMqTDWWmmwpgdaxO8WpRpV2X503XwVqymHV869iDVMMa8YFetgg==
+"@parameter1/graphql@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@parameter1/graphql/-/graphql-2.2.0.tgz#c5b54ad50d022cfd83037d7cfcfa2ca8248860e8"
+  integrity sha512-LoUgsdtzXL4LvbuIFLLDhrMP2j2biQ92qapPrSjmZ+kP7a1za5P3r0HMYNOQA6e8f26C6PMK3o4KEJ2VNao+tQ==
   dependencies:
     "@graphql-tools/schema" "^8.3.1"
     "@graphql-tools/utils" "^8.6.1"
     "@parameter1/object-path" "^2.0.0"
     "@parameter1/utils" "^2.0.0"
     dayjs "^1.10.7"
-    graphql "^16.2.0"
+    graphql "^16.3.0"
     graphql-tag "^2.12.6"
 
 "@parameter1/gulp@^2.0.0":
@@ -1087,14 +1087,14 @@
   dependencies:
     gulp "^4.0.2"
 
-"@parameter1/joi@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@parameter1/joi/-/joi-2.1.1.tgz#48390c19483b6194ace77c714bda502813230c62"
-  integrity sha512-El31tpb5dfx6bJgXsR2+63ZFXh1uZSWX8EqFD6umXlV7NnduoXQpSL0a4egTMO0O7ylLKfEu4/tZZNEHbGQ4hw==
+"@parameter1/joi@^2.2.0":
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/@parameter1/joi/-/joi-2.2.0.tgz#e22bc9291cd953027e3d0068ffee86d7aa8dcb0d"
+  integrity sha512-7S/eohJa/lmv67PlOi3mx30VRZwlLhISBgK1Odce5VMR322O+UUwe3MZjK9xwgwMpmZ2kVsJiPv6W0YkHB0UJQ==
   dependencies:
     "@parameter1/clean-string" "^2.0.0"
     "@parameter1/object-path" "^2.0.0"
-    joi "^17.5.0"
+    joi "^17.6.0"
     mongodb "~4.1.4"
 
 "@parameter1/micro@^2.1.0":
@@ -1107,20 +1107,20 @@
     micro "^9.3.4"
     node-fetch "^3.2.0"
 
-"@parameter1/mongodb@^2.7.0":
-  version "2.7.0"
-  resolved "https://registry.yarnpkg.com/@parameter1/mongodb/-/mongodb-2.7.0.tgz#2614b52f023f9a5260a9000539a8f5acecab3b8e"
-  integrity sha512-ck7BSrsytoTN0/L8A+ieAt89PaKmny4xRsy3JDoNl4SzayqzhBPxDHRWub7Z26XTjdkUWP++34RvxYzPztLTzA==
+"@parameter1/mongodb@^2.8.0":
+  version "2.8.0"
+  resolved "https://registry.yarnpkg.com/@parameter1/mongodb/-/mongodb-2.8.0.tgz#189a3eb62623abe1fb5c523917bd43c0d11327c4"
+  integrity sha512-nQ77x/grYDDCsvK5Qyn7ijPwHkEjSF0324SvoO9/7UVgodyGXTt21v/zOm5MX1q3Faf18htdqbZj40siwEygHw==
   dependencies:
     "@parameter1/object-path" "^2.0.0"
     "@parameter1/utils" "^2.0.0"
-    "@sindresorhus/is" "^4.3.0"
+    "@sindresorhus/is" "^4.4.0"
     async "^3.2.3"
     base64-url "^2.3.3"
     bson "^4.6.1"
     dataloader "^2.0.0"
     escape-string-regexp "^5.0.0"
-    joi "^17.5.0"
+    joi "^17.6.0"
     lodash.merge "^4.6.2"
     map-obj "^5.0.0"
     mongodb "~4.1.4"
@@ -1250,10 +1250,10 @@
   resolved "https://registry.yarnpkg.com/@sideway/pinpoint/-/pinpoint-2.0.0.tgz#cff8ffadc372ad29fd3f78277aeb29e632cc70df"
   integrity sha512-RNiOoTPkptFtSVzQevY/yWtZwf/RxyVnPy/OcA9HBM3MlGDnBEYL5B41H0MTn0Uec8Hi+2qUtTfG2WWZBmMejQ==
 
-"@sindresorhus/is@^4.3.0":
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-4.3.0.tgz#344fd9bf808a84567ba563d00cc54b2f428dbab1"
-  integrity sha512-wwOvh0eO3PiTEivGJWiZ+b946SlMSb4pe+y+Ur/4S87cwo09pYi+FWHHnbrM3W9W7cBYKDqQXcrFYjYUCOJUEQ==
+"@sindresorhus/is@^4.4.0":
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-4.4.0.tgz#e277e5bdbdf7cb1e20d320f02f5e2ed113cd3185"
+  integrity sha512-QppPM/8l3Mawvh4rn9CNEYIU9bxpXUCRMaX9yUpvBk1nMKusLKpfXGDEKExKaPhLzcn3lzil7pR6rnJ11HgeRQ==
 
 "@tootallnate/once@1":
   version "1.1.2"
@@ -3239,10 +3239,10 @@ eslint-plugin-import@^2.25.4:
     resolve "^1.20.0"
     tsconfig-paths "^3.12.0"
 
-eslint-plugin-vue@^8.3.0:
-  version "8.3.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-vue/-/eslint-plugin-vue-8.3.0.tgz#2ae4f915ed3541a58c4a4c1145c1e60b86aa7e85"
-  integrity sha512-IIuLHw4vQxGlHcoP2dG6t/2OVdQf2qoyAzEGAxreU1afZOHGA7y3TWq8I+r3ZA6Wjs6xpeUWGHlT31QGr9Rb5g==
+eslint-plugin-vue@^8.4.0:
+  version "8.4.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-vue/-/eslint-plugin-vue-8.4.0.tgz#16e59b356386b4428fb7d886b6d8ee5df2bbc09d"
+  integrity sha512-Ga96QRG8GA9AyzKtEDxqYRCMt/VJM4SLkcNmm4FvUiFBE4jpaBr25unRBi9iVmHLYhA9EZ/4I+jD8n1vfWzyAA==
   dependencies:
     eslint-utils "^3.0.0"
     natural-compare "^1.4.0"
@@ -4075,11 +4075,6 @@ graphql-tag@^2.11.0, graphql-tag@^2.12.3, graphql-tag@^2.12.6:
   dependencies:
     tslib "^2.1.0"
 
-graphql@^16.2.0:
-  version "16.2.0"
-  resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.2.0.tgz#de3150e80f1fc009590b92a9d16ab1b46e12b656"
-  integrity sha512-MuQd7XXrdOcmfwuLwC2jNvx0n3rxIuNYOxUtiee5XOmfrWo613ar2U8pE7aHAKh8VwfpifubpD9IP+EdEAEOsA==
-
 graphql@^16.3.0:
   version "16.3.0"
   resolved "https://registry.yarnpkg.com/graphql/-/graphql-16.3.0.tgz#a91e24d10babf9e60c706919bb182b53ccdffc05"
@@ -4851,10 +4846,10 @@ isstream@~0.1.2:
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
   integrity sha1-R+Y/evVa+m+S4VAOaQ64uFKcCZo=
 
-joi@^17.5.0:
-  version "17.5.0"
-  resolved "https://registry.yarnpkg.com/joi/-/joi-17.5.0.tgz#7e66d0004b5045d971cf416a55fb61d33ac6e011"
-  integrity sha512-R7hR50COp7StzLnDi4ywOXHrBrgNXuUUfJWIR5lPY5Bm/pOD3jZaTwpluUXVLRWcoWZxkrHBBJ5hLxgnlehbdw==
+joi@^17.6.0:
+  version "17.6.0"
+  resolved "https://registry.yarnpkg.com/joi/-/joi-17.6.0.tgz#0bb54f2f006c09a96e75ce687957bd04290054b2"
+  integrity sha512-OX5dG6DTbcr/kbMFj0KGYxuew69HPcAE3K/sZpEV2nP6e/j/C0HV+HNiBPCASxdx5T7DMoa0s8UeHWMnb6n2zw==
   dependencies:
     "@hapi/hoek" "^9.0.0"
     "@hapi/topo" "^5.0.0"

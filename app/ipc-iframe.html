@@ -8,11 +8,7 @@
 
   </head>
   <body>
-    <h1>Messages</h1>
-    <ul id="messages">
-
-    </ul>
-
+    <h1>Some P1 App</h1>
     <script type="module">
       ((origin) => {
         const parse = (json) => {
@@ -29,9 +25,16 @@
         if (!message || message.cat !== 'p1-sso-token') return;
         const { act } = message;
 
-        const node = document.createElement('li');
-        node.appendChild(document.createTextNode(`${(new Date()).toISOString()}: ${act}`));
-        document.getElementById('messages').appendChild(node);
+        if (act === 'add') {
+          window.location.reload();
+          return;
+        }
+
+        if (act === 'remove') {
+          const next = 'https://manage.allured.com';
+          const href = `${origin}/app/login?next=${encodeURIComponent(next)}`;
+          window.location.href = href;
+        }
       }, false);
 
       const iframe = document.createElement('iframe');

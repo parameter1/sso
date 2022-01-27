@@ -9,8 +9,9 @@ export default {
   name: 'CorePage',
 
   created() {
-    userService.attachStorageListener();
-    this.$router.replace('/login');
+    const { query } = this.$route;
+    userService.attachStorageListener({ redirectTo: query.next });
+    this.$router.replace({ path: '/login', query });
   },
 };
 </script>

@@ -66,15 +66,15 @@ export default {
   /**
    *
    */
-  attachStorageListener: () => {
+  attachStorageListener: ({ redirectTo } = {}) => {
     addTokenListener({
       onAdd: () => {
         // user has likely logged in. relaod the app.
-        window.location.href = BASE;
+        window.location.href = redirectTo || BASE;
       },
       onRemove: () => {
         // user should be logged out
-        clearTokensAndReload();
+        clearTokensAndReload({ redirectTo });
       },
     });
   },

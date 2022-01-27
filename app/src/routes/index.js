@@ -44,11 +44,6 @@ const routes = [
     ],
   },
   {
-    path: '/_ipc',
-    name: 'ipc',
-    component: () => import('../pages/ipc.vue'),
-  },
-  {
     path: '/_style',
     name: 'style-guide',
     component: () => import('../pages/style-guide.vue'),

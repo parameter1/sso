@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <script type="module">
+      const send = ({ act }) => {
+        const message = { cat: 'p1-sso-token', act };
+        window.parent.postMessage(JSON.stringify(message), '*');
+      };
+
+      window.addEventListener('storage', (event) => {
+        const { key, newValue } = event;
+        // if key is null, all of local storage was cleared. user should be logged out
+        if (key === null) {
+          send({ act: 'remove' });
+          return;
+        }
+        // only act on the token key...
+        if (key === '__p1-sso') {
+          // if a new value is set. this effectively logs the user in.
+          if (newValue) {
+            send({ act: 'add' });
+            return;
+          }
+          // otherwise treat as a clear/logout
+          send({ act: 'remove' });
+        }
+      });
+    </script>
+  </body>
+</html>

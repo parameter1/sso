@@ -1,5 +1,4 @@
 <template>
-  <h1>IPC</h1>
   <div class="p1-sso-ipc" style="display: none;" />
 </template>
 

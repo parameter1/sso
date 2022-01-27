@@ -72,6 +72,19 @@ services:
     depends_on:
       - mongodb-secondary
 
+  lib:
+    <<: *node
+    working_dir: /sso/lib
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: *env
+      HOST: sso.dev.parameter1.com
+      PORT: 7914
+    ports:
+      - "7914:7914"
+    hostname: sso.dev.parameter1.com
+
   mongodb-primary:
     image: bitnami/mongodb:5.0
     environment:

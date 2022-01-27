@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import userService from '../services/user';
+import constants from '../constants';
 
 const routes = [
   {
@@ -66,7 +67,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory('/app/'),
+  history: createWebHistory(constants.BASE),
   routes,
 });
 

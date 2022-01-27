@@ -9,6 +9,7 @@
     "url": "git+https://github.com/parameter1/sso.git",
     "directory": "lib"
   },
+  "files": ["dist"],
   "main": "./dist/p1-sso.umd.js",
   "module": "./dist/p1-sso.es.js",
   "exports": {

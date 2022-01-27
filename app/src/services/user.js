@@ -4,7 +4,7 @@ import apollo from '../apollo';
 import tokenStorage from './token-storage';
 import constants from '../constants';
 
-const { TOKEN_KEY } = constants;
+const { TOKEN_KEY, BASE } = constants;
 
 const loggedIn = makeVar(tokenStorage.exists());
 
@@ -34,7 +34,7 @@ const clearTokensAndReload = ({ redirectTo } = {}) => {
   tokenStorage.remove();
   loggedIn(false);
   apollo.clearStore();
-  window.location.href = redirectTo || '/app/';
+  window.location.href = redirectTo || BASE;
 };
 
 export default {
@@ -52,7 +52,7 @@ export default {
       if (key === TOKEN_KEY) {
         // if a new value is set, reload. this effectively logs the user in.
         if (newValue) {
-          window.location.href = '/';
+          window.location.href = BASE;
         } else {
           // otherwise clear tokens and reload.
           clearTokensAndReload();

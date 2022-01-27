@@ -9,15 +9,26 @@
     "url": "git+https://github.com/parameter1/sso.git",
     "directory": "lib"
   },
-  "private": true,
+  "main": "./dist/p1-sso.umd.js",
+  "module": "./dist/p1-sso.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/p1-sso.es.js",
+      "require": "./dist/p1-sso.umd.js"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "lint": "eslint --ext .js --ext .vue --max-warnings 5 ./"
+    "lint": "eslint --ext .js --ext .vue --max-warnings 5 ./",
+    "prepublish": "yarn build"
   },
   "dependencies": {
   },
   "devDependencies": {
     "vite": "^2.7.13"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

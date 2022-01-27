@@ -24,8 +24,8 @@ const client = new ApolloClient({
     }),
     setContext(() => {
       const headers = {};
-      const token = tokenStorage.get();
-      if (token) headers.authorization = `Bearer ${token}`;
+      const { value } = get(tokenStorage.get(), 'value');
+      if (value) headers.authorization = `Bearer ${value}`;
       return { headers };
     }),
     createHttpLink({

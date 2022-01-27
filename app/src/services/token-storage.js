@@ -26,7 +26,10 @@ const get = () => {
 
 export default {
   get,
-  exists: () => Boolean(get()),
+  exists: () => {
+    const tokenObj = get();
+    return Boolean(tokenObj && tokenObj.value);
+  },
   remove: () => {
     localStorage.removeItem(TOKEN_KEY);
     cookie.remove(TOKEN_KEY);

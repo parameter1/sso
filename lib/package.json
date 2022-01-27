@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-lib",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "The SSO browser library.",
   "author": "Jacob Bare <jacob@parameter1.com>",
   "homepage": "https://github.com/parameter1/sso/tree/main/lib#readme",
@@ -9,7 +9,9 @@
     "url": "git+https://github.com/parameter1/sso.git",
     "directory": "lib"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "main": "./dist/p1-sso.umd.js",
   "module": "./dist/p1-sso.es.js",
   "exports": {

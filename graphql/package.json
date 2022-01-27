@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-graphql-server",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "type": "module",
   "description": "The SSO GraphQL API server.",
   "author": "Jacob Bare <jacob@parameter1.com>",
@@ -22,7 +22,7 @@
     "@parameter1/graphql": "^2.2.0",
     "@parameter1/joi": "^2.2.0",
     "@parameter1/object-path": "^2.0.0",
-    "@parameter1/sso-db": "^0.0.1",
+    "@parameter1/sso-db": "^0.0.2",
     "@parameter1/utils": "^2.0.0",
     "@sendgrid/mail": "^7.6.0",
     "apollo-server-core": "^3.6.2",

@@ -11,6 +11,10 @@ const routes = [
     path: '/authenticate',
     name: 'authenticate',
     component: () => import('../pages/authenticate.vue'),
+    props: ({ query }) => ({
+      token: query.token,
+      next: query.next,
+    }),
   },
   {
     path: '/manage',

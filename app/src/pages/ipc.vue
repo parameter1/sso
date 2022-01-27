@@ -3,13 +3,13 @@
 </template>
 
 <script>
-import userService from '../services/user';
+import addTokenListener from '../services/add-token-listener';
 
 export default {
   name: 'IPCPage',
 
   created() {
-    userService.addTokenListener({
+    addTokenListener({
       onAdd: () => {
         // emit token added message
         this.send({ act: 'add' });

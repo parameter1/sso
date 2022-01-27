@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-cli",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "description": "The SSO admin CLI.",
   "author": "Jacob Bare <jacob@parameter1.com>",
@@ -21,7 +21,7 @@
     "@parameter1/joi": "^2.2.0",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/slug": "^2.0.0",
-    "@parameter1/sso-db": "^0.0.2",
+    "@parameter1/sso-db": "^0.0.3",
     "@parameter1/utils": "^2.0.0",
     "envalid": "^7.2.2",
     "inquirer": "^8.2.0"

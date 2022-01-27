@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-db",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "description": "The SSO database repositories.",
   "author": "Jacob Bare <jacob@parameter1.com>",

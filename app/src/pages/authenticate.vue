@@ -14,6 +14,8 @@
 <script>
 import ErrorElement from '../components/error.vue';
 
+import isJWT from '../utils/is-jwt';
+import isRedirect from '../utils/is-redirect';
 import userService from '../services/user';
 import GraphQLError from '../graphql/error';
 
@@ -52,16 +54,18 @@ export default {
         this.isLoggingIn = true;
         const { token, next } = this;
         if (!token) throw new Error('No token was provided.');
-        if (!/^[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*\.[A-Za-z0-9-_]*$/.test(token)) {
-          throw new Error('The provided token is invalid.');
-        }
+        if (!isJWT(token)) throw new Error('The provided token format is invalid.');
         await userService.loginUserFromLink({ loginLinkToken: token });
-        if (next) {
+
+        const redirect = isRedirect(next);
+        if (redirect.valid) {
           this.isRedirecting = true;
-          if (/^http[s?]:/i.test(next)) {
+          if (redirect.type === 'external') {
             window.location.href = next;
           } else {
-            this.$$router.replace(next);
+            const resolved = this.$router.resolve(next);
+            const to = !resolved || resolved.name === 'not-found' ? '/manage' : next;
+            this.$router.replace(to);
           }
         } else {
           this.$router.replace('/manage');

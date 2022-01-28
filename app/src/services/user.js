@@ -4,6 +4,7 @@ import apollo from '../apollo';
 import tokenStorage from './token-storage';
 import addTokenListener from './add-token-listener';
 import constants from '../constants';
+import isRedirect from '../utils/is-redirect';
 
 const { BASE } = constants;
 
@@ -31,11 +32,23 @@ const LOGOUT = gql`
   }
 `;
 
-const clearTokensAndReload = ({ redirectTo } = {}) => {
+const redirectOrReload = ({ next }) => {
+  const redirect = isRedirect(next);
+  let href = BASE;
+  if (redirect.value) {
+    href = next;
+    if (redirect.type === 'internal' && !next.startsWith(BASE)) {
+      href = `${BASE.replace(/\/$, ''/)}/${next.replace(/^\//, '')}`;
+    }
+  }
+  window.location.href = href;
+};
+
+const clearTokensAndReload = ({ next } = {}) => {
   tokenStorage.remove();
   loggedIn(false);
   apollo.clearStore();
-  window.location.href = redirectTo || BASE;
+  redirectOrReload({ next });
 };
 
 export default {
@@ -44,15 +57,20 @@ export default {
   /**
    *
    */
-  attachStorageListener: ({ redirectTo } = {}) => {
+  attachStorageListener: () => {
+    const getRedirect = () => {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('next');
+    };
+
     addTokenListener({
       onAdd: () => {
-        // user has likely logged in. relaod the app.
-        window.location.href = redirectTo || BASE;
+        // user has likely logged in. reload the app.
+        redirectOrReload({ next: getRedirect() });
       },
       onRemove: () => {
         // user should be logged out
-        clearTokensAndReload({ redirectTo });
+        clearTokensAndReload({ next: getRedirect() });
       },
     });
   },
@@ -73,18 +91,17 @@ export default {
     return loginUserFromLink;
   },
 
-  logout: async ({ redirectTo } = {}) => {
+  logout: async ({ next } = {}) => {
     try {
       await apollo.mutate({ mutation: LOGOUT });
-    } catch (e) {
-      // @todo how should this be handled??
     } finally {
       // always clear tokens, even on error
-      clearTokensAndReload({ redirectTo });
+      clearTokensAndReload({ next });
     }
   },
 
-  sendUserLoginLink: async ({ email, redirectTo } = {}) => {
+  sendUserLoginLink: async ({ email, next } = {}) => {
+    const redirectTo = isRedirect(next) ? next : null;
     const input = { email, redirectTo };
     await apollo.mutate({
       mutation: SEND_USER_LOGIN_LINK,

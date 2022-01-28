@@ -34,7 +34,7 @@ export default {
       try {
         this.error = null;
         this.isLoggingOut = true;
-        await userService.logout({ redirectTo: this.next });
+        await userService.logout({ next: this.next });
       } catch (e) {
         this.error = new GraphQLError(e);
       } finally {

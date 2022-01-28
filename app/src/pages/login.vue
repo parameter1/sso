@@ -58,7 +58,7 @@ export default {
       try {
         this.error = null;
         this.isSendingLink = true;
-        await userService.sendUserLoginLink({ email: this.email, redirectTo: this.next });
+        await userService.sendUserLoginLink({ email: this.email, next: this.next });
         this.linkWasSent = true;
       } catch (e) {
         this.error = new GraphQLError(e);

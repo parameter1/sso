@@ -5,43 +5,40 @@ import constants from '../constants';
 const routes = [
   {
     path: '/',
-    name: 'core',
-    component: () => import('../pages/core.vue'),
-    children: [
-      {
-        path: 'authenticate',
-        name: 'authenticate',
-        component: () => import('../pages/authenticate.vue'),
-        props: ({ query }) => ({
-          token: query.token,
-          next: query.next,
-        }),
-      },
-      {
-        path: 'manage',
-        name: 'manage',
-        meta: { whenAuthed: { then: true, otherwise: 'login' } },
-        component: () => import('../pages/manage.vue'),
-      },
-      {
-        path: 'login',
-        name: 'login',
-        meta: { whenAuthed: { then: 'manage', otherwise: true } },
-        component: () => import('../pages/login.vue'),
-        props: ({ query }) => ({
-          next: query.next,
-        }),
-      },
-      {
-        path: 'logout',
-        name: 'logout',
-        meta: { whenAuthed: { then: true, otherwise: 'login' } },
-        component: () => import('../pages/logout.vue'),
-        props: ({ query }) => ({
-          next: query.next,
-        }),
-      },
-    ],
+    redirect: '/manage',
+  },
+  {
+    path: '/authenticate',
+    name: 'authenticate',
+    component: () => import('../pages/authenticate.vue'),
+    props: ({ query }) => ({
+      token: query.token,
+      next: query.next,
+    }),
+  },
+  {
+    path: '/manage',
+    name: 'manage',
+    meta: { whenAuthed: { then: true, otherwise: 'login' } },
+    component: () => import('../pages/manage.vue'),
+  },
+  {
+    path: '/login',
+    name: 'login',
+    meta: { whenAuthed: { then: 'manage', otherwise: true } },
+    component: () => import('../pages/login.vue'),
+    props: ({ query }) => ({
+      next: query.next,
+    }),
+  },
+  {
+    path: '/logout',
+    name: 'logout',
+    meta: { whenAuthed: { then: true, otherwise: 'login' } },
+    component: () => import('../pages/logout.vue'),
+    props: ({ query }) => ({
+      next: query.next,
+    }),
   },
   {
     path: '/_style',

@@ -6,7 +6,7 @@ import addTokenListener from './add-token-listener';
 import constants from '../constants';
 import isRedirect from '../utils/is-redirect';
 
-const { BASE } = constants;
+const { BASE, USER_KEY } = constants;
 
 const loggedIn = makeVar(tokenStorage.exists());
 
@@ -19,7 +19,12 @@ const SEND_USER_LOGIN_LINK = gql`
 const LOGIN_USER_FROM_LINK = gql`
   mutation LoginUserFromLink($input: MutateLoginUserFromLinkInput!) {
     loginUserFromLink(input: $input) {
-      user { id email name }
+      user {
+        id
+        email
+        givenName
+        familyName
+      }
       authToken
       expiresAt
     }
@@ -48,6 +53,7 @@ const clearTokensAndReload = ({ next } = {}) => {
   tokenStorage.remove();
   loggedIn(false);
   apollo.clearStore();
+  localStorage.removeItem(USER_KEY);
   redirectOrReload({ next });
 };
 
@@ -82,6 +88,7 @@ export default {
       variables: { input },
     });
     const { loginUserFromLink } = data;
+    localStorage.setItem(USER_KEY, JSON.stringify(loginUserFromLink.user));
     tokenStorage.set({
       uid: loginUserFromLink.user.id,
       value: loginUserFromLink.authToken,

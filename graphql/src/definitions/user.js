@@ -50,7 +50,7 @@ type UserAuth {
   "The authentication JWT. Use this value to authenticate requests."
   authToken: String!
   "The ISO date of when this token expires."
-  expiresAt: DateTime
+  expiresAt: DateTime!
 }
 
 input MutateLoginUserFromLinkInput {

@@ -289,62 +289,57 @@ export default class UserRepo extends ManagedRepo {
       ua: eventAttrs.ua,
     }).required(), params);
 
+    const loginLinkToken = await this.manager.$('token').verify({ token, subject: 'login-link' });
+    const shouldInvalidateToken = get(loginLinkToken, 'doc.data.scope') !== 'invite';
+    const impersonated = get(loginLinkToken, 'doc.data.impersonated');
+    const user = await this.findByObjectId({
+      id: get(loginLinkToken, 'doc.audience'),
+      options: { projection: { email: 1 }, strict: true },
+    });
+
+    const session = await this.client.startSession();
+    session.startTransaction();
     try {
-      const loginLinkToken = await this.manager.$('token').verify({ token, subject: 'login-link' });
-      const shouldInvalidateToken = get(loginLinkToken, 'doc.data.scope') !== 'invite';
-      const impersonated = get(loginLinkToken, 'doc.data.impersonated');
-      const user = await this.findByObjectId({
-        id: get(loginLinkToken, 'doc.audience'),
-        options: { projection: { email: 1 }, strict: true },
+      const authToken = await this.manager.$('token').getOrCreateAuthToken({
+        userId: user._id,
+        impersonated,
+        options: { session },
+        findOptions: { session },
       });
+      const now = new Date();
+      const $set = { verified: true, 'date.lastLoggedIn': now, 'date.lastSeen': now };
 
-      const session = await this.client.startSession();
-      session.startTransaction();
-      try {
-        const authToken = await this.manager.$('token').getOrCreateAuthToken({
-          userId: user._id,
-          impersonated,
+      await Promise.all([
+        ...(shouldInvalidateToken ? [
+          this.manager.$('token').invalidate({ id: get(loginLinkToken, 'doc._id'), options: { session } }),
+        ] : []),
+        this.manager.$('user-event').create({
+          user,
+          action: 'magic-login',
+          date: now,
+          ip,
+          ua,
+          data: { loginLinkToken, authToken, impersonated },
           options: { session },
-          findOptions: { session },
-        });
-        const now = new Date();
-        const $set = { verified: true, 'date.lastLoggedIn': now, 'date.lastSeen': now };
+        }),
+        impersonated ? Promise.resolve() : this.updateOne({
+          query: { _id: user._id },
+          update: { $set, $inc: { loginCount: 1 } },
+          options: { session },
+        }),
+      ]);
 
-        await Promise.all([
-          ...(shouldInvalidateToken ? [
-            this.manager.$('token').invalidate({ id: get(loginLinkToken, 'doc._id'), options: { session } }),
-          ] : []),
-          this.manager.$('user-event').create({
-            user,
-            action: 'magic-login',
-            date: now,
-            ip,
-            ua,
-            data: { loginLinkToken, authToken, impersonated },
-            options: { session },
-          }),
-          impersonated ? Promise.resolve() : this.updateOne({
-            query: { _id: user._id },
-            update: { $set, $inc: { loginCount: 1 } },
-            options: { session },
-          }),
-        ]);
-
-        await session.commitTransaction();
-        return {
-          authToken: authToken.signed,
-          userId: user._id,
-          authDoc: authToken.doc,
-        };
-      } catch (e) {
-        await session.abortTransaction();
-        throw e;
-      } finally {
-        session.endSession();
-      }
+      await session.commitTransaction();
+      return {
+        authToken: authToken.signed,
+        userId: user._id,
+        authDoc: authToken.doc,
+      };
     } catch (e) {
-      e.message = `Unable to login: ${e.message}`;
+      await session.abortTransaction();
       throw e;
+    } finally {
+      session.endSession();
     }
   }
 

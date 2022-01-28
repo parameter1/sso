@@ -40,7 +40,7 @@ const LOGOUT = gql`
 const redirectOrReload = ({ next }) => {
   const redirect = isRedirect(next);
   let href = BASE;
-  if (redirect.value) {
+  if (redirect.valid) {
     href = next;
     if (redirect.type === 'internal' && !next.startsWith(BASE)) {
       href = `${BASE.replace(/\/$, ''/)}/${next.replace(/^\//, '')}`;

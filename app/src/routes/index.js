@@ -27,6 +27,11 @@ const routes = [
         name: 'manage.index',
         component: () => import('../pages/manage/index.vue'),
       },
+      {
+        path: 'profile',
+        name: 'manage.profile',
+        component: () => import('../pages/manage/profile.vue'),
+      },
     ],
   },
   {

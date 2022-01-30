@@ -50,6 +50,7 @@ export default {
     isLoading: false,
     primaryNavItems: [
       { name: 'Index', to: '/manage' },
+      { name: 'Profile', to: '/manage/profile' },
       { name: 'Logout', to: '/logout' },
     ],
   }),

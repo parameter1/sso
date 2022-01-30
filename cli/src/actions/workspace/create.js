@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { workspaceAttributes as workspaceAttrs } from '@parameter1/sso-db/schema';
+import { workspaceAttributes as workspaceAttrs, environments } from '@parameter1/sso-db/schema';
 import { sluggify } from '@parameter1/slug';
 import { getAppList, getOrgList } from '../utils/index.js';
 import repos from '../../repos.js';
@@ -54,6 +54,16 @@ export default async () => {
         }
       },
     },
+    ...environments.map((env) => ({
+      type: 'input',
+      name: `urls.${env}`,
+      message: `Enter the ${env} app URL`,
+      validate: async (input) => {
+        const { error } = await workspaceAttrs.url.required().validateAsync(input);
+        if (error) return error;
+        return true;
+      },
+    })),
     {
       type: 'confirm',
       name: 'confirm',
@@ -68,6 +78,7 @@ export default async () => {
     org,
     name,
     slug,
+    urls,
   } = await inquirer.prompt(questions);
 
   if (!confirm) return;
@@ -77,6 +88,7 @@ export default async () => {
     org: { _id: org._id, slug: org.slug, name: org.name },
     slug,
     name,
+    urls,
   });
   log(result);
 };

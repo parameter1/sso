@@ -12,7 +12,7 @@ export default async () => {
       type: 'list',
       name: 'eligible',
       message: 'Select the workspace',
-      choices: () => getWorkspaceList({ projection: { members: 1 } }),
+      choices: () => getWorkspaceList({ projection: { members: 1, urls: 1 } }),
       filter: async (workspace) => {
         const memberEmails = asArray(workspace.members).reduce((set, member) => {
           set.add(member.user.email);
@@ -79,6 +79,7 @@ export default async () => {
       name: workspace.name,
       app: workspace.app,
       org: workspace.org,
+      urls: workspace.urls,
     },
     user: {
       _id: user._id,

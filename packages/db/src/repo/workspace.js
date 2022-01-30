@@ -45,6 +45,7 @@ export default class WorkspaceRepo extends ManagedRepo {
         _id: workspaceAttrs.id.required(),
         slug: workspaceAttrs.slug.required(),
         name: Joi.string().required(),
+        urls: workspaceAttrs.urls.required(),
         app: Joi.object({
           _id: appAttrs.id.required(),
           slug: appAttrs.slug.required(),
@@ -206,7 +207,7 @@ export default class WorkspaceRepo extends ManagedRepo {
       org,
       slug,
       name,
-      // urls,
+      urls,
     } = await validateAsync(Joi.object({
       app: Joi.object({
         _id: appAttrs.id.required(),
@@ -220,12 +221,7 @@ export default class WorkspaceRepo extends ManagedRepo {
       }).required(),
       slug: workspaceAttrs.slug.required(),
       name: workspaceAttrs.name.required(),
-      // urls: Joi.array().items(
-      //   Joi.object({
-      //     env: Joi.string().lowercase().required(),
-      //     value: workspaceAttrs.url.required(),
-      //   }).required(),
-      // ).required(),
+      urls: workspaceAttrs.urls.required(),
     }).required(), params);
 
     await this.throwIfSlugHasRedirect({ slug, appId: app._id, orgId: org._id });
@@ -236,7 +232,7 @@ export default class WorkspaceRepo extends ManagedRepo {
       org,
       slug,
       name,
-      // urls,
+      urls,
       date: {
         created: now,
         updated: now,

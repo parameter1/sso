@@ -8,6 +8,7 @@ scalar DateTime
 scalar ObjectID
 
 directive @auth on FIELD_DEFINITION
+directive @array(field: String) on FIELD_DEFINITION
 directive @project(field: String, needs: [String!]! = []) on FIELD_DEFINITION
 
 type Query {

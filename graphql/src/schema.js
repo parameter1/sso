@@ -1,6 +1,9 @@
 import { makeExecutableSchema } from '@parameter1/graphql/schema';
 import { enumDefaultValuesTransformer } from '@parameter1/graphql/transformers';
-import { projectDirectiveTransformer } from '@parameter1/graphql/directives';
+import {
+  arrayDirectiveTransformer,
+  projectDirectiveTransformer,
+} from '@parameter1/graphql/directives';
 
 import resolvers from './resolvers/index.js';
 import typeDefs from './definitions/index.js';
@@ -14,8 +17,9 @@ const schema = makeExecutableSchema({
 
 const withProjectSchema = projectDirectiveTransformer(schema);
 const withAuth = authDirectiveTransformer(withProjectSchema);
+const withArrays = arrayDirectiveTransformer(withAuth);
 
 // handle enum default values
-const withEnumDefaults = enumDefaultValuesTransformer(withAuth, enums);
+const withEnumDefaults = enumDefaultValuesTransformer(withArrays, enums);
 
 export default withEnumDefaults;

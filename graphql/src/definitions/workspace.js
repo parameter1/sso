@@ -22,9 +22,19 @@ type Workspace {
   "The ISO date when the workspace was last updated."
   updatedAt: DateTime! @project(field: "date.updated")
   "The application that this workspace uses."
-  application: Application! @project(field: "app")
+  applicationEdge: WorkspaceApplicationEdge! @project(field: "app")
   "The organization that owns this workspace."
-  organization: Organization! @project(field: "org")
+  organizationEdge: WorkspaceOrganizationEdge! @project(field: "org")
+}
+
+type WorkspaceApplicationEdge {
+  "The workspace application node."
+  node: Application!
+}
+
+type WorkspaceOrganizationEdge {
+  "The workspace organization node."
+  node: Organization!
 }
 
 `;

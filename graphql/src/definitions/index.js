@@ -3,6 +3,7 @@ import { gql } from '@parameter1/graphql/tag';
 import application from './application.js';
 import organization from './organization.js';
 import user from './user.js';
+import workspace from './workspace.js';
 
 export default gql`
 
@@ -26,5 +27,6 @@ type Mutation {
 ${application}
 ${organization}
 ${user}
+${workspace}
 
 `;

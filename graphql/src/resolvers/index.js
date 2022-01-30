@@ -3,6 +3,7 @@ import { ObjectId } from '@parameter1/sso-db';
 import { GraphQLDateTime, GraphQLObjectId } from '@parameter1/graphql/scalars';
 
 import user from './user.js';
+import workspace from './workspace.js';
 
 export default merge({
   DateTime: GraphQLDateTime,
@@ -31,4 +32,4 @@ export default merge({
       return 'pong';
     },
   },
-}, user);
+}, user, workspace);

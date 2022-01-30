@@ -36,7 +36,7 @@ export default {
     currentUser: {
       query: CURRENT_USER,
       fetchPolicy: 'cache-and-network',
-      error(e) { this.errors.user = new GraphQLError(e); },
+      error(e) { this.error = new GraphQLError(e); },
       watchLoading(isLoading) {
         this.isLoading = isLoading;
         if (isLoading) this.error = null;

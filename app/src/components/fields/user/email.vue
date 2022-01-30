@@ -1,6 +1,7 @@
 <template>
   <field-group
     type="email"
+    autocomplete="email"
     :id="id"
     :label="label"
     :index="index"

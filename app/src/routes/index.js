@@ -21,6 +21,13 @@ const routes = [
     name: 'manage',
     meta: { whenAuthed: { then: true, otherwise: 'login' } },
     component: () => import('../pages/manage.vue'),
+    children: [
+      {
+        path: '',
+        name: 'manage.index',
+        component: () => import('../pages/manage/index.vue'),
+      },
+    ],
   },
   {
     path: '/login',

@@ -14,6 +14,8 @@
         </li>
       </ul>
     </nav>
+
+    <router-view />
   </main>
 </template>
 
@@ -47,6 +49,7 @@ export default {
     error: null,
     isLoading: false,
     primaryNavItems: [
+      { name: 'Index', to: '/manage' },
       { name: 'Logout', to: '/logout' },
     ],
   }),

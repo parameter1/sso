@@ -1,5 +1,6 @@
 import { gql } from '@parameter1/graphql/tag';
 
+import application from './application.js';
 import user from './user.js';
 
 export default gql`
@@ -21,6 +22,7 @@ type Mutation {
   ping: String!
 }
 
+${application}
 ${user}
 
 `;

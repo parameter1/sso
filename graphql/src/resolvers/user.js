@@ -32,6 +32,21 @@ export default {
     /**
      *
      */
+    async ownUserProfile(_, { input }, { auth, repos }, info) {
+      const id = await auth.getUserId();
+      const user = repos.$('user');
+      await user.updateName({
+        id,
+        givenName: input.givenName,
+        familyName: input.familyName,
+      });
+      const projection = getProjectionForType(info);
+      return user.findByObjectId({ id, options: { projection } });
+    },
+
+    /**
+     *
+     */
     async sendUserLoginLink(_, { input }, { ip, repos, ua }) {
       const { email, redirectTo } = input;
       await repos.$('user').createLoginLinkToken({

@@ -14,6 +14,9 @@ extend type Mutation {
   "Logs out the currently logged-in user."
   logoutUser: String!
     @auth
+  "Updates the current user's basic profile details."
+  ownUserProfile(input: MutateOwnUserProfileInput!): User!
+    @auth
   "Sends a magic login link to a user. The user must already exist."
   sendUserLoginLink(input: MutateSendUserLoginLinkInput!): String!
 }
@@ -56,6 +59,13 @@ type UserAuth {
 input MutateLoginUserFromLinkInput {
   "The JWT token provided from the user login link."
   loginLinkToken: String!
+}
+
+input MutateOwnUserProfileInput {
+  "The current user's given/first name."
+  givenName: String!
+  "The current user's family/last name."
+  familyName: String!
 }
 
 input MutateSendUserLoginLinkInput {

@@ -7,6 +7,10 @@ type Workspace {
   id: ObjectID! @project(field: "_id")
   "The workspace name."
   name: String! @project
+  "The workspace namespace."
+  namespace: String! @project(field: "slug", needs: ["app.slug", "org.slug"])
+  "The workspace full name, including the app and org names."
+  fullName: String! @project(field: "name", needs: ["app.name", "org.name"])
   "The unique workspace slug."
   slug: String! @project
   "The workspace URL. Is calaculated based on the current environment."
@@ -17,6 +21,10 @@ type Workspace {
   createdAt: DateTime! @project(field: "date.created")
   "The ISO date when the workspace was last updated."
   updatedAt: DateTime! @project(field: "date.updated")
+  "The application that this workspace uses."
+  application: Application! @project(field: "app")
+  "The organization that owns this workspace."
+  organization: Organization! @project(field: "org")
 }
 
 `;

@@ -58,7 +58,13 @@ const clearTokensAndReload = ({ next } = {}) => {
 };
 
 export default {
-  isLoggedIn: () => loggedIn(),
+  isLoggedIn: () => {
+    const isLoggedIn = loggedIn();
+    if (!isLoggedIn && localStorage.getItem(USER_KEY)) {
+      localStorage.removeItem(USER_KEY);
+    }
+    return isLoggedIn;
+  },
 
   /**
    *

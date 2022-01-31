@@ -1107,10 +1107,10 @@
     micro "^9.3.4"
     node-fetch "^3.2.0"
 
-"@parameter1/mongodb@^2.8.0":
-  version "2.8.0"
-  resolved "https://registry.yarnpkg.com/@parameter1/mongodb/-/mongodb-2.8.0.tgz#189a3eb62623abe1fb5c523917bd43c0d11327c4"
-  integrity sha512-nQ77x/grYDDCsvK5Qyn7ijPwHkEjSF0324SvoO9/7UVgodyGXTt21v/zOm5MX1q3Faf18htdqbZj40siwEygHw==
+"@parameter1/mongodb@^2.9.0":
+  version "2.9.0"
+  resolved "https://registry.yarnpkg.com/@parameter1/mongodb/-/mongodb-2.9.0.tgz#817af7ea431df19b0e300076946c0364dc6a5a70"
+  integrity sha512-zBcrKfjVeGwCARC7T7APU1ecBUJ3Qcca0IM6DxKFrG/aVUMruBL2sQxEWwjMCyPOk9pLoyI0koEjuMS0k0+EeQ==
   dependencies:
     "@parameter1/object-path" "^2.0.0"
     "@parameter1/utils" "^2.0.0"

@@ -1,4 +1,8 @@
 import { gql } from '@parameter1/graphql/tag';
+import {
+  paginationDefinitions,
+  sortOrderDefinitions,
+} from '@parameter1/graphql/features';
 
 import application from './application.js';
 import organization from './organization.js';
@@ -23,6 +27,9 @@ type Mutation {
   "A simple ping/pong mutation."
   ping: String!
 }
+
+${paginationDefinitions}
+${sortOrderDefinitions}
 
 ${application}
 ${organization}

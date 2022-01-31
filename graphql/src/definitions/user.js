@@ -44,6 +44,10 @@ type User {
   lastLoggedInAt: DateTime @project(field: "date.lastLoggedIn")
   "The ISO date when the user was last seen accessing the system."
   lastSeenAt: DateTime @project(field: "date.lastSeen")
+  "Gets a workspace membership role for the provided input, or will return null if the user is not a member."
+  workspaceRole(input: UserWorkspaceRoleInput!): String
+    @auth
+    @project(field: "memberships")
 }
 
 
@@ -73,6 +77,11 @@ input MutateSendUserLoginLinkInput {
   email: String!
   "A location to redirect the user to after successful authentication."
   redirectTo: String
+}
+
+input UserWorkspaceRoleInput {
+  "The workspace ID to get the user role for."
+  id: ObjectID!
 }
 
 `;

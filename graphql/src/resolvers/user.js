@@ -94,6 +94,15 @@ export default {
     name({ givenName, familyName }) {
       return [givenName, familyName].join(' ');
     },
+
+    /**
+     *
+     */
+    workspaceRole({ memberships }, { input }) {
+      const { id } = input;
+      const membership = memberships.find((m) => `${m.workspace._id}` === `${id}`);
+      return membership ? membership.role : null;
+    },
   },
 
   /**

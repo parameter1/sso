@@ -1,0 +1,23 @@
+{
+  "name": "@parameter1/sso-node-api-client",
+  "version": "0.0.4",
+  "type": "module",
+  "description": "The SSO Node API Client (for use on the server).",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/sso/tree/main/packages/node-api-client#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/sso.git",
+    "directory": "packages/node-api-client"
+  },
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.js",
+  "scripts": {
+    "lint": "eslint --ext .js ./",
+    "test": "yarn lint"
+  },
+  "dependencies": {
+    "node-fetch": "^3.2.0"
+  }
+}

@@ -19,7 +19,7 @@
     "test": "yarn lint"
   },
   "dependencies": {
-    "@parameter1/graphql": "^2.2.0",
+    "@parameter1/graphql": "^2.3.0",
     "@parameter1/joi": "^2.2.0",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/sso-db": "^0.0.3",

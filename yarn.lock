@@ -1067,10 +1067,10 @@
   dependencies:
     burner-email-providers "^1.0.67"
 
-"@parameter1/graphql@^2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@parameter1/graphql/-/graphql-2.2.0.tgz#c5b54ad50d022cfd83037d7cfcfa2ca8248860e8"
-  integrity sha512-LoUgsdtzXL4LvbuIFLLDhrMP2j2biQ92qapPrSjmZ+kP7a1za5P3r0HMYNOQA6e8f26C6PMK3o4KEJ2VNao+tQ==
+"@parameter1/graphql@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@parameter1/graphql/-/graphql-2.3.0.tgz#4fe02ef21d42713052e8672c77b62713b5e49ba5"
+  integrity sha512-5IBgF2JHUMa3rONzduM/GyNKqrwSaY1D5BLsCGFGCJOHr7e46ZuUD1opzf3IIHxaCoLnG2Z7q5ic3mUfyKcA3w==
   dependencies:
     "@graphql-tools/schema" "^8.3.1"
     "@graphql-tools/utils" "^8.6.1"
@@ -1107,10 +1107,10 @@
     micro "^9.3.4"
     node-fetch "^3.2.0"
 
-"@parameter1/mongodb@^2.9.0":
-  version "2.9.0"
-  resolved "https://registry.yarnpkg.com/@parameter1/mongodb/-/mongodb-2.9.0.tgz#817af7ea431df19b0e300076946c0364dc6a5a70"
-  integrity sha512-zBcrKfjVeGwCARC7T7APU1ecBUJ3Qcca0IM6DxKFrG/aVUMruBL2sQxEWwjMCyPOk9pLoyI0koEjuMS0k0+EeQ==
+"@parameter1/mongodb@^2.9.1":
+  version "2.9.1"
+  resolved "https://registry.yarnpkg.com/@parameter1/mongodb/-/mongodb-2.9.1.tgz#32b7d36e61c459c53a671635fdeeca32f6afa330"
+  integrity sha512-p765duwzbF/zN04aJx8IAOzQlMaMvEnqT7dEHKboOV1osbiuH8r3NAJn6HRzrwaW+cfH84tSY3n63Pr0cyU49Q==
   dependencies:
     "@parameter1/object-path" "^2.0.0"
     "@parameter1/utils" "^2.0.0"

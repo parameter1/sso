@@ -29,15 +29,6 @@ export default class Repos extends RepoManager {
       .add({ key: 'workspace', ManagedRepo: WorkspaceRepo });
   }
 
-  async createDataloaders() {
-    const dataloaders = new Map();
-    await Promise.all([...this.repos].map(async ([key, repo]) => {
-      const loader = await repo.createDataloader();
-      dataloaders.set(key, loader);
-    }));
-    return dataloaders;
-  }
-
   /**
    *
    * @param {object} params

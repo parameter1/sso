@@ -3,12 +3,14 @@ import DenormalizedTarget from './target.js';
 import DenormalizedFieldDefintion from './definition.js';
 
 export default class DenormalizationManager {
-  constructor(repoManager, defs = []) {
+  constructor({ repoManager, definitions, globalFields = [] } = {}) {
     if (!(repoManager instanceof RepoManager)) throw new Error('The repoManager must be an instanceof RepoManager');
     this.repoManager = repoManager;
     this.map = new Map();
+
+    this.globalFields = globalFields;
     this.fieldTargetMap = new Map();
-    defs.forEach(([on, params]) => {
+    definitions.forEach(([on, params]) => {
       this.addDefinition(on, params);
     });
   }
@@ -28,6 +30,7 @@ export default class DenormalizationManager {
    * @param {string?} [params.path=null] The optional subpath
    * @param {boolean} [params.isArray=false] Whether the target field is an array of docs
    * @param {object[]} params.fields The field definitions on this target doc
+   *                                 Global fields will be merged with these.
    * @param {string} params.fields.name The field name/key
    * @param {object} params.fields.schema The field Joi schema
    * @returns {DenormalizedFields}
@@ -38,7 +41,9 @@ export default class DenormalizationManager {
     fields = [],
   } = {}) {
     const target = new DenormalizedTarget({ on, path, isArray });
-    this.map.set(on, new DenormalizedFieldDefintion({ target, fields }));
+    this.map.set(on, new DenormalizedFieldDefintion({
+      target, fields: [...this.globalFields, ...fields],
+    }));
     return this;
   }
 

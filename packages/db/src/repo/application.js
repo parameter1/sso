@@ -5,8 +5,9 @@ import {
   organizationAttributes as orgAttrs,
   workspaceAttributes as workspaceAttrs,
 } from '../schema/attributes/index.js';
+import DenormalizationManager from '../dnz-manager/index.js';
 
-import { buildUpdateNamePipeline } from './pipelines/index.js';
+import { buildUpdatePipeline, slugRedirects } from './pipelines/index.js';
 
 export default class ApplicationRepo extends ManagedRepo {
   /**
@@ -23,6 +24,21 @@ export default class ApplicationRepo extends ManagedRepo {
         { key: { redirects: 1 } },
 
         { key: { name: 1, _id: 1 }, collation: { locale: 'en_US' } },
+      ],
+    });
+
+    this.denoManager = new DenormalizationManager({
+      repoManager: this.manager,
+      globalFields: [
+        // @todo vet schema and required prop usage
+        { name: 'name', schema: attrs.name, required: true },
+        { name: 'slug', schema: attrs.slug, required: true },
+      ],
+      // @todo automatically update `date.updated`??
+      definitions: [
+        ['user::memberships', { path: 'workspace.app', isArray: true }],
+        ['organization::workspaces', { path: 'app', isArray: true }],
+        ['workspace::app', { path: null, isArray: false }],
       ],
     });
   }
@@ -54,10 +70,7 @@ export default class ApplicationRepo extends ManagedRepo {
       doc: cleanDocument({
         name,
         slug,
-        date: {
-          created: now,
-          updated: now,
-        },
+        date: { created: now, updated: now },
         roles,
         workspaces: [],
         redirects: [],
@@ -125,48 +138,6 @@ export default class ApplicationRepo extends ManagedRepo {
     return this.manager.throwIfSlugHasRedirect({ repo: 'application', id, slug });
   }
 
-  async updateForeignNameValues(params = {}) {
-    const {
-      id,
-      name,
-      options,
-    } = await validateAsync(Joi.object({
-      id: attrs.id.required(),
-      name: attrs.name.required(),
-      options: Joi.object().default({}),
-    }).required(), params);
-
-    return Promise.all([
-      // user memberships
-      this.manager.$('user').updateRelatedMembershipWorkspaceApps({ id, name, options }),
-      // workspaces
-      this.manager.$('workspace').updateRelatedApps({ id, name, options }),
-      // org workspaces
-      this.manager.$('organization').updateRelatedWorkspaceApps({ id, name, options }),
-    ]);
-  }
-
-  async updateForiegnSlugValues(params = {}) {
-    const {
-      id,
-      slug,
-      options,
-    } = await validateAsync(Joi.object({
-      id: attrs.id.required(),
-      slug: attrs.slug.required(),
-      options: Joi.object().default({}),
-    }).required(), params);
-
-    return Promise.all([
-      // user memberships
-      this.manager.$('user').updateRelatedMembershipWorkspaceApps({ id, slug, options }),
-      // workspaces
-      this.manager.$('workspace').updateRelatedApps({ id, slug, options }),
-      // org workspaces
-      this.manager.$('organization').updateRelatedWorkspaceApps({ id, slug, options }),
-    ]);
-  }
-
   /**
    * @param {object} params
    * @param {ObjectId} params.id
@@ -182,7 +153,9 @@ export default class ApplicationRepo extends ManagedRepo {
       name: attrs.name.required(),
     }).required(), params);
 
-    const update = await buildUpdateNamePipeline({ name });
+    const update = buildUpdatePipeline([
+      { path: 'name', value: name },
+    ]);
     const session = await this.client.startSession();
     session.startTransaction();
 
@@ -197,8 +170,11 @@ export default class ApplicationRepo extends ManagedRepo {
       // if nothing changed, skip updating related fields
       if (!result.modifiedCount) return result;
 
-      // then update relationships.
-      await this.updateForeignNameValues({ id, name, options: { session } });
+      const { denoManager } = this;
+      await denoManager.executeRepoBulkOps({
+        repoBulkOps: denoManager.buildRepoBulkOpsFor({ id, values: { name } }),
+        options: { session },
+      });
 
       await session.commitTransaction();
       return result;
@@ -299,7 +275,10 @@ export default class ApplicationRepo extends ManagedRepo {
       slug: attrs.slug.required(),
     }).required(), params);
 
-    const update = await this.manager.prepareSlugUpdatePipeline({ repo: 'application', id, slug });
+    await this.throwIfSlugHasRedirect({ repo: 'application', id, slug });
+    const update = buildUpdatePipeline([
+      { path: 'slug', value: slug, set: () => slugRedirects(slug) },
+    ]);
 
     const session = await this.client.startSession();
     session.startTransaction();
@@ -315,8 +294,11 @@ export default class ApplicationRepo extends ManagedRepo {
       // if nothing changed, skip updating related fields
       if (!result.modifiedCount) return result;
 
-      // then update relationships.
-      await this.updateForiegnSlugValues({ id, slug, options: { session } });
+      const { denoManager } = this;
+      await denoManager.executeRepoBulkOps({
+        repoBulkOps: denoManager.buildRepoBulkOpsFor({ id, values: { slug } }),
+        options: { session },
+      });
 
       await session.commitTransaction();
       return result;

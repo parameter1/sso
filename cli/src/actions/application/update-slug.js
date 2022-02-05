@@ -21,6 +21,8 @@ export default async () => {
       validate: async (input, { app }) => {
         const { error } = appAttrs.slug.required().validate(input);
         if (error) return error;
+        const doc = await repos.$('application').findBySlug({ slug: input, options: { projection: { _id: 1 } } });
+        if (doc) return new Error('An existing record is already using this slug.');
         try {
           await repos.$('application').throwIfSlugHasRedirect({ id: app._id, slug: input });
           return true;

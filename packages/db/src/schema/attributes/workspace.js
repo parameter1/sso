@@ -6,10 +6,10 @@ const url = Joi.url().external(cleanPath);
 
 export default {
   id: Joi.objectId(),
-  name: Joi.string(),
+  name: Joi.string().min(2),
   namespace: Joi.string(),
   role: Joi.string(),
-  slug: Joi.slug(),
+  slug: Joi.slug().min(2),
   url,
   urls: Joi.object({
     ...environments.reduce((o, key) => ({ ...o, [key]: url.required() }), {}),

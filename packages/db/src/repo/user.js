@@ -9,7 +9,7 @@ import {
 } from '../schema/attributes/index.js';
 import DenormalizationManager from '../dnz-manager/index.js';
 
-import { buildUpdatePipeline } from './pipelines/index.js';
+import { buildUpdatePipeline, Expr } from './pipelines/index.js';
 import { userEmails } from './pipelines/build/index.js';
 
 export default class UserRepo extends ManagedRepo {
@@ -264,7 +264,6 @@ export default class UserRepo extends ManagedRepo {
         findOptions: { session },
       });
       const now = new Date();
-      const $set = { verified: true, 'date.lastLoggedIn': now, 'date.lastSeen': now };
 
       await Promise.all([
         ...(shouldInvalidateToken ? [
@@ -279,11 +278,18 @@ export default class UserRepo extends ManagedRepo {
           data: { loginLinkToken, authToken, impersonated },
           options: { session },
         }),
-        // @todo this should use the update pipeline and change the date.updated
-        // value when `verified` changes.
         impersonated ? Promise.resolve() : this.updateOne({
           query: { _id: user._id },
-          update: { $set, $inc: { loginCount: 1 } },
+          update: buildUpdatePipeline([
+            { path: 'verified', value: true },
+            { path: 'date.lastLoggedIn', value: now },
+            { path: 'date.lastSeen', value: now },
+            { path: 'loginCount', value: new Expr({ $add: ['$loginCount', 1] }) },
+          ], {
+            now,
+            // only change updated date when verified flag changes
+            updatedDateCondition: '$__will_change.verified',
+          }),
           options: { session },
         }),
       ]);

@@ -391,29 +391,6 @@ export default class OrganizationRepo extends ManagedRepo {
     return this.manager.throwIfSlugHasRedirect({ repo: 'organization', id, slug });
   }
 
-  async updateForiegnSlugValues(params = {}) {
-    const {
-      id,
-      slug,
-      options,
-    } = await validateAsync(Joi.object({
-      id: attrs.id.required(),
-      slug: attrs.slug.required(),
-      options: Joi.object().default({}),
-    }).required(), params);
-
-    return Promise.all([
-      // user managed orgs
-      this.manager.$('user').updateRelatedManagedOrgs({ id, slug, options }),
-      // user membership workspace orgs
-      this.manager.$('user').updateRelatedMembershipWorkspaceOrgs({ id, slug, options }),
-      // workspaces
-      this.manager.$('workspace').updateRelatedOrgs({ id, slug, options }),
-      // app workspace orgs
-      this.manager.$('application').updateRelatedWorkspaceOrgs({ id, slug, options }),
-    ]);
-  }
-
   /**
    * @param {object} params
    * @param {ObjectId} params.id

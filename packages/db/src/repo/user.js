@@ -10,6 +10,7 @@ import {
 import DenormalizationManager from '../dnz-manager/index.js';
 
 import { buildUpdatePipeline } from './pipelines/index.js';
+import { userEmails } from './pipelines/build/index.js';
 
 export default class UserRepo extends ManagedRepo {
   /**
@@ -44,63 +45,6 @@ export default class UserRepo extends ManagedRepo {
         ['workspace::members', { subPath: 'user', isArray: true }],
       ],
     });
-  }
-
-  /**
-   *
-   * @param {object} params
-   * @param {string} params.id
-   * @param {string} params.email
-   * @param {boolean} [params.verfied=false]
-   */
-  async changeEmailAddress(params = {}) {
-    const {
-      id,
-      email,
-    } = await validateAsync(Joi.object({
-      id: attrs.id.required(),
-      email: attrs.email.required(),
-    }).required(), params);
-
-    const update = buildUpdatePipeline([
-      {
-        path: 'email',
-        value: email,
-        set: () => ({
-          domain: email.split('@')[1],
-          verified: { $cond: ['$__didChange', false, '$verified'] },
-        }),
-      },
-    ]);
-
-    const session = await this.client.startSession();
-    session.startTransaction();
-
-    try {
-      // attempt to update the user email.
-      const result = await this.updateOne({
-        query: { _id: id },
-        update,
-        options: { strict: true, session },
-      });
-
-      // if nothing changed, skip updating related fields
-      if (!result.modifiedCount) return result;
-
-      const { dnzManager } = this;
-      await dnzManager.executeRepoBulkOps({
-        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { email } }),
-        options: { session },
-      });
-
-      await session.commitTransaction();
-      return result;
-    } catch (e) {
-      await session.abortTransaction();
-      throw e;
-    } finally {
-      session.endSession();
-    }
   }
 
   /**
@@ -141,6 +85,7 @@ export default class UserRepo extends ManagedRepo {
         },
         manages: [],
         memberships: [],
+        previousEmails: [],
       }, { preserveEmptyArrays: true }),
       options,
     });
@@ -334,6 +279,8 @@ export default class UserRepo extends ManagedRepo {
           data: { loginLinkToken, authToken, impersonated },
           options: { session },
         }),
+        // @todo this should use the update pipeline and change the date.updated
+        // value when `verified` changes.
         impersonated ? Promise.resolve() : this.updateOne({
           query: { _id: user._id },
           update: { $set, $inc: { loginCount: 1 } },
@@ -357,43 +304,58 @@ export default class UserRepo extends ManagedRepo {
 
   /**
    * @param {object} params
-   * @param {string} params.givenName
-   * @param {string} params.familyName
+   * @param {ObjectId} params.id
+   * @param {string} [params.email]
+   * @param {string} [params.givenName]
+   * @param {string} [params.familyName]
    */
-  async updateName(params = {}) {
+  async updateAttributes(params = {}) {
     const {
       id,
+      email,
       givenName,
       familyName,
     } = await validateAsync(Joi.object({
       id: attrs.id.required(),
-      givenName: attrs.givenName.required(),
-      familyName: attrs.familyName.required(),
-      options: Joi.object().default({}),
+      email: attrs.email,
+      givenName: attrs.givenName,
+      familyName: attrs.familyName,
     }).required(), params);
 
-    const update = buildUpdatePipeline([
-      { path: 'givenName', value: givenName },
-      { path: 'familyName', value: familyName },
-    ]);
+    const fields = [];
+    if (givenName) fields.push({ path: 'givenName', value: givenName });
+    if (familyName) fields.push({ path: 'familyName', value: familyName });
+    if (email) {
+      fields.push({
+        path: 'email',
+        value: email,
+        set: () => userEmails(email),
+      });
+    }
+    if (!fields.length) return null; // noop
 
     const session = await this.client.startSession();
     session.startTransaction();
-
     try {
       // attempt to update the user.
       const result = await this.updateOne({
         query: { _id: id },
-        update,
+        update: buildUpdatePipeline(fields),
         options: { strict: true, session },
       });
 
       // if nothing changed, skip updating related fields
       if (!result.modifiedCount) return result;
-
       const { dnzManager } = this;
       await dnzManager.executeRepoBulkOps({
-        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { givenName, familyName } }),
+        repoBulkOps: dnzManager.buildRepoBulkOpsFor({
+          id,
+          values: {
+            email,
+            givenName,
+            familyName,
+          },
+        }),
         options: { session },
       });
 

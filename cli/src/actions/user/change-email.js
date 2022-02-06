@@ -46,7 +46,7 @@ export default async () => {
 
   if (!confirm) return;
 
-  const result = await repos.$('user').changeEmailAddress({
+  const result = await repos.$('user').updateAttributes({
     id: user._id,
     email,
   });

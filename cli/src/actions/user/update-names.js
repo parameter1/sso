@@ -52,7 +52,7 @@ export default async () => {
 
   if (!confirm) return;
 
-  const result = await repos.$('user').updateName({
+  const result = await repos.$('user').updateAttributes({
     id: user._id,
     givenName,
     familyName,

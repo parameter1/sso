@@ -30,7 +30,7 @@ export default class DenormalizedFieldDefintion {
   }
 
   /**
-   * @todo Do this need to account for Joi schemas??
+   * @todo Does this need to account for Joi schemas??
    */
   buildBulkOpFor({ id, values = {} }) {
     if (!id) throw new Error('The foreign, denormalized model ID is required.');

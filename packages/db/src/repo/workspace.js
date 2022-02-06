@@ -4,10 +4,11 @@ import {
   applicationAttributes as appAttrs,
   organizationAttributes as orgAttrs,
   userAttributes as userAttrs,
-  workspaceAttributes as workspaceAttrs,
+  workspaceAttributes as attrs,
 } from '../schema/attributes/index.js';
+import DenormalizationManager from '../dnz-manager/index.js';
 
-import { buildUpdateNamePipeline } from './pipelines/index.js';
+import { buildUpdatePipeline, slugRedirects } from './pipelines/index.js';
 
 export default class WorkspaceRepo extends ManagedRepo {
   /**
@@ -22,6 +23,21 @@ export default class WorkspaceRepo extends ManagedRepo {
       indexes: [
         { key: { 'org._id': 1, 'app._id': 1, slug: 1 }, unique: true },
         { key: { redirects: 1 } },
+      ],
+    });
+
+    this.dnzManager = new DenormalizationManager({
+      repoManager: this.manager,
+      globalFields: [
+        // @todo vet schema and required prop usage
+        { name: 'name', schema: attrs.name, required: true },
+        { name: 'slug', schema: attrs.slug, required: true },
+      ],
+      // @todo automatically update `date.updated`??
+      definitions: [
+        ['application::workspaces', { subPath: null, isArray: true }],
+        ['organization::workspaces', { subPath: null, isArray: true }],
+        ['user::memberships', { subPath: 'workspace', isArray: true }],
       ],
     });
   }
@@ -42,10 +58,10 @@ export default class WorkspaceRepo extends ManagedRepo {
       role,
     } = await validateAsync(Joi.object({
       workspace: Joi.object({
-        _id: workspaceAttrs.id.required(),
-        slug: workspaceAttrs.slug.required(),
+        _id: attrs.id.required(),
+        slug: attrs.slug.required(),
         name: Joi.string().required(),
-        urls: workspaceAttrs.urls.required(),
+        urls: attrs.urls.required(),
         app: Joi.object({
           _id: appAttrs.id.required(),
           slug: appAttrs.slug.required(),
@@ -121,9 +137,9 @@ export default class WorkspaceRepo extends ManagedRepo {
       userId,
       role,
     } = await validateAsync(Joi.object({
-      workspaceId: workspaceAttrs.id.required(),
+      workspaceId: attrs.id.required(),
       userId: userAttrs.id.required(),
-      role: workspaceAttrs.role.required(),
+      role: attrs.role.required(),
     }).required(), params);
 
     const session = await this.client.startSession();
@@ -219,9 +235,9 @@ export default class WorkspaceRepo extends ManagedRepo {
         slug: orgAttrs.slug.required(),
         name: orgAttrs.name.required(),
       }).required(),
-      slug: workspaceAttrs.slug.required(),
-      name: workspaceAttrs.name.required(),
-      urls: workspaceAttrs.urls.required(),
+      slug: attrs.slug.required(),
+      name: attrs.name.required(),
+      urls: attrs.urls.required(),
     }).required(), params);
 
     await this.throwIfSlugHasRedirect({ slug, appId: app._id, orgId: org._id });
@@ -283,7 +299,7 @@ export default class WorkspaceRepo extends ManagedRepo {
       workspaceId,
       userId,
     } = await validateAsync(Joi.object({
-      workspaceId: workspaceAttrs.id.required(),
+      workspaceId: attrs.id.required(),
       userId: userAttrs.id.required(),
     }).required(), params);
 
@@ -340,8 +356,8 @@ export default class WorkspaceRepo extends ManagedRepo {
       appId,
       orgId,
     } = await validateAsync(Joi.object({
-      id: workspaceAttrs.id,
-      slug: workspaceAttrs.slug.required(),
+      id: attrs.id,
+      slug: attrs.slug.required(),
       appId: appAttrs.id.required(),
       orgId: orgAttrs.id.required(),
     }).required(), params);
@@ -351,48 +367,6 @@ export default class WorkspaceRepo extends ManagedRepo {
       slug,
       query: { 'app._id': appId, 'org._id': orgId },
     });
-  }
-
-  async updateForeignNameValues(params = {}) {
-    const {
-      id,
-      name,
-      options,
-    } = await validateAsync(Joi.object({
-      id: workspaceAttrs.id.required(),
-      name: workspaceAttrs.name.required(),
-      options: Joi.object().default({}),
-    }).required(), params);
-
-    return Promise.all([
-      // user memberships
-      this.manager.$('user').updateRelatedMembershipWorkspaces({ id, name, options }),
-      // app workspaces
-      this.manager.$('application').updateRelatedWorkspaces({ id, name, options }),
-      // org workspaces
-      this.manager.$('organization').updateRelatedWorkspaces({ id, name, options }),
-    ]);
-  }
-
-  async updateForiegnSlugValues(params = {}) {
-    const {
-      id,
-      slug,
-      options,
-    } = await validateAsync(Joi.object({
-      id: workspaceAttrs.id.required(),
-      slug: workspaceAttrs.slug.required(),
-      options: Joi.object().default({}),
-    }).required(), params);
-
-    return Promise.all([
-      // user memberships
-      this.manager.$('user').updateRelatedMembershipWorkspaces({ id, slug, options }),
-      // app workspaces
-      this.manager.$('application').updateRelatedWorkspaces({ id, slug, options }),
-      // org workspaces
-      this.manager.$('organization').updateRelatedWorkspaces({ id, slug, options }),
-    ]);
   }
 
   /**
@@ -405,11 +379,13 @@ export default class WorkspaceRepo extends ManagedRepo {
       id,
       name,
     } = await validateAsync(Joi.object({
-      id: workspaceAttrs.id.required(),
-      name: workspaceAttrs.name.required(),
+      id: attrs.id.required(),
+      name: attrs.name.required(),
     }).required(), params);
 
-    const update = await buildUpdateNamePipeline({ name });
+    const update = buildUpdatePipeline([
+      { path: 'name', value: name },
+    ]);
     const session = await this.client.startSession();
     session.startTransaction();
 
@@ -424,8 +400,11 @@ export default class WorkspaceRepo extends ManagedRepo {
       // if nothing changed, skip updating related fields
       if (!result.modifiedCount) return result;
 
-      // then update relationships.
-      await this.updateForeignNameValues({ id, name, options: { session } });
+      const { dnzManager } = this;
+      await dnzManager.executeRepoBulkOps({
+        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { name } }),
+        options: { session },
+      });
 
       await session.commitTransaction();
       return result;
@@ -560,18 +539,17 @@ export default class WorkspaceRepo extends ManagedRepo {
       appId,
       orgId,
     } = await validateAsync(Joi.object({
-      id: workspaceAttrs.id,
-      slug: workspaceAttrs.slug.required(),
+      id: attrs.id,
+      slug: attrs.slug.required(),
       appId: appAttrs.id.required(),
       orgId: orgAttrs.id.required(),
     }).required(), params);
 
-    const update = await this.manager.prepareSlugUpdatePipeline({
-      repo: 'workspace',
-      id,
-      slug,
-      query: { 'app._id': appId, 'org._id': orgId },
-    });
+    await this.throwIfSlugHasRedirect({ slug, appId, orgId });
+    const update = buildUpdatePipeline([
+      { path: 'slug', value: slug, set: () => slugRedirects(slug) },
+    ]);
+
     const session = await this.client.startSession();
     session.startTransaction();
 
@@ -586,8 +564,11 @@ export default class WorkspaceRepo extends ManagedRepo {
       // if nothing changed, skip updating related fields
       if (!result.modifiedCount) return result;
 
-      // then update relationships.
-      await this.updateForiegnSlugValues({ id, slug, options: { session } });
+      const { dnzManager } = this;
+      await dnzManager.executeRepoBulkOps({
+        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { slug } }),
+        options: { session },
+      });
 
       await session.commitTransaction();
       return result;

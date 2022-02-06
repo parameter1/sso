@@ -1,4 +1,3 @@
-import { get } from '@parameter1/object-path';
 import DenormalizedField from './field.js';
 import DenormalizedTarget from './target.js';
 
@@ -41,8 +40,8 @@ export default class DenormalizedFieldDefintion {
     const $set = {};
     let hasUpdate = false;
     this.getUpdateFieldPaths().forEach((path, field) => {
-      const value = get(values, field);
-      // @todo undefined should be skipped, null should be validate for required
+      const value = values[field];
+      // @todo undefined should be skipped, null should be validated for required
       // and then unset if allowed. also need to handle empty strings
       if (value == null) return;
       hasUpdate = true;

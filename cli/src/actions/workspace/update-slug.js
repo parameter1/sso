@@ -63,7 +63,7 @@ export default async () => {
 
   if (!confirm) return;
 
-  const result = await repos.$('workspace').updateSlug({
+  const result = await repos.$('workspace').updateAttributes({
     id: workspace._id,
     slug,
     appId: workspace.app._id,

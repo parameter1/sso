@@ -40,7 +40,7 @@ export default async () => {
 
   if (!confirm) return;
 
-  const result = await repos.$('workspace').updateName({
+  const result = await repos.$('workspace').updateAttributes({
     id: workspace._id,
     name,
   });

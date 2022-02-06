@@ -373,83 +373,48 @@ export default class WorkspaceRepo extends ManagedRepo {
   /**
    * @param {object} params
    * @param {ObjectId} params.id
-   * @param {string} params.name
+   * @param {string} [params.name]
+   * @param {string} [params.slug]
+   * @param {ObjectId} [params.appId]
+   * @param {ObjectId} [params.orgId]
    */
-  async updateName(params = {}) {
+  async updateAttributes(params = {}) {
     const {
       id,
       name,
-    } = await validateAsync(Joi.object({
-      id: attrs.id.required(),
-      name: attrs.name.required(),
-    }).required(), params);
-
-    const update = buildUpdatePipeline([
-      { path: 'name', value: name },
-    ]);
-    const session = await this.client.startSession();
-    session.startTransaction();
-
-    try {
-      // attempt to update the workspace.
-      const result = await this.updateOne({
-        query: { _id: id },
-        update,
-        options: { strict: true, session },
-      });
-
-      // if nothing changed, skip updating related fields
-      if (!result.modifiedCount) return result;
-
-      const { dnzManager } = this;
-      await dnzManager.executeRepoBulkOps({
-        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { name } }),
-        options: { session },
-      });
-
-      await session.commitTransaction();
-      return result;
-    } catch (e) {
-      await session.abortTransaction();
-      throw e;
-    } finally {
-      session.endSession();
-    }
-  }
-
-  /**
-   * @param {object} params
-   * @param {ObjectId} params.id
-   * @param {string} params.slug
-   * @param {ObjectId} params.appId
-   * @param {ObjectId} params.orgId
-   */
-  async updateSlug(params = {}) {
-    const {
-      id,
       slug,
+
       appId,
       orgId,
     } = await validateAsync(Joi.object({
-      id: attrs.id,
-      slug: attrs.slug.required(),
-      appId: appAttrs.id.required(),
-      orgId: orgAttrs.id.required(),
+      id: attrs.id.required(),
+      name: attrs.name,
+      slug: attrs.slug,
+
+      appId: Joi.when('slug', { is: /^.+/, then: appAttrs.id.required() }),
+      orgId: Joi.when('slug', { is: /^.+/, then: orgAttrs.id.required() }),
     }).required(), params);
 
-    await this.throwIfSlugHasRedirect({ slug, appId, orgId });
-    const update = buildUpdatePipeline([
-      { path: 'slug', value: slug, set: () => slugRedirects(slug) },
-    ]);
+    const fields = [];
+    if (name) fields.push({ path: 'name', value: name });
+    if (slug) {
+      await this.throwIfSlugHasRedirect({
+        id,
+        slug,
+        appId,
+        orgId,
+      });
+      fields.push({ path: 'slug', value: slug, set: () => slugRedirects(slug) });
+    }
+    if (!fields.length) return null; // noop
 
     const session = await this.client.startSession();
     session.startTransaction();
-
     try {
-      // attempt to update the workspace.
+      // attempt to update the app.
       const result = await this.updateOne({
         query: { _id: id },
-        update,
+        update: buildUpdatePipeline(fields),
         options: { strict: true, session },
       });
 
@@ -458,7 +423,10 @@ export default class WorkspaceRepo extends ManagedRepo {
 
       const { dnzManager } = this;
       await dnzManager.executeRepoBulkOps({
-        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { slug } }),
+        repoBulkOps: dnzManager.buildRepoBulkOpsFor({
+          id,
+          values: { name, slug },
+        }),
         options: { session },
       });
 

@@ -44,9 +44,12 @@ export default async () => {
 
   if (!confirm) return;
 
-  const result = await repos.$('organization').addEmailDomains({
+  const result = await repos.$('organization').updateAttributes({
     id: org._id,
-    emailDomains,
+    emailDomains: {
+      values: emailDomains,
+      mode: 'addToSet',
+    },
   });
   log(result);
 };

@@ -8,6 +8,7 @@ import {
 } from '../schema/attributes/index.js';
 import DenormalizationManager from '../dnz-manager/index.js';
 
+import arrayUpdateModeEnum from './utils/array-update-mode-enum.js';
 import { buildUpdatePipeline, slugRedirects } from './pipelines/index.js';
 
 export default class OrganizationRepo extends ManagedRepo {
@@ -42,31 +43,6 @@ export default class OrganizationRepo extends ManagedRepo {
         ['user::memberships', { subPath: 'workspace.org', isArray: true }],
         ['workspace::org', { subPath: null, isArray: false }],
       ],
-    });
-  }
-
-  /**
-   *
-   * @param {object} params
-   * @param {string} params.id
-   * @param {string[]} params.emailDomains
-   */
-  async addEmailDomains(params = {}) {
-    const {
-      id,
-      emailDomains,
-    } = await validateAsync(Joi.object({
-      id: attrs.id.required(),
-      emailDomains: Joi.array().items(attrs.emailDomain.required()).required(),
-    }).required(), params);
-
-    const $or = emailDomains.map((domain) => ({ emailDomains: { $ne: domain } }));
-    return this.updateOne({
-      query: { _id: id, $or },
-      update: {
-        $set: { 'date.updated': new Date() },
-        $addToSet: { emailDomains: { $each: emailDomains } },
-      },
     });
   }
 
@@ -306,31 +282,6 @@ export default class OrganizationRepo extends ManagedRepo {
   /**
    *
    * @param {object} params
-   * @param {string} params.id
-   * @param {string[]} params.emailDomains
-   */
-  async removeEmailDomains(params = {}) {
-    const {
-      id,
-      emailDomains,
-    } = await validateAsync(Joi.object({
-      id: attrs.id.required(),
-      emailDomains: Joi.array().items(attrs.emailDomain.required()).required(),
-    }).required(), params);
-
-    const $or = emailDomains.map((domain) => ({ emailDomains: domain }));
-    return this.updateOne({
-      query: { _id: id, $or },
-      update: {
-        $set: { 'date.updated': new Date() },
-        $pull: { emailDomains: { $in: emailDomains } },
-      },
-    });
-  }
-
-  /**
-   *
-   * @param {object} params
    * @param {ObjectId} params.orgId
    * @param {ObjectId} params.userId
    */
@@ -394,77 +345,47 @@ export default class OrganizationRepo extends ManagedRepo {
   /**
    * @param {object} params
    * @param {ObjectId} params.id
-   * @param {string} params.name
+   * @param {string} [params.name]
+   * @param {string} [params.slug]
    */
-  async updateName(params = {}) {
+  async updateAttributes(params = {}) {
     const {
       id,
       name,
-    } = await validateAsync(Joi.object({
-      id: attrs.id.required(),
-      name: attrs.name.required(),
-    }).required(), params);
-
-    const update = buildUpdatePipeline([
-      { path: 'name', value: name },
-    ]);
-    const session = await this.client.startSession();
-    session.startTransaction();
-
-    try {
-      // attempt to update the org.
-      const result = await this.updateOne({
-        query: { _id: id },
-        update,
-        options: { strict: true, session },
-      });
-
-      // if nothing changed, skip updating related fields
-      if (!result.modifiedCount) return result;
-
-      const { dnzManager } = this;
-      await dnzManager.executeRepoBulkOps({
-        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { name } }),
-        options: { session },
-      });
-
-      await session.commitTransaction();
-      return result;
-    } catch (e) {
-      await session.abortTransaction();
-      throw e;
-    } finally {
-      session.endSession();
-    }
-  }
-
-  /**
-   * @param {object} params
-   * @param {ObjectId} params.id
-   * @param {string} params.slug
-   */
-  async updateSlug(params = {}) {
-    const {
-      id,
       slug,
+      emailDomains,
     } = await validateAsync(Joi.object({
       id: attrs.id.required(),
-      slug: attrs.slug.required(),
+      name: attrs.name,
+      slug: attrs.slug,
+      emailDomains: Joi.object({
+        values: Joi.array().items(Joi.hostname()),
+        mode: arrayUpdateModeEnum.required(),
+      }),
     }).required(), params);
 
-    await this.throwIfSlugHasRedirect({ id, slug });
-    const update = buildUpdatePipeline([
-      { path: 'slug', value: slug, set: () => slugRedirects(slug) },
-    ]);
+    const fields = [];
+    if (name) fields.push({ path: 'name', value: name });
+    if (slug) {
+      await this.throwIfSlugHasRedirect({ id, slug });
+      fields.push({ path: 'slug', value: slug, set: () => slugRedirects(slug) });
+    }
+    if (emailDomains) {
+      fields.push({
+        path: 'emailDomains',
+        value: emailDomains.values,
+        arrayMode: emailDomains.mode,
+      });
+    }
+    if (!fields.length) return null; // noop
 
     const session = await this.client.startSession();
     session.startTransaction();
-
     try {
       // attempt to update the org.
       const result = await this.updateOne({
         query: { _id: id },
-        update,
+        update: buildUpdatePipeline(fields),
         options: { strict: true, session },
       });
 
@@ -473,7 +394,10 @@ export default class OrganizationRepo extends ManagedRepo {
 
       const { dnzManager } = this;
       await dnzManager.executeRepoBulkOps({
-        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { slug } }),
+        repoBulkOps: dnzManager.buildRepoBulkOpsFor({
+          id,
+          values: { name, slug },
+        }),
         options: { session },
       });
 

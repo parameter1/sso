@@ -37,9 +37,12 @@ export default async () => {
   if (!emailDomains || !emailDomains.length) return;
   if (!confirm) return;
 
-  const result = await repos.$('organization').removeEmailDomains({
+  const result = await repos.$('organization').updateAttributes({
     id: org._id,
-    emailDomains,
+    emailDomains: {
+      values: emailDomains,
+      mode: 'pull',
+    },
   });
   log(result);
 };

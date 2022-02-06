@@ -10,7 +10,9 @@ import WorkspaceRepo from './workspace.js';
 
 export default class Repos extends RepoManager {
   /**
-   *
+   * @todo create change history handlers via change streams
+   *       only add items that have a modified date change
+   *       this would also ignore denormalized field changes, which is good
    * @param {object} params
    * @param {MongoDBClient} params.client
    * @param {string} [params.dbBame=tenancy]

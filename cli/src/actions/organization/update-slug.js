@@ -21,6 +21,9 @@ export default async () => {
       validate: async (input, { org }) => {
         const { error } = orgAttrs.slug.required().validate(input);
         if (error) return error;
+
+        if (input === org.slug) return true;
+
         const doc = await repos.$('organization').findBySlug({ slug: input, options: { projection: { _id: 1 } } });
         if (doc) return new Error('An existing record is already using this slug.');
         try {

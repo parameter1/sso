@@ -19,7 +19,7 @@ export default async () => {
       default: ({ org }) => org.name,
       message: 'Enter the new organization name',
       validate: async (input) => {
-        const { error } = orgAttrs.name.required().validate(input);
+        const { error } = orgAttrs.name.validate(input);
         if (error) return error;
         return true;
       },
@@ -40,7 +40,7 @@ export default async () => {
 
   if (!confirm) return;
 
-  const result = await repos.$('organization').updateName({
+  const result = await repos.$('organization').updateAttributes({
     id: org._id,
     name,
   });

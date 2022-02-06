@@ -19,7 +19,7 @@ export default async () => {
       default: ({ org }) => org.slug,
       message: 'Enter the new organization slug',
       validate: async (input, { org }) => {
-        const { error } = orgAttrs.slug.required().validate(input);
+        const { error } = orgAttrs.slug.validate(input);
         if (error) return error;
 
         if (input === org.slug) return true;
@@ -54,7 +54,7 @@ export default async () => {
 
   if (!confirm) return;
 
-  const result = await repos.$('organization').updateSlug({
+  const result = await repos.$('organization').updateAttributes({
     id: org._id,
     slug,
   });

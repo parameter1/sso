@@ -21,6 +21,15 @@ export default async () => {
       validate: async (input, { workspace }) => {
         const { error } = workspaceAttrs.slug.required().validate(input);
         if (error) return error;
+
+        if (input === workspace.slug) return true;
+
+        const doc = await repos.$('workspace').findOne({
+          query: { slug: input, 'app._id': workspace.app._id, 'org._id': workspace.org._id },
+          options: { projection: { _id: 1 } },
+        });
+        if (doc) return new Error('An existing record is already using this slug.');
+
         try {
           await repos.$('workspace').throwIfSlugHasRedirect({
             id: workspace._id,

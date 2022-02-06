@@ -19,7 +19,7 @@ export default async () => {
       default: ({ app }) => app.name,
       message: 'Enter the new application name',
       validate: async (input) => {
-        const { error } = appAttrs.name.required().validate(input);
+        const { error } = appAttrs.name.validate(input);
         if (error) return error;
         return true;
       },
@@ -40,7 +40,7 @@ export default async () => {
 
   if (!confirm) return;
 
-  const result = await repos.$('application').updateName({
+  const result = await repos.$('application').updateAttributes({
     id: app._id,
     name,
   });

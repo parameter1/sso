@@ -141,79 +141,31 @@ export default class ApplicationRepo extends ManagedRepo {
   /**
    * @param {object} params
    * @param {ObjectId} params.id
-   * @param {string} params.name
-   * @param {object} [params.options]
+   * @param {string} [params.name]
+   * @param {string} [params.slug]
    */
-  async updateName(params = {}) {
-    const {
-      id,
-      name,
-    } = await validateAsync(Joi.object({
+  async updateAttributes(params = {}) {
+    const { id, name, slug } = await validateAsync(Joi.object({
       id: attrs.id.required(),
-      name: attrs.name.required(),
+      name: attrs.name,
+      slug: attrs.slug,
     }).required(), params);
 
-    const update = buildUpdatePipeline([
-      { path: 'name', value: name },
-    ]);
-    const session = await this.client.startSession();
-    session.startTransaction();
-
-    try {
-      // attempt to update the app.
-      const result = await this.updateOne({
-        query: { _id: id },
-        update,
-        options: { strict: true, session },
-      });
-
-      // if nothing changed, skip updating related fields
-      if (!result.modifiedCount) return result;
-
-      const { dnzManager } = this;
-      await dnzManager.executeRepoBulkOps({
-        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { name } }),
-        options: { session },
-      });
-
-      await session.commitTransaction();
-      return result;
-    } catch (e) {
-      await session.abortTransaction();
-      throw e;
-    } finally {
-      session.endSession();
+    const fields = [];
+    if (name) fields.push({ path: 'name', value: name });
+    if (slug) {
+      await this.throwIfSlugHasRedirect({ id, slug });
+      fields.push({ path: 'slug', value: slug, set: () => slugRedirects(slug) });
     }
-  }
-
-  /**
-   * @param {object} params
-   * @param {ObjectId} params.id
-   * @param {string} params.slug
-   * @param {object} [params.options]
-   */
-  async updateSlug(params = {}) {
-    const {
-      id,
-      slug,
-    } = await validateAsync(Joi.object({
-      id: attrs.id.required(),
-      slug: attrs.slug.required(),
-    }).required(), params);
-
-    await this.throwIfSlugHasRedirect({ id, slug });
-    const update = buildUpdatePipeline([
-      { path: 'slug', value: slug, set: () => slugRedirects(slug) },
-    ]);
+    if (!fields.length) return null; // noop
 
     const session = await this.client.startSession();
     session.startTransaction();
-
     try {
       // attempt to update the app.
       const result = await this.updateOne({
         query: { _id: id },
-        update,
+        update: buildUpdatePipeline(fields),
         options: { strict: true, session },
       });
 
@@ -222,7 +174,10 @@ export default class ApplicationRepo extends ManagedRepo {
 
       const { dnzManager } = this;
       await dnzManager.executeRepoBulkOps({
-        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { slug } }),
+        repoBulkOps: dnzManager.buildRepoBulkOpsFor({
+          id,
+          values: { name, slug },
+        }),
         options: { session },
       });
 

@@ -19,7 +19,7 @@ export default async () => {
       default: ({ app }) => app.slug,
       message: 'Enter the new application slug',
       validate: async (input, { app }) => {
-        const { error } = appAttrs.slug.required().validate(input);
+        const { error } = appAttrs.slug.validate(input);
         if (error) return error;
 
         if (input === app.slug) return true;
@@ -54,7 +54,7 @@ export default async () => {
 
   if (!confirm) return;
 
-  const result = await repos.$('application').updateSlug({
+  const result = await repos.$('application').updateAttributes({
     id: app._id,
     slug,
   });

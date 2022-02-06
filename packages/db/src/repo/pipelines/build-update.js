@@ -60,7 +60,7 @@ export default function buildUpdatePipeline(fields = [], {
   const pipeline = [
     {
       $addFields: {
-        __didChange: {
+        __willChange: {
           // when _any_ of the conditions are true
           $or: f.reduce((or, { prefixedPath, value, arrayMode }) => {
             if (arrayMode === 'addToSet') {
@@ -113,11 +113,11 @@ export default function buildUpdatePipeline(fields = [], {
         };
       }, {
         ...(updatedDatePath && {
-          [updatedDatePath]: { $cond: ['$__didChange', now, `$${updatedDatePath}`] },
+          [updatedDatePath]: { $cond: ['$__willChange', now, `$${updatedDatePath}`] },
         }),
       }),
     },
-    { $unset: ['__didChange', ...expose.map(({ current }) => current)] },
+    { $unset: ['__willChange', ...expose.map(({ current }) => current)] },
   ];
   return pipeline;
 }

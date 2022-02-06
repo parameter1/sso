@@ -1,7 +1,7 @@
 export default (slug) => ({
   redirects: {
     $cond: {
-      if: '$__didChange',
+      if: '$__willChange',
       then: {
         $filter: {
           input: { $concatArrays: ['$redirects', ['$__current:slug']] },

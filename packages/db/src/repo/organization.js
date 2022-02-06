@@ -9,7 +9,8 @@ import {
 import DenormalizationManager from '../dnz-manager/index.js';
 
 import arrayUpdateModeEnum from './utils/array-update-mode-enum.js';
-import { buildUpdatePipeline, slugRedirects } from './pipelines/index.js';
+import { buildUpdatePipeline } from './pipelines/index.js';
+import { slugRedirects } from './pipelines/build/index.js';
 
 export default class OrganizationRepo extends ManagedRepo {
   /**

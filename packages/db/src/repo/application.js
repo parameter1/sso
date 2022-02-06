@@ -36,9 +36,9 @@ export default class ApplicationRepo extends ManagedRepo {
       ],
       // @todo automatically update `date.updated`??
       definitions: [
-        ['user::memberships', { path: 'workspace.app', isArray: true }],
-        ['organization::workspaces', { path: 'app', isArray: true }],
-        ['workspace::app', { path: null, isArray: false }],
+        ['user::memberships', { subPath: 'workspace.app', isArray: true }],
+        ['organization::workspaces', { subPath: 'app', isArray: true }],
+        ['workspace::app', { subPath: null, isArray: false }],
       ],
     });
   }

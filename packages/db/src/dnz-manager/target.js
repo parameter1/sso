@@ -1,17 +1,18 @@
 export default class DenormalizedTarget {
-  constructor({ on, path = null, isArray = false } = {}) {
-    const [repoName, rootField] = on.split('::').map((v) => v.trim());
-    if (!repoName || !rootField) throw new Error('Unable to extract a repo name or root field name from the target.');
+  constructor({ on, subPath = null, isArray = false } = {}) {
+    if (typeof on !== 'string') throw new Error('The on value must be a string.');
+    const [repoName, rootPath] = on.trim().split('::').map((v) => v.trim());
+    if (!repoName || !rootPath) throw new Error('Unable to extract a repo name or root field name from the target.');
     this.repoName = repoName;
-    this.rootField = rootField;
-    this.path = path || null;
+    this.rootPath = rootPath;
+    this.subPath = subPath || null;
     this.isArray = Boolean(isArray);
   }
 
   getArrayFilterField() {
     if (!this.isArray) return null;
     const parts = ['elem'];
-    if (this.path) parts.push(this.path);
+    if (this.subPath) parts.push(this.subPath);
     parts.push('_id');
     return parts.join('.');
   }
@@ -20,8 +21,8 @@ export default class DenormalizedTarget {
    *
    */
   getQueryIDField() {
-    const parts = [this.rootField];
-    if (this.path) parts.push(this.path);
+    const parts = [this.rootPath];
+    if (this.subPath) parts.push(this.subPath);
     parts.push('_id');
     return parts.join('.');
   }
@@ -39,9 +40,9 @@ export default class DenormalizedTarget {
    *
    */
   getUpdateFieldPrefix() {
-    const parts = [this.rootField];
+    const parts = [this.rootPath];
     if (this.isArray) parts.push('$[elem]');
-    if (this.path) parts.push(this.path);
+    if (this.subPath) parts.push(this.subPath);
     return parts.join('.');
   }
 }

@@ -27,7 +27,7 @@ export default class DenormalizationManager {
    *
    * @param {string} on The repo name + root field target, e.g. `workspace::app`
    * @param {object} params
-   * @param {string?} [params.path=null] The optional subpath
+   * @param {string?} [params.subPath=null] The optional subpath
    * @param {boolean} [params.isArray=false] Whether the target field is an array of docs
    * @param {object[]} params.fields The field definitions on this target doc
    *                                 Global fields will be merged with these.
@@ -36,11 +36,11 @@ export default class DenormalizationManager {
    * @returns {DenormalizedFields}
    */
   addDefinition(on, {
-    path = null,
+    subPath = null,
     isArray = false,
     fields = [],
   } = {}) {
-    const target = new DenormalizedTarget({ on, path, isArray });
+    const target = new DenormalizedTarget({ on, subPath, isArray });
     this.map.set(on, new DenormalizedFieldDefintion({
       target, fields: [...this.globalFields, ...fields],
     }));

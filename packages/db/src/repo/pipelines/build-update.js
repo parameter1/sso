@@ -2,6 +2,8 @@ import { isFunction as isFn } from '@parameter1/utils';
 import { cleanDocument } from '@parameter1/mongodb';
 import is from '@sindresorhus/is';
 
+import { addToSet, pull } from './utils/index.js';
+
 /**
  * @todo move to mongodb lib!
  */
@@ -22,8 +24,8 @@ const cleanArray = (value = []) => {
   }
   if (is.array(filtered, is.plainObject)) {
     return filtered.sort((a, b) => {
-      const jsonA = JSON.stringify(cleanDocument(a));
-      const jsonB = JSON.stringify(cleanDocument(b));
+      const jsonA = JSON.stringify(cleanDocument(a, { preserveEmptyArrays: true }));
+      const jsonB = JSON.stringify(cleanDocument(b, { preserveEmptyArrays: true }));
       if (jsonA > jsonB) return 1;
       if (jsonA < jsonB) return -1;
       return 0;
@@ -41,83 +43,95 @@ export default function buildUpdatePipeline(fields = [], {
   now = new Date(),
   updatedDatePath = 'date.updated',
 } = {}) {
-  const expose = [];
-
   const f = fields.map((field) => {
-    const {
-      exposeCurrentValue,
-      path,
-      set,
-      arrayMode,
-      value,
-    } = field;
-    if (arrayMode && !Array.isArray(value)) throw new Error('You cannot specify an array field without an array value');
-    const prefixedPath = `$${path}`;
-    if (exposeCurrentValue || isFn(set)) expose.push({ current: `__current:${path}`, prefixedPath });
-    return { ...field, value: prepareValue(value), prefixedPath };
+    const { path, value } = field;
+    const paths = {
+      field: path,
+      willChange: `__will_change.${path}`,
+    };
+    return {
+      ...field,
+      value: prepareValue(value),
+      paths,
+      prefixedPaths: Object.keys(paths)
+        .reduce((o, key) => ({ ...o, [key]: `$${paths[key]}` }), {}),
+    };
   });
 
+  const $addFields = {
+    // determine which fields will change and expose current values
+    ...f.reduce((o, {
+      paths,
+      prefixedPaths,
+      value,
+      arrayMode,
+    }) => {
+      if (arrayMode === 'addToSet') {
+        // will change when the size of the difference between
+        // the new and existing values is greater than 0
+        return {
+          ...o,
+          [paths.willChange]: {
+            $gt: [{ $size: { $setDifference: [value, prefixedPaths.field] } }, 0],
+          },
+        };
+      }
+
+      if (arrayMode === 'pull') {
+        // will change when the size of the common values between
+        // the new and existing values is greater than 0
+        return {
+          ...o,
+          [paths.willChange]: {
+            $gt: [{ $size: { $setIntersection: [value, prefixedPaths.field] } }, 0],
+          },
+        };
+      }
+
+      // will change when the existing value is not equal to the new value
+      return {
+        ...o,
+        [paths.willChange]: { $ne: [prefixedPaths.field, value] },
+      };
+    }, {}),
+  };
+
   const pipeline = [
+    // add individual field changes and any current values
+    { $addFields },
+    // then determine if _any_ of the fields will change
     {
       $addFields: {
-        __willChange: {
-          // when _any_ of the conditions are true
-          $or: f.reduce((or, { prefixedPath, value, arrayMode }) => {
-            if (arrayMode === 'addToSet') {
-              // when the size of the difference between
-              // the new and existing values is greater than 0
-              or.push({ $gt: [{ $size: { $setDifference: [value, prefixedPath] } }, 0] });
-              return or;
-            }
-            if (arrayMode === 'pull') {
-              // when the size of the common values between
-              // the new and existing values is greater than 0
-              or.push({ $gt: [{ $size: { $setIntersection: [value, prefixedPath] } }, 0] });
-              return or;
-            }
-            // when the existing value is not equal to the new value
-            or.push({ $ne: [prefixedPath, value] });
-            return or;
-          }, []),
+        '__will_change.__any': {
+          $anyElementTrue: [f.map(({ prefixedPaths }) => prefixedPaths.willChange)],
         },
-        ...expose.reduce((o, { current, prefixedPath }) => ({
-          ...o, [current]: prefixedPath,
-        }), {}),
       },
     },
+    // set the new values
     {
-      $set: f.reduce((o, {
-        prefixedPath,
-        path,
-        value,
-        set,
-        arrayMode,
-      }) => {
+      $set: f.reduce((o, field) => {
+        const { prefixedPaths, value, arrayMode } = field;
         let resolved = value;
         if (arrayMode === 'addToSet') {
-          resolved = { $setUnion: [value, prefixedPath] };
+          resolved = addToSet({ path: prefixedPaths.field, value });
         }
         if (arrayMode === 'pull') {
-          resolved = {
-            $filter: {
-              input: prefixedPath,
-              as: 'v',
-              cond: { $not: { $in: ['$$v', value] } },
-            },
-          };
+          resolved = pull({ input: prefixedPaths.field, value });
         }
         return {
           ...o,
-          [path]: resolved,
-          ...(isFn(set) && set()),
+          [field.paths.field]: resolved,
+          ...(isFn(field.set) && field.set(field)),
         };
       }, {
         ...(updatedDatePath && {
-          [updatedDatePath]: { $cond: ['$__willChange', now, `$${updatedDatePath}`] },
+          [updatedDatePath]: { $cond: ['$__will_change.__any', now, `$${updatedDatePath}`] },
         }),
       }),
     },
-    { $unset: ['__willChange', ...expose.map(({ current }) => current)] },
+    // remove the change flags so they aren't
+    // saved to the document :)
+    { $unset: ['__will_change'] },
   ];
   return pipeline;
 }

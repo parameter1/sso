@@ -2,7 +2,7 @@ import { isFunction as isFn } from '@parameter1/utils';
 import { cleanDocument } from '@parameter1/mongodb';
 import is from '@sindresorhus/is';
 
-import { addToSet, pull } from './utils/index.js';
+import { addToSet, pull, Expr } from './utils/index.js';
 
 /**
  * @todo move to mongodb lib!
@@ -35,6 +35,7 @@ const cleanArray = (value = []) => {
 };
 
 export function prepareValue(value) {
+  if (is.directInstanceOf(value, Expr)) return value.expr;
   if (is.array(value)) return cleanArray(value);
   return value;
 }

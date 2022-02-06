@@ -8,8 +8,6 @@ import UserEventRepo from './user-event.js';
 import UserRepo from './user.js';
 import WorkspaceRepo from './workspace.js';
 
-import { buildUpdateSlugPipeline } from './pipelines/index.js';
-
 export default class Repos extends RepoManager {
   /**
    *
@@ -27,35 +25,6 @@ export default class Repos extends RepoManager {
       .add({ key: 'user', ManagedRepo: UserRepo })
       .add({ key: 'user-event', ManagedRepo: UserEventRepo })
       .add({ key: 'workspace', ManagedRepo: WorkspaceRepo });
-  }
-
-  /**
-   *
-   * @param {object} params
-   * @param {string} params.repo
-   * @param {string} params.slug
-   * @param {object} [params.query] Optional query criteria to apply
-   */
-  async prepareSlugUpdatePipeline(params = {}) {
-    const {
-      repo,
-      id,
-      slug,
-      query,
-    } = await validateAsync(Joi.object({
-      repo: Joi.string().required(),
-      id: Joi.objectId().required(),
-      slug: Joi.slug().required(),
-      query: Joi.object().default({}),
-    }).required(), params);
-
-    await this.throwIfSlugHasRedirect({
-      repo,
-      id,
-      slug,
-      query,
-    });
-    return buildUpdateSlugPipeline({ slug });
   }
 
   /**

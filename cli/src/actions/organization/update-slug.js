@@ -33,6 +33,10 @@ export default async () => {
           return e;
         }
       },
+      filter: (input) => {
+        const { value } = orgAttrs.slug.validate(input);
+        return value;
+      },
     },
     {
       type: 'confirm',

@@ -42,6 +42,10 @@ export default async () => {
           return e;
         }
       },
+      filter: (input) => {
+        const { value } = workspaceAttrs.slug.validate(input);
+        return value;
+      },
     },
     {
       type: 'confirm',

@@ -33,6 +33,10 @@ export default async () => {
           return e;
         }
       },
+      filter: (input) => {
+        const { value } = appAttrs.slug.validate(input);
+        return value;
+      },
     },
     {
       type: 'confirm',

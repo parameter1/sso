@@ -275,7 +275,7 @@ export default class ApplicationRepo extends ManagedRepo {
       slug: attrs.slug.required(),
     }).required(), params);
 
-    await this.throwIfSlugHasRedirect({ repo: 'application', id, slug });
+    await this.throwIfSlugHasRedirect({ id, slug });
     const update = buildUpdatePipeline([
       { path: 'slug', value: slug, set: () => slugRedirects(slug) },
     ]);

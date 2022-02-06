@@ -6,8 +6,9 @@ import {
   userAttributes as userAttrs,
   workspaceAttributes as workspaceAttrs,
 } from '../schema/attributes/index.js';
+import DenormalizationManager from '../dnz-manager/index.js';
 
-import { buildUpdateNamePipeline } from './pipelines/index.js';
+import { buildUpdatePipeline, slugRedirects } from './pipelines/index.js';
 
 export default class OrganizationRepo extends ManagedRepo {
   /**
@@ -24,6 +25,22 @@ export default class OrganizationRepo extends ManagedRepo {
         { key: { redirects: 1 } },
 
         { key: { name: 1, _id: 1 }, collation: { locale: 'en_US' } },
+      ],
+    });
+
+    this.dnzManager = new DenormalizationManager({
+      repoManager: this.manager,
+      globalFields: [
+        // @todo vet schema and required prop usage
+        { name: 'name', schema: attrs.name, required: true },
+        { name: 'slug', schema: attrs.slug, required: true },
+      ],
+      // @todo automatically update `date.updated`??
+      definitions: [
+        ['application::workspaces', { subPath: 'org', isArray: true }],
+        ['user::manages', { subPath: 'org', isArray: true }],
+        ['user::memberships', { subPath: 'workspace.org', isArray: true }],
+        ['workspace::org', { subPath: null, isArray: false }],
       ],
     });
   }
@@ -374,29 +391,6 @@ export default class OrganizationRepo extends ManagedRepo {
     return this.manager.throwIfSlugHasRedirect({ repo: 'organization', id, slug });
   }
 
-  async updateForeignNameValues(params = {}) {
-    const {
-      id,
-      name,
-      options,
-    } = await validateAsync(Joi.object({
-      id: attrs.id.required(),
-      name: attrs.name.required(),
-      options: Joi.object().default({}),
-    }).required(), params);
-
-    return Promise.all([
-      // user managed orgs
-      this.manager.$('user').updateRelatedManagedOrgs({ id, name, options }),
-      // user memberships
-      this.manager.$('user').updateRelatedMembershipWorkspaceOrgs({ id, name, options }),
-      // workspaces
-      this.manager.$('workspace').updateRelatedOrgs({ id, name, options }),
-      // app workspace orgs
-      this.manager.$('application').updateRelatedWorkspaceOrgs({ id, name, options }),
-    ]);
-  }
-
   async updateForiegnSlugValues(params = {}) {
     const {
       id,
@@ -434,7 +428,9 @@ export default class OrganizationRepo extends ManagedRepo {
       name: attrs.name.required(),
     }).required(), params);
 
-    const update = await buildUpdateNamePipeline({ name });
+    const update = buildUpdatePipeline([
+      { path: 'name', value: name },
+    ]);
     const session = await this.client.startSession();
     session.startTransaction();
 
@@ -449,8 +445,11 @@ export default class OrganizationRepo extends ManagedRepo {
       // if nothing changed, skip updating related fields
       if (!result.modifiedCount) return result;
 
-      // then update relationships.
-      await this.updateForeignNameValues({ id, name, options: { session } });
+      const { dnzManager } = this;
+      await dnzManager.executeRepoBulkOps({
+        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { name } }),
+        options: { session },
+      });
 
       await session.commitTransaction();
       return result;
@@ -591,7 +590,11 @@ export default class OrganizationRepo extends ManagedRepo {
       slug: attrs.slug.required(),
     }).required(), params);
 
-    const update = await this.manager.prepareSlugUpdatePipeline({ repo: 'organization', id, slug });
+    await this.throwIfSlugHasRedirect({ id, slug });
+    const update = buildUpdatePipeline([
+      { path: 'slug', value: slug, set: () => slugRedirects(slug) },
+    ]);
+
     const session = await this.client.startSession();
     session.startTransaction();
 
@@ -606,8 +609,11 @@ export default class OrganizationRepo extends ManagedRepo {
       // if nothing changed, skip updating related fields
       if (!result.modifiedCount) return result;
 
-      // then update relationships.
-      await this.updateForiegnSlugValues({ id, slug, options: { session } });
+      const { dnzManager } = this;
+      await dnzManager.executeRepoBulkOps({
+        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { slug } }),
+        options: { session },
+      });
 
       await session.commitTransaction();
       return result;

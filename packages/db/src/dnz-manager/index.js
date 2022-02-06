@@ -33,16 +33,20 @@ export default class DenormalizationManager {
    *                                 Global fields will be merged with these.
    * @param {string} params.fields.name The field name/key
    * @param {object} params.fields.schema The field Joi schema
+   * @param {boolean} [params.suppressGlobals=false]
    * @returns {DenormalizedFields}
    */
   addDefinition(on, {
     subPath = null,
     isArray = false,
     fields = [],
+    suppressGlobals = false,
   } = {}) {
+    if (!Array.isArray(fields)) throw new Error('Fields must be an array');
     const target = new DenormalizedTarget({ on, subPath, isArray });
+    const globalFields = suppressGlobals ? [] : this.globalFields;
     this.map.set(on, new DenormalizedFieldDefintion({
-      target, fields: [...this.globalFields, ...fields],
+      target, fields: [...globalFields, ...fields],
     }));
     return this;
   }

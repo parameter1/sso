@@ -45,6 +45,9 @@ export default class DenormalizedFieldDefintion {
       // and then unset if allowed. also need to handle empty strings
       if (value == null) return;
       hasUpdate = true;
+      // @todo should these also have update guards?
+      // only needed if updated date is added and, somehow, this method
+      // is used without a wrapping method that's check the update.
       $set[path] = value;
     });
 

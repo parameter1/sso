@@ -27,7 +27,7 @@ export default class ApplicationRepo extends ManagedRepo {
       ],
     });
 
-    this.denoManager = new DenormalizationManager({
+    this.dnzManager = new DenormalizationManager({
       repoManager: this.manager,
       globalFields: [
         // @todo vet schema and required prop usage
@@ -170,9 +170,9 @@ export default class ApplicationRepo extends ManagedRepo {
       // if nothing changed, skip updating related fields
       if (!result.modifiedCount) return result;
 
-      const { denoManager } = this;
-      await denoManager.executeRepoBulkOps({
-        repoBulkOps: denoManager.buildRepoBulkOpsFor({ id, values: { name } }),
+      const { dnzManager } = this;
+      await dnzManager.executeRepoBulkOps({
+        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { name } }),
         options: { session },
       });
 
@@ -294,9 +294,9 @@ export default class ApplicationRepo extends ManagedRepo {
       // if nothing changed, skip updating related fields
       if (!result.modifiedCount) return result;
 
-      const { denoManager } = this;
-      await denoManager.executeRepoBulkOps({
-        repoBulkOps: denoManager.buildRepoBulkOpsFor({ id, values: { slug } }),
+      const { dnzManager } = this;
+      await dnzManager.executeRepoBulkOps({
+        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { slug } }),
         options: { session },
       });
 

@@ -10,6 +10,9 @@ import {
   tokenAttributes as tokenAttrs,
   workspaceAttributes as workspaceAttrs,
 } from '../schema/attributes/index.js';
+import DenormalizationManager from '../dnz-manager/index.js';
+
+import { buildUpdatePipeline } from './pipelines/index.js';
 
 export default class UserRepo extends ManagedRepo {
   /**
@@ -27,6 +30,23 @@ export default class UserRepo extends ManagedRepo {
         { key: { familyName: 1, _id: 1 }, collation: { locale: 'en_US' } },
       ],
     });
+
+    const emailField = { name: 'email', schema: attrs.email, required: true };
+    this.dnzManager = new DenormalizationManager({
+      repoManager: this.manager,
+      globalFields: [
+        // @todo vet schema and required prop usage
+        emailField,
+        { name: 'givenName', schema: attrs.givenName, required: true },
+        { name: 'familyName', schema: attrs.familyName, required: true },
+      ],
+      // @todo automatically update `date.updated`??
+      definitions: [
+        ['organization::managers', { subPath: 'user', isArray: true }],
+        ['user-event::user', { suppressGlobals: true, fields: [emailField] }],
+        ['workspace::members', { subPath: 'user', isArray: true }],
+      ],
+    });
   }
 
   /**
@@ -40,29 +60,21 @@ export default class UserRepo extends ManagedRepo {
     const {
       id,
       email,
-      verified,
     } = await validateAsync(Joi.object({
       id: attrs.id.required(),
       email: attrs.email.required(),
-      verified: attrs.verified.default(false),
     }).required(), params);
 
-    const update = [
+    const update = buildUpdatePipeline([
       {
-        $addFields: {
-          __didChange: { $ne: ['$email', email] },
-        },
-      },
-      {
-        $set: {
-          email,
+        path: 'email',
+        value: email,
+        set: () => ({
           domain: email.split('@')[1],
-          verified: { $cond: ['$__didChange', verified, '$verified'] },
-          'date.updated': { $cond: ['$__didChange', new Date(), '$date.updated'] },
-        },
+          verified: { $cond: ['$__didChange', false, '$verified'] },
+        }),
       },
-      { $unset: ['__didChange'] },
-    ];
+    ]);
 
     const session = await this.client.startSession();
     session.startTransaction();
@@ -78,8 +90,11 @@ export default class UserRepo extends ManagedRepo {
       // if nothing changed, skip updating related fields
       if (!result.modifiedCount) return result;
 
-      // then update relationships.
-      await this.updateForiegnEmailValues({ id, email, options: { session } });
+      const { dnzManager } = this;
+      await dnzManager.executeRepoBulkOps({
+        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { email } }),
+        options: { session },
+      });
 
       await session.commitTransaction();
       return result;
@@ -343,48 +358,6 @@ export default class UserRepo extends ManagedRepo {
     }
   }
 
-  async updateForiegnEmailValues(params = {}) {
-    const {
-      id,
-      email,
-      options,
-    } = await validateAsync(Joi.object({
-      id: attrs.id.required(),
-      email: attrs.email.required(),
-      options: Joi.object().default({}),
-    }).required(), params);
-
-    return Promise.all([
-      // org managers
-      this.manager.$('organization').updateRelatedManagers({ user: { _id: id, email }, options }),
-      // workspace members
-      this.manager.$('workspace').updateRelatedMembers({ user: { _id: id, email }, options }),
-      // user events
-      this.manager.$('user-event').updateRelatedUser({ id, email, options }),
-    ]);
-  }
-
-  async updateForiegnNameValues(params = {}) {
-    const {
-      id,
-      givenName,
-      familyName,
-      options,
-    } = await validateAsync(Joi.object({
-      id: attrs.id.required(),
-      givenName: attrs.givenName.required(),
-      familyName: attrs.familyName.required(),
-      options: Joi.object().default({}),
-    }).required(), params);
-
-    return Promise.all([
-      // org managers
-      this.manager.$('organization').updateRelatedManagers({ user: { _id: id, givenName, familyName }, options }),
-      // workspace members
-      this.manager.$('workspace').updateRelatedMembers({ user: { _id: id, givenName, familyName }, options }),
-    ]);
-  }
-
   /**
    *
    * @param {object} params
@@ -550,26 +523,10 @@ export default class UserRepo extends ManagedRepo {
       options: Joi.object().default({}),
     }).required(), params);
 
-    const update = [
-      {
-        $addFields: {
-          __didChange: {
-            $or: [
-              { $ne: ['$givenName', givenName] },
-              { $ne: ['$familyName', familyName] },
-            ],
-          },
-        },
-      },
-      {
-        $set: {
-          givenName,
-          familyName,
-          'date.updated': { $cond: ['$__didChange', new Date(), '$date.updated'] },
-        },
-      },
-      { $unset: ['__didChange'] },
-    ];
+    const update = buildUpdatePipeline([
+      { path: 'givenName', value: givenName },
+      { path: 'familyName', value: familyName },
+    ]);
 
     const session = await this.client.startSession();
     session.startTransaction();
@@ -585,11 +542,9 @@ export default class UserRepo extends ManagedRepo {
       // if nothing changed, skip updating related fields
       if (!result.modifiedCount) return result;
 
-      // then update relationships.
-      await this.updateForiegnNameValues({
-        id,
-        givenName,
-        familyName,
+      const { dnzManager } = this;
+      await dnzManager.executeRepoBulkOps({
+        repoBulkOps: dnzManager.buildRepoBulkOpsFor({ id, values: { givenName, familyName } }),
         options: { session },
       });
 

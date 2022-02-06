@@ -19,7 +19,8 @@
   },
   "scripts": {
     "lint": "eslint --ext .js ./",
-    "test": "yarn lint"
+    "test": "yarn lint && yarn test-nolint",
+    "test-nolint": "mocha ./test/**/*.spec.js"
   },
   "dependencies": {
     "@parameter1/email-utils": "^2.0.0",

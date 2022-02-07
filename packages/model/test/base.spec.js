@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
+import Joi from '@parameter1/joi';
 import Base from '../src/base.js';
 
 describe('base.js', () => {
@@ -16,7 +17,7 @@ describe('base.js', () => {
 
   it('should clone when retrieving all values', () => {
     const base = new Base();
-    const b1 = base.$set('test', 'foo').$set('arr', ['foo'], { type: 'array' });
+    const b1 = base.$set('test', 'foo').$set('arr', ['foo'], Joi.array());
     const values = b1.$values();
     values.test = 'bar';
     values.arr.push('bar');

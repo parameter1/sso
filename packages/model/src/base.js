@@ -3,6 +3,8 @@ import Joi from '@parameter1/joi';
 import { isFunction as isFn } from '@parameter1/utils';
 import is from '@sindresorhus/is';
 
+const defaultSchema = Joi.string().required();
+
 // @todo account for deep values (and Joi schemas).
 const clone = (values) => Object.keys(values).reduce((o, k) => {
   const v = values[k];
@@ -27,17 +29,18 @@ export default class Base {
     return values[key];
   }
 
-  $set(key, value, { type = 'string', required = true } = {}) {
-    const validated = this.$validate(key, value, { type, required });
+  $set(key, value, schema) {
+    const validated = this.$validate(key, value, schema);
     const obj = this.$clone();
     obj.values[key] = validated;
     return obj;
   }
 
-  $validate(key, value, { type = 'string', required = true } = {}) {
-    if (!Joi[type]) throw new Error(`No validator was found for '${type}'`);
-    const mode = required ? 'required' : 'optional';
-    const { value: validated, error } = Joi[type]().label(key).presence(mode).validate(value);
+  $validate(key, value, schema = defaultSchema) {
+    if (schema != null && !Joi.isSchema(schema)) throw new Error('The provided type must be a Joi schema.');
+    if (!schema) return value;
+
+    const { value: validated, error } = schema.label(key).validate(value);
 
     if (error) throw error;
     return validated;

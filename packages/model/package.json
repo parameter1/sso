@@ -1,0 +1,30 @@
+{
+  "name": "@parameter1/sso-model",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "The SSO modeling package.",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/sso/tree/main/packages/model#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/sso.git",
+    "directory": "packages/model"
+  },
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.js",
+  "scripts": {
+    "lint": "eslint --ext .js ./",
+    "test": "yarn lint && yarn test-nolint",
+    "test-nolint": "mocha ./test/*.spec.js ./test/**/*.spec.js"
+  },
+  "dependencies": {
+    "@parameter1/email-utils": "^2.0.0",
+    "@parameter1/joi": "^2.2.0",
+    "@parameter1/mongodb": "^2.9.1",
+    "@parameter1/object-path": "^2.0.0",
+    "@parameter1/utils": "^2.0.0",
+    "@sindresorhus/is": "^4.4.0",
+    "inflected": "^2.1.0"
+  }
+}

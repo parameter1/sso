@@ -34,8 +34,8 @@ class Entity extends Base {
 
   /**
    * Defines a property on this entity, along with its schema. The property
-   * name will be automatically converted to camelCase (e.g. `pull_request` would
-   * become `pullRequest`).
+   * name will be automatically converted to camelCase (e.g. `pull_request`
+   * would become `pullRequest`).
    *
    * Will throw an error if an existing property is already set.
    *
@@ -46,7 +46,7 @@ class Entity extends Base {
    * ```
    *
    * @param {string} name The name of the property.
-   * @param {object} schema The schema to use when validating the property's value
+   * @param {object} schema The schema to use when validating the property value
    * @returns {Entity} The cloned instance
    */
   prop(name, schema) {

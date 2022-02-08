@@ -69,7 +69,8 @@ export default class Base {
    * @param {*} value The value to set
    * @param {object} options
    * @param {Joi} options.schema The schema to validate the value against
-   * @param {boolean} [options.strict=false] Whether to prevent reassignment of an existing value
+   * @param {boolean} [options.strict=false] Whether to prevent reassignment of
+   *                                         an existing value
    * @returns {Base} The cloned instance
    */
   $set(path, value, { schema = defaultSchema, strict = false } = {}) {

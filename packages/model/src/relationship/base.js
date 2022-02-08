@@ -19,11 +19,13 @@ const typeSchema = string().valid('one', 'many').required();
 export default class Relationship extends Base {
   /**
    * Sets the local field name that will used when saving the relationship. This
-   * value will always be converted to camelCase but _won't_ enforce singular/plural form.
+   * value will always be converted to camelCase but _won't_ enforce
+   * singular/plural form.
    *
    * If this method is _never_ called, the default local field will be set as
-   * the camelCased version of the `entity` name. If the relationship `has` value is also set
-   * to `many`, then the field will also be converted into plural form.
+   * the camelCased version of the `entity` name. If the relationship `has`
+   * value is also set to `many`, then the field will also be converted into
+   * plural form.
    *
    * The `type`, `entity` and `has` methods must before called before calling
    * the `as` method, otherwise an error will be thrown.
@@ -82,13 +84,14 @@ export default class Relationship extends Base {
    * Sets the props and edges that will be saved on the relationship.
    *
    * These values are denormalized and will be automatically updated whenever
-   * the values on the foreign document change. These are _not_ properties _on_ the
-   * relationship (i.e. related fields). To set these, use the `affix` method instead.
+   * the values on the foreign document change. These are _not_ properties _on_
+   * the relationship (i.e. related fields). To set these, use the `affix`
+   * method instead.
    *
    *
-   * The value can either be a single string prop, and array of string props, or an
-   * object that defines both `props` and `edges`. The method can also be called multiple
-   * times to append multiple props and edges.
+   * The value can either be a single string prop, and array of string props, or
+   * an object that defines both `props` and `edges`. The method can also be
+   * called multiple times to append multiple props and edges.
    *
    * The `type`, `entity` and `has` methods must before called before calling
    * the `with` method, otherwise an error will be thrown.

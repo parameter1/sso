@@ -74,8 +74,6 @@ class Entity extends Base {
   }
 }
 
-const o = new Entity();
-
 /**
  * Creates a new entity definition.
  *
@@ -83,5 +81,5 @@ const o = new Entity();
  * @returns {Entity}
  */
 export default function entity(name) {
-  return o.name(name);
+  return (new Entity()).name(name);
 }

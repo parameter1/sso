@@ -10,6 +10,7 @@ const clone = (values) => Object.keys(values).reduce((o, k) => {
   const v = values[k];
   if (is.set(v)) return { ...o, [k]: new Set(v) };
   if (is.map(v)) return { ...o, [k]: new Map(v) };
+  if (is.object(v) && isFn(v.$clone)) return { ...o, [k]: v.$clone() };
   if (is.plainObject(v)) return { ...o, [k]: clone(v) };
   if (is.array(v)) return { ...o, [k]: v.slice() };
   return { ...o, [k]: v };

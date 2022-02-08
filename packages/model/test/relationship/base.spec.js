@@ -20,7 +20,7 @@ describe('relationship/base.js', () => {
     it('should throw an error if the value has already been set', () => {
       const rel = (new BaseRelationship()).type('one');
       expect(() => {
-        rel.entity('many');
+        rel.type('many');
       }).to.throw(Error, 'A value already exists for `type`');
     });
     it('should accept one as a value', () => {

@@ -3,6 +3,7 @@ import Joi from '@parameter1/joi';
 // types
 export const any = () => Joi.any();
 export const array = () => Joi.array();
+export const object = () => Joi.object();
 export const string = () => Joi.string();
 
 // utils

@@ -4,41 +4,37 @@ const one = () => {};
 const many = () => {};
 
 export default [
-  one('application')
-    .has().many('tags').with(['name']),
+  one('Application')
+    .hasMany('Tags').with(['name']),
 
-  many('user-events')
-    .have().one('user').with(['email']),
+  many('UserEvents')
+    .haveOne('User').with(['email']),
 
-  many('organizations')
-    .have()
-    .many('users')
+  many('Organizations')
+    .haveMany('Users')
     .as('managers')
     .with(['email', 'givenName', 'familyName'])
     .affix({ role: Joi.string().valid('Owner', 'Administrator') })
     .inverse('manages')
     .with(['name', 'slug']),
 
-  many('workspaces')
-    .have()
-    .many('users')
+  many('Workspaces')
+    .haveMany('Users')
     .as('members')
     .with(['email', 'givenName', 'familyName'])
     .affix({ role: Joi.string() })
     .inverse('memberships')
     .with({ props: ['name', 'slug', 'url'], edges: ['app', 'org'] }),
 
-  many('workspaces')
-    .have()
-    .one('application')
+  many('Workspaces')
+    .haveOne('Application')
     .as('app')
     .with(['name', 'slug'])
     .inverse()
     .with({ props: ['name', 'slug'], edges: ['org'] }),
 
-  many('workspaces')
-    .have()
-    .one('organization')
+  many('Workspaces')
+    .haveOne('Organization')
     .as('org')
     .with(['name', 'slug'])
     .inverse()

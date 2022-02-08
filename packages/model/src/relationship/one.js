@@ -1,8 +1,6 @@
 import BaseRelationship from './base.js';
 
-class RelOne extends BaseRelationship {
-
-}
+class RelOne extends BaseRelationship {}
 
 const o = new RelOne();
 

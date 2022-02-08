@@ -1,8 +1,6 @@
 import BaseRelationship from './base.js';
 
-class RelMany extends BaseRelationship {
-
-}
+class RelMany extends BaseRelationship {}
 
 const o = new RelMany();
 

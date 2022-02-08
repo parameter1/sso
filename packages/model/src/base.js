@@ -8,7 +8,8 @@ const defaultSchema = string().required();
 
 const clone = (values) => Object.keys(values).reduce((o, k) => {
   const v = values[k];
-  if (is.set(v)) return { ...o, [k]: new Set([...v]) };
+  if (is.set(v)) return { ...o, [k]: new Set(v) };
+  if (is.map(v)) return { ...o, [k]: new Map(v) };
   if (is.plainObject(v)) return { ...o, [k]: clone(v) };
   if (is.array(v)) return { ...o, [k]: v.slice() };
   return { ...o, [k]: v };

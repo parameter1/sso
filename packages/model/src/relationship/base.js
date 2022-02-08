@@ -16,7 +16,7 @@ const { camel, plural } = inflector;
 const setSchema = set();
 const typeSchema = string().valid('one', 'many').required();
 
-export default class BaseRelationship extends Base {
+export default class Relationship extends Base {
   as(value) {
     this.$needs('type', 'entity', 'has');
     return this.$set('as', camel(value));
@@ -84,7 +84,7 @@ export default class BaseRelationship extends Base {
    * ```
    *
    * @param {string|string[]|object} value
-   * @returns {BaseRelationship}
+   * @returns {Relationship}
    */
   with(value) {
     this.$needs('type', 'entity', 'has');

@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@parameter1/graphql": "^2.3.0",
-    "@parameter1/joi": "^2.2.0",
+    "@parameter1/joi": "^2.2.1",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/sso-db": "^0.1.0",
     "@parameter1/utils": "^2.0.0",

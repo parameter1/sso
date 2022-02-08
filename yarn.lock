@@ -1087,10 +1087,10 @@
   dependencies:
     gulp "^4.0.2"
 
-"@parameter1/joi@^2.2.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@parameter1/joi/-/joi-2.2.0.tgz#e22bc9291cd953027e3d0068ffee86d7aa8dcb0d"
-  integrity sha512-7S/eohJa/lmv67PlOi3mx30VRZwlLhISBgK1Odce5VMR322O+UUwe3MZjK9xwgwMpmZ2kVsJiPv6W0YkHB0UJQ==
+"@parameter1/joi@^2.2.1":
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/@parameter1/joi/-/joi-2.2.1.tgz#726af9e4090b5f9873e69205af65b31b4ac58fb3"
+  integrity sha512-6kOrbh06lCEPfADiWVSUE8w1LqMpqKlc0GtJaY2UZUDfeOpGkbynzSpehqXYnAUQFxJ1Dtmxz0iyYFwYCfnDmA==
   dependencies:
     "@parameter1/clean-string" "^2.0.0"
     "@parameter1/object-path" "^2.0.0"

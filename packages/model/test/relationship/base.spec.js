@@ -42,7 +42,7 @@ describe('relationship/base.js', () => {
       const rel = new Relationship();
       expect(() => {
         rel.entity('foo');
-      }).to.throw(Error, 'The relationship `type` value must be set first.');
+      }).to.throw(Error, 'The `type` value must be set before continuing.');
     });
     it('should throw an error when empty', () => {
       const rel = (new Relationship()).type('one');
@@ -63,10 +63,23 @@ describe('relationship/base.js', () => {
   });
 
   describe('has', () => {
-    it('should throw an error if the value has already been set', () => {
-      const rel = (new Relationship()).type('one').entity('foo').hasMany('bar');
+    it('should use the entity name utility when setting the name');
+    it('should throw an error if called before the type is set', () => {
+      const rel = new Relationship();
       expect(() => {
-        rel.hasMany('foo');
+        rel.has('one', 'foo');
+      }).to.throw(Error, 'The `type` value must be set before continuing.');
+    });
+    it('should throw an error if called before the entity is set', () => {
+      const rel = (new Relationship()).type('one');
+      expect(() => {
+        rel.has('one', 'foo');
+      }).to.throw(Error, 'The `entity` value must be set before continuing.');
+    });
+    it('should throw an error if the value has already been set', () => {
+      const rel = (new Relationship()).type('one').entity('foo').has('one', 'bar');
+      expect(() => {
+        rel.has('many', 'foo');
       }).to.throw(Error, 'A value already exists for `has.type`');
     });
     it('should throw an error when the type is neither one or many', () => {
@@ -74,31 +87,17 @@ describe('relationship/base.js', () => {
         (new Relationship()).type('one').entity('Foo').has('df', 'bar');
       }).to.throw(Error, '"has.type" must be one of [one, many]');
     });
+    it('should throw an error when the entity is empty', () => {
+      const rel = (new Relationship()).type('one').entity('foo');
+      common.testInvalidRequiredStrings((value) => {
+        rel.has('one', value);
+      });
+    });
   });
 
   // @todo convert to sinon
   describe('hasOne', () => {
-    it('should use the entity name utility when setting the name');
-    it('should throw an error if called before the type is set', () => {
-      const rel = new Relationship();
-      expect(() => {
-        rel.hasOne('foo');
-      }).to.throw(Error, 'The relationship `type` value must be set first.');
-    });
-
-    it('should throw an error if called before the entity is set', () => {
-      const rel = (new Relationship()).type('one');
-      expect(() => {
-        rel.hasOne('foo');
-      }).to.throw(Error, 'The relationship `entity` value must be set first.');
-    });
-
-    it('should throw an error when empty', () => {
-      const rel = (new Relationship()).type('one').entity('foo');
-      common.testInvalidRequiredStrings((value) => {
-        rel.hasOne(value);
-      });
-    });
+    it('should ensure that the `has` method is called');
     it('should set the value', () => {
       const rel = (new Relationship()).type('one').entity('foo').hasOne('bar');
       expect(rel.$get('has')).to.deep.equal({ type: 'one', entity: 'Bar' });
@@ -107,21 +106,7 @@ describe('relationship/base.js', () => {
 
   // @todo convert to sinon
   describe('hasMany', () => {
-    it('should use the entity name utility when setting the name');
-    it('should throw an error if called before the type is set', () => {
-      const rel = new Relationship();
-      expect(() => {
-        rel.hasMany('foo');
-      }).to.throw(Error, 'The relationship `type` value must be set first.');
-    });
-
-    it('should throw an error if called before the entity is set', () => {
-      const rel = (new Relationship()).type('one');
-      expect(() => {
-        rel.hasMany('foo');
-      }).to.throw(Error, 'The relationship `entity` value must be set first.');
-    });
-
+    it('should ensure that the `has` method is called');
     it('should set the value', () => {
       const rel = (new Relationship()).type('one').entity('foo').hasMany('bar');
       expect(rel.$get('has')).to.deep.equal({ type: 'many', entity: 'Bar' });
@@ -133,21 +118,21 @@ describe('relationship/base.js', () => {
       const rel = new Relationship();
       expect(() => {
         rel.as('foo');
-      }).to.throw(Error, 'The relationship `type` value must be set first.');
+      }).to.throw(Error, 'The `type` value must be set before continuing.');
     });
 
     it('should throw an error if called before the entity is set', () => {
       const rel = (new Relationship()).type('one');
       expect(() => {
         rel.as('foo');
-      }).to.throw(Error, 'The relationship `entity` value must be set first.');
+      }).to.throw(Error, 'The `entity` value must be set before continuing.');
     });
 
     it('should throw an error if called before has is set', () => {
       const rel = (new Relationship()).type('one').entity('Foo');
       expect(() => {
         rel.as('foo');
-      }).to.throw(Error, 'The relationship `has` value must be set first.');
+      }).to.throw(Error, 'The `has` value must be set before continuing.');
     });
 
     it('should throw an error when empty', () => {
@@ -189,21 +174,21 @@ describe('relationship/base.js', () => {
       const rel = new Relationship();
       expect(() => {
         rel.with([]);
-      }).to.throw(Error, 'The relationship `type` value must be set first.');
+      }).to.throw(Error, 'The `type` value must be set before continuing.');
     });
 
     it('should throw an error if called before the entity is set', () => {
       const rel = (new Relationship()).type('one');
       expect(() => {
         rel.with([]);
-      }).to.throw(Error, 'The relationship `entity` value must be set first.');
+      }).to.throw(Error, 'The `entity` value must be set before continuing.');
     });
 
     it('should throw an error if called before has is set', () => {
       const rel = (new Relationship()).type('one').entity('Foo');
       expect(() => {
         rel.with([]);
-      }).to.throw(Error, 'The relationship `has` value must be set first.');
+      }).to.throw(Error, 'The `has` value must be set before continuing.');
     });
 
     it('should throw an error when the value is not a string, array, or object', () => {

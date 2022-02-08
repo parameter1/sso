@@ -2,7 +2,6 @@ import Base from './base.js';
 import inflector from './inflector.js';
 import entityName from './utils/entity-name.js';
 import {
-  any,
   array,
   attempt,
   isSchema,

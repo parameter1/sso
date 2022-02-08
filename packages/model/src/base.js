@@ -16,8 +16,16 @@ const clone = (values) => Object.keys(values).reduce((o, k) => {
 }, {});
 
 export default class Base {
-  constructor() {
+  /**
+   *
+   * @param {object} options Construtor options
+   * @param {string[]} options.maybeRequiredMethods Methods that may be required
+   *                                                in order to continue with
+   *                                                another method
+   */
+  constructor({ maybeRequiredMethods = [] } = {}) {
     this.values = {};
+    this.$maybeRequiredMethods = new Set(maybeRequiredMethods);
   }
 
   /**
@@ -28,6 +36,7 @@ export default class Base {
   $clone() {
     const obj = Object.create(Object.getPrototypeOf(this));
     obj.values = clone(this.values);
+    obj.$maybeRequiredMethods = this.$maybeRequiredMethods;
     return obj;
   }
 
@@ -54,6 +63,21 @@ export default class Base {
    */
   $has(path) {
     return this.$get(path) != null;
+  }
+
+  /**
+   * Determines which method values are required to be set on the instance
+   * before allowing another action.
+   *
+   * @param  {...any} values
+   */
+  $needs(...values) {
+    const required = new Set(values);
+    this.$maybeRequiredMethods.forEach((key) => {
+      if (required.has(key) && this.$get(key) == null) {
+        throw new Error(`The \`${key}\` value must be set before continuing.`);
+      }
+    });
   }
 
   /**

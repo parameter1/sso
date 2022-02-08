@@ -18,6 +18,13 @@ const typeSchema = string().valid('one', 'many').required();
 
 export default class Relationship extends Base {
   /**
+   *
+   */
+  constructor() {
+    super({ maybeRequiredMethods: ['type', 'entity', 'has'] });
+  }
+
+  /**
    * Sets the local field name that will used when saving the relationship. This
    * value will always be converted to camelCase but _won't_ enforce
    * singular/plural form.
@@ -268,20 +275,5 @@ export default class Relationship extends Base {
       affix: {},
       with: { props: new Set(), edges: new Set() },
     };
-  }
-
-  /**
-   * Determines which values are required to be set on the instance before
-   * allowing another action.
-   *
-   * @param  {...any} values
-   */
-  $needs(...values) {
-    const s = new Set(values);
-    ['type', 'entity', 'has'].forEach((key) => {
-      if (s.has(key) && this.$get(key) == null) {
-        throw new Error(`The relationship \`${key}\` value must be set first.`);
-      }
-    });
   }
 }

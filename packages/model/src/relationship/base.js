@@ -27,7 +27,7 @@ export default class Relationship extends Base {
    * value is also set to `many`, then the field will also be converted into
    * plural form.
    *
-   * The `type`, `entity` and `has` methods must before called before calling
+   * The `type`, `entity` and `has` methods must be called before calling
    * the `as` method, otherwise an error will be thrown.
    *
    * ```
@@ -49,7 +49,7 @@ export default class Relationship extends Base {
    * singular form (e.g. `fruit-snacks` would become `FruitSnack`) - just as the
    * `Entity.name` value is handled.
    *
-   * The `type`, method must before called before calling the `entity` method,
+   * The `type`, method must be called before calling the `entity` method,
    * otherwise an error will be thrown.
    *
    * This method is called automatically when the local relationship `one` or
@@ -77,7 +77,7 @@ export default class Relationship extends Base {
    * Sets the _foreign_ relationship entity and type. The entity name will be
    * converted to PascalCase in singular form.
    *
-   * The `type` and `entity` must before called before calling the `has` method,
+   * The `type` and `entity` must be called before calling the `has` method,
    * otherwise an error will be thrown.
    *
    * ```
@@ -185,7 +185,7 @@ export default class Relationship extends Base {
    * an object that defines both `props` and `edges`. The method can also be
    * called multiple times to append multiple props and edges.
    *
-   * The `type`, `entity` and `has` methods must before called before calling
+   * The `type`, `entity` and `has` methods must be called before calling
    * the `with` method, otherwise an error will be thrown.
    *
    * The `_id` value is always saved and will be filtered out if provided.

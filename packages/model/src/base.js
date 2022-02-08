@@ -1,9 +1,10 @@
 /* eslint-disable class-methods-use-this */
-import Joi from '@parameter1/joi';
 import { isFunction as isFn } from '@parameter1/utils';
+import { get, set } from '@parameter1/object-path';
 import is from '@sindresorhus/is';
+import { attempt, isSchema, string } from './schema.js';
 
-const defaultSchema = Joi.string().required();
+const defaultSchema = string().required();
 
 // @todo account for deep values (and Joi schemas).
 const clone = (values) => Object.keys(values).reduce((o, k) => {
@@ -24,25 +25,28 @@ export default class Base {
     return obj;
   }
 
-  $get(key) {
+  $get(path) {
     const values = this.$values();
-    return values[key];
+    return get(values, path);
   }
 
-  $set(key, value, schema) {
-    const validated = this.$validate(key, value, schema);
+  $has(path) {
+    return this.$get(path) != null;
+  }
+
+  $set(path, value, { schema, strict = false } = {}) {
+    const p = attempt(path, string().label('$set.path').required());
+    const validated = this.$validate(path, value, schema);
+    if (strict && this.$has(path)) throw new Error(`A value already exists for \`${path}\``);
     const obj = this.$clone();
-    obj.values[key] = validated;
+    set(obj.values, p, validated);
     return obj;
   }
 
-  $validate(key, value, schema = defaultSchema) {
-    if (schema != null && !Joi.isSchema(schema)) throw new Error('The provided type must be a Joi schema.');
+  $validate(path, value, schema = defaultSchema) {
+    if (schema != null && !isSchema(schema)) throw new Error('The provided type must be a Joi schema.');
     if (!schema) return value;
-
-    const { value: validated, error } = schema.label(key).validate(value);
-
-    if (error) throw error;
+    const validated = attempt(value, schema.label(path));
     return validated;
   }
 

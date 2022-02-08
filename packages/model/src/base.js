@@ -6,9 +6,9 @@ import { attempt, isSchema, string } from './schema.js';
 
 const defaultSchema = string().required();
 
-// @todo account for deep values (and Joi schemas).
 const clone = (values) => Object.keys(values).reduce((o, k) => {
   const v = values[k];
+  if (is.set(v)) return { ...o, [k]: new Set([...v]) };
   if (is.plainObject(v)) return { ...o, [k]: clone(v) };
   if (is.array(v)) return { ...o, [k]: v.slice() };
   return { ...o, [k]: v };

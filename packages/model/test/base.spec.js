@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import Base from '../src/base.js';
 import common from './common.js';
 
-import { any, array } from '../src/schema.js';
+import { any, array, set } from '../src/schema.js';
 
 describe('base.js', () => {
   it('should clone on change', () => {
@@ -37,6 +37,24 @@ describe('base.js', () => {
 
     expect(b1.$get('test')).to.deep.equal({ foo: 'bar' });
     expect(b2.$get('test')).to.deep.equal({ foo: 'baz' });
+  });
+
+  it('should clone set values', () => {
+    const base = new Base();
+
+    const b1 = base.$set('test.foo', new Set(['foo']), { schema: set() });
+    const b2 = b1.$set('test.foo', new Set(['bar', 'baz']), { schema: set() });
+
+    const s1 = b1.$get('test.foo');
+    expect(s1).to.be.an.instanceOf(Set);
+    expect(s1.size).to.equal(1);
+    expect(s1.has('foo')).to.equal(true);
+
+    const s2 = b2.$get('test.foo');
+    expect(s2).to.be.an.instanceOf(Set);
+    expect(s2.size).to.equal(2);
+    expect(s2.has('bar')).to.equal(true);
+    expect(s2.has('baz')).to.equal(true);
   });
 
   describe('$set', () => {

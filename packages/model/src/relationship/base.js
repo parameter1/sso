@@ -17,6 +17,30 @@ const setSchema = set();
 const typeSchema = string().valid('one', 'many').required();
 
 export default class Relationship extends Base {
+  /**
+   * Sets the local field name that will used when saving the relationship. This
+   * value will always be converted to camelCase but _won't_ enforce singular/plural form.
+   *
+   * If this method is _never_ called, the default local field will be set as
+   * the camelCased version of the `entity` name. If the relationship `has` value is also set
+   * to `many`, then the field will also be converted into plural form.
+   *
+   * The `type`, `entity` and `has` methods must before called before calling
+   * the `as` method, otherwise an error will be thrown.
+   *
+   * ```
+   * // will set the local field as `myBars` instead of
+   * // the default `bars` value.
+   * rel
+   *  .type('one')
+   *  .entity('Foo')
+   *  .hasMany('Bars')
+   *  .as('myBars');
+   * ```
+   *
+   * @param {string} value The local field value
+   * @returns {Relationship}
+   */
   as(value) {
     this.$needs('type', 'entity', 'has');
     return this.$set('as', camel(value));
@@ -66,6 +90,9 @@ export default class Relationship extends Base {
    * object that defines both `props` and `edges`. The method can also be called multiple
    * times to append multiple props and edges.
    *
+   * The `type`, `entity` and `has` methods must before called before calling
+   * the `with` method, otherwise an error will be thrown.
+   *
    * The `_id` value is always saved and will be filtered out if provided.
    *
    * ```
@@ -83,7 +110,7 @@ export default class Relationship extends Base {
    * rel.with({ props: ['foo', 'bar', 'baz'], edges: ['a', 'b'] });
    * ```
    *
-   * @param {string|string[]|object} value
+   * @param {string|string[]|object} value The prop(s) and/or edge(s) to set
    * @returns {Relationship}
    */
   with(value) {

@@ -168,6 +168,20 @@ export default class Relationship extends Base {
     return this.has('many', value);
   }
 
+  /**
+   * The _local/owning_ relationship type of either `one` or `many`.
+   *
+   * This is called automatically with the `one` or `many` rel helper functions
+   * are used.
+   *
+   * ```
+   * one('Tag'); // uses rel.type('one').entity('Tag');
+   * many('Tags'); // uses rel.type('many').entity('Tags');
+   * ```
+   *
+   * @param {string} value The owning relationship type - `one` or `many`
+   * @returns {Relationship}
+   */
   type(value) {
     return this.$set('type', value, { schema: typeSchema, strict: true });
   }
@@ -236,6 +250,11 @@ export default class Relationship extends Base {
       .$set('with.edges', edges, { schema: setSchema });
   }
 
+  /**
+   * Determines the local field of the relationship.
+   *
+   * @returns {string}
+   */
   $localField() {
     const { as: alias, has } = this.$values();
     if (alias) return alias;
@@ -251,6 +270,12 @@ export default class Relationship extends Base {
     };
   }
 
+  /**
+   * Determines which values are required to be set on the instance before
+   * allowing another action.
+   *
+   * @param  {...any} values
+   */
   $needs(...values) {
     const s = new Set(values);
     ['type', 'entity', 'has'].forEach((key) => {

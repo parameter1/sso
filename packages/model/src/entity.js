@@ -11,7 +11,7 @@ import {
 
 const { camel, param, plural } = inflector;
 
-class Entity extends Base {
+export class Entity extends Base {
   /**
    * A Joi schema object for use in validating and sanitizing values
    * @typedef {object} Schema
@@ -26,6 +26,13 @@ class Entity extends Base {
    * @property {Schema} schema The schema to use when validating the property
    *                           value
    */
+
+  /**
+   *
+   */
+  constructor() {
+    super({ maybeRequiredMethods: ['name'] });
+  }
 
   /**
    * Sets the name of the entity. The value will be converted to PascalCase in
@@ -55,6 +62,9 @@ class Entity extends Base {
    *
    * This method will throw an error if an existing property is already set.
    *
+   * The `name` must be called before calling the `collection` method, otherwise
+   * an error will be thrown.
+   *
    * ```
    * const ent = entity('Foo')
    *  .prop('bar', string())
@@ -75,6 +85,7 @@ class Entity extends Base {
    * @returns {Entity} The cloned instance
    */
   prop(name, schema) {
+    this.$needs('name');
     const k = attempt(name, string().required());
     attempt(schema, schemaType().label('schema').required());
     const path = `props.${camel(k)}`;
@@ -84,6 +95,9 @@ class Entity extends Base {
   /**
    * Definines multiple properties on this entity in one call. Invokes the
    * `prop` method for each value in the array.
+   *
+   * The `name` must be called before calling the `collection` method, otherwise
+   * an error will be thrown.
    *
    * ```
    * const ent = entity('Foo').props([
@@ -122,6 +136,9 @@ class Entity extends Base {
    * entity name. As an example, if the entity name is `UserEvent` then the
    * collection name would be `user-events`.
    *
+   * The `name` must be called before calling the `collection` method, otherwise
+   * an error will be thrown.
+   *
    * ```
    * // `some_collection` instead of the default `foos` collection
    * entity('Foo').collection('some_collection');
@@ -133,6 +150,7 @@ class Entity extends Base {
    * @returns {Entity} The cloned instance
    */
   collection(value) {
+    this.$needs('name');
     return this.$set('collection', value);
   }
 

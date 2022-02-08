@@ -4,11 +4,18 @@ import { pascalCase } from 'pascal-case';
 import { camelCase } from 'camel-case';
 import { noCase } from 'no-case';
 
+const run = (value, fn) => {
+  if (value == null) return null;
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed ? fn(trimmed) : null;
+};
+
 export default {
-  camel: (value) => camelCase(value),
-  none: (value) => noCase(value),
-  pascal: (value) => pascalCase(value),
-  param: (value) => paramCase(value),
-  plural: (value) => infl.pluralize(value),
-  singular: (value) => infl.singularize(value),
+  camel: (value) => run(value, camelCase),
+  none: (value) => run(value, noCase),
+  pascal: (value) => run(value, pascalCase),
+  param: (value) => run(value, paramCase),
+  plural: (value) => run(value, infl.pluralize),
+  singular: (value) => run(value, infl.singularize),
 };

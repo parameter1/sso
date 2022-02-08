@@ -52,8 +52,8 @@ export default class Relationship extends Base {
    * The `type`, method must before called before calling the `entity` method,
    * otherwise an error will be thrown.
    *
-   * This method is called automatically when the relationship `one` or `many`
-   * helper functions are invoked.
+   * This method is called automatically when the local relationship `one` or
+   * `many` helper functions are invoked.
    *
    * ```
    * // in both cases the internal entity name is stored as `Foo`
@@ -73,6 +73,39 @@ export default class Relationship extends Base {
     return this.$set('entity', entityName(value), { strict: true });
   }
 
+  /**
+   * Sets the _foreign_ relationship entity and type. The entity name will be
+   * converted to PascalCase in singular form.
+   *
+   * The `type` and `entity` must before called before calling the `has` method,
+   * otherwise an error will be thrown.
+   *
+   * ```
+   * // one-to-one relationships (1:1)
+   * rel.type('one').entity('Org').has('one', 'User');
+   * one('Org').has('one', 'User'); // using rel helper function
+   * one('Org').hasOne('User'); // using `hasOne` helper method
+   *
+   * // one-to-many relationships (1:N)
+   * rel.type('one').entity('Org').has('many', 'Users');
+   * one('Org').has('many', 'Users'); // using rel helper function
+   * one('Org').hasMany('Users'); // using `hasMany` helper method
+   *
+   * // many-to-one relationships (N:1)
+   * rel.type('many').entity('Orgs').have('one', 'User');
+   * many('Orgs').have('one', 'User'); // using rel helper function
+   * many('Orgs').haveOne('User'); // using `haveOne` helper method
+   *
+   * // many-to-many relationships (M:N)
+   * rel.type('many').entity('Orgs').have('many', 'Users');
+   * many('Orgs').have('many', 'Users'); // using rel helper function
+   * many('Orgs').haveMany('Users'); // using `haveMany` helper method
+   * ```
+   *
+   * @param {string} type The relationship type, either `one` or `many`
+   * @param {string} value The related entity name.
+   * @returns {Relationship}
+   */
   has(type, value) {
     this.$needs('type', 'entity');
     return this
@@ -80,18 +113,57 @@ export default class Relationship extends Base {
       .$set('has.entity', entityName(value), { strict: true });
   }
 
+  /**
+   * A semantic alias of the `has` method.
+   *
+   * @param {string} type The relationship type, either `one` or `many`
+   * @param {string} value The related entity name.
+   * @returns {Relationship}
+   */
+  have(type, value) {
+    return this.has(type, value);
+  }
+
+  /**
+   * A semantic alias of the `has` method that automatically sets the foreign
+   * relationship type to `one`.
+   *
+   * @param {string} value The related entity name.
+   * @returns {Relationship}
+   */
   hasOne(value) {
     return this.has('one', value);
   }
 
+  /**
+   * A semantic alias of the `has` method that automatically sets the foreign
+   * relationship type to `many`.
+   *
+   * @param {string} value The related entity name.
+   * @returns {Relationship}
+   */
   hasMany(value) {
     return this.has('many', value);
   }
 
+  /**
+   * A semantic alias of the `has` method that automatically sets the foreign
+   * relationship type to `one`.
+   *
+   * @param {string} value The related entity name.
+   * @returns {Relationship}
+   */
   haveOne(value) {
     return this.has('one', value);
   }
 
+  /**
+   * A semantic alias of the `has` method that automatically sets the foreign
+   * relationship type to `many`.
+   *
+   * @param {string} value The related entity name.
+   * @returns {Relationship}
+   */
   haveMany(value) {
     return this.has('many', value);
   }

@@ -1,15 +1,15 @@
 import Base from './base.js';
 import inflector from './inflector.js';
+import entityName from './utils/entity-name.js';
 
 const { param, plural } = inflector;
 
 class Entity extends Base {
   name(value) {
-    return this.$set('name', value);
-  }
-
-  plural(value) {
-    return this.$set('plural', value);
+    const name = entityName(value);
+    return this
+      .$set('name', name)
+      .$set('plural', plural(name));
   }
 
   collection(value) {
@@ -18,10 +18,7 @@ class Entity extends Base {
 
   $defaults() {
     const { name } = this.values;
-    return {
-      plural: plural(name),
-      collection: plural(param(name)),
-    };
+    return { collection: plural(param(name)) };
   }
 }
 

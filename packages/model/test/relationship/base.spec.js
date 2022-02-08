@@ -27,6 +27,7 @@ describe('relationship/base.js', () => {
   });
 
   describe('entity', () => {
+    it('should use the entity name utility when setting the name');
     it('should throw an error if called before the type is set', () => {
       const rel = new BaseRelationship();
       expect(() => {
@@ -43,11 +44,12 @@ describe('relationship/base.js', () => {
     });
     it('should set the value', () => {
       const rel = (new BaseRelationship()).type('one').entity('foo');
-      expect(rel.$get('entity')).to.equal('foo');
+      expect(rel.$get('entity')).to.equal('Foo');
     });
   });
 
   describe('hasOne', () => {
+    it('should use the entity name utility when setting the name');
     it('should throw an error if called before the type is set', () => {
       const rel = new BaseRelationship();
       expect(() => {
@@ -72,11 +74,12 @@ describe('relationship/base.js', () => {
     });
     it('should set the value', () => {
       const rel = (new BaseRelationship()).type('one').entity('foo').hasOne('bar');
-      expect(rel.$get('has')).to.equal('bar');
+      expect(rel.$get('has')).to.equal('Bar');
     });
   });
 
   describe('hasMany', () => {
+    it('should use the entity name utility when setting the name');
     it('should throw an error if called before the type is set', () => {
       const rel = new BaseRelationship();
       expect(() => {
@@ -93,7 +96,7 @@ describe('relationship/base.js', () => {
 
     it('should set the value', () => {
       const rel = (new BaseRelationship()).type('one').entity('foo').hasMany('bar');
-      expect(rel.$get('has')).to.equal('bar');
+      expect(rel.$get('has')).to.equal('Bar');
     });
   });
 });

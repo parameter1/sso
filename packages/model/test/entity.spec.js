@@ -14,20 +14,12 @@ describe('entity.js', () => {
     expect(ent2.$values().collection).to.equal('user-events');
   });
 
-  it('should create a plural by default', () => {
-    const ent1 = entity('Application');
-    const ent2 = entity('UserEvent');
+  it('should use the entity name utility when setting the name');
 
-    expect(ent1.$get('plural')).to.equal('Applications');
-    expect(ent1.$values().plural).to.equal('Applications');
-    expect(ent2.$get('plural')).to.equal('UserEvents');
-    expect(ent2.$values().plural).to.equal('UserEvents');
-  });
-
-  it('should set the plural value', () => {
-    const ent1 = entity('Application').plural('Foo');
-
-    expect(ent1.$get('plural')).to.equal('Foo');
-    expect(ent1.$values().plural).to.equal('Foo');
+  it('should add the pural version of the name', () => {
+    ['UserEvents', 'user-event', 'userEvent', 'user event', 'user.event', 'UserEvent', 'User Event'].forEach((name) => {
+      const ent = entity(name);
+      expect(ent.$get('plural')).to.equal('UserEvents');
+    });
   });
 });

@@ -1,22 +1,28 @@
 import Joi from '@parameter1/joi';
 import Base from '../base.js';
+import entityName from '../utils/entity-name.js';
 
 const typeSchema = Joi.string().valid('one', 'many').required();
 
 export default class BaseRelationship extends Base {
+  as(value) {
+    this.$needs('type', 'entity');
+    return this.$set('as', value);
+  }
+
   entity(value) {
     this.$needs('type');
-    return this.$set('entity', value);
+    return this.$set('entity', entityName(value));
   }
 
   hasOne(value) {
     this.$needs('type', 'entity');
-    return this.$set('has', value);
+    return this.$set('has', entityName(value));
   }
 
   hasMany(value) {
     this.$needs('type', 'entity');
-    return this.$set('has', value);
+    return this.$set('has', entityName(value));
   }
 
   haveOne(value) {

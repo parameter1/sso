@@ -7,6 +7,6 @@ describe('relationship/one.js', () => {
   it('on call, should be set as type `one` with an entity name', () => {
     const r = one('foo');
     expect(r.$get('type')).to.equal('one');
-    expect(r.$get('entity')).to.equal('foo');
+    expect(r.$get('entity')).to.equal('Foo');
   });
 });

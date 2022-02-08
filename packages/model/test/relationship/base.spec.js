@@ -99,4 +99,43 @@ describe('relationship/base.js', () => {
       expect(rel.$get('has')).to.equal('Bar');
     });
   });
+
+  describe('as', () => {
+    it('should throw an error if called before the type is set', () => {
+      const rel = new BaseRelationship();
+      expect(() => {
+        rel.as('foo');
+      }).to.throw(Error, 'The relationship `type` value must be set first.');
+    });
+
+    it('should throw an error if called before the entity is set', () => {
+      const rel = (new BaseRelationship()).type('one');
+      expect(() => {
+        rel.as('foo');
+      }).to.throw(Error, 'The relationship `entity` value must be set first.');
+    });
+
+    it('should throw an error if called before hasOne/hasMany is set', () => {
+      const rel = (new BaseRelationship()).type('one').entity('Foo');
+      expect(() => {
+        rel.as('foo');
+      }).to.throw(Error, 'The relationship `has` value must be set first.');
+    });
+
+    it('should throw an error when empty', () => {
+      const rel = (new BaseRelationship()).type('one').entity('Foo').hasMany('Bar');
+      [undefined, null, '', '  ', {}].forEach((value) => {
+        expect(() => {
+          rel.as(value);
+        }).to.throw(ValidationError);
+      });
+    });
+
+    it('should set the camelized value', () => {
+      const rel = (new BaseRelationship()).type('one').entity('foo').hasOne('bar');
+      ['userEvent', 'UserEvent', 'user-event', 'user event', ' userEvent '].forEach((value) => {
+        expect(rel.as(value).$get('as')).to.equal('userEvent');
+      });
+    });
+  });
 });

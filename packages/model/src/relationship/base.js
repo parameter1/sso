@@ -1,13 +1,16 @@
 import Joi from '@parameter1/joi';
 import Base from '../base.js';
 import entityName from '../utils/entity-name.js';
+import inflector from '../inflector.js';
+
+const { camel } = inflector;
 
 const typeSchema = Joi.string().valid('one', 'many').required();
 
 export default class BaseRelationship extends Base {
   as(value) {
-    this.$needs('type', 'entity');
-    return this.$set('as', value);
+    this.$needs('type', 'entity', 'has');
+    return this.$set('as', camel(value));
   }
 
   entity(value) {
@@ -39,7 +42,7 @@ export default class BaseRelationship extends Base {
 
   $needs(...values) {
     const set = new Set(values);
-    ['type', 'entity'].forEach((key) => {
+    ['type', 'entity', 'has'].forEach((key) => {
       if (set.has(key) && this.$get(key) == null) {
         throw new Error(`The relationship \`${key}\` value must be set first.`);
       }

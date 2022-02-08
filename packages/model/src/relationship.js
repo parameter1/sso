@@ -1,7 +1,7 @@
 import is from '@sindresorhus/is';
-import Base from '../base.js';
-import entityName from '../utils/entity-name.js';
-import inflector from '../inflector.js';
+import Base from './base.js';
+import entityName from './utils/entity-name.js';
+import inflector from './inflector.js';
 import {
   array,
   attempt,
@@ -9,14 +9,14 @@ import {
   object,
   set,
   string,
-} from '../schema.js';
+} from './schema.js';
 
 const { camel, plural } = inflector;
 
 const setSchema = set();
 const typeSchema = string().valid('one', 'many').required();
 
-export default class Relationship extends Base {
+export class Relationship extends Base {
   /**
    *
    */
@@ -276,4 +276,24 @@ export default class Relationship extends Base {
       with: { props: new Set(), edges: new Set() },
     };
   }
+}
+
+/**
+ * Creates an owning relationship instance for `one` related entity.
+ *
+ * @param {string} name The entity name to relate
+ * @returns {Relationship}
+ */
+export function one(name) {
+  return (new Relationship()).type('one').entity(name);
+}
+
+/**
+ * Creates an owning relationship instance for `many` related entities.
+ *
+ * @param {string} name The entity name to relate
+ * @returns {Relationship}
+ */
+export function many(name) {
+  return (new Relationship()).type('many').entity(name);
 }

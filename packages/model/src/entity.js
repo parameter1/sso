@@ -12,6 +12,21 @@ const { camel, param, plural } = inflector;
 
 class Entity extends Base {
   /**
+   * A Joi schema object for use in validating and sanitizing values
+   * @typedef {object} Schema
+   * @property {function} required Whether the value must be defined
+   */
+
+  /**
+   * A property definition object.
+   *
+   * @typedef {object} PropertyDefinition
+   * @property {string} name The name of the property
+   * @property {Schema} schema The schema to use when validating the property
+   *                           value
+   */
+
+  /**
    * Sets the name of the entity. The value will be converted to PascalCase in
    * singular form. As an example, `fruit-snacks` would become `FruitSnack`.
    *
@@ -40,14 +55,22 @@ class Entity extends Base {
    * This method will throw an error if an existing property is already set.
    *
    * ```
-   * entity('Foo')
+   * const ent = entity('Foo')
    *  .prop('bar', string())
-   *  .prop('pull_request', string()) // stored internally as `pullRequest`
+   *  .prop('pull_request', string())
    *  .prop('baz', boolean());
+   *
+   * Map(3) {
+   *  'bar' => { schema: StringSchema },
+   *  'pullRequest' => { schema: StringSchema },
+   *  'baz' => { schema: BooleanSchema },
+   * } = ent.$get('props');
    * ```
    *
-   * @param {string} name The name of the property.
-   * @param {object} schema The schema to use when validating the property value
+   * Multiple props can be added at once using the `props` method.
+   *
+   * @param {string} name The name of the property
+   * @param {Schema} schema The schema to use when validating the property value
    * @returns {Entity} The cloned instance
    */
   prop(name, schema) {
@@ -71,7 +94,7 @@ class Entity extends Base {
    * ```
    *
    * @param {string} value The collection name
-   * @returns {Entity}
+   * @returns {Entity} The cloned instance
    */
   collection(value) {
     return this.$set('collection', value);
@@ -92,7 +115,7 @@ class Entity extends Base {
  * Creates a new entity definition.
  *
  * @param {string} name The entity name.
- * @returns {Entity}
+ * @returns {Entity} The cloned instance
  */
 export default function entity(name) {
   return (new Entity()).name(name);

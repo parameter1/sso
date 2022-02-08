@@ -1,9 +1,5 @@
-import BaseRelationship from './base.js';
-
-class RelOne extends BaseRelationship {}
-
-const o = new RelOne();
+import Relationship from './base.js';
 
 export default function one(entityName) {
-  return o.type('one').entity(entityName);
+  return (new Relationship()).type('one').entity(entityName);
 }

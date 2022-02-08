@@ -1,9 +1,5 @@
-import BaseRelationship from './base.js';
-
-class RelMany extends BaseRelationship {}
-
-const o = new RelMany();
+import Relationship from './base.js';
 
 export default function many(entityName) {
-  return o.type('many').entity(entityName);
+  return (new Relationship()).type('many').entity(entityName);
 }

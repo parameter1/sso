@@ -19,22 +19,60 @@ export default class Base {
     this.values = {};
   }
 
+  /**
+   * Clones the current object and values.
+   *
+   * @returns {Base} The cloned instance
+   */
   $clone() {
     const obj = Object.create(Object.getPrototypeOf(this));
     obj.values = clone(this.values);
     return obj;
   }
 
+  /**
+   * Gets a single value from the instance.
+   * Dot-notation can be used to access deep property values.
+   *
+   * The value is cloned (where applicable).
+   *
+   * @param {string} path The path to access
+   * @returns {*} The path value
+   */
   $get(path) {
     const values = this.$values();
     return get(values, path);
   }
 
+  /**
+   * Determines if a value exists (i.e. defined and not null).
+   * Dot-notation can be used to access deep property values.
+   *
+   * @param {string} path The path to check
+   * @returns {boolean} Whether the path values exists
+   */
   $has(path) {
     return this.$get(path) != null;
   }
 
-  $set(path, value, { schema, strict = false } = {}) {
+  /**
+   * Sets a value. The values are cloned before setting.
+   * Dot-notation can be used to set deep property values.
+   *
+   * By default, a required `string` schema is used to validate the value,
+   * but any schema type can used by setting the `schema` option.
+   *
+   * To prevent a previously set value from being reassigned, set the `strict`
+   * option to true.
+   *
+   * @param {string} path The path to set
+   * @param {*} value The value to set
+   * @param {object} options
+   * @param {Joi} options.schema The schema to validate the value against
+   * @param {boolean} [options.strict=false] Whether to prevent reassignment of an existing value
+   * @returns {Base} The cloned instance
+   */
+  $set(path, value, { schema = defaultSchema, strict = false } = {}) {
     const p = attempt(path, string().label('$set.path').required());
     const validated = this.$validate(path, value, schema);
     if (strict && this.$has(path)) throw new Error(`A value already exists for \`${path}\``);
@@ -43,6 +81,14 @@ export default class Base {
     return obj;
   }
 
+  /**
+   * Validates the provided value against the given schema.
+   *
+   * @param {string} path The intended path
+   * @param {*} value The value to validate
+   * @param {Joi} schema The schema to use for validation
+   * @returns {void}
+   */
   $validate(path, value, schema = defaultSchema) {
     if (schema != null && !isSchema(schema)) throw new Error('The provided type must be a Joi schema.');
     if (!schema) return value;
@@ -50,6 +96,12 @@ export default class Base {
     return validated;
   }
 
+  /**
+   * Gets all values currently set to the instance.
+   * The values are cloned.
+   *
+   * @returns {object}
+   */
   $values() {
     const defaults = isFn(this.$defaults) ? this.$defaults() : undefined;
     return clone({ ...defaults, ...this.values });

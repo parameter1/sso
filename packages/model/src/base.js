@@ -2,7 +2,7 @@
 import { isFunction as isFn } from '@parameter1/utils';
 import { get, set } from '@parameter1/object-path';
 import is from '@sindresorhus/is';
-import { attempt, schema as schemaType, string } from './schema.js';
+import { attempt, schemaObject, string } from './schema.js';
 
 const defaultSchema = string().required();
 
@@ -117,7 +117,7 @@ export default class Base {
    * @returns {void}
    */
   $validate(path, value, schema = defaultSchema) {
-    attempt(schema, schemaType().allow(null).label('schema'));
+    attempt(schema, schemaObject().allow(null).label('schema'));
     if (!schema) return value;
     const validated = attempt(value, schema.label(path));
     return validated;

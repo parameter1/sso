@@ -10,7 +10,7 @@ export const array = () => Joi.array();
 export const conditional = (...args) => Joi.alternatives().conditional(...args);
 export const object = () => Joi.object();
 export const map = () => Joi.object().instance(Map);
-export const schema = () => Joi.object().schema();
+export const schemaObject = () => Joi.object().schema();
 export const set = () => Joi.object().instance(Set);
 export const string = () => Joi.string();
 

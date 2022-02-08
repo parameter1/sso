@@ -1,15 +1,15 @@
 import Base from './base.js';
 import inflector from './inflector.js';
 import entityName from './utils/entity-name.js';
+import { prop } from './property.js';
 import {
   array,
   attempt,
   object,
-  schema as schemaType,
   string,
 } from './schema.js';
 
-const { camel, param, plural } = inflector;
+const { param, plural } = inflector;
 
 export class Entity extends Base {
   /**
@@ -32,6 +32,7 @@ export class Entity extends Base {
    */
   constructor() {
     super({ maybeRequiredMethods: ['name'] });
+    this.$props = new Map();
   }
 
   /**
@@ -86,10 +87,12 @@ export class Entity extends Base {
    */
   prop(name, schema) {
     this.$needs('name');
-    const k = attempt(name, string().required());
-    attempt(schema, schemaType().label('schema').required());
-    const path = `props.${camel(k)}`;
-    return this.$set(path, { schema }, { schema: object(), strict: true });
+    const value = prop(name, schema);
+    const obj = this.$clone();
+    const key = value.$get('name');
+    if (obj.$props.has(key)) throw new Error(`A value already exists for \`props.${key}\``);
+    obj.$props.set(key, value);
+    return obj;
   }
 
   /**
@@ -154,6 +157,12 @@ export class Entity extends Base {
     return this.$set('collection', value);
   }
 
+  $clone() {
+    const cloned = super.$clone();
+    cloned.$props = new Map(this.$props);
+    return cloned;
+  }
+
   /**
    * Returns the default values for each instance.
    *
@@ -171,6 +180,6 @@ export class Entity extends Base {
  * @param {string} name The entity name.
  * @returns {Entity} The cloned instance
  */
-export default function entity(name) {
+export function entity(name) {
   return (new Entity()).name(name);
 }

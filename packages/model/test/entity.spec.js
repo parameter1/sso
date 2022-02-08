@@ -2,7 +2,7 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { ValidationError } from '@parameter1/joi';
-import entity from '../src/entity.js';
+import { entity } from '../src/entity.js';
 import { string, isSchema } from '../src/schema.js';
 import common from './common.js';
 
@@ -48,13 +48,13 @@ describe('entity.js', () => {
     });
     it('should camelize the prop name', () => {
       ['foo_bar', 'FooBar', 'foo-bar', 'foo bar', 'foo.bar', 'foo__bar'].forEach((name) => {
-        const v = entity('foo').prop(name, string()).$has('props.fooBar');
+        const v = entity('foo').prop(name, string()).$props.has('fooBar');
         expect(v).to.equal(true);
       });
     });
     it('should set the schema', () => {
-      const prop = entity('foo').prop('foo', string()).$get('props.foo');
-      expect(isSchema(prop.schema)).to.equal(true);
+      const prop = entity('foo').prop('foo', string()).$props.get('foo');
+      expect(isSchema(prop.$get('schema'))).to.equal(true);
     });
   });
 
@@ -75,9 +75,10 @@ describe('entity.js', () => {
         { name: 'baz', schema: string() },
       ]);
       ['bar', 'pullRequest', 'baz'].forEach((name) => {
-        const prop = ent.$get(`props.${name}`);
+        const prop = ent.$props.get(name);
         expect(prop).to.be.an('object');
-        expect(isSchema(prop.schema)).to.equal(true);
+        expect(prop.$get('name')).to.equal(name);
+        expect(isSchema(prop.$get('schema'))).to.equal(true);
       });
     });
   });

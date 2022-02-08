@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
+import { ValidationError } from '@parameter1/joi';
 import Base from '../src/base.js';
 import common from './common.js';
 
@@ -102,6 +103,16 @@ describe('base.js', () => {
     it('should deeply get', () => {
       const base = (new Base()).$set('foo.bar', 'a');
       expect(base.$get('foo.bar')).to.equal('a');
+    });
+  });
+
+  describe('$validate', () => {
+    it('should throw an error when set but not a schema object', () => {
+      ['', 'foo', true, [], {}].forEach((schema) => {
+        expect(() => {
+          (new Base()).$validate('key', 'value', schema);
+        }).to.throw(ValidationError);
+      });
     });
   });
 

@@ -39,11 +39,11 @@ describe('entity.js', () => {
         entity('foo').prop('bar', string()).prop('bar', string());
       }).to.throw(Error, 'A value already exists for `props.bar`');
     });
-    it('should throw an error when a Joi schema is omitted', () => {
+    it('should throw an error when schema is not a Joi object', () => {
       [undefined, null, {}, string].forEach((schema) => {
         expect(() => {
           entity('foo').prop('bar', schema);
-        }).to.throw(Error, 'A Joi schema is required when setting a prop.');
+        }).to.throw(ValidationError);
       });
     });
     it('should camelize the prop name', () => {

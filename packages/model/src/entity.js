@@ -4,8 +4,8 @@ import entityName from './utils/entity-name.js';
 import {
   array,
   attempt,
-  isSchema,
   object,
+  schema as schemaType,
   string,
 } from './schema.js';
 
@@ -76,7 +76,7 @@ class Entity extends Base {
    */
   prop(name, schema) {
     const k = attempt(name, string().required());
-    if (!isSchema(schema)) throw Error('A Joi schema is required when setting a prop.');
+    attempt(schema, schemaType().label('schema').required());
     const path = `props.${camel(k)}`;
     return this.$set(path, { schema }, { schema: object(), strict: true });
   }

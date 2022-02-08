@@ -50,10 +50,24 @@ class Entity extends Base {
     return this.$set(path, { schema }, { schema: object(), strict: true });
   }
 
+  /**
+   * Sets the database collection. If never used, the default
+   * collection will be the param-cased, plural version of the
+   * entity name (e.g. if the entity name is `UserEvent` the collection
+   * name will be `user-events`).
+   *
+   * @param {string} value The collection name
+   * @returns {Entity}
+   */
   collection(value) {
     return this.$set('collection', value);
   }
 
+  /**
+   * Returns the default values for each instance.
+   *
+   * @returns {object}
+   */
   $defaults() {
     const { name } = this.values;
     return { collection: plural(param(name)) };

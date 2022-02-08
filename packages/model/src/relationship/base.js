@@ -3,7 +3,7 @@ import Base from '../base.js';
 import entityName from '../utils/entity-name.js';
 import inflector from '../inflector.js';
 
-const { camel } = inflector;
+const { camel, plural } = inflector;
 
 const typeSchema = Joi.string().valid('one', 'many').required();
 
@@ -18,14 +18,19 @@ export default class BaseRelationship extends Base {
     return this.$set('entity', entityName(value));
   }
 
-  hasOne(value) {
+  has(type, value) {
     this.$needs('type', 'entity');
-    return this.$set('has', entityName(value));
+    return this
+      .$set('has.type', type, { schema: typeSchema })
+      .$set('has.entity', entityName(value));
+  }
+
+  hasOne(value) {
+    return this.has('one', value);
   }
 
   hasMany(value) {
-    this.$needs('type', 'entity');
-    return this.$set('has', entityName(value));
+    return this.has('many', value);
   }
 
   haveOne(value) {
@@ -37,7 +42,22 @@ export default class BaseRelationship extends Base {
   }
 
   type(value) {
-    return this.$set('type', value, typeSchema);
+    return this.$set('type', value, { schema: typeSchema });
+  }
+
+  $localField() {
+    const { as: alias, has } = this.$values();
+    if (alias) return alias;
+    const field = camel(has.entity);
+    return has.type === 'many' ? plural(field) : field;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  $defaults() {
+    return {
+      affix: {},
+      with: { props: [], edges: [], connections: [] },
+    };
   }
 
   $needs(...values) {

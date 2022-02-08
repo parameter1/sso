@@ -31,8 +31,8 @@ export default class Base {
   }
 
   /**
-   * Gets a single value from the instance.
-   * Dot-notation can be used to access deep property values.
+   * Gets a single value from the instance. Dot-notation can be used to access
+   * deep property values.
    *
    * The value is cloned (where applicable).
    *
@@ -45,8 +45,8 @@ export default class Base {
   }
 
   /**
-   * Determines if a value exists (i.e. defined and not null).
-   * Dot-notation can be used to access deep property values.
+   * Determines if a value exists (i.e. defined and not null). Dot-notation can
+   * be used to access deep property values.
    *
    * @param {string} path The path to check
    * @returns {boolean} Whether the path values exists
@@ -56,11 +56,11 @@ export default class Base {
   }
 
   /**
-   * Sets a value. The values are cloned before setting.
-   * Dot-notation can be used to set deep property values.
+   * Sets a value. The values are cloned before setting. Dot-notation can be
+   * used to set deep property values.
    *
-   * By default, a required `string` schema is used to validate the value,
-   * but any schema type can used by setting the `schema` option.
+   * By default, a required `string` schema is used to validate the value, but
+   * any schema type can used by setting the `schema` option.
    *
    * To prevent a previously set value from being reassigned, set the `strict`
    * option to true.

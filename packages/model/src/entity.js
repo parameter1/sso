@@ -12,14 +12,14 @@ const { camel, param, plural } = inflector;
 
 class Entity extends Base {
   /**
-   * Sets the name of the entity. The value will be automatically
-   * converted to PascalCase in singular form (e.g.
-   * `fruit-snacks` would become `FruitSnack`).
+   * Sets the name of the entity. The value will be converted to PascalCase in
+   * singular form. As an example, `fruit-snacks` would become `FruitSnack`.
    *
-   * This method is automatically called when the `entity` function is invoked.
+   * This method is called automatically when the `entity` function is invoked.
    *
    * ```
-   * entity('foo');
+   * entity('Foo');
+   * entity('Bars'); // the internal entity name will be `Bar`
    * ```
    *
    * @param {string} value The entity name
@@ -33,15 +33,16 @@ class Entity extends Base {
   }
 
   /**
-   * Defines a property on this entity, along with its schema. The property
-   * name will be automatically converted to camelCase (e.g. `pull_request`
-   * would become `pullRequest`).
+   * Defines a property on this entity, along with its schema. The property name
+   * will be converted to camelCase. As an example, `pull_request` would become
+   * `pullRequest`.
    *
-   * Will throw an error if an existing property is already set.
+   * This method will throw an error if an existing property is already set.
    *
    * ```
-   * entity('foo')
+   * entity('Foo')
    *  .prop('bar', string())
+   *  .prop('pull_request', string()) // stored internally as `pullRequest`
    *  .prop('baz', boolean());
    * ```
    *
@@ -57,14 +58,16 @@ class Entity extends Base {
   }
 
   /**
-   * Sets the database collection. If never used, the default
-   * collection will be the param-cased, plural version of the
-   * entity name (e.g. if the entity name is `UserEvent` the collection
-   * name will be `user-events`).
+   * Sets the database collection. If this method is _never_ called, then the
+   * default collection name will be the param-cased, plural version of the
+   * entity name. As an example, if the entity name is `UserEvent` then the
+   * collection name would be `user-events`.
    *
    * ```
-   * entity('foo').collection('some_collection'); // some_collection
-   * entity('bar').collection('foo/bar'); // foo/bar
+   * // `some_collection` instead of the default `foos` collection
+   * entity('Foo').collection('some_collection');
+   * // `foo/bar` instead of the default `foo-bars` collection
+   * entity('FooBar').collection('foo/bar');
    * ```
    *
    * @param {string} value The collection name

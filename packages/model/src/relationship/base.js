@@ -33,11 +33,7 @@ export default class Relationship extends Base {
    * ```
    * // will set the local field as `myBars` instead of
    * // the default `bars` value.
-   * rel
-   *  .type('one')
-   *  .entity('Foo')
-   *  .hasMany('Bars')
-   *  .as('myBars');
+   * rel.type('one').entity('Foo').hasMany('Bars').as('myBars');
    * ```
    *
    * @param {string} value The local field value

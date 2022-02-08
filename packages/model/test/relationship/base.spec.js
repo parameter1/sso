@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
+import { ValidationError } from '@parameter1/joi';
 import BaseRelationship from '../../src/relationship/base.js';
 import common from '../common.js';
 
@@ -180,6 +181,98 @@ describe('relationship/base.js', () => {
         .hasMany('UserEvent')
         .as('foo_bar');
       expect(rel.$localField()).to.equal('fooBar');
+    });
+  });
+
+  describe('with', () => {
+    it('should throw an error if called before the type is set', () => {
+      const rel = new BaseRelationship();
+      expect(() => {
+        rel.with([]);
+      }).to.throw(Error, 'The relationship `type` value must be set first.');
+    });
+
+    it('should throw an error if called before the entity is set', () => {
+      const rel = (new BaseRelationship()).type('one');
+      expect(() => {
+        rel.with([]);
+      }).to.throw(Error, 'The relationship `entity` value must be set first.');
+    });
+
+    it('should throw an error if called before has is set', () => {
+      const rel = (new BaseRelationship()).type('one').entity('Foo');
+      expect(() => {
+        rel.with([]);
+      }).to.throw(Error, 'The relationship `has` value must be set first.');
+    });
+
+    it('should throw an error when the value is not a string, array, or object', () => {
+      const rel = (new BaseRelationship()).type('one').entity('Foo').has('one', 'Bar');
+      [null, undefined, true, 1].forEach((value) => {
+        expect(() => {
+          rel.with(value);
+        }).to.throw(ValidationError);
+      });
+    });
+
+    it('should set the related props and edges using an object', () => {
+      const rel = (new BaseRelationship())
+        .type('one')
+        .entity('Foo')
+        .has('one', 'Bar')
+        .with({ props: ['foo', 'bar'], edges: ['dill'] })
+        .with({ props: ['baz', 'bar'], edges: ['dill', 'bag'] });
+      const props = rel.$get('with.props');
+      expect(props).to.be.an.instanceOf(Set);
+      expect(props.size).to.equal(3);
+      ['foo', 'bar', 'baz'].forEach((prop) => expect(props.has(prop)).to.equal(true));
+
+      const edges = rel.$get('with.edges');
+      expect(edges).to.be.an.instanceOf(Set);
+      expect(edges.size).to.equal(2);
+      ['dill', 'bag'].forEach((prop) => expect(edges.has(prop)).to.equal(true));
+    });
+
+    it('should set the related props using a string', () => {
+      const rel = (new BaseRelationship())
+        .type('one')
+        .entity('Foo')
+        .has('one', 'Bar')
+        .with('foo')
+        .with('bar')
+        .with('foo');
+      const props = rel.$get('with.props');
+      expect(props).to.be.an.instanceOf(Set);
+      expect(props.size).to.equal(2);
+      ['foo', 'bar'].forEach((prop) => expect(props.has(prop)).to.equal(true));
+    });
+
+    it('should set the related props using an array', () => {
+      const rel = (new BaseRelationship())
+        .type('one')
+        .entity('Foo')
+        .has('one', 'Bar')
+        .with(['foo', 'bar'])
+        .with(['baz', 'foo']);
+      const props = rel.$get('with.props');
+      expect(props).to.be.an.instanceOf(Set);
+      expect(props.size).to.equal(3);
+      ['foo', 'bar', 'baz'].forEach((prop) => expect(props.has(prop)).to.equal(true));
+    });
+
+    it('should filter the `_id` field from props and edges', () => {
+      const rel = (new BaseRelationship())
+        .type('one')
+        .entity('Foo')
+        .has('one', 'Bar')
+        .with({ props: ['_id'], edges: ['_id'] });
+      const props = rel.$get('with.props');
+      expect(props).to.be.an.instanceOf(Set);
+      expect(props.size).to.equal(0);
+
+      const edges = rel.$get('with.edges');
+      expect(edges).to.be.an.instanceOf(Set);
+      expect(edges.size).to.equal(0);
     });
   });
 });

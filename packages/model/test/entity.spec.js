@@ -16,10 +16,12 @@ describe('entity.js', () => {
 
   it('should use the entity name utility when setting the name');
 
-  it('should add the pural version of the name', () => {
-    ['UserEvents', 'user-event', 'userEvent', 'user event', 'user.event', 'UserEvent', 'User Event'].forEach((name) => {
-      const ent = entity(name);
-      expect(ent.$get('plural')).to.equal('UserEvents');
+  describe('name', () => {
+    it('should add the plural version of the name', () => {
+      ['UserEvents', 'user-event', 'userEvent', 'user event', 'user.event', 'UserEvent', 'User Event'].forEach((name) => {
+        const ent = entity(name);
+        expect(ent.$get('plural')).to.equal('UserEvents');
+      });
     });
   });
 });

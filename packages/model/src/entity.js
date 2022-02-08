@@ -2,6 +2,8 @@ import Base from './base.js';
 import inflector from './inflector.js';
 import entityName from './utils/entity-name.js';
 import {
+  any,
+  array,
   attempt,
   isSchema,
   object,
@@ -78,6 +80,41 @@ class Entity extends Base {
     if (!isSchema(schema)) throw Error('A Joi schema is required when setting a prop.');
     const path = `props.${camel(k)}`;
     return this.$set(path, { schema }, { schema: object(), strict: true });
+  }
+
+  /**
+   * Definines multiple properties on this entity in one call. Invokes the
+   * `prop` method for each value in the array.
+   *
+   * ```
+   * const ent = entity('Foo').props([
+   *  { name: 'bar', schema: string() },
+   *  { name: 'pull_request', schema: string() },
+   *  { name: 'baz', schema: boolean() },
+   * ]);
+   *
+   * Map(3) {
+   *  'bar' => { schema: StringSchema },
+   *  'pullRequest' => { schema: StringSchema },
+   *  'baz' => { schema: BooleanSchema },
+   * } = ent.$get('props');
+   * ```
+   * @param {PropertyDefinition[]} values The properties to set
+   * @returns {Entity} The cloned instance
+   */
+  props(values) {
+    const props = attempt(values, array().items(
+      object({
+        name: string().required(),
+        schema: object().required(),
+      }).required(),
+    ).required());
+
+    let instance = this;
+    props.forEach(({ name, schema }) => {
+      instance = instance.prop(name, schema);
+    });
+    return instance;
   }
 
   /**

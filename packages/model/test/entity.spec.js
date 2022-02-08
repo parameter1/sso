@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
+import { ValidationError } from '@parameter1/joi';
 import entity from '../src/entity.js';
 import { string, isSchema } from '../src/schema.js';
 import common from './common.js';
@@ -54,6 +55,30 @@ describe('entity.js', () => {
     it('should set the schema', () => {
       const prop = entity('foo').prop('foo', string()).$get('props.foo');
       expect(isSchema(prop.schema)).to.equal(true);
+    });
+  });
+
+  describe('props', () => {
+    it('should throw an error when the values array is invalid', () => {
+      ['', null, undefined, [], ['foo'], [{ name: null }], [{ schema: {} }]].forEach((values) => {
+        expect(() => {
+          const ent = entity('foo');
+          ent.props(values);
+        }).to.throw(ValidationError);
+      });
+    });
+
+    it('should set the props', () => {
+      const ent = entity('foo').props([
+        { name: 'bar', schema: string() },
+        { name: 'pull_request', schema: string() },
+        { name: 'baz', schema: string() },
+      ]);
+      ['bar', 'pullRequest', 'baz'].forEach((name) => {
+        const prop = ent.$get(`props.${name}`);
+        expect(prop).to.be.an('object');
+        expect(isSchema(prop.schema)).to.equal(true);
+      });
     });
   });
 });

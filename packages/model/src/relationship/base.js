@@ -34,11 +34,11 @@ export default class BaseRelationship extends Base {
   }
 
   haveOne(value) {
-    return this.hasOne(value);
+    return this.has('one', value);
   }
 
   haveMany(value) {
-    return this.hasMany(value);
+    return this.has('many', value);
   }
 
   type(value) {

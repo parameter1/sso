@@ -16,6 +16,12 @@ class Entity extends Base {
    * converted to PascalCase in singular form (e.g.
    * `fruit-snacks` would become `FruitSnack`).
    *
+   * This method is automatically called when the `entity` function is invoked.
+   *
+   * ```
+   * entity('foo');
+   * ```
+   *
    * @param {string} value The entity name
    * @returns {Entity} The cloned instance
    */
@@ -55,6 +61,11 @@ class Entity extends Base {
    * collection will be the param-cased, plural version of the
    * entity name (e.g. if the entity name is `UserEvent` the collection
    * name will be `user-events`).
+   *
+   * ```
+   * entity('foo').collection('some_collection'); // some_collection
+   * entity('bar').collection('foo/bar'); // foo/bar
+   * ```
    *
    * @param {string} value The collection name
    * @returns {Entity}

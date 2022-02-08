@@ -17,6 +17,12 @@ describe('relationship/base.js', () => {
         (new BaseRelationship()).type('foo');
       }).to.throw(Error, '"type" must be one of [one, many]');
     });
+    it('should throw an error if the value has already been set', () => {
+      const rel = (new BaseRelationship()).type('one');
+      expect(() => {
+        rel.entity('many');
+      }).to.throw(Error, 'A value already exists for `type`');
+    });
     it('should accept one as a value', () => {
       const rel = new BaseRelationship();
       const r = rel.type('one');
@@ -43,6 +49,12 @@ describe('relationship/base.js', () => {
         rel.entity(value);
       });
     });
+    it('should throw an error if the value has already been set', () => {
+      const rel = (new BaseRelationship()).type('one').entity('foo');
+      expect(() => {
+        rel.entity('bar');
+      }).to.throw(Error, 'A value already exists for `entity`');
+    });
     it('should set the value', () => {
       const rel = (new BaseRelationship()).type('one').entity('foo');
       expect(rel.$get('entity')).to.equal('Foo');
@@ -50,6 +62,12 @@ describe('relationship/base.js', () => {
   });
 
   describe('has', () => {
+    it('should throw an error if the value has already been set', () => {
+      const rel = (new BaseRelationship()).type('one').entity('foo').hasMany('bar');
+      expect(() => {
+        rel.hasMany('foo');
+      }).to.throw(Error, 'A value already exists for `has.type`');
+    });
     it('should throw an error when the type is neither one or many', () => {
       expect(() => {
         (new BaseRelationship()).type('one').entity('Foo').has('df', 'bar');
@@ -124,7 +142,7 @@ describe('relationship/base.js', () => {
       }).to.throw(Error, 'The relationship `entity` value must be set first.');
     });
 
-    it('should throw an error if called before hasOne/hasMany is set', () => {
+    it('should throw an error if called before has is set', () => {
       const rel = (new BaseRelationship()).type('one').entity('Foo');
       expect(() => {
         rel.as('foo');

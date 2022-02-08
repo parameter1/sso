@@ -15,14 +15,14 @@ export default class BaseRelationship extends Base {
 
   entity(value) {
     this.$needs('type');
-    return this.$set('entity', entityName(value));
+    return this.$set('entity', entityName(value), { strict: true });
   }
 
   has(type, value) {
     this.$needs('type', 'entity');
     return this
-      .$set('has.type', type, { schema: typeSchema })
-      .$set('has.entity', entityName(value));
+      .$set('has.type', type, { schema: typeSchema, strict: true })
+      .$set('has.entity', entityName(value), { strict: true });
   }
 
   hasOne(value) {
@@ -42,7 +42,7 @@ export default class BaseRelationship extends Base {
   }
 
   type(value) {
-    return this.$set('type', value, { schema: typeSchema });
+    return this.$set('type', value, { schema: typeSchema, strict: true });
   }
 
   $localField() {

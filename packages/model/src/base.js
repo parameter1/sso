@@ -74,8 +74,8 @@ export default class Base {
    */
   $set(path, value, { schema = defaultSchema, strict = false } = {}) {
     const p = attempt(path, string().label('$set.path').required());
-    const validated = this.$validate(path, value, schema);
-    if (strict && this.$has(path)) throw new Error(`A value already exists for \`${path}\``);
+    const validated = this.$validate(p, value, schema);
+    if (strict && this.$has(p)) throw new Error(`A value already exists for \`${p}\``);
     const obj = this.$clone();
     set(obj.values, p, validated);
     return obj;

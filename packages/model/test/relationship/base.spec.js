@@ -1,17 +1,15 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
-import { ValidationError } from '@parameter1/joi';
 import BaseRelationship from '../../src/relationship/base.js';
+import common from '../common.js';
 
 describe('relationship/base.js', () => {
   describe('type', () => {
     it('should throw an error when empty', () => {
       const rel = new BaseRelationship();
-      [undefined, null, '', '  ', {}].forEach((value) => {
-        expect(() => {
-          rel.type(value);
-        }).to.throw(ValidationError);
+      common.testInvalidRequiredStrings((value) => {
+        rel.type(value);
       });
     });
     it('should accept one as a value', () => {
@@ -36,10 +34,8 @@ describe('relationship/base.js', () => {
     });
     it('should throw an error when empty', () => {
       const rel = (new BaseRelationship()).type('one');
-      [undefined, null, '', '  ', {}].forEach((value) => {
-        expect(() => {
-          rel.entity(value);
-        }).to.throw(ValidationError);
+      common.testInvalidRequiredStrings((value) => {
+        rel.entity(value);
       });
     });
     it('should set the value', () => {
@@ -66,10 +62,8 @@ describe('relationship/base.js', () => {
 
     it('should throw an error when empty', () => {
       const rel = (new BaseRelationship()).type('one').entity('foo');
-      [undefined, null, '', '  ', {}].forEach((value) => {
-        expect(() => {
-          rel.hasOne(value);
-        }).to.throw(ValidationError);
+      common.testInvalidRequiredStrings((value) => {
+        rel.hasOne(value);
       });
     });
     it('should set the value', () => {
@@ -124,10 +118,8 @@ describe('relationship/base.js', () => {
 
     it('should throw an error when empty', () => {
       const rel = (new BaseRelationship()).type('one').entity('Foo').hasMany('Bar');
-      [undefined, null, '', '  ', {}].forEach((value) => {
-        expect(() => {
-          rel.as(value);
-        }).to.throw(ValidationError);
+      common.testInvalidRequiredStrings((value) => {
+        rel.as(value);
       });
     });
 

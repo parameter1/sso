@@ -26,6 +26,7 @@
     "@parameter1/utils": "^2.0.0",
     "@sindresorhus/is": "^4.4.0",
     "camel-case": "^4.1.2",
+    "immutable": "^4.0.0",
     "inflected": "^2.1.0",
     "no-case": "^3.0.4",
     "param-case": "^3.0.4",

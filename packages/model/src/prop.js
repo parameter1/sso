@@ -11,11 +11,23 @@ export class Prop extends Base({
   $name: null,
   $schema: null,
 }) {
+  /**
+   * Sets the property name.
+   *
+   * @param {string} value The property name
+   * @returns {this}
+   */
   name(value) {
     const name = attempt(value, string().required());
     return this.set('$name', camel(name));
   }
 
+  /**
+   * Sets the property schema.
+   *
+   * @param {Joi} value The property schema
+   * @returns {this}
+   */
   schema(value) {
     this.needsValues('$name');
     const schema = attempt(value, schemaObject().required());

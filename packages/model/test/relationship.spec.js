@@ -193,65 +193,78 @@ describe('relationship.js', () => {
       expect(has.getEntityName()).to.equal('Bar');
     });
   });
+
+  /**
+   *
+   */
+  describe('Relationship.as', () => {
+    /**
+     *
+     */
+    it('should throw an error when empty', () => {
+      const rel = one('Foo').hasMany('Bars');
+      common.testInvalidRequiredStrings((value) => {
+        rel.as(value);
+      });
+    });
+
+    /**
+     *
+     */
+    it('should set the camelized value', () => {
+      const rel = one('Foo').hasOne('bar');
+      ['userEvent', 'UserEvent', 'user-event', 'user event', ' userEvent '].forEach((value) => {
+        expect(rel.as(value).getAs()).to.equal('userEvent');
+      });
+    });
+  });
+
+  /**
+   *
+   */
+  describe('Relationship.getLocalField', () => {
+    /**
+     *
+     */
+    it('should use the the plural `has.entity` value `has.type` is many', () => {
+      const rel = one('User').hasMany('UserEvent');
+      expect(rel.getLocalField()).to.equal('userEvents');
+    });
+
+    /**
+     *
+     */
+    it('should use the the singular `has.entity` value `has.type` is one', () => {
+      const rel = one('User').hasOne('UserEvents');
+      expect(rel.getLocalField()).to.equal('userEvent');
+    });
+
+    /**
+     *
+     */
+    it('should use the as value when set', () => {
+      const rel = one('User').hasMany('UserEvent').as('foo_bar');
+      expect(rel.getLocalField()).to.equal('fooBar');
+    });
+  });
 });
 
 // describe('relationship.js', () => {
 //   describe('Relationship', () => {
 
 //     describe('as', () => {
-//       it('should throw an error if called before the type is set', () => {
-//         const rel = new Relationship();
-//         expect(() => {
-//           rel.as('foo');
-//         }).to.throw(Error, 'The `type` value must be set before continuing.');
-//       });
 
-//       it('should throw an error if called before the entity is set', () => {
-//         const rel = (new Relationship()).type('one');
-//         expect(() => {
-//           rel.as('foo');
-//         }).to.throw(Error, 'The `entity` value must be set before continuing.');
-//       });
+//
 
-//       it('should throw an error if called before has is set', () => {
-//         const rel = (new Relationship()).type('one').entity('Foo');
-//         expect(() => {
-//           rel.as('foo');
-//         }).to.throw(Error, 'The `has` value must be set before continuing.');
-//       });
-
-//       it('should throw an error when empty', () => {
-//         const rel = (new Relationship()).type('one').entity('Foo').hasMany('Bar');
-//         common.testInvalidRequiredStrings((value) => {
-//           rel.as(value);
-//         });
-//       });
-
-//       it('should set the camelized value', () => {
-//         const rel = (new Relationship()).type('one').entity('foo').hasOne('bar');
-//         ['userEvent', 'UserEvent', 'user-event', 'user event', ' userEvent '].forEach((value) => {
-//           expect(rel.as(value).$get('as')).to.equal('userEvent');
-//         });
-//       });
+//
 //     });
 
 //     describe('$localField', () => {
-//       it('should use the the plural `has.entity` value `has.type` is many', () => {
-//         const rel = (new Relationship()).type('one').entity('User').hasMany('UserEvent');
-//         expect(rel.$localField()).to.equal('userEvents');
-//       });
+//
 
-//       it('should use the the singular `has.entity` value `has.type` is one', () => {
-//         const rel = (new Relationship()).type('one').entity('User').hasOne('UserEvents');
-//         expect(rel.$localField()).to.equal('userEvent');
-//       });
+//
 
-//       it('should use the as value when set', () => {
-//         const rel = (new Relationship()).type('one').entity('User')
-//           .hasMany('UserEvent')
-//           .as('foo_bar');
-//         expect(rel.$localField()).to.equal('fooBar');
-//       });
+//
 //     });
 
 //     describe('with', () => {

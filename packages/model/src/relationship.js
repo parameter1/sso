@@ -5,15 +5,41 @@ import {
   object,
   string,
 } from './schema.js';
+import { camel, plural } from './utils/inflector.js';
 
 const hasSchema = object().instance(Has).required();
 const typeSchema = string().valid('one', 'many').required();
 
 export class Relationship extends Base({
+  $as: null,
   $entity: null,
   $has: null,
   $type: null,
 }) {
+  /**
+   * Sets the local field name that will used when saving the relationship. This
+   * value will always be converted to camelCase but _won't_ enforce
+   * singular/plural form.
+   *
+   * If this method is _never_ called, the default local field will be set as
+   * the camelCased version of the `entity` name. If the relationship `has`
+   * value is also set to `many`, then the field will also be converted into
+   * plural form.
+   *
+   * ```
+   * // will set the local field as `myBars` instead of
+   * // the default `bars` value.
+   * rel.type('one').entity('Foo').hasMany('Bars').as('myBars');
+   * one('Foo').hasMany('Bars').as('myBars');
+   * ```
+   *
+   * @param {string} value The local field value
+   * @returns {this}
+   */
+  as(value) {
+    return this.set('$as', camel(value));
+  }
+
   /**
    * Sets the entity that _owns_ the relationship. The value will be converted
    * to PascalCase in singular form (e.g. `fruit-snacks` would become
@@ -137,6 +163,32 @@ export class Relationship extends Base({
    */
   type(value) {
     return this.set('$type', value, { schema: typeSchema, strict: true });
+  }
+
+  /**
+   * Gets the local field alias that will used when saving the relationship.
+   * Will be `null` if not set or used.
+   *
+   * @returns {string|null} The local field alias
+   */
+  getAs() {
+    return this.get('$as');
+  }
+
+  /**
+   * Gets the local field that will be used when saving the relationship. This
+   * will use the `as` value, if set, otherwise will return the camelCased
+   * version of the foreign entity name (pluralized when the foreign rel type is
+   * `many`).
+   *
+   * @returns {String} The local field name
+   */
+  getLocalField() {
+    const alias = this.getAs();
+    if (alias) return alias;
+    const rel = this.getHas();
+    const field = camel(rel.getEntityName());
+    return rel.getType() === 'many' ? plural(field) : field;
   }
 
   /**

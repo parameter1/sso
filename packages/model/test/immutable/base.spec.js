@@ -5,6 +5,7 @@ import { ValidationError } from '@parameter1/joi';
 import { Record, Set } from 'immutable';
 import { base } from '../../src/immutable/base.js';
 import { object } from '../../src/immutable/schema.js';
+import common from '../common.js';
 
 const { isSet } = Set;
 const { isRecord } = Record;
@@ -62,6 +63,49 @@ describe('base.js', () => {
   /**
    *
    */
+  describe('Base.set', () => {
+    /**
+     *
+     */
+    it('should throw an error when the key is invalid', () => {
+      const record = base();
+      common.testInvalidRequiredStrings((key) => {
+        record.set(key);
+      });
+    });
+
+    /**
+     *
+     */
+    it('should throw an error when a value already exists in strict mode', () => {
+      expect(() => {
+        const record = base({ foo: null });
+        record.set('foo', 'baz').set('foo', 'dill', { strict: true });
+      }).to.throw(Error, 'A value already exists for `foo`');
+    });
+
+    /**
+     *
+     */
+    it('should throw an error when the value fails validation', () => {
+      const record = base({ foo: null });
+      expect(() => {
+        record.set('key', null);
+      }).to.throw(ValidationError, '"key" must be a string');
+    });
+
+    /**
+     *
+     */
+    it('should set set the value', () => {
+      const record = base({ foo: null }).set('foo', 'bar');
+      expect(record.get('foo')).to.equal('bar');
+    });
+  });
+
+  /**
+   *
+   */
   describe('Base.$needs', () => {
     /**
      *
@@ -98,6 +142,9 @@ describe('base.js', () => {
    *
    */
   describe('Base.$validate', () => {
+    /**
+     *
+     */
     it('should throw when the schema is not a schema object', () => {
       const record = base();
       ['', 'foo', true, [], {}].forEach((schema) => {
@@ -106,10 +153,18 @@ describe('base.js', () => {
         }).to.throw(ValidationError);
       });
     });
+
+    /**
+     *
+     */
     it('should allow null schema values in order to bypass validation', () => {
       const record = base();
       expect(record.$validate('key', ' value ', null)).to.equal(' value ');
     });
+
+    /**
+     *
+     */
     it('should use a required string schema by default', () => {
       const record = base();
       expect(() => {
@@ -119,6 +174,10 @@ describe('base.js', () => {
         record.$validate('key', null);
       }).to.throw(ValidationError, '"key" must be a string');
     });
+
+    /**
+     *
+     */
     it('should validate the value based on the given schema.', () => {
       const record = base();
       expect(record.$validate('key', ' value ')).to.equal('value');

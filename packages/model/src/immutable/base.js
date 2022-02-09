@@ -23,10 +23,36 @@ export const Base = (defaults = {}) => {
     ...rest,
   }) {
     /**
+     * Sets a value.
+     *
+     * By default, a required `string()` schema is used to validate the value, but
+     * any schema type can used by setting the `schema` option (or set to `null`
+     * to bypass validation).
+     *
+     * To prevent a previously set value from being reassigned, set the `strict`
+     * option to true.
+     *
+     * @param {string} key The keu to set
+     * @param {*} value The value to set
+     * @param {object} options
+     * @param {Joi} options.schema The schema to validate the value against
+     * @param {boolean} [options.strict=false] Whether to prevent reassignment of
+     *                                         an existing value
+     * @returns {this}
+     */
+    set(key, value, { schema = defaultSchema, strict = false } = {}) {
+      const k = attempt(key, string().label('set.key').required());
+      const v = this.$validate(k, value, schema);
+      if (strict && this.has(k)) throw new Error(`A value already exists for \`${k}\``);
+      return super.set(k, v);
+    }
+
+    /**
      * Determines which method values are required to be set on the instance
      * before allowing another method call.
      *
      * @param  {...any} values
+     * @returns {this}
      */
     $needs(...values) {
       attempt(values, array().items(string()));

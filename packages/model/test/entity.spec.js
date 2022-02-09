@@ -46,7 +46,6 @@ describe('entity.js', () => {
      *
      */
     it('should set the trimmed value as passed', () => {
-      console.log(entity('Foo').toObject());
       ['some_collection', ' some_collection  '].forEach((value) => {
         expect(entity('Foo').collection(value).get('$collection')).to.equal('some_collection');
       });

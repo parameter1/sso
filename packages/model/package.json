@@ -15,6 +15,7 @@
   "main": "./src/index.js",
   "scripts": {
     "lint": "eslint --ext .js ./",
+    "mocha": "mocha",
     "test": "yarn lint && yarn test-nolint",
     "test-nolint": "mocha ./test/*.spec.js ./test/**/*.spec.js"
   },

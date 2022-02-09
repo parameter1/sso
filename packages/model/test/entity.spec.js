@@ -5,8 +5,10 @@ import { ValidationError } from '@parameter1/joi';
 import { isMap } from 'immutable';
 import { entity } from '../src/entity.js';
 import { Prop } from '../src/prop.js';
-import { isSchema, string } from '../src/schema.js';
+import Schema, { isSchema } from '../src/schema.js';
 import common from './common.js';
+
+const { string } = Schema;
 
 describe('entity.js', () => {
   /**

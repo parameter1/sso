@@ -1,14 +1,11 @@
 import { Map as ImmutableMap } from 'immutable';
 import { Base } from './base.js';
 import { prop } from './prop.js';
-import {
-  attempt,
-  object,
-  immutableMap,
-} from './schema.js';
+import Schema, { attempt } from './schema.js';
 import Inflector from './utils/inflector.js';
 import entityName from './utils/entity-name.js';
 
+const { immutableMap, object } = Schema;
 const { param, plural } = Inflector;
 
 export class Entity extends Base({

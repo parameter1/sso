@@ -4,8 +4,10 @@ import { expect } from 'chai';
 import { ValidationError } from '@parameter1/joi';
 import { isRecord } from 'immutable';
 import { base } from '../src/base.js';
-import { object } from '../src/schema.js';
+import Schema from '../src/schema.js';
 import common from './common.js';
+
+const { object } = Schema;
 
 describe('base.js', () => {
   /**

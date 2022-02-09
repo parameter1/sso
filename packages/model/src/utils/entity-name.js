@@ -1,5 +1,5 @@
 import Inflector from './inflector.js';
-import { attempt, string } from '../schema.js';
+import Schema, { attempt } from '../schema.js';
 
 const { pascal, singular } = Inflector;
 
@@ -12,6 +12,6 @@ const { pascal, singular } = Inflector;
  * @return {string} The PascalCased, singularized entity name
  */
 export default (value, key = 'name') => {
-  const v = attempt(value, string().label(key).required());
+  const v = attempt(value, Schema.string().label(key).required());
   return singular(pascal(v));
 };

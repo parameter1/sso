@@ -3,15 +3,16 @@ import { Map as ImmutableMap, Set as ImmutableSet } from 'immutable';
 import { Base } from './base.js';
 import { has, Has } from './relationship/has.js';
 import entityName from './utils/entity-name.js';
-import {
+import Schema, { attempt } from './schema.js';
+import Inflector from './utils/inflector.js';
+
+const {
   array,
-  attempt,
   conditional,
   immutableMap,
   object,
   string,
-} from './schema.js';
-import Inflector from './utils/inflector.js';
+} = Schema;
 
 const hasSchema = object().instance(Has).required();
 const typeSchema = string().valid('one', 'many').required();

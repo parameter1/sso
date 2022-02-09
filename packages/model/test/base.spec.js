@@ -2,13 +2,10 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { ValidationError } from '@parameter1/joi';
-import { Record, Set as ImmutableSet } from 'immutable';
+import { isRecord } from 'immutable';
 import { base } from '../src/base.js';
 import { object } from '../src/schema.js';
 import common from './common.js';
-
-const { isSet } = ImmutableSet;
-const { isRecord } = Record;
 
 describe('base.js', () => {
   /**

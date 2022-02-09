@@ -1,84 +1,137 @@
-// /* eslint-disable import/no-extraneous-dependencies */
-// import { describe, it } from 'mocha';
-// import { expect } from 'chai';
-// import { ValidationError } from '@parameter1/joi';
-// import { Relationship, many, one } from '../src/relationship.js';
-// import common from './common.js';
+/* eslint-disable import/no-extraneous-dependencies */
+import { describe, it } from 'mocha';
+import { expect } from 'chai';
+import { ValidationError } from '@parameter1/joi';
+import { Relationship, many, one } from '../src/relationship.js';
+import common from './common.js';
+
+describe('relationship.js', () => {
+  /**
+   *
+   */
+  describe('many()', () => {
+    /**
+     *
+     */
+    it('should set the type to `many` with an entity name', () => {
+      const r = many('foo');
+      expect(r.getType()).to.equal('many');
+      expect(r.getEntityName()).to.equal('Foo');
+    });
+  });
+
+  /**
+   *
+   */
+  describe('one()', () => {
+    /**
+     *
+     */
+    it('should set the type to `one` with an entity name', () => {
+      const r = one('foo');
+      expect(r.getType()).to.equal('one');
+      expect(r.getEntityName()).to.equal('Foo');
+    });
+  });
+
+  /**
+   *
+   */
+  describe('Relationship.type', () => {
+    /**
+     *
+     */
+    it('should throw an error when empty', () => {
+      const rel = new Relationship();
+      common.testInvalidRequiredStrings((value) => {
+        rel.type(value);
+      });
+    });
+
+    /**
+     *
+     */
+    it('should throw an error when the value is neither one or many', () => {
+      expect(() => {
+        (new Relationship()).type('foo');
+      }).to.throw(ValidationError, '"$type" must be one of [one, many]');
+    });
+
+    /**
+     *
+     */
+    it('should throw an error if the value has already been set', () => {
+      const rel = (new Relationship()).type('one');
+      expect(() => {
+        rel.type('many');
+      }).to.throw(Error, 'A value already exists for `$type`');
+    });
+
+    /**
+     *
+     */
+    it('should accept one as a value', () => {
+      const rel = (new Relationship()).type('one');
+      expect(rel.getType()).to.equal('one');
+    });
+
+    /**
+     *
+     */
+    it('should accept many as a value', () => {
+      const rel = (new Relationship()).type('many');
+      expect(rel.getType()).to.equal('many');
+    });
+  });
+
+  /**
+   *
+   */
+  describe('Relationship.entity', () => {
+    it('should use the entity name utility when setting the name');
+
+    /**
+     *
+     */
+    it('should throw an error if called before the type is set', () => {
+      const rel = new Relationship();
+      expect(() => {
+        rel.entity('foo');
+      }).to.throw(Error, 'The `type` value must be set before continuing.');
+    });
+
+    /**
+     *
+     */
+    it('should throw an error when empty', () => {
+      const rel = (new Relationship()).type('one');
+      common.testInvalidRequiredStrings((value) => {
+        rel.entity(value);
+      });
+    });
+
+    /**
+     *
+     */
+    it('should throw an error if the value has already been set', () => {
+      const rel = (new Relationship()).type('one').entity('foo');
+      expect(() => {
+        rel.entity('bar');
+      }).to.throw(Error, 'A value already exists for `$entity`');
+    });
+
+    /**
+     *
+     */
+    it('should set the value', () => {
+      const rel = (new Relationship()).type('one').entity('foo');
+      expect(rel.getEntityName()).to.equal('Foo');
+    });
+  });
+});
 
 // describe('relationship.js', () => {
-//   describe('many', () => {
-//     it('on call, should be set as type `many` with an entity name', () => {
-//       const r = many('foo');
-//       expect(r.$get('type')).to.equal('many');
-//       expect(r.$get('entity')).to.equal('Foo');
-//     });
-//   });
-
-//   describe('one', () => {
-//     it('on call, should be set as type `one` with an entity name', () => {
-//       const r = one('foo');
-//       expect(r.$get('type')).to.equal('one');
-//       expect(r.$get('entity')).to.equal('Foo');
-//     });
-//   });
-
 //   describe('Relationship', () => {
-//     describe('type', () => {
-//       it('should throw an error when empty', () => {
-//         const rel = new Relationship();
-//         common.testInvalidRequiredStrings((value) => {
-//           rel.type(value);
-//         });
-//       });
-//       it('should throw an error when the value is neither one or many', () => {
-//         expect(() => {
-//           (new Relationship()).type('foo');
-//         }).to.throw(Error, '"type" must be one of [one, many]');
-//       });
-//       it('should throw an error if the value has already been set', () => {
-//         const rel = (new Relationship()).type('one');
-//         expect(() => {
-//           rel.type('many');
-//         }).to.throw(Error, 'A value already exists for `type`');
-//       });
-//       it('should accept one as a value', () => {
-//         const rel = new Relationship();
-//         const r = rel.type('one');
-//         expect(r.$get('type')).to.equal('one');
-//       });
-//       it('should accept many as a value', () => {
-//         const rel = new Relationship();
-//         const r = rel.type('many');
-//         expect(r.$get('type')).to.equal('many');
-//       });
-//     });
-
-//     describe('entity', () => {
-//       it('should use the entity name utility when setting the name');
-//       it('should throw an error if called before the type is set', () => {
-//         const rel = new Relationship();
-//         expect(() => {
-//           rel.entity('foo');
-//         }).to.throw(Error, 'The `type` value must be set before continuing.');
-//       });
-//       it('should throw an error when empty', () => {
-//         const rel = (new Relationship()).type('one');
-//         common.testInvalidRequiredStrings((value) => {
-//           rel.entity(value);
-//         });
-//       });
-//       it('should throw an error if the value has already been set', () => {
-//         const rel = (new Relationship()).type('one').entity('foo');
-//         expect(() => {
-//           rel.entity('bar');
-//         }).to.throw(Error, 'A value already exists for `entity`');
-//       });
-//       it('should set the value', () => {
-//         const rel = (new Relationship()).type('one').entity('foo');
-//         expect(rel.$get('entity')).to.equal('Foo');
-//       });
-//     });
-
 //     describe('has', () => {
 //       it('should use the entity name utility when setting the name');
 //       it('should throw an error if called before the type is set', () => {

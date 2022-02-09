@@ -1,10 +1,12 @@
 import { isEmailBurner } from '@parameter1/email-utils';
 import { cleanPath } from '@parameter1/utils';
-import {
+import { Schema, entity } from '@parameter1/sso-model';
+import environments from './schema/environments.js';
+
+const {
   array,
   boolean,
   date,
-  entity,
   email,
   hostname,
   ipv4,
@@ -13,8 +15,7 @@ import {
   slug,
   string,
   url,
-} from '@parameter1/sso-model';
-import environments from './schema/environments.js';
+} = Schema;
 
 const common = {
   email: email().lowercase().custom((value, helpers) => {
@@ -59,8 +60,8 @@ export default [
     name: common.name,
     redirects: array().items(common.slug),
     slug: common.slug,
-    urls: environments.reduce((o, env) => ({
+    urls: object().keys(environments.reduce((o, env) => ({
       ...o, [env]: url().custom(cleanPath),
-    }), {}),
+    }), {})),
   }),
 ];

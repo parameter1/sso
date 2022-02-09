@@ -1,6 +1,6 @@
 import { Map as ImmutableMap } from 'immutable';
 import { Base } from './base.js';
-import { prop } from './prop.js';
+import { Prop, prop } from './prop.js';
 import { Schema, attempt } from './schema.js';
 import Inflector from './utils/inflector.js';
 import entityName from './utils/entity-name.js';
@@ -69,7 +69,10 @@ export class Entity extends Base({
    * will be converted to camelCase. As an example, `pull_request` would become
    * `pullRequest`.
    *
-   * This method will throw an error if an existing property is already set.
+   * Setting a `null` schema will _unset_ the property.
+   *
+   * This method will throw an error if an existing property is already set (
+   * unless the `schema` value is `null`).
    *
    * ```
    * const record = entity('Foo')
@@ -91,11 +94,14 @@ export class Entity extends Base({
    * @returns {this} The cloned instance
    */
   prop(name, schema) {
-    const value = prop(name, schema);
-    const key = value.get('$name');
-    const $props = this.get('$props');
-    if ($props.has(key)) throw new Error(`A value already exists for \`props.${key}\``);
-    return this.set('$props', $props.set(key, value), { schema: immutableMap() });
+    const $props = this.getProps();
+    const key = Prop.formatName(name);
+    if (schema === null && $props.get(key) != null) {
+      // unset the prop
+      return this.set('$props', $props.delete(key), { schema: immutableMap() });
+    }
+    if (this.hasProp(key)) throw new Error(`A prop already exists for \`${key}\``);
+    return this.set('$props', $props.set(key, prop(name, schema)), { schema: immutableMap() });
   }
 
   /**
@@ -126,7 +132,7 @@ export class Entity extends Base({
       return map.set(key, value);
     }, ImmutableMap());
 
-    const merged = this.get('$props').mergeWith((_, val, key) => {
+    const merged = this.getProps().mergeWith((_, val, key) => {
       if (key) throw new Error(`A prop already exists for \`${key}\``);
       return val;
     }, props);
@@ -139,7 +145,7 @@ export class Entity extends Base({
    * @returns {string|null} The collection name
    */
   getCollection() {
-    const name = this.get('$name');
+    const name = this.getName();
     const collection = this.get('$collection');
     if (collection) return collection;
     return name ? plural(param(name)) : null;
@@ -160,7 +166,7 @@ export class Entity extends Base({
    * @returns {string|null}
    */
   getPluralName() {
-    const name = this.get('$name');
+    const name = this.getName();
     return name ? plural(name) : null;
   }
 
@@ -172,9 +178,9 @@ export class Entity extends Base({
    * @return {Prop}
    */
   getProp(name) {
-    const p = this.get('$props').get(name);
-    if (!p) throw new Error(`No property named \`${name}\` was found on the \`${this.getName()}\` entity.`);
-    return p;
+    const hasProp = this.hasProp(name);
+    if (!hasProp) throw new Error(`No property named \`${name}\` was found on the \`${this.getName()}\` entity.`);
+    return this.getProps().get(Prop.formatName(name));
   }
 
   /**
@@ -184,6 +190,17 @@ export class Entity extends Base({
    */
   getProps() {
     return this.get('$props');
+  }
+
+  /**
+   * Determines if the property exists on this entity.
+   *
+   * @param {string} name The camelCased property name
+   * @returns {boolean} Whether the property exists
+   */
+  hasProp(name) {
+    const key = Prop.formatName(name);
+    return this.getProps().get(key) != null;
   }
 }
 

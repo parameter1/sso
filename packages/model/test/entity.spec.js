@@ -121,7 +121,7 @@ describe('entity.js', () => {
     it('should throw an error when an existing prop is already set', () => {
       expect(() => {
         entity('Foo').prop('bar', string()).prop('bar', string());
-      }).to.throw(Error, 'A value already exists for `props.bar`');
+      }).to.throw(Error, 'A prop already exists for `bar`');
     });
 
     /**
@@ -150,8 +150,19 @@ describe('entity.js', () => {
      */
     it('should set the schema to the prop', () => {
       const record = entity('Foo').prop('fooBar', string());
-      const prop = record.get('$props').get('fooBar');
-      expect(isSchema(prop.get('$schema'))).to.equal(true);
+      const prop = record.getProp('fooBar');
+      expect(isSchema(prop.getSchema())).to.equal(true);
+    });
+
+    /**
+     *
+     */
+    it('should unset the prop when the schema is null', () => {
+      const record = entity('Foo').prop('fooBar', string());
+      expect(record.hasProp('fooBar')).to.equal(true);
+      const removed = record.prop('foo_bar', null);
+      expect(removed.hasProp('fooBar')).to.equal(false);
+      expect(removed.hasProp('foo_bar')).to.equal(false);
     });
   });
 

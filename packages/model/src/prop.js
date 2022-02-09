@@ -15,8 +15,7 @@ export class Prop extends Base({
    * @returns {this}
    */
   name(value) {
-    const name = attempt(value, string().required());
-    return this.set('$name', Inflector.camel(name));
+    return this.set('$name', Prop.formatName(value));
   }
 
   /**
@@ -49,7 +48,18 @@ export class Prop extends Base({
    * @returns {Joi} The property name
    */
   getSchema() {
-    return this.get('$name');
+    return this.get('$schema');
+  }
+
+  /**
+   * Formats the property name.
+   *
+   * @param {string} value The prop name to format
+   * @returns {string} The formatted value
+   */
+  static formatName(value) {
+    const name = attempt(value, string().required());
+    return Inflector.camel(name);
   }
 }
 

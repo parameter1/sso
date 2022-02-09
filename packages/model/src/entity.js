@@ -147,6 +147,58 @@ export class Entity extends Base({
     }, props);
     return this.set('$props', merged, { schema: immutableMap() });
   }
+
+  /**
+   * Gets the collection name for this entity.
+   *
+   * The `name` method must be called first otherwise an error will be thrown.
+   *
+   * @returns {string} The collection name
+   */
+  getCollection() {
+    this.needsValues('$name');
+    return this.get('$collection');
+  }
+
+  /**
+   * Gets the name for this entity.
+   *
+   * The `name` method must be called first otherwise an error will be thrown.
+   *
+   * @returns {string} The entity name
+   */
+  getName() {
+    this.needsValues('$name');
+    return this.get('$name');
+  }
+
+  /**
+   * Gets a single property definition. Will throw an error if the property
+   * isn't registered with the instance.
+   *
+   * The `name` method must be called first otherwise an error will be thrown.
+   *
+   * @param {string} name The camelCased property name
+   * @return {Prop}
+   */
+  getProp(name) {
+    this.needsValues('$name');
+    const p = this.get('$props').get(name);
+    if (!p) throw new Error(`No property named \`${name}\` was found on the \`${this.getName()}\` entity.`);
+    return p;
+  }
+
+  /**
+   * Gets all properties registered with this entity as an immutable map.
+   *
+   * The `name` method must be called first otherwise an error will be thrown.
+   *
+   * @returns {ImmutableMap<string, Joi>} The entity name
+   */
+  getProps() {
+    this.needsValues('$name');
+    return this.get('$props');
+  }
 }
 
 /**

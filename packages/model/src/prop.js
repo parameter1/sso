@@ -33,6 +33,30 @@ export class Prop extends Base({
     const schema = attempt(value, schemaObject().required());
     return this.set('$schema', schema, { schema: schemaObject() });
   }
+
+  /**
+   * Gets the property name.
+   *
+   * The `name` method must be called first otherwise an error will be thrown.
+   *
+   * @returns {string} The property name
+   */
+  getName() {
+    this.needsValues('$name');
+    return this.get('$name');
+  }
+
+  /**
+   * Gets the property schema.
+   *
+   * The `name` method must be called first otherwise an error will be thrown.
+   *
+   * @returns {Joi} The property name
+   */
+  getSchema() {
+    this.needsValues('$name');
+    return this.get('$name');
+  }
 }
 
 /**

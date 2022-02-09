@@ -2,7 +2,9 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { ValidationError } from '@parameter1/joi';
+import { isMap } from 'immutable';
 import { entity, Entity } from '../src/entity.js';
+import { Prop } from '../src/prop.js';
 import { isSchema, string } from '../src/schema.js';
 import common from './common.js';
 
@@ -209,6 +211,107 @@ describe('entity.js', () => {
       ['bar', 'pullRequest', 'baz'].forEach((name) => {
         const prop = record.get('$props').get(name);
         expect(isSchema(prop.get('$schema'))).to.equal(true);
+      });
+    });
+  });
+
+  /**
+   *
+   */
+  describe('Entity.getCollection', () => {
+    /**
+     *
+     */
+    it('should throw an error if called before the name is set', () => {
+      expect(() => {
+        (new Entity()).getCollection();
+      }).to.throw(Error, 'The `name` value must be set before continuing.');
+    });
+
+    /**
+     *
+     */
+    it('should return the collection name', () => {
+      expect(entity('Foo').getCollection()).to.equal('foos');
+    });
+  });
+
+  /**
+   *
+   */
+  describe('Entity.getName', () => {
+    /**
+     *
+     */
+    it('should throw an error if called before the name is set', () => {
+      expect(() => {
+        (new Entity()).getName();
+      }).to.throw(Error, 'The `name` value must be set before continuing.');
+    });
+
+    /**
+     *
+     */
+    it('should return the entity name', () => {
+      expect(entity('Foo').getName()).to.equal('Foo');
+    });
+  });
+
+  /**
+   *
+   */
+  describe('Entity.getProp', () => {
+    /**
+     *
+     */
+    it('should throw an error if called before the name is set', () => {
+      expect(() => {
+        (new Entity()).getProp();
+      }).to.throw(Error, 'The `name` value must be set before continuing.');
+    });
+
+    /**
+     *
+     */
+    it('should throw an error when the prop does not exist', () => {
+      expect(() => {
+        entity('Foo').getProp('bar');
+      }).to.throw(Error, 'No property named `bar` was found on the `Foo` entity.');
+    });
+
+    /**
+     *
+     */
+    it('should return the property definition', () => {
+      const prop = entity('Foo').prop('bar', string()).getProp('bar');
+      expect(prop).to.be.an.instanceOf(Prop);
+    });
+  });
+
+  /**
+   *
+   */
+  describe('Entity.getProps', () => {
+    /**
+     *
+     */
+    it('should throw an error if called before the name is set', () => {
+      expect(() => {
+        (new Entity()).getProps();
+      }).to.throw(Error, 'The `name` value must be set before continuing.');
+    });
+
+    /**
+     *
+     */
+    it('should return an immutable map of prop definitions', () => {
+      const props = entity('Foo').props({
+        bar: string(),
+        baz: string(),
+      }).getProps();
+      expect(isMap(props)).to.equal(true);
+      props.forEach((prop) => {
+        expect(prop).to.be.an.instanceOf(Prop);
       });
     });
   });

@@ -1,7 +1,6 @@
 /* eslint-disable max-classes-per-file, class-methods-use-this */
-import { Record, Set as ImmutableSet } from 'immutable';
+import { Record } from 'immutable';
 import {
-  array,
   object,
   attempt,
   schemaObject,
@@ -12,14 +11,10 @@ const defaultSchema = string().required();
 
 export const Base = (defaults = {}) => {
   const {
-    $maybeRequiresValues = [],
     ...rest
-  } = attempt(defaults, object().keys({
-    $maybeRequiresValues: array().items(string()),
-  }).unknown().label('defaults'));
+  } = attempt(defaults, object().keys().unknown().label('defaults'));
 
   return class extends Record({
-    $maybeRequiresValues: ImmutableSet($maybeRequiresValues),
     ...rest,
   }) {
     /**
@@ -45,24 +40,6 @@ export const Base = (defaults = {}) => {
       const v = this.validateValue(k, value, schema);
       if (strict && this.get(k) != null) throw new Error(`A value already exists for \`${k}\``);
       return super.set(k, v);
-    }
-
-    /**
-     * Determines which property values are required to be set on the instance
-     * before allowing another method call.
-     *
-     * @param  {...any} values
-     * @returns {this}
-     */
-    needsValues(...values) {
-      attempt(values, array().items(string()));
-      const required = ImmutableSet(values);
-      this.$maybeRequiresValues.forEach((key) => {
-        if (required.has(key) && this.get(key) == null) {
-          throw new Error(`The \`${key.replace(/^\$/, '')}\` value must be set before continuing.`);
-        }
-      });
-      return this;
     }
 
     /**

@@ -12,16 +12,12 @@ const typeSchema = string().valid('one', 'many').required();
 export class Relationship extends Base({
   $entity: null,
   $has: null,
-  $maybeRequiresValues: ['$type', '$entity', '$has'],
   $type: null,
 }) {
   /**
    * Sets the entity that _owns_ the relationship. The value will be converted
    * to PascalCase in singular form (e.g. `fruit-snacks` would become
    * `FruitSnack`) - just as the `Entity.name` value is handled.
-   *
-   * The `type` method must be called before calling the `entity` method,
-   * otherwise an error will be thrown.
    *
    * This method is called automatically when the local relationship `one` or
    * `many` helper functions are invoked.
@@ -40,16 +36,12 @@ export class Relationship extends Base({
    * @returns {Relationship}
    */
   entity(value) {
-    this.needsValues('$type');
     return this.set('$entity', entityName(value), { strict: true });
   }
 
   /**
    * Sets the _foreign_ relationship entity as a rel-many. The entity name will
    * be converted to PascalCase in singular form.
-   *
-   * The `type` and `entity` must be called before calling the `has` method,
-   * otherwise an error will be thrown.
    *
    * ```
    * // one-to-many relationships (1:N)
@@ -68,16 +60,12 @@ export class Relationship extends Base({
    */
   hasMany(value) {
     // @todo create helper func for one and many that isn't called `has`
-    this.needsValues('$type', '$entity');
     return this.set('$has', has('many', value), { schema: hasSchema, strict: true });
   }
 
   /**
    * Sets the _foreign_ relationship entity as a rel-one. The entity name will
    * be converted to PascalCase in singular form.
-   *
-   * The `type` and `entity` must be called before calling the `has` method,
-   * otherwise an error will be thrown.
    *
    * ```
    * // one-to-one relationships (1:1)
@@ -96,7 +84,6 @@ export class Relationship extends Base({
    * @returns {Relationship}
    */
   hasOne(value) {
-    this.needsValues('$type', '$entity');
     return this.set('$has', has('one', value), { schema: hasSchema, strict: true });
   }
 
@@ -129,7 +116,6 @@ export class Relationship extends Base({
    * @returns {string} The entity name
    */
   getEntityName() {
-    this.needsValues('$entity');
     return this.get('$entity');
   }
 
@@ -139,7 +125,6 @@ export class Relationship extends Base({
    * @returns {Has} The foreign relationship definition
    */
   getHas() {
-    this.needsValues('$type', '$entity', '$has');
     return this.get('$has');
   }
 
@@ -149,7 +134,6 @@ export class Relationship extends Base({
    * @returns {string} The relationship type - either `one` or `many`
    */
   getType() {
-    this.needsValues('$type');
     return this.get('$type');
   }
 }

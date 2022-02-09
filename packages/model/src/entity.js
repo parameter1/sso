@@ -11,7 +11,6 @@ import entityName from './utils/entity-name.js';
 
 export class Entity extends Base({
   $collection: null,
-  $maybeRequiresValues: ['$name'],
   $name: null,
   $plural: null,
   $props: ImmutableMap(),
@@ -31,9 +30,6 @@ export class Entity extends Base({
    * entity name. As an example, if the entity name is `UserEvent` then the
    * collection name would be `user-events`.
    *
-   * The `name` must be called before calling the `collection` method, otherwise
-   * an error will be thrown.
-   *
    * ```
    * // `some_collection` instead of the default `foos` collection
    * entity('Foo').collection('some_collection');
@@ -45,7 +41,6 @@ export class Entity extends Base({
    * @returns {this} The cloned instance
    */
   collection(value) {
-    this.needsValues('$name');
     return this.set('$collection', value);
   }
 
@@ -78,9 +73,6 @@ export class Entity extends Base({
    *
    * This method will throw an error if an existing property is already set.
    *
-   * The `name` must be called before calling the `prop` method, otherwise an
-   * error will be thrown.
-   *
    * ```
    * const record = entity('Foo')
    *   .prop('bar', string())
@@ -101,7 +93,6 @@ export class Entity extends Base({
    * @returns {this} The cloned instance
    */
   prop(name, schema) {
-    this.needsValues('$name');
     const value = prop(name, schema);
     const key = value.get('$name');
     const $props = this.get('$props');
@@ -111,9 +102,6 @@ export class Entity extends Base({
 
   /**
    * Definines multiple properties on this entity in one call.
-   *
-   * The `name` must be called before calling the `props` method, otherwise an
-   * error will be thrown.
    *
    * ```
    * const record = entity('Foo').props({
@@ -132,7 +120,6 @@ export class Entity extends Base({
    * @returns {this} The cloned instance
    */
   props(values) {
-    this.needsValues('$name');
     const v = attempt(values, object().unknown().required());
     const props = Object.keys(v).reduce((map, name) => {
       const value = prop(name, v[name]);
@@ -151,24 +138,18 @@ export class Entity extends Base({
   /**
    * Gets the collection name for this entity.
    *
-   * The `name` method must be called first otherwise an error will be thrown.
-   *
    * @returns {string} The collection name
    */
   getCollection() {
-    this.needsValues('$name');
     return this.get('$collection');
   }
 
   /**
    * Gets the name for this entity.
    *
-   * The `name` method must be called first otherwise an error will be thrown.
-   *
    * @returns {string} The entity name
    */
   getName() {
-    this.needsValues('$name');
     return this.get('$name');
   }
 
@@ -176,13 +157,10 @@ export class Entity extends Base({
    * Gets a single property definition. Will throw an error if the property
    * isn't registered with the instance.
    *
-   * The `name` method must be called first otherwise an error will be thrown.
-   *
    * @param {string} name The camelCased property name
    * @return {Prop}
    */
   getProp(name) {
-    this.needsValues('$name');
     const p = this.get('$props').get(name);
     if (!p) throw new Error(`No property named \`${name}\` was found on the \`${this.getName()}\` entity.`);
     return p;
@@ -191,12 +169,9 @@ export class Entity extends Base({
   /**
    * Gets all properties registered with this entity as an immutable map.
    *
-   * The `name` method must be called first otherwise an error will be thrown.
-   *
    * @returns {ImmutableMap<string, Joi>} The entity name
    */
   getProps() {
-    this.needsValues('$name');
     return this.get('$props');
   }
 }

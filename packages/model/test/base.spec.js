@@ -22,42 +22,6 @@ describe('base.js', () => {
       const record = base();
       expect(isRecord(record)).to.equal(true);
     });
-
-    /**
-     *
-     */
-    it('should should throw when $maybeRequiresValues is not an array', () => {
-      [{}, '', false, null].forEach(($maybeRequiresValues) => {
-        expect(() => {
-          base({ $maybeRequiresValues });
-        }).to.throw(ValidationError);
-      });
-    });
-
-    /**
-     *
-     */
-    it('should allow empty values', () => {
-      [undefined, []].forEach(($maybeRequiresValues) => {
-        const record = base({ $maybeRequiresValues });
-        expect(isSet(record.get('$maybeRequiresValues'))).to.equal(true);
-      });
-    });
-
-    /**
-     *
-     */
-    it('should set the values', () => {
-      [
-        { methods: ['foo'], expected: ['foo'] },
-        { methods: ['foo', 'foo'], expected: ['foo'] },
-        { methods: ['foo', 'bar'], expected: ['foo', 'bar'] },
-      ].forEach(({ methods, expected }) => {
-        const value = base({ $maybeRequiresValues: methods }).get('$maybeRequiresValues');
-        expect(isSet(value)).to.equal(true);
-        expect(value.toArray()).to.deep.equal(expected);
-      });
-    });
   });
 
   /**
@@ -100,41 +64,6 @@ describe('base.js', () => {
     it('should set set the value', () => {
       const record = base({ foo: null }).set('foo', 'bar');
       expect(record.get('foo')).to.equal('bar');
-    });
-  });
-
-  /**
-   *
-   */
-  describe('Base.needsValues', () => {
-    /**
-     *
-     */
-    it('should not throw when no values are passed', () => {
-      const record1 = base();
-      const record2 = base({ $maybeRequiresValues: ['name'] });
-
-      expect(isRecord(record1.needsValues())).to.equal(true);
-      expect(isRecord(record2.needsValues())).to.equal(true);
-    });
-
-    /**
-     *
-     */
-    it('should throw when methods are required and needed but not set', () => {
-      const record = base({ $maybeRequiresValues: ['name'], name: null });
-      expect(() => {
-        record.needsValues('name');
-      }).to.throw(Error, 'The `name` value must be set before continuing.');
-    });
-
-    /**
-     *
-     */
-    it('should not throw when methods are required, needed, and set', () => {
-      const record = base({ $maybeRequiresValues: ['name', 'foo'], name: null, foo: null });
-      const r = record.set('name', 'foo').set('foo', 'bar');
-      expect(isRecord(r.needsValues('name', 'foo'))).to.equal(true);
     });
   });
 

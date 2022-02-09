@@ -94,16 +94,6 @@ describe('relationship.js', () => {
     /**
      *
      */
-    it('should throw an error if called before the type is set', () => {
-      const rel = new Relationship();
-      expect(() => {
-        rel.entity('foo');
-      }).to.throw(Error, 'The `type` value must be set before continuing.');
-    });
-
-    /**
-     *
-     */
     it('should throw an error when empty', () => {
       const rel = (new Relationship()).type('one');
       common.testInvalidRequiredStrings((value) => {
@@ -135,46 +125,6 @@ describe('relationship.js', () => {
    */
   describe('Relationship.hasOne/hasMany', () => {
     it('should use the entity name utility when setting the name');
-
-    /**
-     *
-     */
-    it('should throw an error if called before the type is set', () => {
-      const message = 'The `type` value must be set before continuing.';
-      expect(() => {
-        (new Relationship()).hasOne('foo');
-      }).to.throw(Error, message);
-      expect(() => {
-        (new Relationship()).hasMany('foo');
-      }).to.throw(Error, message);
-    });
-
-    /**
-     *
-     */
-    it('should throw an error if called before the entity is set', () => {
-      const message = 'The `entity` value must be set before continuing.';
-      expect(() => {
-        (new Relationship()).type('one').hasOne('foo');
-      }).to.throw(Error, message);
-      expect(() => {
-        (new Relationship()).type('one').hasMany('foo');
-      }).to.throw(Error, message);
-    });
-
-    /**
-     *
-     */
-    it('should throw an error if the value has alraeady been set', () => {
-      expect(() => {
-        const rel = one('Foo').hasMany('bars');
-        rel.hasMany('baz');
-      }).to.throw(Error, 'A value already exists for `$has`');
-      expect(() => {
-        const rel = one('Foo').hasMany('bars');
-        rel.hasOne('baz');
-      }).to.throw(Error, 'A value already exists for `$has`');
-    });
 
     /**
      *
@@ -225,24 +175,6 @@ describe('relationship.js', () => {
 
 // describe('relationship.js', () => {
 //   describe('Relationship', () => {
-
-//     // @todo convert to sinon
-//     describe('hasOne', () => {
-//       it('should ensure that the `has` method is called');
-//       it('should set the value', () => {
-//         const rel = (new Relationship()).type('one').entity('foo').hasOne('bar');
-//         expect(rel.$get('has')).to.deep.equal({ type: 'one', entity: 'Bar' });
-//       });
-//     });
-
-//     // @todo convert to sinon
-//     describe('hasMany', () => {
-//       it('should ensure that the `has` method is called');
-//       it('should set the value', () => {
-//         const rel = (new Relationship()).type('one').entity('foo').hasMany('bar');
-//         expect(rel.$get('has')).to.deep.equal({ type: 'many', entity: 'Bar' });
-//       });
-//     });
 
 //     describe('as', () => {
 //       it('should throw an error if called before the type is set', () => {

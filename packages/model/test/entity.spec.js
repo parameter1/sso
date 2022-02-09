@@ -3,7 +3,7 @@ import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { ValidationError } from '@parameter1/joi';
 import { isMap } from 'immutable';
-import { entity, Entity } from '../src/entity.js';
+import { entity } from '../src/entity.js';
 import { Prop } from '../src/prop.js';
 import { isSchema, string } from '../src/schema.js';
 import common from './common.js';
@@ -27,15 +27,6 @@ describe('entity.js', () => {
    *
    */
   describe('Entity.collection', () => {
-    /**
-     *
-     */
-    it('should throw an error if called before the name is set', () => {
-      expect(() => {
-        (new Entity()).collection('foo');
-      }).to.throw(Error, 'The `name` value must be set before continuing.');
-    });
-
     /**
      *
      */
@@ -107,15 +98,6 @@ describe('entity.js', () => {
     /**
      *
      */
-    it('should throw an error if called before the name is set', () => {
-      expect(() => {
-        (new Entity()).prop('foo');
-      }).to.throw(Error, 'The `name` value must be set before continuing.');
-    });
-
-    /**
-     *
-     */
     it('should throw an error when the name is invalid', () => {
       common.testInvalidRequiredStrings((name) => {
         entity('Foo').prop(name);
@@ -169,15 +151,6 @@ describe('entity.js', () => {
     /**
      *
      */
-    it('should throw an error if called before the name is set', () => {
-      expect(() => {
-        (new Entity()).props('foo');
-      }).to.throw(Error, 'The `name` value must be set before continuing.');
-    });
-
-    /**
-     *
-     */
     it('should throw an error when the values are invalid', () => {
       [undefined, null, '', ' '].forEach((value) => {
         expect(() => {
@@ -222,15 +195,6 @@ describe('entity.js', () => {
     /**
      *
      */
-    it('should throw an error if called before the name is set', () => {
-      expect(() => {
-        (new Entity()).getCollection();
-      }).to.throw(Error, 'The `name` value must be set before continuing.');
-    });
-
-    /**
-     *
-     */
     it('should return the collection name', () => {
       expect(entity('Foo').getCollection()).to.equal('foos');
     });
@@ -243,15 +207,6 @@ describe('entity.js', () => {
     /**
      *
      */
-    it('should throw an error if called before the name is set', () => {
-      expect(() => {
-        (new Entity()).getName();
-      }).to.throw(Error, 'The `name` value must be set before continuing.');
-    });
-
-    /**
-     *
-     */
     it('should return the entity name', () => {
       expect(entity('Foo').getName()).to.equal('Foo');
     });
@@ -261,15 +216,6 @@ describe('entity.js', () => {
    *
    */
   describe('Entity.getProp', () => {
-    /**
-     *
-     */
-    it('should throw an error if called before the name is set', () => {
-      expect(() => {
-        (new Entity()).getProp();
-      }).to.throw(Error, 'The `name` value must be set before continuing.');
-    });
-
     /**
      *
      */
@@ -292,15 +238,6 @@ describe('entity.js', () => {
    *
    */
   describe('Entity.getProps', () => {
-    /**
-     *
-     */
-    it('should throw an error if called before the name is set', () => {
-      expect(() => {
-        (new Entity()).getProps();
-      }).to.throw(Error, 'The `name` value must be set before continuing.');
-    });
-
     /**
      *
      */

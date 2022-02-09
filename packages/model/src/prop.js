@@ -7,7 +7,6 @@ import {
 import { camel } from './utils/inflector.js';
 
 export class Prop extends Base({
-  $maybeRequiresValues: ['$name'],
   $name: null,
   $schema: null,
 }) {
@@ -29,7 +28,6 @@ export class Prop extends Base({
    * @returns {this}
    */
   schema(value) {
-    this.needsValues('$name');
     const schema = attempt(value, schemaObject().required());
     return this.set('$schema', schema, { schema: schemaObject() });
   }
@@ -42,7 +40,6 @@ export class Prop extends Base({
    * @returns {string} The property name
    */
   getName() {
-    this.needsValues('$name');
     return this.get('$name');
   }
 
@@ -54,7 +51,6 @@ export class Prop extends Base({
    * @returns {Joi} The property name
    */
   getSchema() {
-    this.needsValues('$name');
     return this.get('$name');
   }
 }

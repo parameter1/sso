@@ -46,7 +46,7 @@ export const Base = (defaults = {}) => {
      * @param {string} path The intended key/path
      * @param {*} value The value to validate
      * @param {Joi} schema The schema to use for validation
-     * @returns {void}
+     * @returns {*} The validated and resolved value
      */
     validateValue(path, value, schema = defaultSchema) {
       attempt(schema, schemaObject().allow(null).label('schema'));

@@ -5,7 +5,7 @@ import { isMap, isSet, isRecord } from 'immutable';
 export const { attempt, isSchema } = Joi;
 export { default as Joi, validate, validateAsync } from '@parameter1/joi';
 
-export default class Schema {
+export class Schema {
   /**
    * Creates an alternatives type.
    *

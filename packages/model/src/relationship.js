@@ -3,7 +3,7 @@ import { Map as ImmutableMap, Set as ImmutableSet } from 'immutable';
 import { Base } from './base.js';
 import { has, Has } from './relationship/has.js';
 import entityName from './utils/entity-name.js';
-import Schema, { attempt } from './schema.js';
+import { Schema, attempt } from './schema.js';
 import Inflector from './utils/inflector.js';
 
 const {

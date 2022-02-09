@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file, class-methods-use-this */
 import { Record } from 'immutable';
-import Schema, { attempt } from './schema.js';
+import { Schema, attempt } from './schema.js';
 
 const { object, schemaObject, string } = Schema;
 

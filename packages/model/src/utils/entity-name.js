@@ -1,5 +1,5 @@
 import Inflector from './inflector.js';
-import Schema, { attempt } from '../schema.js';
+import { Schema, attempt } from '../schema.js';
 
 const { pascal, singular } = Inflector;
 

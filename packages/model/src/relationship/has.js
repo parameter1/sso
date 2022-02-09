@@ -1,6 +1,6 @@
 import { Base } from '../base.js';
 import entityName from '../utils/entity-name.js';
-import Schema from '../schema.js';
+import { Schema } from '../schema.js';
 
 const typeSchema = Schema.string().valid('one', 'many').required();
 

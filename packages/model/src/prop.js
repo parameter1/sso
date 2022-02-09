@@ -1,5 +1,5 @@
 import { Base } from './base.js';
-import Schema, { attempt } from './schema.js';
+import { Schema, attempt } from './schema.js';
 import Inflector from './utils/inflector.js';
 
 const { schemaObject, string } = Schema;

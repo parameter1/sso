@@ -123,7 +123,7 @@ describe('relationship.js', () => {
   /**
    *
    */
-  describe('Relationship.hasOne/hasMany', () => {
+  describe('Relationship.setHas', () => {
     it('should use the entity name utility when setting the name');
 
     /**

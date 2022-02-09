@@ -40,51 +40,58 @@ export class Relationship extends Base({
   }
 
   /**
-   * Sets the _foreign_ relationship entity as a rel-many. The entity name will
-   * be converted to PascalCase in singular form.
-   *
-   * ```
-   * // one-to-many relationships (1:N)
-   * rel.type('one').entity('Org').has('many', 'Users');
-   * one('Org').has('many', 'Users'); // using rel helper function
-   * one('Org').hasMany('Users'); // using `hasMany` helper method
-   *
-   * // many-to-many relationships (M:N)
-   * rel.type('many').entity('Orgs').have('many', 'Users');
-   * many('Orgs').have('many', 'Users'); // using rel helper function
-   * many('Orgs').haveMany('Users'); // using `haveMany` helper method
-   * ```
+   * Sets the _foreign_ relationship entity as a rel-many.
    *
    * @param {string} value The related entity name.
    * @returns {Relationship}
    */
   hasMany(value) {
-    // @todo create helper func for one and many that isn't called `has`
-    return this.set('$has', has('many', value), { schema: hasSchema, strict: true });
+    return this.setHas('many', value);
   }
 
   /**
-   * Sets the _foreign_ relationship entity as a rel-one. The entity name will
-   * be converted to PascalCase in singular form.
-   *
-   * ```
-   * // one-to-one relationships (1:1)
-   * rel.type('one').entity('Org').has('one', 'User');
-   * one('Org').has('one', 'User'); // using rel helper function
-   * one('Org').hasOne('User'); // using `hasOne` helper method
-   *
-   * // many-to-one relationships (N:1)
-   * rel.type('many').entity('Orgs').have('one', 'User');
-   * many('Orgs').have('one', 'User'); // using rel helper function
-   * many('Orgs').haveOne('User'); // using `haveOne` helper method
-   *
-   * ```
+   * Sets the _foreign_ relationship entity as a rel-one.
    *
    * @param {string} value The related entity name.
    * @returns {Relationship}
    */
   hasOne(value) {
-    return this.set('$has', has('one', value), { schema: hasSchema, strict: true });
+    return this.setHas('one', value);
+  }
+
+  /**
+   * Sets the _foreign_ relationship entity and type. The entity name will be
+   * converted to PascalCase in singular form.
+   *
+   * ```
+   * // one-to-one relationships (1:1)
+   * rel.type('one').entity('Org').hasHas('one', 'User');
+   * one('Org').hasHas('one', 'User'); // using rel helper function
+   * one('Org').hasOne('User'); // using `hasOne` helper method
+   *
+   * // one-to-many relationships (1:N)
+   * rel.type('one').entity('Org').hasHas('many', 'Users');
+   * one('Org').hasHas('many', 'Users'); // using rel helper function
+   * one('Org').hasMany('Users'); // using `hasMany` helper method
+   *
+   * // many-to-one relationships (N:1)
+   * rel.type('many').entity('Orgs').setHas('one', 'User');
+   * many('Orgs').setHas('one', 'User'); // using rel helper function
+   * many('Orgs').haveOne('User'); // using `haveOne` helper method
+   *
+   * // many-to-many relationships (M:N)
+   * rel.type('many').entity('Orgs').setHas('many', 'Users');
+   * many('Orgs').setHas('many', 'Users'); // using rel helper function
+   * many('Orgs').haveMany('Users'); // using `haveMany` helper method
+   *
+   * ```
+   *
+   * @param {string} type The relationship type - either `one` or `many`
+   * @param {string} value The related entity name.
+   * @returns {Relationship}
+   */
+  setHas(type, value) {
+    return this.set('$has', has(type, value), { schema: hasSchema, strict: true });
   }
 
   /**

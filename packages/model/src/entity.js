@@ -1,7 +1,11 @@
 import { Map as ImmutableMap } from 'immutable';
 import { Base } from './base.js';
 import { prop } from './prop.js';
-import { immutableMap } from './schema.js';
+import {
+  attempt,
+  object,
+  immutableMap,
+} from './schema.js';
 import { param, plural } from './utils/inflector.js';
 import entityName from './utils/entity-name.js';
 
@@ -12,6 +16,15 @@ export class Entity extends Base({
   $plural: null,
   $props: ImmutableMap(),
 }) {
+  /**
+   * A property definition object.
+   *
+   * @typedef {object} PropDefinition
+   * @property {string} name The name of the property
+   * @property {Schema} schema The schema to use when validating the property
+   *                           value
+   */
+
   /**
    * Sets the database collection. If this method is _never_ called, then the
    * default collection name will be the param-cased, plural version of the
@@ -65,19 +78,19 @@ export class Entity extends Base({
    *
    * This method will throw an error if an existing property is already set.
    *
-   * The `name` must be called before calling the `collection` method, otherwise
-   * an error will be thrown.
+   * The `name` must be called before calling the `prop` method, otherwise an
+   * error will be thrown.
    *
    * ```
    * const record = entity('Foo')
-   *  .prop('bar', string())
-   *  .prop('pull_request', string())
-   *  .prop('baz', boolean());
+   *   .prop('bar', string())
+   *   .prop('pull_request', string())
+   *   .prop('baz', boolean());
    *
    * ImmutableMap(3) {
-   *  'bar' => { schema: StringSchema },
-   *  'pullRequest' => { schema: StringSchema },
-   *  'baz' => { schema: BooleanSchema },
+   *   'bar' => { schema: StringSchema },
+   *   'pullRequest' => { schema: StringSchema },
+   *   'baz' => { schema: BooleanSchema },
    * } = record.get('$props');
    * ```
    *
@@ -94,6 +107,45 @@ export class Entity extends Base({
     const $props = this.get('$props');
     if ($props.has(key)) throw new Error(`A value already exists for \`props.${key}\``);
     return this.set('$props', $props.set(key, value), { schema: immutableMap() });
+  }
+
+  /**
+   * Definines multiple properties on this entity in one call.
+   *
+   * The `name` must be called before calling the `props` method, otherwise an
+   * error will be thrown.
+   *
+   * ```
+   * const record = entity('Foo').props({
+   *   bar: string(),
+   *   pull_request: string(),
+   *   baz: boolean(),
+   * });
+   *
+   * ImmutableMap(3) {
+   *   'bar' => { schema: StringSchema },
+   *   'pullRequest' => { schema: StringSchema },
+   *   'baz' => { schema: BooleanSchema },
+   * } = record.get('$props');
+   * ```
+   * @param {PropDefinition[]} values The properties to set
+   * @returns {this} The cloned instance
+   */
+  props(values) {
+    this.$needs('$name');
+    const v = attempt(values, object().unknown().required());
+    const props = Object.keys(v).reduce((map, name) => {
+      const value = prop(name, v[name]);
+      const key = value.get('$name');
+      if (map.has(key)) throw new Error(`A value already exists for \`props.${key}\``);
+      return map.set(key, value);
+    }, ImmutableMap());
+
+    const merged = this.get('$props').mergeWith((_, val, key) => {
+      if (key) throw new Error(`A value already exists for \`props.${key}\``);
+      return val;
+    }, props);
+    return this.set('$props', merged, { schema: immutableMap() });
   }
 }
 

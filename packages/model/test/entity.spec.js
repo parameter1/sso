@@ -24,7 +24,7 @@ describe('entity.js', () => {
   /**
    *
    */
-  describe('Entity.collection()', () => {
+  describe('Entity.collection', () => {
     /**
      *
      */
@@ -57,7 +57,7 @@ describe('entity.js', () => {
   /**
    *
    */
-  describe('Entity.name()', () => {
+  describe('Entity.name', () => {
     /**
      *
      */
@@ -101,7 +101,16 @@ describe('entity.js', () => {
   /**
    *
    */
-  describe('Entity.prop()', () => {
+  describe('Entity.prop', () => {
+    /**
+     *
+     */
+    it('should throw an error if called before the name is set', () => {
+      expect(() => {
+        (new Entity()).prop('foo');
+      }).to.throw(Error, 'The `name` value must be set before continuing.');
+    });
+
     /**
      *
      */
@@ -150,30 +159,57 @@ describe('entity.js', () => {
       expect(isSchema(prop.get('$schema'))).to.equal(true);
     });
   });
+
+  /**
+   *
+   */
+  describe('Entity.props', () => {
+    /**
+     *
+     */
+    it('should throw an error if called before the name is set', () => {
+      expect(() => {
+        (new Entity()).props('foo');
+      }).to.throw(Error, 'The `name` value must be set before continuing.');
+    });
+
+    /**
+     *
+     */
+    it('should throw an error when the values are invalid', () => {
+      [undefined, null, '', ' '].forEach((value) => {
+        expect(() => {
+          entity('Foo').props(value);
+        }).to.throw(ValidationError);
+      });
+    });
+
+    /**
+     *
+     */
+    it('should throw an error when an existing prop is already set', () => {
+      expect(() => {
+        entity('Foo').props({ foo: string(), bar: string() }).props({ foo: string() });
+      }).to.throw(Error, 'A value already exists for `props.foo`');
+
+      expect(() => {
+        entity('Foo').props({ foo: string(), ' foo ': string() });
+      }).to.throw(Error, 'A value already exists for `props.foo`');
+    });
+
+    /**
+     *
+     */
+    it('should set the props', () => {
+      const record = entity('Foo').props({
+        bar: string(),
+        pull_request: string(),
+        baz: string(),
+      });
+      ['bar', 'pullRequest', 'baz'].forEach((name) => {
+        const prop = record.get('$props').get(name);
+        expect(isSchema(prop.get('$schema'))).to.equal(true);
+      });
+    });
+  });
 });
-
-//   describe('props', () => {
-//     it('should throw an error when the values array is invalid', () => {
-//       ['', null, undefined, [], ['foo'], [{ name: null }], [{ schema: {} }]].forEach((values) => {
-//         expect(() => {
-//           const ent = entity('foo');
-//           ent.props(values);
-//         }).to.throw(ValidationError);
-//       });
-//     });
-
-//     it('should set the props', () => {
-//       const ent = entity('foo').props([
-//         { name: 'bar', schema: string() },
-//         { name: 'pull_request', schema: string() },
-//         { name: 'baz', schema: string() },
-//       ]);
-//       ['bar', 'pullRequest', 'baz'].forEach((name) => {
-//         const prop = ent.$props.get(name);
-//         expect(prop).to.be.an('object');
-//         expect(prop.$get('name')).to.equal(name);
-//         expect(isSchema(prop.$get('schema'))).to.equal(true);
-//       });
-//     });
-//   });
-// });

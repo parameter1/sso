@@ -29,7 +29,7 @@ describe('entity.js', () => {
     it('should throw an error if called before the name is set', () => {
       expect(() => {
         (new Entity()).collection('foo');
-      }).to.throw(Error, 'The `$name` value must be set before continuing.');
+      }).to.throw(Error, 'The `name` value must be set before continuing.');
     });
 
     /**

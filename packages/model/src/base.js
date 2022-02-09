@@ -59,7 +59,7 @@ export const Base = (defaults = {}) => {
       const required = ImmutableSet(values);
       this.$maybeRequiresValues.forEach((key) => {
         if (required.has(key) && this.get(key) == null) {
-          throw new Error(`The \`${key}\` value must be set before continuing.`);
+          throw new Error(`The \`${key.replace(/^\$/, '')}\` value must be set before continuing.`);
         }
       });
       return this;

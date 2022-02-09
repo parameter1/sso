@@ -1,6 +1,6 @@
 import is from '@sindresorhus/is';
 import { Map as ImmutableMap, Set as ImmutableSet } from 'immutable';
-import { Base } from './base.js';
+import { WithProps } from './with-props.js';
 import { has, Has } from './relationship/has.js';
 import entityName from './utils/entity-name.js';
 import { Schema, attempt } from './schema.js';
@@ -18,7 +18,7 @@ const reqNullableString = string().required().allow(null);
 const hasSchema = object().instance(Has).required();
 const typeSchema = string().valid('one', 'many').required();
 
-export class Relationship extends Base({
+export class Relationship extends WithProps({
   $as: null,
   $entity: null,
   $has: null,

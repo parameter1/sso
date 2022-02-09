@@ -25,6 +25,8 @@ export const immutableSet = () => Joi.object().custom((value) => {
   if (isSet(value)) return value;
   throw new Error('The value must be an immutable set object');
 });
+export const ip = (options) => Joi.string().ip(options);
+export const ipv4 = () => Joi.string().ip({ version: ['ipv4'], cidr: 'forbidden' });
 export const integer = () => Joi.integer();
 export const mapObject = () => Joi.object().instance(Map);
 export const number = () => Joi.number();

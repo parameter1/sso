@@ -1,7 +1,13 @@
+import is from '@sindresorhus/is';
+import { Map as ImmutableMap, Set as ImmutableSet } from 'immutable';
 import { Base } from './base.js';
 import { has, Has } from './relationship/has.js';
 import entityName from './utils/entity-name.js';
 import {
+  array,
+  attempt,
+  conditional,
+  immutableMap,
   object,
   string,
 } from './schema.js';
@@ -15,6 +21,7 @@ export class Relationship extends Base({
   $entity: null,
   $has: null,
   $type: null,
+  $with: ImmutableMap({ props: ImmutableSet(), edges: ImmutableSet() }),
 }) {
   /**
    * Sets the local field name that will used when saving the relationship. This
@@ -34,7 +41,7 @@ export class Relationship extends Base({
    * ```
    *
    * @param {string} value The local field value
-   * @returns {this}
+   * @returns {this} The cloned instance
    */
   as(value) {
     return this.set('$as', camel(value));
@@ -59,7 +66,7 @@ export class Relationship extends Base({
    * ```
    *
    * @param {string} value The related entity name
-   * @returns {this}
+   * @returns {this} The cloned instance
    */
   entity(value) {
     return this.set('$entity', entityName(value), { strict: true });
@@ -69,7 +76,7 @@ export class Relationship extends Base({
    * Sets the _foreign_ relationship entity as a rel-many.
    *
    * @param {string} value The related entity name.
-   * @returns {this}
+   * @returns {this} The cloned instance
    */
   hasMany(value) {
     return this.setHas('many', value);
@@ -79,7 +86,7 @@ export class Relationship extends Base({
    * Sets the _foreign_ relationship entity as a rel-one.
    *
    * @param {string} value The related entity name.
-   * @returns {this}
+   * @returns {this} The cloned instance
    */
   hasOne(value) {
     return this.setHas('one', value);
@@ -90,7 +97,7 @@ export class Relationship extends Base({
    * foreign relationship type to `many`.
    *
    * @param {string} value The related entity name.
-   * @returns {this}
+   * @returns {this} The cloned instance
    */
   haveMany(value) {
     return this.hasMany(value);
@@ -101,7 +108,7 @@ export class Relationship extends Base({
    * relationship type to `one`.
    *
    * @param {string} value The related entity name.
-   * @returns {this}
+   * @returns {this} The cloned instance
    */
   haveOne(value) {
     return this.hasOne(value);
@@ -136,7 +143,7 @@ export class Relationship extends Base({
    *
    * @param {string} type The relationship type - either `one` or `many`
    * @param {string} value The related entity name.
-   * @returns {this}
+   * @returns {this} The cloned instance
    */
   setHas(type, value) {
     return this.set('$has', has(type, value), { schema: hasSchema, strict: true });
@@ -159,10 +166,70 @@ export class Relationship extends Base({
    * ```
    *
    * @param {string} value The owning relationship type - `one` or `many`
-   * @returns {this}
+   * @returns {this} The cloned instance
    */
   type(value) {
     return this.set('$type', value, { schema: typeSchema, strict: true });
+  }
+
+  /**
+   * Sets the props and edges that will be saved on the relationship.
+   *
+   * These values are denormalized and will be automatically updated whenever
+   * the values on the foreign document change. These are _not_ properties _on_
+   * the relationship (i.e. related fields). To set these, use the `affix`
+   * method instead.
+   *
+   * The value can either be a single string prop, and array of string props, or
+   * an object that defines both `props` and `edges`. The method can also be
+   * called multiple times to append multiple props and edges.
+   *
+   * The `_id` value is always saved and will be filtered out if provided.
+   *
+   * ```
+   * // will set the `foo`, `bar`, and `baz` props
+   * // and the `a` and `b` edges.
+   * rel
+   *  .type('one')
+   *  .entity('Foo')
+   *  .hasMany('Bars')
+   *  .with('foo')
+   *  .with(['bar'])
+   *  .with({ props: ['baz'], edges: ['a', 'b'] });
+   *
+   * // however, it's easier to do this using a single `with` call:
+   * rel.with({ props: ['foo', 'bar', 'baz'], edges: ['a', 'b'] });
+   * ```
+   *
+   * @param {string|string[]|object} value The prop(s) and/or edge(s) to set
+   * @returns {this} The cloned instance
+   */
+  with(value) {
+    const v = attempt(value, conditional(array(), {
+      then: array().items(string()),
+      otherwise: conditional(string(), {
+        then: string(),
+        otherwise: object().keys({
+          props: array(),
+          edges: array(),
+        }),
+      }),
+    }).required().label('with'));
+
+    const toSet = { props: [], edges: [] };
+    if (is.array(v)) toSet.props.push(...v);
+    if (is.string(v)) toSet.props.push(v);
+    if (is.plainObject(v) && v.props) toSet.props.push(...v.props);
+    if (is.plainObject(v) && v.edges) toSet.edges.push(...v.edges);
+
+    const { union } = ImmutableSet;
+    const $with = this.getWith();
+
+    const props = union([$with.get('props'), toSet.props.filter((prop) => prop !== '_id')]);
+    const edges = union([$with.get('edges'), toSet.edges.filter((edge) => edge !== '_id')]);
+
+    const map = $with.set('props', props).set('edges', edges);
+    return this.set('$with', map, { schema: immutableMap() });
   }
 
   /**
@@ -216,6 +283,33 @@ export class Relationship extends Base({
    */
   getType() {
     return this.get('$type');
+  }
+
+  /**
+   * Gets the denormalized fields that will be saved with the relationship.
+   *
+   * @returns {ImmutableMap<string, ImmutableSet<string>>}
+   */
+  getWith() {
+    return this.get('$with');
+  }
+
+  /**
+   * Gets the denormalized edges that will be saved with the relationship.
+   *
+   * @returns {ImmutableSet<string>}
+   */
+  getWithEdges() {
+    return this.get('$with').get('edges');
+  }
+
+  /**
+   * Gets the denormalized props that will be saved with the relationship.
+   *
+   * @returns {ImmutableSet<string>}
+   */
+  getWithProps() {
+    return this.get('$with').get('props');
   }
 }
 

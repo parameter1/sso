@@ -1,14 +1,12 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
-import inflector from '../src/inflector.js';
-
-const {
+import {
   camel,
   none,
   pascal,
   param,
-} = inflector;
+} from '../../src/utils/inflector.js';
 
 const words = [
   'UserEvent',
@@ -28,7 +26,7 @@ const words = [
   'userEvent',
 ];
 
-describe('inflector.js', () => {
+describe('utils/inflector.js', () => {
   describe('pascal', () => {
     describe('multiple words', () => {
       words.forEach((value) => {

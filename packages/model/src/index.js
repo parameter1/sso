@@ -1,3 +1,2 @@
-export { default as Base } from './base.js';
-export * from './entity.js';
-export * from './relationship.js';
+export { Set, Map } from 'immutable';
+export * from './base.js';

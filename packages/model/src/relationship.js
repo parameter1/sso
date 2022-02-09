@@ -11,7 +11,7 @@ import {
   object,
   string,
 } from './schema.js';
-import { camel, plural } from './utils/inflector.js';
+import Inflector from './utils/inflector.js';
 
 const hasSchema = object().instance(Has).required();
 const typeSchema = string().valid('one', 'many').required();
@@ -44,7 +44,7 @@ export class Relationship extends Base({
    * @returns {this} The cloned instance
    */
   as(value) {
-    return this.set('$as', camel(value));
+    return this.set('$as', Inflector.camel(value));
   }
 
   /**
@@ -254,8 +254,8 @@ export class Relationship extends Base({
     const alias = this.getAs();
     if (alias) return alias;
     const rel = this.getHas();
-    const field = camel(rel.getEntityName());
-    return rel.getType() === 'many' ? plural(field) : field;
+    const field = Inflector.camel(rel.getEntityName());
+    return rel.getType() === 'many' ? Inflector.plural(field) : field;
   }
 
   /**

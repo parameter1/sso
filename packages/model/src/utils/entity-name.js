@@ -1,5 +1,7 @@
-import { pascal, singular } from './inflector.js';
+import Inflector from './inflector.js';
 import { attempt, string } from '../schema.js';
+
+const { pascal, singular } = Inflector;
 
 /**
  * Formats the name of the entity. The value will be converted to PascalCase in

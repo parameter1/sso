@@ -4,7 +4,7 @@ import {
   schemaObject,
   string,
 } from './schema.js';
-import { camel } from './utils/inflector.js';
+import Inflector from './utils/inflector.js';
 
 export class Prop extends Base({
   $name: null,
@@ -18,7 +18,7 @@ export class Prop extends Base({
    */
   name(value) {
     const name = attempt(value, string().required());
-    return this.set('$name', camel(name));
+    return this.set('$name', Inflector.camel(name));
   }
 
   /**

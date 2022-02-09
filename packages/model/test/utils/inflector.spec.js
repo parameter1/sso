@@ -1,12 +1,14 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
-import {
+import Inflector from '../../src/utils/inflector.js';
+
+const {
   camel,
   none,
   pascal,
   param,
-} from '../../src/utils/inflector.js';
+} = Inflector;
 
 const words = [
   'UserEvent',

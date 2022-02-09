@@ -6,8 +6,10 @@ import {
   object,
   immutableMap,
 } from './schema.js';
-import { param, plural } from './utils/inflector.js';
+import Inflector from './utils/inflector.js';
 import entityName from './utils/entity-name.js';
+
+const { param, plural } = Inflector;
 
 export class Entity extends Base({
   $collection: null,

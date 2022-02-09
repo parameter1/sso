@@ -4,7 +4,7 @@ import entityName from './utils/entity-name.js';
 
 export class Entity extends Base({
   $collection: null,
-  $maybeRequiresMethods: ['name'],
+  $maybeRequiresValues: ['$name'],
   $name: null,
   $plural: null,
 }) {

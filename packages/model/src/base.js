@@ -12,14 +12,14 @@ const defaultSchema = string().required();
 
 export const Base = (defaults = {}) => {
   const {
-    $maybeRequiresMethods = [],
+    $maybeRequiresValues = [],
     ...rest
   } = attempt(defaults, object().keys({
-    $maybeRequiresMethods: array().items(string()),
+    $maybeRequiresValues: array().items(string()),
   }).unknown().label('defaults'));
 
   return class extends Record({
-    $maybeRequiresMethods: Set($maybeRequiresMethods),
+    $maybeRequiresValues: Set($maybeRequiresValues),
     ...rest,
   }) {
     /**
@@ -57,7 +57,7 @@ export const Base = (defaults = {}) => {
     $needs(...values) {
       attempt(values, array().items(string()));
       const required = Set(values);
-      this.$maybeRequiresMethods.forEach((key) => {
+      this.$maybeRequiresValues.forEach((key) => {
         if (required.has(key) && this.get(key) == null) {
           throw new Error(`The \`${key}\` value must be set before continuing.`);
         }

@@ -106,18 +106,6 @@ describe('base.js', () => {
   /**
    *
    */
-  describe('Base.toObject', () => {
-    it('should return $maybeRequiresValues as a native set', () => {
-      const { $maybeRequiresValues: value } = base({ $maybeRequiresValues: ['$name'] }).toObject();
-      expect(value).to.be.an.instanceOf(Set);
-      expect(value.size).to.equal(1);
-      expect(value.has('$name')).to.equal(true);
-    });
-  });
-
-  /**
-   *
-   */
   describe('Base.$needs', () => {
     /**
      *

@@ -48,18 +48,6 @@ export const Base = (defaults = {}) => {
     }
 
     /**
-     * Deeply converts this record to a JavaScript object
-     *
-     * @returns {object}
-     */
-    toObject() {
-      return {
-        ...super.toObject(),
-        $maybeRequiresValues: new Set(this.$maybeRequiresValues.toArray()),
-      };
-    }
-
-    /**
      * Determines which method values are required to be set on the instance
      * before allowing another method call.
      *

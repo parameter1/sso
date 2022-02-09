@@ -176,11 +176,11 @@ describe('entity.js', () => {
     it('should throw an error when an existing prop is already set', () => {
       expect(() => {
         entity('Foo').props({ foo: string(), bar: string() }).props({ foo: string() });
-      }).to.throw(Error, 'A value already exists for `props.foo`');
+      }).to.throw(Error, 'A prop already exists for `foo`');
 
       expect(() => {
         entity('Foo').props({ foo: string(), ' foo ': string() });
-      }).to.throw(Error, 'A value already exists for `props.foo`');
+      }).to.throw(Error, 'A prop already exists for `foo`');
     });
 
     /**

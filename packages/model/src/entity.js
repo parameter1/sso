@@ -122,12 +122,12 @@ export class Entity extends Base({
     const props = Object.keys(v).reduce((map, name) => {
       const value = prop(name, v[name]);
       const key = value.get('$name');
-      if (map.has(key)) throw new Error(`A value already exists for \`props.${key}\``);
+      if (map.has(key)) throw new Error(`A prop already exists for \`${key}\``);
       return map.set(key, value);
     }, ImmutableMap());
 
     const merged = this.get('$props').mergeWith((_, val, key) => {
-      if (key) throw new Error(`A value already exists for \`props.${key}\``);
+      if (key) throw new Error(`A prop already exists for \`${key}\``);
       return val;
     }, props);
     return this.set('$props', merged, { schema: immutableMap() });

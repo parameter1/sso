@@ -8,4 +8,10 @@ export default {
       cb(value);
     }).to.throw(ValidationError);
   }),
+
+  testInvalidRequiredNullableStrings: (cb) => [undefined, '', ' ', {}].forEach((value) => {
+    expect(() => {
+      cb(value);
+    }).to.throw(ValidationError);
+  }),
 };

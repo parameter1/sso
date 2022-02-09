@@ -34,7 +34,7 @@ describe('entity.js', () => {
      */
     it('should throw an error when invalid', () => {
       const record = entity('Foo');
-      common.testInvalidRequiredStrings((key) => {
+      common.testInvalidRequiredNullableStrings((key) => {
         record.collection(key);
       });
     });
@@ -44,8 +44,17 @@ describe('entity.js', () => {
      */
     it('should set the trimmed value as passed', () => {
       ['some_collection', ' some_collection  '].forEach((value) => {
-        expect(entity('Foo').collection(value).get('$collection')).to.equal('some_collection');
+        expect(entity('Foo').collection(value).getCollection()).to.equal('some_collection');
       });
+    });
+
+    /**
+     *
+     */
+    it('should unset the value when a null is passed', () => {
+      const record = entity('Foo').collection('bar');
+      expect(record.getCollection()).to.equal('bar');
+      expect(record.collection(null).getCollection()).to.equal('foos');
     });
   });
 
@@ -58,7 +67,7 @@ describe('entity.js', () => {
      */
     it('should PascalCase the name', () => {
       ['user-event', 'userEvent', 'user event', 'user.event', 'UserEvent', 'User Event'].forEach((value) => {
-        expect(entity(value).get('$name')).to.equal('UserEvent');
+        expect(entity(value).getName()).to.equal('UserEvent');
       });
     });
 
@@ -67,7 +76,7 @@ describe('entity.js', () => {
      */
     it('should ensure the name is singular', () => {
       ['UserEvent', 'user-events', 'userEvents', 'user events', 'user.events', 'UserEvents', 'User Events'].forEach((value) => {
-        expect(entity(value).get('$name')).to.equal('UserEvent');
+        expect(entity(value).getName()).to.equal('UserEvent');
       });
     });
 
@@ -77,7 +86,7 @@ describe('entity.js', () => {
     it('should add the plural version of the name', () => {
       ['UserEvents', 'user-event', 'userEvent', 'user event', 'user.event', 'UserEvent', 'User Event'].forEach((name) => {
         const ent = entity(name);
-        expect(ent.get('$plural')).to.equal('UserEvents');
+        expect(ent.getPluralName()).to.equal('UserEvents');
       });
     });
 
@@ -88,8 +97,8 @@ describe('entity.js', () => {
       const ent1 = entity('Application');
       const ent2 = entity('UserEvent');
 
-      expect(ent1.get('$collection')).to.equal('applications');
-      expect(ent2.get('$collection')).to.equal('user-events');
+      expect(ent1.getCollection()).to.equal('applications');
+      expect(ent2.getCollection()).to.equal('user-events');
     });
   });
 

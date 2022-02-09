@@ -8,10 +8,11 @@ import entityName from './utils/entity-name.js';
 const { immutableMap, object } = Schema;
 const { param, plural } = Inflector;
 
+const reqNullableString = Schema.string().required().allow(null);
+
 export class Entity extends Base({
   $collection: null,
   $name: null,
-  $plural: null,
   $props: ImmutableMap(),
 }) {
   /**
@@ -29,6 +30,8 @@ export class Entity extends Base({
    * entity name. As an example, if the entity name is `UserEvent` then the
    * collection name would be `user-events`.
    *
+   * If the value is `null`, the collection will be reset to it's default value.
+   *
    * ```
    * // `some_collection` instead of the default `foos` collection
    * entity('Foo').collection('some_collection');
@@ -36,11 +39,11 @@ export class Entity extends Base({
    * entity('FooBar').collection('foo/bar');
    * ```
    *
-   * @param {string} value The collection name
+   * @param {string|null} value The collection name
    * @returns {this} The cloned instance
    */
   collection(value) {
-    return this.set('$collection', value);
+    return this.set('$collection', value, { schema: reqNullableString });
   }
 
   /**
@@ -58,11 +61,7 @@ export class Entity extends Base({
    * @returns {this} The cloned instance
    */
   name(value) {
-    const name = entityName(value, 'name');
-    return this
-      .set('$name', name)
-      .set('$plural', plural(name))
-      .set('$collection', plural(param(name)));
+    return this.set('$name', entityName(value, 'name'));
   }
 
   /**
@@ -137,19 +136,32 @@ export class Entity extends Base({
   /**
    * Gets the collection name for this entity.
    *
-   * @returns {string} The collection name
+   * @returns {string|null} The collection name
    */
   getCollection() {
-    return this.get('$collection');
+    const name = this.get('$name');
+    const collection = this.get('$collection');
+    if (collection) return collection;
+    return name ? plural(param(name)) : null;
   }
 
   /**
    * Gets the name for this entity.
    *
-   * @returns {string} The entity name
+   * @returns {string|null} The entity name
    */
   getName() {
     return this.get('$name');
+  }
+
+  /**
+   * Gets the plural name of this entity.
+   *
+   * @returns {string|null}
+   */
+  getPluralName() {
+    const name = this.get('$name');
+    return name ? plural(name) : null;
   }
 
   /**

@@ -3,6 +3,7 @@ import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { ValidationError } from '@parameter1/joi';
 import { Relationship, many, one } from '../src/relationship.js';
+import { Has } from '../src/relationship/has.js';
 import common from './common.js';
 
 describe('relationship.js', () => {
@@ -128,42 +129,102 @@ describe('relationship.js', () => {
       expect(rel.getEntityName()).to.equal('Foo');
     });
   });
+
+  /**
+   *
+   */
+  describe('Relationship.hasOne/hasMany', () => {
+    it('should use the entity name utility when setting the name');
+
+    /**
+     *
+     */
+    it('should throw an error if called before the type is set', () => {
+      const message = 'The `type` value must be set before continuing.';
+      expect(() => {
+        (new Relationship()).hasOne('foo');
+      }).to.throw(Error, message);
+      expect(() => {
+        (new Relationship()).hasMany('foo');
+      }).to.throw(Error, message);
+    });
+
+    /**
+     *
+     */
+    it('should throw an error if called before the entity is set', () => {
+      const message = 'The `entity` value must be set before continuing.';
+      expect(() => {
+        (new Relationship()).type('one').hasOne('foo');
+      }).to.throw(Error, message);
+      expect(() => {
+        (new Relationship()).type('one').hasMany('foo');
+      }).to.throw(Error, message);
+    });
+
+    /**
+     *
+     */
+    it('should throw an error if the value has alraeady been set', () => {
+      expect(() => {
+        const rel = one('Foo').hasMany('bars');
+        rel.hasMany('baz');
+      }).to.throw(Error, 'A value already exists for `$has`');
+      expect(() => {
+        const rel = one('Foo').hasMany('bars');
+        rel.hasOne('baz');
+      }).to.throw(Error, 'A value already exists for `$has`');
+    });
+
+    /**
+     *
+     */
+    it('should throw an error when the entity is empty', () => {
+      const rel = one('foo');
+      common.testInvalidRequiredStrings((value) => {
+        rel.hasOne(value);
+      });
+      common.testInvalidRequiredStrings((value) => {
+        rel.hasMany(value);
+      });
+    });
+  });
+
+  /**
+   *
+   */
+  describe('Relationship.hasOne', () => {
+    /**
+     *
+     */
+    it('should set the value', () => {
+      const rel = one('foo').hasOne('bar');
+      const has = rel.getHas();
+      expect(has).to.be.an.instanceOf(Has);
+      expect(has.getType()).to.equal('one');
+      expect(has.getEntityName()).to.equal('Bar');
+    });
+  });
+
+  /**
+   *
+   */
+  describe('Relationship.hasMany', () => {
+    /**
+     *
+     */
+    it('should set the value', () => {
+      const rel = one('foo').hasMany('bars');
+      const has = rel.getHas();
+      expect(has).to.be.an.instanceOf(Has);
+      expect(has.getType()).to.equal('many');
+      expect(has.getEntityName()).to.equal('Bar');
+    });
+  });
 });
 
 // describe('relationship.js', () => {
 //   describe('Relationship', () => {
-//     describe('has', () => {
-//       it('should use the entity name utility when setting the name');
-//       it('should throw an error if called before the type is set', () => {
-//         const rel = new Relationship();
-//         expect(() => {
-//           rel.has('one', 'foo');
-//         }).to.throw(Error, 'The `type` value must be set before continuing.');
-//       });
-//       it('should throw an error if called before the entity is set', () => {
-//         const rel = (new Relationship()).type('one');
-//         expect(() => {
-//           rel.has('one', 'foo');
-//         }).to.throw(Error, 'The `entity` value must be set before continuing.');
-//       });
-//       it('should throw an error if the value has already been set', () => {
-//         const rel = (new Relationship()).type('one').entity('foo').has('one', 'bar');
-//         expect(() => {
-//           rel.has('many', 'foo');
-//         }).to.throw(Error, 'A value already exists for `has.type`');
-//       });
-//       it('should throw an error when the type is neither one or many', () => {
-//         expect(() => {
-//           (new Relationship()).type('one').entity('Foo').has('df', 'bar');
-//         }).to.throw(Error, '"has.type" must be one of [one, many]');
-//       });
-//       it('should throw an error when the entity is empty', () => {
-//         const rel = (new Relationship()).type('one').entity('foo');
-//         common.testInvalidRequiredStrings((value) => {
-//           rel.has('one', value);
-//         });
-//       });
-//     });
 
 //     // @todo convert to sinon
 //     describe('hasOne', () => {

@@ -1,4 +1,7 @@
+import { Map as ImmutableMap } from 'immutable';
 import { Base } from './base.js';
+import { prop } from './prop.js';
+import { immutableMap } from './schema.js';
 import { param, plural } from './utils/inflector.js';
 import entityName from './utils/entity-name.js';
 
@@ -7,6 +10,7 @@ export class Entity extends Base({
   $maybeRequiresValues: ['$name'],
   $name: null,
   $plural: null,
+  $props: ImmutableMap(),
 }) {
   /**
    * Sets the database collection. If this method is _never_ called, then the
@@ -52,6 +56,44 @@ export class Entity extends Base({
       .set('$name', name)
       .set('$plural', plural(name))
       .set('$collection', plural(param(name)));
+  }
+
+  /**
+   * Defines a property on this entity, along with its schema. The property name
+   * will be converted to camelCase. As an example, `pull_request` would become
+   * `pullRequest`.
+   *
+   * This method will throw an error if an existing property is already set.
+   *
+   * The `name` must be called before calling the `collection` method, otherwise
+   * an error will be thrown.
+   *
+   * ```
+   * const record = entity('Foo')
+   *  .prop('bar', string())
+   *  .prop('pull_request', string())
+   *  .prop('baz', boolean());
+   *
+   * ImmutableMap(3) {
+   *  'bar' => { schema: StringSchema },
+   *  'pullRequest' => { schema: StringSchema },
+   *  'baz' => { schema: BooleanSchema },
+   * } = record.get('$props');
+   * ```
+   *
+   * Multiple props can be added at once using the `props` method.
+   *
+   * @param {string} name The name of the property
+   * @param {Joi} schema The schema to use when validating the property value
+   * @returns {this} The cloned instance
+   */
+  prop(name, schema) {
+    this.$needs('$name');
+    const value = prop(name, schema);
+    const key = value.get('$name');
+    const $props = this.get('$props');
+    if ($props.has(key)) throw new Error(`A value already exists for \`props.${key}\``);
+    return this.set('$props', $props.set(key, value), { schema: immutableMap() });
   }
 }
 

@@ -2,12 +2,12 @@
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
 import { ValidationError } from '@parameter1/joi';
-import { Record, Set } from 'immutable';
+import { Record, Set as ImmutableSet } from 'immutable';
 import { base } from '../src/base.js';
 import { object } from '../src/schema.js';
 import common from './common.js';
 
-const { isSet } = Set;
+const { isSet } = ImmutableSet;
 const { isRecord } = Record;
 
 describe('base.js', () => {
@@ -100,6 +100,18 @@ describe('base.js', () => {
     it('should set set the value', () => {
       const record = base({ foo: null }).set('foo', 'bar');
       expect(record.get('foo')).to.equal('bar');
+    });
+  });
+
+  /**
+   *
+   */
+  describe('Base.toObject', () => {
+    it('should return $maybeRequiresValues as a native set', () => {
+      const { $maybeRequiresValues: value } = base({ $maybeRequiresValues: ['$name'] }).toObject();
+      expect(value).to.be.an.instanceOf(Set);
+      expect(value.size).to.equal(1);
+      expect(value.has('$name')).to.equal(true);
     });
   });
 

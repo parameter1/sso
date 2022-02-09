@@ -12,15 +12,6 @@ export class Entity extends WithProps({
   $name: null,
 }) {
   /**
-   * A property definition object.
-   *
-   * @typedef {object} PropDefinition
-   * @property {string} name The name of the property
-   * @property {Schema} schema The schema to use when validating the property
-   *                           value
-   */
-
-  /**
    * Sets the database collection. If this method is _never_ called, then the
    * default collection name will be the param-cased, plural version of the
    * entity name. As an example, if the entity name is `UserEvent` then the

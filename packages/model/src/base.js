@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { Record, Set } from 'immutable';
+import { Record, Set as ImmutableSet } from 'immutable';
 import {
   array,
   object,
@@ -19,7 +19,7 @@ export const Base = (defaults = {}) => {
   }).unknown().label('defaults'));
 
   return class extends Record({
-    $maybeRequiresValues: Set($maybeRequiresValues),
+    $maybeRequiresValues: ImmutableSet($maybeRequiresValues),
     ...rest,
   }) {
     /**
@@ -48,6 +48,18 @@ export const Base = (defaults = {}) => {
     }
 
     /**
+     * Deeply converts this record to a JavaScript object
+     *
+     * @returns {object}
+     */
+    toObject() {
+      return {
+        ...super.toObject(),
+        $maybeRequiresValues: new Set(this.$maybeRequiresValues.toArray()),
+      };
+    }
+
+    /**
      * Determines which method values are required to be set on the instance
      * before allowing another method call.
      *
@@ -56,7 +68,7 @@ export const Base = (defaults = {}) => {
      */
     $needs(...values) {
       attempt(values, array().items(string()));
-      const required = Set(values);
+      const required = ImmutableSet(values);
       this.$maybeRequiresValues.forEach((key) => {
         if (required.has(key) && this.get(key) == null) {
           throw new Error(`The \`${key}\` value must be set before continuing.`);

@@ -33,7 +33,7 @@ export class Relationship extends Base({
    * ```
    *
    * @param {string} value The related entity name
-   * @returns {Relationship}
+   * @returns {this}
    */
   entity(value) {
     return this.set('$entity', entityName(value), { strict: true });
@@ -43,7 +43,7 @@ export class Relationship extends Base({
    * Sets the _foreign_ relationship entity as a rel-many.
    *
    * @param {string} value The related entity name.
-   * @returns {Relationship}
+   * @returns {this}
    */
   hasMany(value) {
     return this.setHas('many', value);
@@ -53,10 +53,32 @@ export class Relationship extends Base({
    * Sets the _foreign_ relationship entity as a rel-one.
    *
    * @param {string} value The related entity name.
-   * @returns {Relationship}
+   * @returns {this}
    */
   hasOne(value) {
     return this.setHas('one', value);
+  }
+
+  /**
+   * A semantic alias of the `hasMany` method that automatically sets the
+   * foreign relationship type to `many`.
+   *
+   * @param {string} value The related entity name.
+   * @returns {this}
+   */
+  haveMany(value) {
+    return this.hasMany(value);
+  }
+
+  /**
+   * A semantic alias of the `hasOne` method that automatically sets the foreign
+   * relationship type to `one`.
+   *
+   * @param {string} value The related entity name.
+   * @returns {this}
+   */
+  haveOne(value) {
+    return this.hasOne(value);
   }
 
   /**
@@ -88,7 +110,7 @@ export class Relationship extends Base({
    *
    * @param {string} type The relationship type - either `one` or `many`
    * @param {string} value The related entity name.
-   * @returns {Relationship}
+   * @returns {this}
    */
   setHas(type, value) {
     return this.set('$has', has(type, value), { schema: hasSchema, strict: true });
@@ -111,7 +133,7 @@ export class Relationship extends Base({
    * ```
    *
    * @param {string} value The owning relationship type - `one` or `many`
-   * @returns {Relationship}
+   * @returns {this}
    */
   type(value) {
     return this.set('$type', value, { schema: typeSchema, strict: true });
@@ -149,7 +171,7 @@ export class Relationship extends Base({
  * Creates an owning relationship instance for `one` related entity.
  *
  * @param {string} name The entity name to relate
- * @returns {Relationship}
+ * @returns {this}
  */
 export function one(name) {
   return (new Relationship()).type('one').entity(name);
@@ -159,7 +181,7 @@ export function one(name) {
  * Creates an owning relationship instance for `many` related entities.
  *
  * @param {string} name The entity name to relate
- * @returns {Relationship}
+ * @returns {this}
  */
 export function many(name) {
   return (new Relationship()).type('many').entity(name);

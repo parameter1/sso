@@ -154,6 +154,17 @@ describe('relationship.js', () => {
       expect(has.getType()).to.equal('one');
       expect(has.getEntityName()).to.equal('Bar');
     });
+
+    /**
+     *
+     */
+    it('should set the value using haveOne', () => {
+      const rel = many('foos').haveOne('bar');
+      const has = rel.getHas();
+      expect(has).to.be.an.instanceOf(Has);
+      expect(has.getType()).to.equal('one');
+      expect(has.getEntityName()).to.equal('Bar');
+    });
   });
 
   /**
@@ -165,6 +176,17 @@ describe('relationship.js', () => {
      */
     it('should set the value', () => {
       const rel = one('foo').hasMany('bars');
+      const has = rel.getHas();
+      expect(has).to.be.an.instanceOf(Has);
+      expect(has.getType()).to.equal('many');
+      expect(has.getEntityName()).to.equal('Bar');
+    });
+
+    /**
+     *
+     */
+    it('should set the value using haveMany', () => {
+      const rel = many('foos').haveMany('bars');
       const has = rel.getHas();
       expect(has).to.be.an.instanceOf(Has);
       expect(has.getType()).to.equal('many');

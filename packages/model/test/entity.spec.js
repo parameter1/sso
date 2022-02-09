@@ -1,13 +1,62 @@
 /* eslint-disable import/no-extraneous-dependencies */
 import { describe, it } from 'mocha';
 import { expect } from 'chai';
-import { entity } from '../src/entity.js';
+import { entity, Entity } from '../src/entity.js';
+import common from './common.js';
 
 describe('entity.js', () => {
   /**
    *
    */
-  describe('name()', () => {
+  describe('entity()', () => {
+    /**
+     *
+     */
+    it('should throw an error when invalid', () => {
+      common.testInvalidRequiredStrings((key) => {
+        entity(key);
+      });
+    });
+  });
+
+  /**
+   *
+   */
+  describe('Entity.collection()', () => {
+    /**
+     *
+     */
+    it('should throw an error if called before the name is set', () => {
+      expect(() => {
+        (new Entity()).collection('foo');
+      }).to.throw(Error, 'The `$name` value must be set before continuing.');
+    });
+
+    /**
+     *
+     */
+    it('should throw an error when invalid', () => {
+      const record = entity('Foo');
+      common.testInvalidRequiredStrings((key) => {
+        record.collection(key);
+      });
+    });
+
+    /**
+     *
+     */
+    it('should set the trimmed value as passed', () => {
+      console.log(entity('Foo').toObject());
+      ['some_collection', ' some_collection  '].forEach((value) => {
+        expect(entity('Foo').collection(value).get('$collection')).to.equal('some_collection');
+      });
+    });
+  });
+
+  /**
+   *
+   */
+  describe('Entity.name()', () => {
     /**
      *
      */

@@ -87,7 +87,11 @@ describe('base.js', () => {
     /**
      *
      */
-    it('should not throw when methods are required, needed, and set');
+    it('should not throw when methods are required, needed, and set', () => {
+      const record = base({ $maybeRequiresMethods: ['name', 'foo'], name: null, foo: null });
+      const r = record.set('name', 'foo').set('foo', 'bar');
+      expect(isRecord(r.$needs('name', 'foo'))).to.equal(true);
+    });
   });
 
   /**

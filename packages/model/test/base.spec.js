@@ -106,7 +106,7 @@ describe('base.js', () => {
   /**
    *
    */
-  describe('Base.$needs', () => {
+  describe('Base.needsValues', () => {
     /**
      *
      */
@@ -114,8 +114,8 @@ describe('base.js', () => {
       const record1 = base();
       const record2 = base({ $maybeRequiresValues: ['name'] });
 
-      expect(isRecord(record1.$needs())).to.equal(true);
-      expect(isRecord(record2.$needs())).to.equal(true);
+      expect(isRecord(record1.needsValues())).to.equal(true);
+      expect(isRecord(record2.needsValues())).to.equal(true);
     });
 
     /**
@@ -124,7 +124,7 @@ describe('base.js', () => {
     it('should throw when methods are required and needed but not set', () => {
       const record = base({ $maybeRequiresValues: ['name'], name: null });
       expect(() => {
-        record.$needs('name');
+        record.needsValues('name');
       }).to.throw(Error, 'The `name` value must be set before continuing.');
     });
 
@@ -134,7 +134,7 @@ describe('base.js', () => {
     it('should not throw when methods are required, needed, and set', () => {
       const record = base({ $maybeRequiresValues: ['name', 'foo'], name: null, foo: null });
       const r = record.set('name', 'foo').set('foo', 'bar');
-      expect(isRecord(r.$needs('name', 'foo'))).to.equal(true);
+      expect(isRecord(r.needsValues('name', 'foo'))).to.equal(true);
     });
   });
 

@@ -48,13 +48,13 @@ export const Base = (defaults = {}) => {
     }
 
     /**
-     * Determines which method values are required to be set on the instance
+     * Determines which property values are required to be set on the instance
      * before allowing another method call.
      *
      * @param  {...any} values
      * @returns {this}
      */
-    $needs(...values) {
+    needsValues(...values) {
       attempt(values, array().items(string()));
       const required = ImmutableSet(values);
       this.$maybeRequiresValues.forEach((key) => {

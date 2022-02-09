@@ -17,7 +17,7 @@ export class Prop extends Base({
   }
 
   schema(value) {
-    this.$needs('$name');
+    this.needsValues('$name');
     const schema = attempt(value, schemaObject().required());
     return this.set('$schema', schema, { schema: schemaObject() });
   }

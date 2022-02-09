@@ -45,7 +45,7 @@ export class Entity extends Base({
    * @returns {this} The cloned instance
    */
   collection(value) {
-    this.$needs('$name');
+    this.needsValues('$name');
     return this.set('$collection', value);
   }
 
@@ -101,7 +101,7 @@ export class Entity extends Base({
    * @returns {this} The cloned instance
    */
   prop(name, schema) {
-    this.$needs('$name');
+    this.needsValues('$name');
     const value = prop(name, schema);
     const key = value.get('$name');
     const $props = this.get('$props');
@@ -132,7 +132,7 @@ export class Entity extends Base({
    * @returns {this} The cloned instance
    */
   props(values) {
-    this.$needs('$name');
+    this.needsValues('$name');
     const v = attempt(values, object().unknown().required());
     const props = Object.keys(v).reduce((map, name) => {
       const value = prop(name, v[name]);

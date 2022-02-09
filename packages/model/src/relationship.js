@@ -229,7 +229,9 @@ export class Relationship extends Base({
     const props = union([$with.get('props'), toSet.props.filter((prop) => prop !== '_id')]);
     const edges = union([$with.get('edges'), toSet.edges.filter((edge) => edge !== '_id')]);
 
-    const map = $with.set('props', props).set('edges', edges);
+    const map = $with.withMutations((w) => {
+      w.set('props', props).set('edges', edges);
+    });
     return this.set('$with', map, { schema: immutableMap() });
   }
 

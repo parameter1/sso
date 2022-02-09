@@ -14,6 +14,7 @@ const {
   string,
 } = Schema;
 
+const reqNullableString = string().required().allow(null);
 const hasSchema = object().instance(Has).required();
 const typeSchema = string().valid('one', 'many').required();
 
@@ -34,6 +35,8 @@ export class Relationship extends Base({
    * value is also set to `many`, then the field will also be converted into
    * plural form.
    *
+   * If this method is called with `null` the current `as` value will be unset
+   *
    * ```
    * // will set the local field as `myBars` instead of
    * // the default `bars` value.
@@ -41,10 +44,11 @@ export class Relationship extends Base({
    * one('Foo').hasMany('Bars').as('myBars');
    * ```
    *
-   * @param {string} value The local field value
+   * @param {string|null} value The local field value
    * @returns {this} The cloned instance
    */
   as(value) {
+    if (value === null) return this.set('$as', null, { schema: reqNullableString });
     return this.set('$as', Inflector.camel(value));
   }
 

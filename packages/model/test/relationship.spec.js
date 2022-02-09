@@ -202,9 +202,9 @@ describe('relationship.js', () => {
     /**
      *
      */
-    it('should throw an error when empty', () => {
+    it('should throw an error when invalid', () => {
       const rel = one('Foo').hasMany('Bars');
-      common.testInvalidRequiredStrings((value) => {
+      common.testInvalidRequiredNullableStrings((value) => {
         rel.as(value);
       });
     });
@@ -217,6 +217,15 @@ describe('relationship.js', () => {
       ['userEvent', 'UserEvent', 'user-event', 'user event', ' userEvent '].forEach((value) => {
         expect(rel.as(value).getAs()).to.equal('userEvent');
       });
+    });
+
+    /**
+     *
+     */
+    it('should unset the value when null', () => {
+      const rel = one('Foo').hasOne('bar').as('userEvent');
+      expect(rel.getAs()).to.equal('userEvent');
+      expect(rel.as(null).getAs()).to.equal(null);
     });
   });
 

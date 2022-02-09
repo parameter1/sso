@@ -11,6 +11,24 @@ describe('entity.js', () => {
     /**
      *
      */
+    it('should PascalCase the name', () => {
+      ['user-event', 'userEvent', 'user event', 'user.event', 'UserEvent', 'User Event'].forEach((value) => {
+        expect(entity(value).get('$name')).to.equal('UserEvent');
+      });
+    });
+
+    /**
+     *
+     */
+    it('should ensure the name is singular', () => {
+      ['UserEvent', 'user-events', 'userEvents', 'user events', 'user.events', 'UserEvents', 'User Events'].forEach((value) => {
+        expect(entity(value).get('$name')).to.equal('UserEvent');
+      });
+    });
+
+    /**
+     *
+     */
     it('should add the plural version of the name', () => {
       ['UserEvents', 'user-event', 'userEvent', 'user event', 'user.event', 'UserEvent', 'User Event'].forEach((name) => {
         const ent = entity(name);
@@ -21,7 +39,7 @@ describe('entity.js', () => {
     /**
      *
      */
-    it('should pluralize and dasherize the collection name by default', () => {
+    it('should pluralize and param-case the collection name by default', () => {
       const ent1 = entity('Application');
       const ent2 = entity('UserEvent');
 

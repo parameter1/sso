@@ -4,8 +4,11 @@ import {
   array,
   object,
   attempt,
+  schemaObject,
   string,
 } from './schema.js';
+
+const defaultSchema = string().required();
 
 export const Base = (defaults = {}) => {
   const {
@@ -34,6 +37,21 @@ export const Base = (defaults = {}) => {
         }
       });
       return this;
+    }
+
+    /**
+     * Validates the provided value against the given schema.
+     *
+     * @param {string} path The intended key/path
+     * @param {*} value The value to validate
+     * @param {Joi} schema The schema to use for validation
+     * @returns {void}
+     */
+    $validate(path, value, schema = defaultSchema) { // eslint-disable-line class-methods-use-this
+      attempt(schema, schemaObject().allow(null).label('schema'));
+      if (!schema) return value;
+      const validated = attempt(value, schema.label(path));
+      return validated;
     }
   };
 };

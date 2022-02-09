@@ -4,6 +4,7 @@ import { expect } from 'chai';
 import { ValidationError } from '@parameter1/joi';
 import { Record, Set } from 'immutable';
 import { base } from '../../src/immutable/base.js';
+import { object } from '../../src/immutable/schema.js';
 
 const { isSet } = Set;
 const { isRecord } = Record;
@@ -87,5 +88,37 @@ describe('base.js', () => {
      *
      */
     it('should not throw when methods are required, needed, and set');
+  });
+
+  /**
+   *
+   */
+  describe('Base.$validate', () => {
+    it('should throw when the schema is not a schema object', () => {
+      const record = base();
+      ['', 'foo', true, [], {}].forEach((schema) => {
+        expect(() => {
+          record.$validate('key', 'value', schema);
+        }).to.throw(ValidationError);
+      });
+    });
+    it('should allow null schema values in order to bypass validation', () => {
+      const record = base();
+      expect(record.$validate('key', ' value ', null)).to.equal(' value ');
+    });
+    it('should use a required string schema by default', () => {
+      const record = base();
+      expect(() => {
+        record.$validate('key');
+      }).to.throw(ValidationError, '"key" is required');
+      expect(() => {
+        record.$validate('key', null);
+      }).to.throw(ValidationError, '"key" must be a string');
+    });
+    it('should validate the value based on the given schema.', () => {
+      const record = base();
+      expect(record.$validate('key', ' value ')).to.equal('value');
+      expect(record.$validate('key', {}, object())).to.deep.equal({});
+    });
   });
 });

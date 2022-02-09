@@ -43,7 +43,7 @@ export const Base = (defaults = {}) => {
     set(key, value, { schema = defaultSchema, strict = false } = {}) {
       const k = attempt(key, string().label('set.key').required());
       const v = this.validateValue(k, value, schema);
-      if (strict && this.has(k)) throw new Error(`A value already exists for \`${k}\``);
+      if (strict && this.get(k) != null) throw new Error(`A value already exists for \`${k}\``);
       return super.set(k, v);
     }
 

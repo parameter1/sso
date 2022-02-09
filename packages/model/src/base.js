@@ -1,4 +1,4 @@
-/* eslint-disable max-classes-per-file */
+/* eslint-disable max-classes-per-file, class-methods-use-this */
 import { Record, Set as ImmutableSet } from 'immutable';
 import {
   array,
@@ -42,7 +42,7 @@ export const Base = (defaults = {}) => {
      */
     set(key, value, { schema = defaultSchema, strict = false } = {}) {
       const k = attempt(key, string().label('set.key').required());
-      const v = this.$validate(k, value, schema);
+      const v = this.validateValue(k, value, schema);
       if (strict && this.has(k)) throw new Error(`A value already exists for \`${k}\``);
       return super.set(k, v);
     }
@@ -66,14 +66,15 @@ export const Base = (defaults = {}) => {
     }
 
     /**
-     * Validates the provided value against the given schema.
+     * Validates the provided value against the given schema. Used when setting
+     * property values to the instance.
      *
      * @param {string} path The intended key/path
      * @param {*} value The value to validate
      * @param {Joi} schema The schema to use for validation
      * @returns {void}
      */
-    $validate(path, value, schema = defaultSchema) { // eslint-disable-line class-methods-use-this
+    validateValue(path, value, schema = defaultSchema) {
       attempt(schema, schemaObject().allow(null).label('schema'));
       if (!schema) return value;
       const validated = attempt(value, schema.label(path));

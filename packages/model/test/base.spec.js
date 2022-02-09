@@ -141,7 +141,7 @@ describe('base.js', () => {
   /**
    *
    */
-  describe('Base.$validate', () => {
+  describe('Base.validateValue', () => {
     /**
      *
      */
@@ -149,7 +149,7 @@ describe('base.js', () => {
       const record = base();
       ['', 'foo', true, [], {}].forEach((schema) => {
         expect(() => {
-          record.$validate('key', 'value', schema);
+          record.validateValue('key', 'value', schema);
         }).to.throw(ValidationError);
       });
     });
@@ -159,7 +159,7 @@ describe('base.js', () => {
      */
     it('should allow null schema values in order to bypass validation', () => {
       const record = base();
-      expect(record.$validate('key', ' value ', null)).to.equal(' value ');
+      expect(record.validateValue('key', ' value ', null)).to.equal(' value ');
     });
 
     /**
@@ -168,10 +168,10 @@ describe('base.js', () => {
     it('should use a required string schema by default', () => {
       const record = base();
       expect(() => {
-        record.$validate('key');
+        record.validateValue('key');
       }).to.throw(ValidationError, '"key" is required');
       expect(() => {
-        record.$validate('key', null);
+        record.validateValue('key', null);
       }).to.throw(ValidationError, '"key" must be a string');
     });
 
@@ -180,8 +180,8 @@ describe('base.js', () => {
      */
     it('should validate the value based on the given schema.', () => {
       const record = base();
-      expect(record.$validate('key', ' value ')).to.equal('value');
-      expect(record.$validate('key', {}, object())).to.deep.equal({});
+      expect(record.validateValue('key', ' value ')).to.equal('value');
+      expect(record.validateValue('key', {}, object())).to.deep.equal({});
     });
   });
 });

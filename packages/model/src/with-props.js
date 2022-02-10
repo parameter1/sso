@@ -2,9 +2,9 @@
 import { Map as ImmutableMap } from 'immutable';
 import { Base } from './base.js';
 import { Prop, prop } from './prop.js';
-import { Schema, attempt } from './schema.js';
+import { Types, attempt } from './types.js';
 
-const { immutableMap, object } = Schema;
+const { immutableMap, object } = Types;
 
 export const WithProps = (defaults = {}) => class extends Base({
   ...defaults,
@@ -15,7 +15,7 @@ export const WithProps = (defaults = {}) => class extends Base({
    *
    * @typedef {object} PropDefinition
    * @property {string} name The name of the property
-   * @property {Schema} schema The schema to use when validating the property
+   * @property {Types} schema The schema to use when validating the property
    *                           value
    */
 
@@ -36,9 +36,9 @@ export const WithProps = (defaults = {}) => class extends Base({
    *   .prop('baz', boolean());
    *
    * ImmutableMap(3) {
-   *   'bar' => { schema: StringSchema },
-   *   'pullRequest' => { schema: StringSchema },
-   *   'baz' => { schema: BooleanSchema },
+   *   'bar' => { schema: StringType },
+   *   'pullRequest' => { schema: StringType },
+   *   'baz' => { schema: BooleanType },
    * } = record.get('$props');
    * ```
    *
@@ -70,9 +70,9 @@ export const WithProps = (defaults = {}) => class extends Base({
    * });
    *
    * ImmutableMap(3) {
-   *   'bar' => { schema: StringSchema },
-   *   'pullRequest' => { schema: StringSchema },
-   *   'baz' => { schema: BooleanSchema },
+   *   'bar' => { schema: StringType },
+   *   'pullRequest' => { schema: StringType },
+   *   'baz' => { schema: BooleanType },
    * } = record.get('$props');
    * ```
    * @param {PropDefinition[]} values The properties to set

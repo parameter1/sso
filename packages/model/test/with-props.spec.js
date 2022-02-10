@@ -4,11 +4,11 @@ import { expect } from 'chai';
 import { ValidationError } from '@parameter1/joi';
 import { isRecord, isMap } from 'immutable';
 import { withProps } from '../src/with-props.js';
-import { Schema, isSchema } from '../src/schema.js';
+import { Types, isSchema } from '../src/types.js';
 import { Prop } from '../src/prop.js';
 import common from './common.js';
 
-const { string } = Schema;
+const { string } = Types;
 
 describe('with-props.js', () => {
   /**

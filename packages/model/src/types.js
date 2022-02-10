@@ -5,7 +5,7 @@ import { isMap, isSet, isRecord } from 'immutable';
 export const { attempt, isSchema } = Joi;
 export { default as Joi, validate, validateAsync } from '@parameter1/joi';
 
-export class Schema {
+export class Types {
   /**
    * Creates an alternatives type.
    *
@@ -131,7 +131,7 @@ export class Schema {
    * @returns {Joi}
    */
   static ipv4() {
-    return Schema.ip({ version: ['ipv4'], cidr: 'forbidden' });
+    return Types.ip({ version: ['ipv4'], cidr: 'forbidden' });
   }
 
   /**

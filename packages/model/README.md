@@ -23,7 +23,7 @@ When values on the `ForeignDocument` change, _many_ `OwningDocuments` must also 
 - this would use an `updateMany` operation
 
 #### Inversion
-When inversed the relstionsip becomes One-To-Many (1:N)
+When inversed the relationship becomes One-To-Many (1:N)
 - _one_ `Organization` has _many_ `Workspaces`
 
 ### Examples
@@ -76,7 +76,7 @@ When values on the `ForeignDocument` change, _many_ `OwningDocuments` must also 
 - this would use an `updateMany` operation
 
 #### Inversion
-When inversed the relstionsip becomes Many-To-One (N:1)
+When inversed the relationship becomes Many-To-One (N:1)
 - _many_ `Workspaces` have _one_ `Organization`
 
 ```js

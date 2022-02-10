@@ -26,6 +26,7 @@ export class Entity extends WithProps({
    * entity('FooBar').collection('foo/bar');
    * ```
    *
+   * @deprecated This should move outside of the actual definition
    * @param {string|null} value The collection name
    * @returns {this} The cloned instance
    */
@@ -54,6 +55,7 @@ export class Entity extends WithProps({
   /**
    * Gets the collection name for this entity.
    *
+   * @deprecated remove once moved
    * @returns {string|null} The collection name
    */
   getCollection() {

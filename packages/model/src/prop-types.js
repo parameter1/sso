@@ -9,7 +9,7 @@ export class PropTypes {
   /**
    * Creates an alternatives type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static alternatives() {
     return Joi.alternatives();
@@ -18,7 +18,7 @@ export class PropTypes {
   /**
    * Creates an any type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static any() {
     return Joi.any();
@@ -27,7 +27,7 @@ export class PropTypes {
   /**
    * Creates an array type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static array() {
     return Joi.array();
@@ -36,7 +36,7 @@ export class PropTypes {
   /**
    * Creates a boolean type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static boolean() {
     return Joi.boolean();
@@ -46,7 +46,7 @@ export class PropTypes {
    * Creates a conditional type.
    *
    * @param {...any} args
-   * @returns {Joi}
+   * @returns {function}
    */
   static conditional(...args) {
     return Joi.alternatives().conditional(...args);
@@ -55,7 +55,7 @@ export class PropTypes {
   /**
    * Creates a date type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static date() {
     return Joi.date();
@@ -64,7 +64,7 @@ export class PropTypes {
   /**
    * Creates an email type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static email() {
     return Joi.email();
@@ -73,7 +73,7 @@ export class PropTypes {
   /**
    * Creates a hostname type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static hostname() {
     return Joi.hostname();
@@ -82,7 +82,7 @@ export class PropTypes {
   /**
    * Creates an immutable map type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static immutableMap() {
     return Joi.object().custom((value) => {
@@ -94,7 +94,7 @@ export class PropTypes {
   /**
    * Creates an immutable record type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static immutableRecord() {
     return Joi.object().custom((value) => {
@@ -106,7 +106,7 @@ export class PropTypes {
   /**
    * Creates an immutable set type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static immutableSet() {
     return Joi.object().custom((value) => {
@@ -119,7 +119,7 @@ export class PropTypes {
    * Creates an IP address type.
    *
    * @param {object} options
-   * @returns {Joi}
+   * @returns {function}
    */
   static ip(options) {
     return Joi.string().ip(options);
@@ -128,7 +128,7 @@ export class PropTypes {
   /**
    * Creates an IPv4 address type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static ipv4() {
     return PropTypes.ip({ version: ['ipv4'], cidr: 'forbidden' });
@@ -137,7 +137,7 @@ export class PropTypes {
   /**
    * Creates an integer type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static integer() {
     return Joi.integer();
@@ -146,7 +146,7 @@ export class PropTypes {
   /**
    * Creates a Map object type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static mapObject() {
     return Joi.object().instance(Map);
@@ -155,7 +155,7 @@ export class PropTypes {
   /**
    * Creates a number type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static number() {
     return Joi.number();
@@ -164,7 +164,7 @@ export class PropTypes {
   /**
    * Creates an object type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static object() {
     return Joi.object();
@@ -173,7 +173,7 @@ export class PropTypes {
   /**
    * Creates a Joi schema object type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static schemaObject() {
     return Joi.object().schema();
@@ -182,7 +182,7 @@ export class PropTypes {
   /**
    * Creates a sequence type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static sequence() {
     return Joi.sequence();
@@ -191,7 +191,7 @@ export class PropTypes {
   /**
    * Creates a Set object type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static setObject() {
     return Joi.object().instance(Set);
@@ -200,7 +200,7 @@ export class PropTypes {
   /**
    * Creates a slug type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static slug() {
     return Joi.slug();
@@ -209,7 +209,7 @@ export class PropTypes {
   /**
    * Creates a string type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static string() {
     return Joi.string();
@@ -218,7 +218,7 @@ export class PropTypes {
   /**
    * Creates a url type.
    *
-   * @returns {Joi}
+   * @returns {function}
    */
   static url() {
     return Joi.url();

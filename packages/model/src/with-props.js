@@ -45,18 +45,18 @@ export const WithProps = (defaults = {}) => class extends Base({
    * Multiple props can be added at once using the `props` method.
    *
    * @param {string} name The name of the property
-   * @param {Joi} schema The schema to use when validating the property value
+   * @param {object} type The type to use when validating the property value
    * @returns {this} The cloned instance
    */
-  prop(name, schema) {
+  prop(name, type) {
     const $props = this.getProps();
     const key = Prop.formatName(name);
-    if (schema === null && $props.get(key) != null) {
+    if (type === null && $props.get(key) != null) {
       // unset the prop
-      return this.set('$props', $props.delete(key), { schema: immutableMap() });
+      return this.set('$props', $props.delete(key), { propType: immutableMap() });
     }
     if (this.hasProp(key)) throw new Error(`A prop already exists for \`${key}\``);
-    return this.set('$props', $props.set(key, prop(name, schema)), { schema: immutableMap() });
+    return this.set('$props', $props.set(key, prop(name, type)), { propType: immutableMap() });
   }
 
   /**
@@ -91,7 +91,7 @@ export const WithProps = (defaults = {}) => class extends Base({
       if (key) throw new Error(`A prop already exists for \`${key}\``);
       return val;
     }, props);
-    return this.set('$props', merged, { schema: immutableMap() });
+    return this.set('$props', merged, { propType: immutableMap() });
   }
 
   /**

@@ -26,7 +26,7 @@ export class Has extends Base({
    * @returns {Has}
    */
   type(value) {
-    return this.set('$type', value, { schema: typeSchema, strict: true });
+    return this.set('$type', value, { propType: typeSchema, strict: true });
   }
 
   /**

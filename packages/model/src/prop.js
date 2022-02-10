@@ -2,11 +2,11 @@ import { Base } from './base.js';
 import { PropTypes, attempt } from './prop-types.js';
 import Inflector from './utils/inflector.js';
 
-const { schemaObject, string } = PropTypes;
+const { propTypeObject, string } = PropTypes;
 
 export class Prop extends Base({
   $name: null,
-  $schema: null,
+  $type: null,
 }) {
   /**
    * Sets the property name.
@@ -19,20 +19,18 @@ export class Prop extends Base({
   }
 
   /**
-   * Sets the property schema.
+   * Sets the property type.
    *
    * @param {Joi} value The property schema
    * @returns {this}
    */
-  schema(value) {
-    const schema = attempt(value, schemaObject().required());
-    return this.set('$schema', schema, { schema: schemaObject() });
+  type(value) {
+    const type = attempt(value, propTypeObject().required());
+    return this.set('$type', type, { propType: propTypeObject() });
   }
 
   /**
    * Gets the property name.
-   *
-   * The `name` method must be called first otherwise an error will be thrown.
    *
    * @returns {string} The property name
    */
@@ -41,14 +39,12 @@ export class Prop extends Base({
   }
 
   /**
-   * Gets the property schema.
+   * Gets the property type.
    *
-   * The `name` method must be called first otherwise an error will be thrown.
-   *
-   * @returns {Joi} The property name
+   * @returns {object} The property type
    */
-  getSchema() {
-    return this.get('$schema');
+  getType() {
+    return this.get('$type');
   }
 
   /**
@@ -67,9 +63,9 @@ export class Prop extends Base({
  * Creates a new Prop instance with the prop name and schema type.
  *
  * @param {string} name The property name
- * @param {Joi} schema The property schema object
+ * @param {object} type The property type
  * @returns {Prop}
  */
-export function prop(name, schema) {
-  return (new Prop()).name(name).schema(schema);
+export function prop(name, type) {
+  return (new Prop()).name(name).type(type);
 }

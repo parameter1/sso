@@ -2,9 +2,9 @@
 import { Record } from 'immutable';
 import { PropTypes, attempt } from './prop-types.js';
 
-const { object, schemaObject, string } = PropTypes;
+const { object, propTypeObject, string } = PropTypes;
 
-const defaultSchema = string().required();
+const defaultPropType = string().required();
 
 export const Base = (defaults = {}) => {
   const {
@@ -27,14 +27,14 @@ export const Base = (defaults = {}) => {
      * @param {string} key The keu to set
      * @param {*} value The value to set
      * @param {object} options
-     * @param {Joi} options.schema The schema to validate the value against
+     * @param {object} options.propType The prop type to validate the value against
      * @param {boolean} [options.strict=false] Whether to prevent reassignment of
      *                                         an existing value
      * @returns {this}
      */
-    set(key, value, { schema = defaultSchema, strict = false } = {}) {
+    set(key, value, { propType = defaultPropType, strict = false } = {}) {
       const k = attempt(key, string().label('set.key').required());
-      const v = this.validateValue(k, value, schema);
+      const v = this.validateValue(k, value, propType);
       if (strict && this.get(k) != null) throw new Error(`A value already exists for \`${k}\``);
       return super.set(k, v);
     }
@@ -45,11 +45,11 @@ export const Base = (defaults = {}) => {
      *
      * @param {string} path The intended key/path
      * @param {*} value The value to validate
-     * @param {Joi} schema The schema to use for validation
+     * @param {object} propType The schema to use for validation
      * @returns {*} The validated and resolved value
      */
-    validateValue(path, value, schema = defaultSchema) {
-      attempt(schema, schemaObject().allow(null).label('schema'));
+    validateValue(path, value, schema = defaultPropType) {
+      attempt(schema, propTypeObject().allow(null).label('schema'));
       if (!schema) return value;
       const validated = attempt(value, schema.label(path));
       return validated;

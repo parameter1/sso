@@ -48,7 +48,7 @@ export class Relationship extends WithProps({
    * @returns {this} The cloned instance
    */
   as(value) {
-    if (value === null) return this.set('$as', null, { schema: reqNullableString });
+    if (value === null) return this.set('$as', null, { propType: reqNullableString });
     return this.set('$as', Inflector.camel(value));
   }
 
@@ -151,7 +151,7 @@ export class Relationship extends WithProps({
    * @returns {this} The cloned instance
    */
   setHas(type, value) {
-    return this.set('$has', has(type, value), { schema: hasSchema, strict: true });
+    return this.set('$has', has(type, value), { propType: hasSchema, strict: true });
   }
 
   /**
@@ -174,7 +174,7 @@ export class Relationship extends WithProps({
    * @returns {this} The cloned instance
    */
   type(value) {
-    return this.set('$type', value, { schema: typeSchema, strict: true });
+    return this.set('$type', value, { propType: typeSchema, strict: true });
   }
 
   /**
@@ -236,7 +236,7 @@ export class Relationship extends WithProps({
     const map = $with.withMutations((w) => {
       w.set('props', props).set('edges', edges);
     });
-    return this.set('$with', map, { schema: immutableMap() });
+    return this.set('$with', map, { propType: immutableMap() });
   }
 
   /**
@@ -262,6 +262,7 @@ export class Relationship extends WithProps({
     if (alias) return alias;
     const rel = this.getHas();
     const field = Inflector.camel(rel.getEntityName());
+    // @todo should all local fields stay singular, e.g. _connection.workspace
     return rel.getType() === 'many' ? Inflector.plural(field) : field;
   }
 

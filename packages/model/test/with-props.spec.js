@@ -114,7 +114,7 @@ describe('with-props.js', () => {
     it('should set the schema to the prop', () => {
       const record = withProps().prop('fooBar', string());
       const prop = record.getProp('fooBar');
-      expect(isPropType(prop.getSchema())).to.equal(true);
+      expect(isPropType(prop.getType())).to.equal(true);
     });
 
     /**
@@ -167,8 +167,8 @@ describe('with-props.js', () => {
         baz: string(),
       });
       ['bar', 'pullRequest', 'baz'].forEach((name) => {
-        const prop = record.get('$props').get(name);
-        expect(isPropType(prop.get('$schema'))).to.equal(true);
+        const prop = record.getProps().get(name);
+        expect(isPropType(prop.getType())).to.equal(true);
       });
     });
   });

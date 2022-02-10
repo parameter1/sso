@@ -31,7 +31,7 @@ export class Entity extends WithProps({
    * @returns {this} The cloned instance
    */
   collection(value) {
-    return this.set('$collection', value, { schema: reqNullableString });
+    return this.set('$collection', value, { propType: reqNullableString });
   }
 
   /**

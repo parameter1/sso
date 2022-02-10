@@ -30,7 +30,7 @@ export class Relationship extends WithProps({
    * value will always be converted to camelCase in singular form.
    *
    * If this method is _never_ called, the default local field will be set as
-   * the camelCased version of the `entity` name.
+   * the camelCased version of the foreign entity name.
    *
    * If this method is called with `null` the current `as` value will be unset
    *
@@ -276,6 +276,17 @@ export class Relationship extends WithProps({
    */
   getHas() {
     return this.get('$has');
+  }
+
+  /**
+   * Gets the unique key for this relationship.
+   *
+   * @returns {string}
+   */
+  getKey() {
+    const $has = this.getHas();
+    if (!$has) throw new Error('No foreign relationship has been defined.');
+    return `${this.getEntityName()}.${$has.getType()}.${this.getLocalField()}`;
   }
 
   /**

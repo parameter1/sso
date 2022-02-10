@@ -1,6 +1,12 @@
 import { isEmailBurner } from '@parameter1/email-utils';
 import { cleanPath } from '@parameter1/utils';
-import { Schema, entity } from '@parameter1/sso-model';
+import {
+  PropTypes,
+  createSchema,
+  entity,
+  many,
+  one,
+} from '@parameter1/sso-model';
 import environments from './schema/environments.js';
 
 const {
@@ -15,7 +21,7 @@ const {
   slug,
   string,
   url,
-} = Schema;
+} = PropTypes;
 
 const common = {
   email: email().lowercase().custom((value, helpers) => {
@@ -27,7 +33,7 @@ const common = {
   slug: slug().min(2),
 };
 
-export default [
+export default createSchema().entities([
   entity('Application').props({
     name: common.name,
     redirects: array().items(common.slug),
@@ -64,4 +70,43 @@ export default [
       ...o, [env]: url().custom(cleanPath),
     }), {})),
   }),
-];
+]).relationships([
+  one('Application')
+    .hasMany('Workspaces')
+    .with({ props: ['name', 'slug'], edges: ['org'] }),
+
+  /*
+  ^^^ the above is the same as (assuming inverse is on both of these)
+    many('Workspaces')
+      .haveOne('Application')
+      .as('app')
+      .with(['name', 'slug']),
+      .inverse()
+      .with({ props: ['name', 'slug'], edges: ['org'] }),
+  */
+
+  many('UserEvents').haveOne('User').with(['email']),
+
+  many('Organizations')
+    .haveMany('Users')
+    .as('managers')
+    .with(['email', 'givenName', 'familyName'])
+    .props({ role: string().valid('Owner', 'Administrator') }),
+  // .inverse('manages')
+  // .with(['name', 'slug']),
+
+  many('Workspaces')
+    .haveMany('Users')
+    .as('members')
+    .with(['email', 'givenName', 'familyName'])
+    .props({ role: string() }),
+  // .inverse('memberships')
+  // .with({ props: ['name', 'slug', 'url'], edges: ['app', 'org'] }),
+
+  many('Workspaces')
+    .haveOne('Organization')
+    .as('org')
+    .with(['name', 'slug']),
+  // .inverse()
+  // .with({ props: ['name', 'slug'], edges: ['app'] }),
+]);

@@ -4,11 +4,11 @@ import { expect } from 'chai';
 import { ValidationError } from '@parameter1/joi';
 import { isRecord, isMap } from 'immutable';
 import { withProps } from '../src/with-props.js';
-import { Types, isSchema } from '../src/types.js';
+import { PropTypes, isPropType } from '../src/prop-types.js';
 import { Prop } from '../src/prop.js';
 import common from './common.js';
 
-const { string } = Types;
+const { string } = PropTypes;
 
 describe('with-props.js', () => {
   /**
@@ -114,7 +114,7 @@ describe('with-props.js', () => {
     it('should set the schema to the prop', () => {
       const record = withProps().prop('fooBar', string());
       const prop = record.getProp('fooBar');
-      expect(isSchema(prop.getSchema())).to.equal(true);
+      expect(isPropType(prop.getSchema())).to.equal(true);
     });
 
     /**
@@ -168,7 +168,7 @@ describe('with-props.js', () => {
       });
       ['bar', 'pullRequest', 'baz'].forEach((name) => {
         const prop = record.get('$props').get(name);
-        expect(isSchema(prop.get('$schema'))).to.equal(true);
+        expect(isPropType(prop.get('$schema'))).to.equal(true);
       });
     });
   });

@@ -1,8 +1,8 @@
 import { Base } from './base.js';
-import { Types, attempt } from './types.js';
+import { PropTypes, attempt } from './prop-types.js';
 import Inflector from './utils/inflector.js';
 
-const { schemaObject, string } = Types;
+const { schemaObject, string } = PropTypes;
 
 export class Prop extends Base({
   $name: null,

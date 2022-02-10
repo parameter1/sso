@@ -2,10 +2,10 @@ import Joi from '@parameter1/joi';
 import { isMap, isSet, isRecord } from 'immutable';
 
 // utils
-export const { attempt, isSchema } = Joi;
+export const { attempt, isSchema: isPropType } = Joi;
 export { default as Joi, validate, validateAsync } from '@parameter1/joi';
 
-export class Types {
+export class PropTypes {
   /**
    * Creates an alternatives type.
    *
@@ -131,7 +131,7 @@ export class Types {
    * @returns {Joi}
    */
   static ipv4() {
-    return Types.ip({ version: ['ipv4'], cidr: 'forbidden' });
+    return PropTypes.ip({ version: ['ipv4'], cidr: 'forbidden' });
   }
 
   /**

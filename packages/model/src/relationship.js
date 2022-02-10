@@ -3,7 +3,7 @@ import { Map as ImmutableMap, Set as ImmutableSet } from 'immutable';
 import { WithProps } from './with-props.js';
 import { has, Has } from './relationship/has.js';
 import entityName from './utils/entity-name.js';
-import { Types, attempt } from './types.js';
+import { PropTypes, attempt } from './prop-types.js';
 import Inflector from './utils/inflector.js';
 
 const {
@@ -12,7 +12,7 @@ const {
   immutableMap,
   object,
   string,
-} = Types;
+} = PropTypes;
 
 const reqNullableString = string().required().allow(null);
 const hasSchema = object().instance(Has).required();

@@ -1,8 +1,8 @@
 import { Base } from '../base.js';
 import entityName from '../utils/entity-name.js';
-import { Types } from '../types.js';
+import { PropTypes } from '../prop-types.js';
 
-const typeSchema = Types.string().valid('one', 'many').required();
+const typeSchema = PropTypes.string().valid('one', 'many').required();
 
 export class Has extends Base({
   $entity: null,

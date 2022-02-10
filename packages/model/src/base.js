@@ -1,8 +1,8 @@
 /* eslint-disable max-classes-per-file, class-methods-use-this */
 import { Record } from 'immutable';
-import { Types, attempt } from './types.js';
+import { PropTypes, attempt } from './prop-types.js';
 
-const { object, schemaObject, string } = Types;
+const { object, schemaObject, string } = PropTypes;
 
 const defaultSchema = string().required();
 

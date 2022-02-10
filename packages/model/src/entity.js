@@ -1,11 +1,11 @@
 import { WithProps } from './with-props.js';
-import { Types } from './types.js';
+import { PropTypes } from './prop-types.js';
 import Inflector from './utils/inflector.js';
 import entityName from './utils/entity-name.js';
 
 const { param, plural } = Inflector;
 
-const reqNullableString = Types.string().required().allow(null);
+const reqNullableString = PropTypes.string().required().allow(null);
 
 export class Entity extends WithProps({
   $collection: null,

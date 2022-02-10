@@ -4,10 +4,10 @@ import { expect } from 'chai';
 import { ValidationError } from '@parameter1/joi';
 import { isRecord } from 'immutable';
 import { base } from '../src/base.js';
-import { Types } from '../src/types.js';
+import { PropTypes } from '../src/prop-types.js';
 import common from './common.js';
 
-const { object } = Types;
+const { object } = PropTypes;
 
 describe('base.js', () => {
   /**

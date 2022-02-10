@@ -2,9 +2,9 @@
 import { Map as ImmutableMap } from 'immutable';
 import { Base } from './base.js';
 import { Prop, prop } from './prop.js';
-import { Types, attempt } from './types.js';
+import { PropTypes, attempt } from './prop-types.js';
 
-const { immutableMap, object } = Types;
+const { immutableMap, object } = PropTypes;
 
 export const WithProps = (defaults = {}) => class extends Base({
   ...defaults,

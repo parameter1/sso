@@ -27,21 +27,18 @@ export class Relationship extends WithProps({
 }) {
   /**
    * Sets the local field name that will used when saving the relationship. This
-   * value will always be converted to camelCase but _won't_ enforce
-   * singular/plural form.
+   * value will always be converted to camelCase in singular form.
    *
    * If this method is _never_ called, the default local field will be set as
-   * the camelCased version of the `entity` name. If the relationship `has`
-   * value is also set to `many`, then the field will also be converted into
-   * plural form.
+   * the camelCased version of the `entity` name.
    *
    * If this method is called with `null` the current `as` value will be unset
    *
    * ```
-   * // will set the local field as `myBars` instead of
+   * // will set the local field as `myBar` instead of
    * // the default `bars` value.
-   * rel.type('one').entity('Foo').hasMany('Bars').as('myBars');
-   * one('Foo').hasMany('Bars').as('myBars');
+   * rel.type('one').entity('Foo').hasMany('Bars').as('myBar');
+   * one('Foo').hasMany('Bars').as('myBar');
    * ```
    *
    * @param {string|null} value The local field value
@@ -49,7 +46,7 @@ export class Relationship extends WithProps({
    */
   as(value) {
     if (value === null) return this.set('$as', null, { propType: reqNullableString });
-    return this.set('$as', Inflector.camel(value));
+    return this.set('$as', Inflector.singular(Inflector.camel(value)));
   }
 
   /**
@@ -252,8 +249,7 @@ export class Relationship extends WithProps({
   /**
    * Gets the local field that will be used when saving the relationship. This
    * will use the `as` value, if set, otherwise will return the camelCased
-   * version of the foreign entity name (pluralized when the foreign rel type is
-   * `many`).
+   * version of the foreign entity name.
    *
    * @returns {String} The local field name
    */
@@ -261,9 +257,7 @@ export class Relationship extends WithProps({
     const alias = this.getAs();
     if (alias) return alias;
     const rel = this.getHas();
-    const field = Inflector.camel(rel.getEntityName());
-    // @todo should all local fields stay singular, e.g. _connection.workspace
-    return rel.getType() === 'many' ? Inflector.plural(field) : field;
+    return Inflector.camel(rel.getEntityName());
   }
 
   /**

@@ -222,6 +222,16 @@ describe('relationship.js', () => {
     /**
      *
      */
+    it('should set the value as singular', () => {
+      const rel = one('Foo').hasOne('bar');
+      ['userEvents', 'UserEvents', 'user-events', 'user events', ' userEvents '].forEach((value) => {
+        expect(rel.as(value).getAs()).to.equal('userEvent');
+      });
+    });
+
+    /**
+     *
+     */
     it('should unset the value when null', () => {
       const rel = one('Foo').hasOne('bar').as('userEvent');
       expect(rel.getAs()).to.equal('userEvent');
@@ -236,9 +246,9 @@ describe('relationship.js', () => {
     /**
      *
      */
-    it('should use the the plural `has.entity` value `has.type` is many', () => {
-      const rel = one('User').hasMany('UserEvent');
-      expect(rel.getLocalField()).to.equal('userEvents');
+    it('should use the the singular `has.entity` value `has.type` is many', () => {
+      const rel = one('User').hasMany('UserEvents');
+      expect(rel.getLocalField()).to.equal('userEvent');
     });
 
     /**

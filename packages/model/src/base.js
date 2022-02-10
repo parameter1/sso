@@ -49,7 +49,7 @@ export const Base = (defaults = {}) => {
      * @returns {*} The validated and resolved value
      */
     validateValue(path, value, schema = defaultPropType) {
-      attempt(schema, propTypeObject().allow(null).label('schema'));
+      attempt(schema, propTypeObject().allow(null).label('propType'));
       if (!schema) return value;
       const validated = attempt(value, schema.label(path));
       return validated;

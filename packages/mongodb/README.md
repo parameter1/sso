@@ -43,7 +43,6 @@ const user = {
   _id: ObjectId(),
   email: 'jacob@parameter1.com',
   domain: 'parameter1.com',
-  name: 'Jacob Bare',
   givenName: 'Jacob',
   familyName: 'Bare',
   slug: 'bare-jacob',
@@ -55,6 +54,7 @@ const user = {
   },
   verified: true,
   loginCount: 1,
+  previousEmails: [],
 
   // lists all organizations this user manages.
   organizations: [

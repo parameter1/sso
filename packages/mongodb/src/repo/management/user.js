@@ -57,17 +57,17 @@ export default class UserRepo extends ManagedRepo {
     const now = new Date();
     return this.insertOne({
       doc: cleanDocument({
+        date: { created: now, updated: now },
         email,
         domain: email.split('@')[1],
-        givenName,
         familyName,
+        givenName,
+        loginCount: 0,
+        organizations: [],
+        previousEmails: [],
         slug: [familyName, givenName].map(sluggify).join('-'),
         verified,
-        loginCount: 0,
-        date: { created: now, updated: now },
-        organizations: [],
-        memberships: [],
-        previousEmails: [],
+        workspaces: [],
       }, { preserveEmptyArrays: true }),
       options,
     });

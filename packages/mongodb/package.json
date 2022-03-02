@@ -1,0 +1,29 @@
+{
+  "name": "@parameter1/sso-mongodb",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "The SSO database repositories.",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/sso/tree/main/packages/mongodb#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/sso.git",
+    "directory": "packages/mongodb"
+  },
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.js",
+  "scripts": {
+    "lint": "eslint --ext .js ./",
+    "test": "yarn lint && yarn test-nolint",
+    "test-nolint": "mocha ./test/**/*.spec.js"
+  },
+  "dependencies": {
+    "@parameter1/email-utils": "^2.0.0",
+    "@parameter1/mongodb": "^2.13.0",
+    "@parameter1/object-path": "^2.0.0",
+    "@parameter1/utils": "^2.0.0",
+    "@sso/prop-types": "^0.1.0",
+    "jsonwebtoken": "^8.5.1"
+  }
+}

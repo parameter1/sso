@@ -18,5 +18,6 @@ export default {
   id: objectId(),
   loginCount: sequence(),
   givenName: string(),
+  slug: string(),
   verified: boolean(),
 };

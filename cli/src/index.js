@@ -49,27 +49,27 @@ const run = async () => {
         //   ],
         // },
 
-        // {
-        //   key: 'user',
-        //   choices: [
-        //     { name: 'Create new user', fnName: 'create' },
-        //     {
-        //       name: 'Change user email address',
-        //       fnName: 'changeEmail',
-        //       disabled: !documents.has('user'),
-        //     },
-        //     {
-        //       name: 'Change user first/last name',
-        //       fnName: 'updateNames',
-        //       disabled: !documents.has('user'),
-        //     },
-        //     {
-        //       name: 'Generate user auth token (impersonate)',
-        //       fnName: 'generateAuthToken',
-        //       disabled: !documents.has('user'),
-        //     },
-        //   ],
-        // },
+        {
+          key: 'user',
+          choices: [
+            { name: 'Create new user', fnName: 'create' },
+            // {
+            //   name: 'Change user email address',
+            //   fnName: 'changeEmail',
+            //   disabled: !documents.has('user'),
+            // },
+            // {
+            //   name: 'Change user first/last name',
+            //   fnName: 'updateNames',
+            //   disabled: !documents.has('user'),
+            // },
+            // {
+            //   name: 'Generate user auth token (impersonate)',
+            //   fnName: 'generateAuthToken',
+            //   disabled: !documents.has('user'),
+            // },
+          ],
+        },
 
         // {
         //   key: 'organization',

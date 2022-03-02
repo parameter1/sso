@@ -43,8 +43,7 @@ services:
     entrypoint: ["node"]
     command: ["src/index.js"]
     environment:
-      <<: *env
-      <<: *env-core
+      <<: [*env, *env-core]
     depends_on:
       - mongodb-secondary
 
@@ -59,8 +58,7 @@ services:
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
-      <<: *env
-      <<: *env-core
+      <<: [*env, *env-core]
       APP_URL: ${APP_URL-http://sso.dev.parameter1.com:7913/app}
       EXPOSED_HOST: sso.dev.parameter1.com
       EXPOSED_PORT: 7912
@@ -116,8 +114,7 @@ services:
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
-      <<: *env
-      <<: *env-core
+      <<: [*env, *env-core]
       EXPOSED_HOST: sso-service.dev.parameter1.com
       EXPOSED_PORT: 7911
       HOST: sso-service.dev.parameter1.com

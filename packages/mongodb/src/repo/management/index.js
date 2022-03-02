@@ -3,7 +3,7 @@ import { RepoManager } from '@parameter1/mongodb';
 import TokenRepo from './token.js';
 import UserRepo from './user.js';
 
-export default class Repos extends RepoManager {
+export default class ManagementRepos extends RepoManager {
   /**
    * @todo create change history handlers via change streams
    *       only add items that have a modified date change

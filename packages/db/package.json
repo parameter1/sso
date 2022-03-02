@@ -25,11 +25,11 @@
   "dependencies": {
     "@parameter1/email-utils": "^2.0.0",
     "@parameter1/joi": "^2.2.1",
-    "@parameter1/mongodb": "^2.9.1",
+    "@parameter1/mongodb": "^2.13.0",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/sso-model": "^0.1.0",
     "@parameter1/utils": "^2.0.0",
-    "@sindresorhus/is": "^4.4.0",
+    "@sindresorhus/is": "^4.6.0",
     "jsonwebtoken": "^8.5.1"
   }
 }

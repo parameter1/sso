@@ -11,7 +11,7 @@ export default class Repos extends RepoManager {
    * @param {string} [params.dbBame=tenancy]
    * @param {string} params.tokenSecret
    */
-  constructor({ client, dbName = 'sso-management', tokenSecret } = {}) {
+  constructor({ client, dbName = 'sso/management', tokenSecret } = {}) {
     super({ client, dbName });
     this
       .add({ key: 'token', ManagedRepo: TokenRepo, tokenSecret });

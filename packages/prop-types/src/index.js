@@ -142,6 +142,15 @@ export class PropTypes {
   }
 
   /**
+   * Creates a MongoDB Object ID type.
+   *
+   * @returns {object}
+   */
+  static objectId() {
+    return Joi.objectId();
+  }
+
+  /**
    * Creates a Joi schema object (prop type object)
    *
    * @returns {object}

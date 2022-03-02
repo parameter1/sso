@@ -1,6 +1,7 @@
 import { RepoManager } from '@parameter1/mongodb';
 
 import TokenRepo from './token.js';
+import UserRepo from './user.js';
 
 export default class Repos extends RepoManager {
   /**
@@ -14,6 +15,7 @@ export default class Repos extends RepoManager {
   constructor({ client, dbName = 'sso/management', tokenSecret } = {}) {
     super({ client, dbName });
     this
-      .add({ key: 'token', ManagedRepo: TokenRepo, tokenSecret });
+      .add({ key: 'token', ManagedRepo: TokenRepo, tokenSecret })
+      .add({ key: 'user', ManagedRepo: UserRepo });
   }
 }

@@ -145,3 +145,130 @@ const workspace = {
 
 #### Workspace Members (via `user::workspaces`)
 Define user-to-workspace relationships that signify the instance workspaces that a user is a member of. Each member of an instance workspace can be assigned specific roles and permissions. Only users that are members of an instance workspace can access the instance.
+
+## Versioning
+
+```js
+// after create
+const doc1 = {
+  _id: 1,
+  _version: {
+    n: 1,
+    event: 'create',
+    first: { date: ISODate('2022-01-01'), user: null },
+    last: { date: ISODate('2022-01-01'), user: null },
+    history: [],
+  },
+  name: 'Jacob',
+  age: 39,
+};
+
+// after update 1
+const doc2 = {
+  _id: 1,
+  _version: {
+    n: 2,
+    event: 'update',
+    first: { date: ISODate('2022-01-01'), user: null },
+    last: { date: ISODate('2022-01-02'), user: { _id: 5 } },
+    history: [
+      { n: 1, date: ISODate('2022-01-01'), user: null },
+    ],
+  },
+  name: 'Jake',
+  age: 39,
+}
+
+// after update 2
+const doc3 = {
+   _id: 1,
+  _version: {
+    n: 3,
+    first: { date: ISODate('2022-01-01'), user: null },
+    last: { date: ISODate('2022-01-03'), user: { _id: 2 } },
+    history: [
+      { n: 2, date: ISODate('2022-01-02'), user: { _id: 5 } },
+      { n: 1, date: ISODate('2022-01-01'), user: null },
+    ],
+  },
+  name: 'Foo',
+  age: 40,
+}
+
+// after delete, the doc no longer exists in the main collection
+
+// after restore
+const doc4 = {
+   _id: 1,
+  _version: {
+    n: 5,
+    first: { date: ISODate('2022-01-01'), user: null },
+    last: { date: ISODate('2022-01-05'), user: { _id: 1 } },
+    history: [
+      { n: 4, date: ISODate('2022-01-04'), user: { _id: 7 } },
+      { n: 3, date: ISODate('2022-01-03'), user: { _id: 2 } },
+      { n: 2, date: ISODate('2022-01-02'), user: { _id: 5 } },
+      { n: 1, date: ISODate('2022-01-01'), user: null },
+    ],
+  },
+  name: 'Foo',
+  age: 40,
+}
+
+// corresponding shadow collection
+const docs = [
+  {
+    _id: { _id: 1, n: 1 },
+    event: 'create',
+    date: ISODate('2022-01-01'),
+    user: null,
+    doc: {
+      name: 'Jacob',
+      age: 39,
+    },
+  },
+
+  {
+    _id: { _id: 1, n: 2 },
+    event: 'update',
+    date: ISODate('2022-01-02'),
+    user: { _id: 5 },
+    doc: {
+      name: 'Jake',
+      age: 39,
+    },
+  },
+
+  {
+    _id: { _id: 1, n: 3 },
+    event: 'update',
+    date: ISODate('2022-01-03'),
+    user: { _id: 2 },
+    doc: {
+      name: 'Foo',
+      age: 40,
+    },
+  },
+
+  {
+    _id: { _id: 1, n: 4 },
+    event: 'delete',
+    date: ISODate('2022-01-04'),
+    user: { _id: 7 },
+    doc: {
+      name: 'Foo',
+      age: 40,
+    },
+  },
+
+  {
+    _id: { _id: 1, n: 5 },
+    event: 'restore',
+    date: ISODate('2022-01-05'),
+    user: { _id: 1 },
+    doc: {
+      name: 'Foo',
+      age: 40,
+    },
+  },
+];

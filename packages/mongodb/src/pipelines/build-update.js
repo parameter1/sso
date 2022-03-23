@@ -5,7 +5,7 @@ import is from '@sindresorhus/is';
 import { addToSet, pull, Expr } from './utils/index.js';
 
 /**
- * @todo move to mongodb lib!
+ *
  */
 const cleanArray = (value = []) => {
   if (!value.length) return [];
@@ -41,7 +41,6 @@ export function prepareValue(value) {
 }
 
 export default function buildUpdatePipeline(fields = [], {
-  now = new Date(),
   updatedDatePath = 'date.updated',
   updatedDateCondition,
 } = {}) {
@@ -128,13 +127,12 @@ export default function buildUpdatePipeline(fields = [], {
       }, {
         ...(updatedDatePath && {
           [updatedDatePath]: {
-            $cond: [updatedDateCondition || '$__will_change.__any', now, `$${updatedDatePath}`],
+            $cond: [updatedDateCondition || '$__will_change.__any', '$$NOW', `$${updatedDatePath}`],
           },
         }),
       }),
     },
-    // remove the change flags so they aren't
-    // saved to the document :)
+    // remove the change flags so they aren't saved to the document :)
     { $unset: ['__will_change'] },
   ];
   return pipeline;

@@ -56,11 +56,11 @@ const run = async () => {
               fnName: 'changeEmail',
               disabled: !documents.has('user'),
             },
-            // {
-            //   name: 'Change user first/last name',
-            //   fnName: 'updateNames',
-            //   disabled: !documents.has('user'),
-            // },
+            {
+              name: 'Change user first/last name',
+              fnName: 'updateNames',
+              disabled: !documents.has('user'),
+            },
             // {
             //   name: 'Generate user auth token (impersonate)',
             //   fnName: 'generateAuthToken',

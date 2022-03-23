@@ -1,9 +1,7 @@
 import inquirer from 'inquirer';
-import { userAttributes as userAttrs } from '@parameter1/sso-db/schema';
+import { userProps } from '@parameter1/sso-mongodb';
 import getUserList from '../utils/get-user-list.js';
 import repos from '../../repos.js';
-
-const { log } = console;
 
 export default async () => {
   const questions = [
@@ -18,8 +16,12 @@ export default async () => {
       name: 'givenName',
       default: ({ user }) => user.givenName,
       message: 'Enter the new first/given name',
+      filter: (input) => {
+        const { value } = userProps.givenName.required().validate(input);
+        return value;
+      },
       validate: async (input) => {
-        const { error } = userAttrs.givenName.required().validate(input);
+        const { error } = userProps.givenName.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -29,8 +31,12 @@ export default async () => {
       name: 'familyName',
       default: ({ user }) => user.familyName,
       message: 'Enter the new last/family name',
+      filter: (input) => {
+        const { value } = userProps.familyName.required().validate(input);
+        return value;
+      },
       validate: async (input) => {
-        const { error } = userAttrs.familyName.required().validate(input);
+        const { error } = userProps.familyName.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -50,12 +56,9 @@ export default async () => {
     familyName,
   } = await inquirer.prompt(questions);
 
-  if (!confirm) return;
-
-  const result = await repos.$('user').updateAttributes({
+  return confirm ? repos.$('user').updateAttributes({
     id: user._id,
     givenName,
     familyName,
-  });
-  log(result);
+  }) : null;
 };

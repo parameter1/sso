@@ -26,7 +26,8 @@ export default class UserRepo extends ManagedRepo {
 
         { key: { 'date.created': 1, _id: 1 } },
         { key: { 'date.updated': 1, _id: 1 } },
-        { key: { slug: 1, _id: 1 } },
+        { key: { givenName: 1, familyName: 1, _id: 1 }, collation: { locale: 'en_US' } },
+        { key: { familyName: 1, givenName: 1, _id: 1 }, collation: { locale: 'en_US' } },
       ],
     });
   }

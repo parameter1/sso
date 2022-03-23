@@ -2,28 +2,26 @@ import inquirer from 'inquirer';
 import { immediatelyThrow } from '@parameter1/utils';
 import { get } from '@parameter1/object-path';
 import { connect, close } from './mongodb.js';
-// import repos from './repos.js';
+import repos from './repos.js';
 
 import actions from './actions/index.js';
 
 const { log } = console;
 
-// const hasDocuments = async () => {
-//   const r = await Promise.all([
-//     'application', 'user', 'organization', 'workspace'
-//   ].map(async (name) => {
-//     const repo = repos.$(name);
-//     const doc = await repo.findOne({ query: {}, options: { projection: { _id: 1 } } });
-//     return { name, hasDocs: Boolean(doc) };
-//   }));
-//   return r.reduce((set, { name, hasDocs }) => {
-//     if (hasDocs) set.add(name);
-//     return set;
-//   }, new Set());
-// };
+const hasDocuments = async () => {
+  const r = await Promise.all(['user'].map(async (name) => {
+    const repo = repos.$(name);
+    const doc = await repo.findOne({ query: {}, options: { projection: { _id: 1 } } });
+    return { name, hasDocs: Boolean(doc) };
+  }));
+  return r.reduce((set, { name, hasDocs }) => {
+    if (hasDocs) set.add(name);
+    return set;
+  }, new Set());
+};
 
 const run = async () => {
-  // const documents = await hasDocuments();
+  const documents = await hasDocuments();
 
   const questions = [
     {
@@ -53,11 +51,11 @@ const run = async () => {
           key: 'user',
           choices: [
             { name: 'Create new user', fnName: 'create' },
-            // {
-            //   name: 'Change user email address',
-            //   fnName: 'changeEmail',
-            //   disabled: !documents.has('user'),
-            // },
+            {
+              name: 'Change user email address',
+              fnName: 'changeEmail',
+              disabled: !documents.has('user'),
+            },
             // {
             //   name: 'Change user first/last name',
             //   fnName: 'updateNames',

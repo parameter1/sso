@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { userAttributes as userAttrs } from '@parameter1/sso-db/schema';
+import { userProps } from '@parameter1/sso-mongodb';
 import getUserList from '../utils/get-user-list.js';
 import repos from '../../repos.js';
 
@@ -17,16 +17,19 @@ export default async () => {
       type: 'input',
       name: 'email',
       message: 'Enter the new email address',
+      filter: (input) => {
+        const { value } = userProps.email.required().validate(input);
+        return value;
+      },
       validate: async (input) => {
-        const { error } = userAttrs.email.required().validate(input);
+        const { error, value } = userProps.email.required().validate(input);
         if (error) return error;
 
         const doc = await repos.$('user').findByEmail({
-          email: input,
+          email: value,
           options: { projection: { _id: 1 } },
         });
         if (doc) return new Error('A user already exists with this email address');
-
         return true;
       },
     },

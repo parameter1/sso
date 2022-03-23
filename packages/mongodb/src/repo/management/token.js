@@ -1,8 +1,9 @@
-import { ManagedRepo, cleanDocument } from '@parameter1/mongodb';
+import { ManagedRepo } from '@parameter1/mongodb';
 import { PropTypes, validateAsync } from '@sso/prop-types';
 import { dateToUnix } from '@parameter1/utils';
 import jwt from 'jsonwebtoken';
 
+import cleanDocument from '../../utils/clean-document.js';
 import { tokenProps, userProps } from '../../schema/index.js';
 
 const { boolean, object, string } = PropTypes;
@@ -12,7 +13,7 @@ export default class TokenRepo extends ManagedRepo {
    *
    * @param {object} params
    * @param {string} params.tokenSecret
-   * @param {...object} params.rest
+   * @param {object} params.rest
    */
   constructor({ tokenSecret, ...rest } = {}) {
     if (!tokenSecret) throw new Error('A token secret must be provided.');

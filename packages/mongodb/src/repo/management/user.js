@@ -1,7 +1,8 @@
-import { ManagedRepo, cleanDocument } from '@parameter1/mongodb';
 import { sluggify } from '@parameter1/slug';
+import { ManagedRepo } from '@parameter1/mongodb';
 import { PropTypes, validateAsync } from '@sso/prop-types';
 
+import cleanDocument from '../../utils/clean-document.js';
 import { userProps } from '../../schema/index.js';
 
 const { object } = PropTypes;
@@ -69,7 +70,7 @@ export default class UserRepo extends ManagedRepo {
         slug: [familyName, givenName].map(sluggify).join('-'),
         verified,
         workspaces: [],
-      }, { preserveEmptyArrays: true }),
+      }),
       options,
     });
   }

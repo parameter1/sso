@@ -35,7 +35,8 @@ Define the users within the P1 ecosystem. Users can manage organizations and be 
   - `workspaces._id`
   - `date.created` (sort)
   - `date.updated` (sort)
-  - `slug` (sort)
+  - `givenName` + `familyName` (sort)
+  - `familyName` + `givenName` (sort)
 
 
 ```js
@@ -45,7 +46,6 @@ const user = {
   domain: 'parameter1.com',
   givenName: 'Jacob',
   familyName: 'Bare',
-  slug: 'bare-jacob',
   date: {
     created: ISODate(),
     updated: ISODate(),

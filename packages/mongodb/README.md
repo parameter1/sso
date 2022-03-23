@@ -5,15 +5,20 @@
 ### Applications
 Define high-level applications that are available in the P1 ecosystem.
 
-Model objects of this type _cannot_ be created or modified by external users.
+Document objects of this type _cannot_ be created or modified by external users.
 
-Unique key: `slug`
+**Indexes**
+- Unique
+  - `key`
+- Other
+  - `date.created` (sort)
+  - `date.updated` (sort)
 
 ```js
 const application = {
   _id: ObjectId(),
-  slug: 'omeda',
-  name: 'Omeda',
+  key: 'mindful-cms',
+  name: 'MindfulCMS',
   date: {
     created: ISODate(),
     updated: ISODate(),
@@ -23,7 +28,6 @@ const application = {
 
 ### Users
 Define the users within the P1 ecosystem. Users can manage organizations and be members of application instance workspaces. Users are unique by email and can log-in using a magic login link sent via email. Eventually passwords could be assigned as a secondary authentication method.
-
 
 **Indexes**
 - Unique

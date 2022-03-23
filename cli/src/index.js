@@ -61,11 +61,11 @@ const run = async () => {
               fnName: 'updateNames',
               disabled: !documents.has('user'),
             },
-            // {
-            //   name: 'Generate user auth token (impersonate)',
-            //   fnName: 'generateAuthToken',
-            //   disabled: !documents.has('user'),
-            // },
+            {
+              name: 'Generate user auth token (impersonate)',
+              fnName: 'generateAuthToken',
+              disabled: !documents.has('user'),
+            },
           ],
         },
 

@@ -10,7 +10,7 @@ export default async () => {
       type: 'input',
       name: 'email',
       message: 'Enter the new user\'s email address',
-      transformer: (input) => {
+      filter: (input) => {
         const { value } = userProps.email.required().validate(input);
         return value;
       },

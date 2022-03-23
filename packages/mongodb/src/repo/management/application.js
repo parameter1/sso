@@ -3,6 +3,7 @@ import { PropTypes, validateAsync } from '@sso/prop-types';
 
 import cleanDocument from '../../utils/clean-document.js';
 import { applicationProps } from '../../schema/index.js';
+import { buildUpdatePipeline } from '../../pipelines/index.js';
 
 const { object } = PropTypes;
 
@@ -68,5 +69,26 @@ export default class ApplicationRepo extends ManagedRepo {
    */
   findByKey({ key, options } = {}) {
     return this.findOne({ query: { key }, options });
+  }
+
+  /**
+   * @param {object} params
+   * @param {ObjectId} params.id
+   * @param {string} [params.name]
+   */
+  async updateProps(params = {}) {
+    const { id, name } = await validateAsync(object({
+      id: applicationProps.id.required(),
+      name: applicationProps.name,
+    }).required(), params);
+
+    const fields = [];
+    if (name) fields.push({ path: 'name', value: name });
+    if (!fields.length) return null; // noop
+    return this.updateOne({
+      query: { _id: id },
+      update: buildUpdatePipeline(fields),
+      options: { strict: true },
+    });
   }
 }

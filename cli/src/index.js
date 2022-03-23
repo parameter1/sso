@@ -9,7 +9,7 @@ import actions from './actions/index.js';
 const { log } = console;
 
 const hasDocuments = async () => {
-  const r = await Promise.all(['user'].map(async (name) => {
+  const r = await Promise.all(['application', 'user'].map(async (name) => {
     const repo = repos.$(name);
     const doc = await repo.findOne({ query: {}, options: { projection: { _id: 1 } } });
     return { name, hasDocs: Boolean(doc) };
@@ -34,16 +34,11 @@ const run = async () => {
           key: 'application',
           choices: [
             { name: 'Create new application', fnName: 'create' },
-            // {
-            //   name: 'Change application name',
-            //   fnName: 'updateName',
-            //   disabled: !documents.has('application'),
-            // },
-            // {
-            //   name: 'Change application slug',
-            //   fnName: 'updateSlug',
-            //   disabled: !documents.has('application'),
-            // },
+            {
+              name: 'Change application name',
+              fnName: 'updateName',
+              disabled: !documents.has('application'),
+            },
           ],
         },
 

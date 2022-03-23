@@ -1,9 +1,7 @@
 import inquirer from 'inquirer';
-import { applicationAttributes as appAttrs } from '@parameter1/sso-db/schema';
+import { applicationProps } from '@parameter1/sso-mongodb';
 import { getAppList } from '../utils/index.js';
 import repos from '../../repos.js';
-
-const { log } = console;
 
 export default async () => {
   const questions = [
@@ -18,8 +16,12 @@ export default async () => {
       name: 'name',
       default: ({ app }) => app.name,
       message: 'Enter the new application name',
+      filter: (input) => {
+        const { value } = applicationProps.name.required().validate(input);
+        return value;
+      },
       validate: async (input) => {
-        const { error } = appAttrs.name.validate(input);
+        const { error } = applicationProps.name.validate(input);
         if (error) return error;
         return true;
       },
@@ -38,11 +40,8 @@ export default async () => {
     name,
   } = await inquirer.prompt(questions);
 
-  if (!confirm) return;
-
-  const result = await repos.$('application').updateAttributes({
+  return confirm ? repos.$('application').updateProps({
     id: app._id,
     name,
-  });
-  log(result);
+  }) : null;
 };

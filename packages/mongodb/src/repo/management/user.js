@@ -1,12 +1,19 @@
 import { ManagedRepo } from '@parameter1/mongodb';
+import { isFunction as isFn, objectHasKeys } from '@parameter1/utils';
 import { PropTypes, validateAsync } from '@sso/prop-types';
+import { get } from '@parameter1/object-path';
 
 import cleanDocument from '../../utils/clean-document.js';
-import { userProps } from '../../schema/index.js';
-import { buildUpdatePipeline } from '../../pipelines/index.js';
+import { tokenProps, userEventProps, userProps } from '../../schema/index.js';
+import { buildUpdatePipeline, Expr } from '../../pipelines/index.js';
 import { userEmails } from '../../pipelines/build/index.js';
 
-const { object } = PropTypes;
+const {
+  boolean,
+  func,
+  object,
+  string,
+} = PropTypes;
 
 export default class UserRepo extends ManagedRepo {
   /**
@@ -83,6 +90,79 @@ export default class UserRepo extends ManagedRepo {
   }
 
   /**
+   * Creates a magic login link token for the provided user ID.
+   *
+   * @param {object} params
+   * @param {string} params.userId
+   * @param {string} [params.ip]
+   * @param {string} [params.ua]
+   * @param {string} [params.ttl=3600]
+   * @param {string} [params.scope]
+   * @param {boolean} [params.impersonated=false]
+   * @param {function} [params.inTransaction]
+   */
+  async createLoginLinkToken(params = {}) {
+    const {
+      userId,
+      ip,
+      ua,
+      ttl,
+      scope,
+      impersonated,
+      session: currentSession,
+      inTransaction,
+    } = await validateAsync(object({
+      userId: userProps.id.required(),
+      ip: userEventProps.ip,
+      ua: userEventProps.ua,
+      ttl: tokenProps.ttl.default(3600),
+      scope: string(),
+      impersonated: boolean().default(false),
+      session: object(),
+      inTransaction: func(),
+    }).required(), params);
+
+    const session = currentSession || await this.client.startSession();
+    const previouslyStarted = session.inTransaction();
+    if (!previouslyStarted) session.startTransaction();
+
+    try {
+      const user = await this.findByObjectId({
+        id: userId,
+        options: { strict: true, projection: { email: 1 }, session },
+      });
+
+      const data = { ...(scope && { scope }), ...(impersonated && { impersonated }) };
+
+      const token = await this.manager.$('token').create({
+        subject: 'login-link',
+        audience: user._id,
+        ttl: impersonated ? 60 : ttl,
+        ...(objectHasKeys(data) && { data }),
+        options: { session },
+      });
+
+      await this.manager.$('user-event').create({
+        userId: user._id,
+        action: 'send-login-link',
+        ip,
+        ua,
+        data: { scope, loginToken: token, impersonated },
+        options: { session },
+      });
+
+      if (isFn(inTransaction)) await inTransaction({ user, token });
+      if (!previouslyStarted) await session.commitTransaction();
+      return token.signed;
+    } catch (e) {
+      if (!previouslyStarted) await session.abortTransaction();
+      throw e;
+    } finally {
+      if (!previouslyStarted) session.endSession();
+    }
+  }
+
+  /**
    * Finds a single user by email address.
    *
    * @param {object} params
@@ -91,6 +171,87 @@ export default class UserRepo extends ManagedRepo {
    */
   findByEmail({ email, options } = {}) {
     return this.findOne({ query: { email }, options });
+  }
+
+  /**
+   * Magically logs a user in using the provided login token.
+   *
+   * @param {object} params
+   * @param {string} params.loginToken
+   * @param {string} [params.ip]
+   * @param {string} [params.ua]
+   */
+  async magicLogin(params = {}) {
+    const {
+      loginLinkToken: token,
+      ip,
+      ua,
+    } = await validateAsync(object({
+      loginLinkToken: string().required(),
+      ip: userEventProps.ip,
+      ua: userEventProps.ua,
+    }).required(), params);
+
+    const loginLinkToken = await this.manager.$('token').verify({ token, subject: 'login-link' });
+    const shouldInvalidateToken = get(loginLinkToken, 'doc.data.scope') !== 'invite';
+    const impersonated = get(loginLinkToken, 'doc.data.impersonated');
+    const user = await this.findByObjectId({
+      id: get(loginLinkToken, 'doc.audience'),
+      options: { projection: { email: 1 }, strict: true },
+    });
+
+    const session = await this.client.startSession();
+    session.startTransaction();
+
+    try {
+      const authToken = await this.manager.$('token').getOrCreateAuthToken({
+        userId: user._id,
+        impersonated,
+        options: { session },
+        findOptions: { session },
+      });
+      const now = new Date();
+
+      await Promise.all([
+        ...(shouldInvalidateToken ? [
+          this.manager.$('token').invalidate({ id: get(loginLinkToken, 'doc._id'), options: { session } }),
+        ] : []),
+        this.manager.$('user-event').create({
+          userId: user._id,
+          action: 'magic-login',
+          date: now,
+          ip,
+          ua,
+          data: { loginLinkToken, authToken, impersonated },
+          options: { session },
+        }),
+        impersonated ? Promise.resolve() : this.updateOne({
+          query: { _id: user._id },
+          update: buildUpdatePipeline([
+            { path: 'verified', value: true },
+            { path: 'date.lastLoggedIn', value: '$$NOW' },
+            { path: 'date.lastSeen', value: '$$NOW' },
+            { path: 'loginCount', value: new Expr({ $add: ['$loginCount', 1] }) },
+          ], {
+            // only change updated date when verified flag changes
+            updatedDateCondition: '$__will_change.verified',
+          }),
+          options: { session },
+        }),
+      ]);
+
+      await session.commitTransaction();
+      return {
+        authToken: authToken.signed,
+        userId: user._id,
+        authDoc: authToken.doc,
+      };
+    } catch (e) {
+      await session.abortTransaction();
+      throw e;
+    } finally {
+      session.endSession();
+    }
   }
 
   /**

@@ -35,6 +35,8 @@ export default class UserRepo extends ManagedRepo {
   }
 
   /**
+   * Creates a new user.
+   *
    * @param {object} params
    * @param {string} params.email
    * @param {string} params.givenName
@@ -81,7 +83,7 @@ export default class UserRepo extends ManagedRepo {
   }
 
   /**
-   * Finds a user by email address.
+   * Finds a single user by email address.
    *
    * @param {object} params
    * @param {string} params.email
@@ -92,13 +94,15 @@ export default class UserRepo extends ManagedRepo {
   }
 
   /**
+   * Updates basic user props for a single user.
+   *
    * @param {object} params
    * @param {ObjectId} params.id
    * @param {string} [params.email]
    * @param {string} [params.givenName]
    * @param {string} [params.familyName]
    */
-  async updateAttributes(params = {}) {
+  async updateProps(params = {}) {
     const {
       id,
       email,

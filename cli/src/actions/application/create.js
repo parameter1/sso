@@ -1,10 +1,7 @@
 import inquirer from 'inquirer';
-import Joi from '@parameter1/joi';
-import { applicationAttributes as appAttrs } from '@parameter1/sso-db/schema';
+import { applicationProps } from '@parameter1/sso-mongodb';
 import { sluggify } from '@parameter1/slug';
 import repos from '../../repos.js';
-
-const { log } = console;
 
 export default async () => {
   const questions = [
@@ -12,34 +9,35 @@ export default async () => {
       type: 'input',
       name: 'name',
       message: 'Enter the application name',
+      filter: (input) => {
+        const { value } = applicationProps.name.required().validate(input);
+        return value;
+      },
       validate: (input) => {
-        const { error } = appAttrs.name.required().validate(input);
+        const { error } = applicationProps.name.required().validate(input);
         if (error) return error;
         return true;
       },
     },
     {
       type: 'input',
-      name: 'slug',
-      message: 'Enter the application slug key',
+      name: 'key',
+      message: 'Enter the application key',
       default: ({ name }) => sluggify(name),
+      filter: (input) => {
+        const { value } = applicationProps.key.required().validate(input);
+        return value;
+      },
       validate: async (input) => {
-        const repo = repos.$('application');
-        const { error } = appAttrs.slug.required().validate(input);
+        const { error } = applicationProps.key.required().validate(input);
         if (error) return error;
 
-        const doc = await repo.findBySlug({
-          slug: input,
+        const doc = await repos.$('application').findByKey({
+          key: input,
           options: { projection: { _id: 1 } },
         });
-        if (doc) return new Error('An application already exists with this slug');
-
-        try {
-          await repo.throwIfSlugHasRedirect({ slug: input });
-          return true;
-        } catch (e) {
-          return e;
-        }
+        if (doc) return new Error('An application already exists with this key');
+        return true;
       },
     },
     {
@@ -49,7 +47,7 @@ export default async () => {
       default: 'Administrator, Member',
       filter: (list) => list.split(',').map((v) => v.trim()).filter((v) => v),
       validate: (roles) => {
-        const { error } = Joi.array().items(Joi.string().required()).validate(roles);
+        const { error } = applicationProps.roles.validate(roles);
         if (error) return error;
         return true;
       },
@@ -65,12 +63,8 @@ export default async () => {
   const {
     confirm,
     name,
-    slug,
+    key,
     roles,
   } = await inquirer.prompt(questions);
-
-  if (!confirm) return;
-
-  const result = await repos.$('application').create({ name, slug, roles });
-  log(result);
+  return confirm ? repos.$('application').create({ name, key, roles }) : null;
 };

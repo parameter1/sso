@@ -30,22 +30,22 @@ const run = async () => {
       message: 'Choose an action',
 
       choices: [
-        // {
-        //   key: 'application',
-        //   choices: [
-        //     { name: 'Create new application', fnName: 'create' },
-        //     {
-        //       name: 'Change application name',
-        //       fnName: 'updateName',
-        //       disabled: !documents.has('application'),
-        //     },
-        //     {
-        //       name: 'Change application slug',
-        //       fnName: 'updateSlug',
-        //       disabled: !documents.has('application'),
-        //     },
-        //   ],
-        // },
+        {
+          key: 'application',
+          choices: [
+            { name: 'Create new application', fnName: 'create' },
+            // {
+            //   name: 'Change application name',
+            //   fnName: 'updateName',
+            //   disabled: !documents.has('application'),
+            // },
+            // {
+            //   name: 'Change application slug',
+            //   fnName: 'updateSlug',
+            //   disabled: !documents.has('application'),
+            // },
+          ],
+        },
 
         {
           key: 'user',

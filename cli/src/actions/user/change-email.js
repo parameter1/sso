@@ -3,8 +3,6 @@ import { userProps } from '@parameter1/sso-mongodb';
 import getUserList from '../utils/get-user-list.js';
 import repos from '../../repos.js';
 
-const { log } = console;
-
 export default async () => {
   const questions = [
     {
@@ -47,11 +45,8 @@ export default async () => {
     email,
   } = await inquirer.prompt(questions);
 
-  if (!confirm) return;
-
-  const result = await repos.$('user').updateAttributes({
+  return confirm ? repos.$('user').updateAttributes({
     id: user._id,
     email,
-  });
-  log(result);
+  }) : null;
 };

@@ -2,8 +2,6 @@ import inquirer from 'inquirer';
 import { userProps } from '@parameter1/sso-mongodb';
 import repos from '../../repos.js';
 
-const { log } = console;
-
 export default async () => {
   const questions = [
     {
@@ -62,8 +60,5 @@ export default async () => {
     familyName,
   } = await inquirer.prompt(questions);
 
-  if (!confirm) return;
-
-  const result = await repos.$('user').create({ email, givenName, familyName });
-  log(result);
+  return confirm ? repos.$('user').create({ email, givenName, familyName }) : null;
 };

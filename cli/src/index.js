@@ -172,7 +172,8 @@ const run = async () => {
   const action = get(actions, path);
   if (!action) throw new Error(`No action found for ${path}`);
 
-  await action();
+  const r = await action();
+  if (r !== null) log(r);
 
   log(`> Action '${path}' complete`);
 

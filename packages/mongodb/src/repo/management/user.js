@@ -1,4 +1,3 @@
-import { sluggify } from '@parameter1/slug';
 import { ManagedRepo } from '@parameter1/mongodb';
 import { PropTypes, validateAsync } from '@sso/prop-types';
 
@@ -67,7 +66,6 @@ export default class UserRepo extends ManagedRepo {
         loginCount: 0,
         organizations: [],
         previousEmails: [],
-        slug: [familyName, givenName].map(sluggify).join('-'),
         verified,
         workspaces: [],
       }),

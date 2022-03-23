@@ -3,6 +3,8 @@ import { PropTypes, validateAsync } from '@sso/prop-types';
 
 import cleanDocument from '../../utils/clean-document.js';
 import { userProps } from '../../schema/index.js';
+import { buildUpdatePipeline } from '../../pipelines/index.js';
+import { userEmails } from '../../pipelines/build/index.js';
 
 const { object } = PropTypes;
 
@@ -87,5 +89,43 @@ export default class UserRepo extends ManagedRepo {
    */
   findByEmail({ email, options } = {}) {
     return this.findOne({ query: { email }, options });
+  }
+
+  /**
+   * @param {object} params
+   * @param {ObjectId} params.id
+   * @param {string} [params.email]
+   * @param {string} [params.givenName]
+   * @param {string} [params.familyName]
+   */
+  async updateAttributes(params = {}) {
+    const {
+      id,
+      email,
+      givenName,
+      familyName,
+    } = await validateAsync(object({
+      id: userProps.id.required(),
+      email: userProps.email,
+      givenName: userProps.givenName,
+      familyName: userProps.familyName,
+    }).required(), params);
+
+    const fields = [];
+    if (givenName) fields.push({ path: 'givenName', value: givenName });
+    if (familyName) fields.push({ path: 'familyName', value: familyName });
+    if (email) {
+      fields.push({
+        path: 'email',
+        value: email,
+        set: () => userEmails(email),
+      });
+    }
+    if (!fields.length) return null; // noop
+    return this.updateOne({
+      query: { _id: id },
+      update: buildUpdatePipeline(fields),
+      options: { strict: true },
+    });
   }
 }

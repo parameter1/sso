@@ -16,7 +16,8 @@ export default async ({
         givenName: 1,
         familyName: 1,
       },
-      sort: { familyName: 1 },
+      sort: { familyName: 1, givenName: 1, _id: 1 },
+      collation: { locale: 'en_US' },
     },
   });
 

@@ -58,7 +58,12 @@ export default class UserRepo extends ManagedRepo {
     const now = new Date();
     return this.insertOne({
       doc: cleanDocument({
-        date: { created: now, updated: now },
+        date: {
+          created: now,
+          lastLoggedIn: null,
+          lastSeen: null,
+          updated: now,
+        },
         email,
         domain: email.split('@')[1],
         familyName,

@@ -1,12 +1,20 @@
 import { ManagedRepo } from '@parameter1/mongodb';
 import { PropTypes, validateAsync } from '@sso/prop-types';
 
-import { applicationProps } from '../../schema/index.js';
+import { applicationProps, createApplicationSchema } from '../../schema/index.js';
 import { buildInsertCriteria, buildInsertPipeline, buildUpdatePipeline } from '../../pipelines/index.js';
 
-const { object } = PropTypes;
+const { array, object } = PropTypes;
 
 export default class ApplicationRepo extends ManagedRepo {
+  /**
+   *
+   * @typedef CreateApplicationSchema
+   * @property {string} name
+   * @property {string} key
+   * @property {string[]} [roles=[Administrator, Member]]
+   */
+
   /**
    *
    * @param {object} params
@@ -26,32 +34,44 @@ export default class ApplicationRepo extends ManagedRepo {
   }
 
   /**
-   * Creates a new application
+   * Creates a multiple applications
    *
    * @param {object} params
-   * @param {string} params.name
-   * @param {string} params.key
-   * @param {string[]} [params.roles=[Administrator, Member]]
+   * @param {CreateApplicationSchema[]} params.docs
    * @param {object} [params.session]
    */
-  async create(params = {}) {
+  async batchCreate(params) {
     const {
-      name,
-      key,
-      roles,
+      docs,
       session,
     } = await validateAsync(object({
-      name: applicationProps.name.required(),
-      key: applicationProps.key.required(),
-      roles: applicationProps.roles.default(['Administrator', 'Member']),
+      docs: array().items(createApplicationSchema).required(),
       session: object(),
     }).required(), params);
 
-    return this.updateOne({
-      query: buildInsertCriteria(),
-      update: buildInsertPipeline({ name, key, roles }),
-      options: { session, upsert: true },
+    const operations = docs.map((doc) => {
+      const filter = buildInsertCriteria();
+      const update = buildInsertPipeline(doc);
+      return { updateOne: { filter, update, upsert: true } };
     });
+    const { result } = await this.bulkWrite({ operations, options: { session } });
+    return result.upserted;
+  }
+
+  /**
+   * Creates a new application
+   *
+   * @param {object} params
+   * @param {CreateApplicationSchema} params.doc
+   * @param {object} [params.session]
+   */
+  async create(params) {
+    const { doc, session } = await validateAsync(object({
+      doc: createApplicationSchema,
+      session: object(),
+    }).required(), params);
+    const [r] = await this.batchCreate({ docs: [doc], session });
+    return r;
   }
 
   /**

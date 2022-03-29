@@ -3,9 +3,13 @@ import { isFunction as isFn, objectHasKeys } from '@parameter1/utils';
 import { PropTypes, validateAsync } from '@sso/prop-types';
 import { get } from '@parameter1/object-path';
 
-import cleanDocument from '../../utils/clean-document.js';
 import { tokenProps, userEventProps, userProps } from '../../schema/index.js';
-import { buildUpdatePipeline, Expr } from '../../pipelines/index.js';
+import {
+  buildInsertCriteria,
+  buildInsertPipeline,
+  buildUpdatePipeline,
+  Expr,
+} from '../../pipelines/index.js';
 import { userEmails } from '../../pipelines/build/index.js';
 
 const {
@@ -66,15 +70,10 @@ export default class UserRepo extends ManagedRepo {
       options: object().default({}),
     }).required(), params);
 
-    const now = new Date();
-    return this.insertOne({
-      doc: cleanDocument({
-        date: {
-          created: now,
-          lastLoggedIn: null,
-          lastSeen: null,
-          updated: now,
-        },
+    return this.updateOne({
+      query: buildInsertCriteria(),
+      update: buildInsertPipeline({
+        date: { lastLoggedIn: null, lastSeen: null },
         email,
         domain: email.split('@')[1],
         familyName,
@@ -85,7 +84,7 @@ export default class UserRepo extends ManagedRepo {
         verified,
         workspaces: [],
       }),
-      options,
+      options: { ...options, upsert: true },
     });
   }
 

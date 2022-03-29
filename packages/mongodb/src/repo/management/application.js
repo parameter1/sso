@@ -1,9 +1,8 @@
 import { ManagedRepo } from '@parameter1/mongodb';
 import { PropTypes, validateAsync } from '@sso/prop-types';
 
-import cleanDocument from '../../utils/clean-document.js';
 import { applicationProps } from '../../schema/index.js';
-import { buildUpdatePipeline } from '../../pipelines/index.js';
+import { buildInsertCriteria, buildInsertPipeline, buildUpdatePipeline } from '../../pipelines/index.js';
 
 const { object } = PropTypes;
 
@@ -48,15 +47,10 @@ export default class ApplicationRepo extends ManagedRepo {
       options: object().default({}),
     }).required(), params);
 
-    const now = new Date();
-    return this.insertOne({
-      doc: cleanDocument({
-        name,
-        key,
-        date: { created: now, updated: now },
-        roles,
-      }),
-      options,
+    return this.updateOne({
+      query: buildInsertCriteria(),
+      update: buildInsertPipeline({ name, key, roles }),
+      options: { ...options, upsert: true },
     });
   }
 

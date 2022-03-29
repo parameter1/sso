@@ -1,7 +1,6 @@
 import { PropTypes } from '@sso/prop-types';
 
 const {
-  date,
   object,
   objectId,
   string,
@@ -11,7 +10,6 @@ const actions = ['accept-org-member-invite', 'magic-login', 'reject-org-member-i
 
 export default {
   action: string().valid(...actions),
-  date: date(),
   data: object(),
   id: objectId(),
   ip: string().allow(null).empty(null),

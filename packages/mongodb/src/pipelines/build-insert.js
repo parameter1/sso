@@ -7,13 +7,11 @@ export function buildInsertCriteria(id) {
 }
 
 export function buildInsertPipeline(doc, {
-  createdDatePath = 'date.created',
-  updatedDatePath = 'date.updated',
+  datePaths = ['date.created', 'date.updated'],
   now = '$$NOW',
 } = {}) {
   const obj = { ...doc };
-  set(obj, createdDatePath, now);
-  set(obj, updatedDatePath, now);
+  datePaths.forEach((path) => set(obj, path, now));
 
   return [
     {

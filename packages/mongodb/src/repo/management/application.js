@@ -32,25 +32,25 @@ export default class ApplicationRepo extends ManagedRepo {
    * @param {string} params.name
    * @param {string} params.key
    * @param {string[]} [params.roles=[Administrator, Member]]
-   * @param {object} [params.options]
+   * @param {object} [params.session]
    */
   async create(params = {}) {
     const {
       name,
       key,
       roles,
-      options,
+      session,
     } = await validateAsync(object({
       name: applicationProps.name.required(),
       key: applicationProps.key.required(),
       roles: applicationProps.roles.default(['Administrator', 'Member']),
-      options: object().default({}),
+      session: object(),
     }).required(), params);
 
     return this.updateOne({
       query: buildInsertCriteria(),
       update: buildInsertPipeline({ name, key, roles }),
-      options: { ...options, upsert: true },
+      options: { session, upsert: true },
     });
   }
 

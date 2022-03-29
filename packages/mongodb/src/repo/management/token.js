@@ -3,7 +3,7 @@ import { PropTypes, validateAsync } from '@sso/prop-types';
 import { dateToUnix } from '@parameter1/utils';
 import jwt from 'jsonwebtoken';
 
-import cleanDocument from '../../utils/clean-document.js';
+import { buildInsertCriteria, buildInsertPipeline } from '../../pipelines/index.js';
 import { tokenProps, userProps } from '../../schema/index.js';
 
 const { boolean, object, string } = PropTypes;
@@ -33,43 +33,44 @@ export default class TokenRepo extends ManagedRepo {
    * Creates, saves and signs a new token from the provided parameters.
    *
    * @param {object} params
-   * @param {object} [params.options]
+   * @param {object} [params.session]
    */
   async create(params = {}) {
     const {
       subject,
       audience,
       issuer,
-      issuedAt,
       ttl,
-      expiresAt,
       data,
-      options,
+      session,
     } = await validateAsync(object({
       subject: tokenProps.subject.required(),
       audience: tokenProps.audience.required(),
       issuer: tokenProps.issuer,
-      issuedAt: tokenProps.issuedAt.default(() => new Date()),
       ttl: tokenProps.ttl.default(0),
       data: tokenProps.data,
-      options: object().default({}),
-    }).required().external((obj) => {
-      let exp;
-      if (obj.ttl) exp = new Date((dateToUnix(obj.issuedAt) + obj.ttl) * 1000);
-      return { ...obj, expiresAt: exp };
-    }), params);
+      session: object(),
+    }).required(), params);
 
-    const doc = await this.insertOne({
-      doc: cleanDocument({
+    const { upsertedId } = await this.updateOne({
+      query: buildInsertCriteria(),
+      update: buildInsertPipeline({
         subject,
         audience,
         issuer,
-        issuedAt,
+        issuedAt: '$$NOW',
         ttl,
-        expiresAt,
         data,
-      }),
-      options,
+        ...(ttl && {
+          expiresAt: { $add: ['$$NOW', ttl * 1000] },
+        }),
+      }, { datePaths: [] }),
+      options: { session, upsert: true },
+    });
+
+    const doc = await this.findByObjectId({
+      id: upsertedId,
+      options: { session },
     });
     const signed = this.signDocument(doc);
     return { doc, signed };
@@ -79,34 +80,31 @@ export default class TokenRepo extends ManagedRepo {
    * @param {object} params
    * @param {string|ObjectId} params.userId
    * @param {boolean} [params.impersonated=false]
-   * @param {object} [params.findOptions]
-   * @param {object} [params.options]
+   * @param {object} [params.session]
    */
   async getOrCreateAuthToken(params = {}) {
     const {
       userId,
       impersonated,
-      findOptions,
-      options,
+      session,
     } = await validateAsync(object({
       userId: userProps.id.required(),
       impersonated: boolean().default(false),
-      findOptions: object().default({}),
-      options: object().default({}),
+      session: object(),
     }).required(), params);
     const query = {
       subject: 'auth',
       audience: userId,
       'data.impersonated': impersonated ? true : { $ne: true },
     };
-    const doc = await this.findOne({ query, options: findOptions });
+    const doc = await this.findOne({ query, options: { session } });
     if (doc) return { doc, signed: this.signDocument(doc) };
     return this.create({
       subject: 'auth',
       audience: userId,
       data: { ...(impersonated && { impersonated: true }) },
       ttl: impersonated ? 60 * 60 : 60 * 60 * 24,
-      options,
+      session,
     });
   }
 

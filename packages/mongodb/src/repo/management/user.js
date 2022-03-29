@@ -53,7 +53,7 @@ export default class UserRepo extends ManagedRepo {
    * @param {string} params.givenName
    * @param {string} params.familyName
    * @param {boolean} [params.verified]
-   * @param {object} [params.options]
+   * @param {object} [params.session]
    */
   async create(params = {}) {
     const {
@@ -61,13 +61,13 @@ export default class UserRepo extends ManagedRepo {
       familyName,
       givenName,
       verified,
-      options,
+      session,
     } = await validateAsync(object({
       email: userProps.email.required(),
       familyName: userProps.familyName.required(),
       givenName: userProps.givenName.required(),
       verified: userProps.verified.default(false),
-      options: object().default({}),
+      session: object(),
     }).required(), params);
 
     return this.updateOne({
@@ -84,7 +84,7 @@ export default class UserRepo extends ManagedRepo {
         verified,
         workspaces: [],
       }),
-      options: { ...options, upsert: true },
+      options: { session, upsert: true },
     });
   }
 
@@ -138,7 +138,7 @@ export default class UserRepo extends ManagedRepo {
         audience: user._id,
         ttl: impersonated ? 60 : ttl,
         ...(objectHasKeys(data) && { data }),
-        options: { session },
+        session,
       });
 
       await this.manager.$('user-event').create({
@@ -147,7 +147,7 @@ export default class UserRepo extends ManagedRepo {
         ip,
         ua,
         data: { scope, loginToken: token, impersonated },
-        options: { session },
+        session,
       });
 
       if (isFn(inTransaction)) await inTransaction({ user, token });
@@ -206,10 +206,8 @@ export default class UserRepo extends ManagedRepo {
       const authToken = await this.manager.$('token').getOrCreateAuthToken({
         userId: user._id,
         impersonated,
-        options: { session },
-        findOptions: { session },
+        session,
       });
-      const now = new Date();
 
       await Promise.all([
         ...(shouldInvalidateToken ? [
@@ -218,11 +216,10 @@ export default class UserRepo extends ManagedRepo {
         this.manager.$('user-event').create({
           userId: user._id,
           action: 'magic-login',
-          date: now,
           ip,
           ua,
           data: { loginLinkToken, authToken, impersonated },
-          options: { session },
+          session,
         }),
         impersonated ? Promise.resolve() : this.updateOne({
           query: { _id: user._id },

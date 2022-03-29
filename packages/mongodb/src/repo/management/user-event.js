@@ -1,8 +1,8 @@
 import { ManagedRepo } from '@parameter1/mongodb';
 import { PropTypes, validateAsync } from '@sso/prop-types';
 
-import cleanDocument from '../../utils/clean-document.js';
 import { userEventProps, userProps } from '../../schema/index.js';
+import { buildInsertCriteria, buildInsertPipeline } from '../../pipelines/index.js';
 
 const { object } = PropTypes;
 
@@ -30,34 +30,35 @@ export default class UserEventRepo extends ManagedRepo {
    * @param {string} [params.ip]
    * @param {string} [params.ua]
    * @param {object} [params.data]
-   * @param {object} [params.options]
+   * @param {object} [params.session]
    */
   async create(params = {}) {
     const {
       userId,
       action,
-      date,
       ip,
       ua,
       data,
-      options,
+      session,
     } = await validateAsync(object({
       userId: userProps.id.required(),
       action: userEventProps.action.required(),
-      date: userEventProps.date.default(() => new Date()),
       ip: userEventProps.ip,
       ua: userEventProps.ua,
       data: userEventProps.data,
-      options: object().default({}),
+      session: object(),
     }).required(), params);
-    const doc = cleanDocument({
-      user: { _id: userId },
-      action,
-      date,
-      ip,
-      ua,
-      data,
+
+    return this.updateOne({
+      query: buildInsertCriteria(),
+      update: buildInsertPipeline({
+        user: { _id: userId },
+        action,
+        ip,
+        ua,
+        data,
+      }, { datePaths: ['date'] }),
+      options: { session, upsert: true },
     });
-    return this.insertOne({ doc, options });
   }
 }

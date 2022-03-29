@@ -43,6 +43,7 @@ export function prepareValue(value) {
 export default function buildUpdatePipeline(fields = [], {
   updatedDatePath = 'date.updated',
   updatedDateCondition,
+  now = '$$NOW',
 } = {}) {
   const f = fields.map((field) => {
     const { path, value } = field;
@@ -127,7 +128,7 @@ export default function buildUpdatePipeline(fields = [], {
       }, {
         ...(updatedDatePath && {
           [updatedDatePath]: {
-            $cond: [updatedDateCondition || '$__will_change.__any', '$$NOW', `$${updatedDatePath}`],
+            $cond: [updatedDateCondition || '$__will_change.__any', now, `$${updatedDatePath}`],
           },
         }),
       }),

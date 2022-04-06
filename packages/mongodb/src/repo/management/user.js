@@ -100,11 +100,13 @@ export default class UserRepo extends AbstractManagementRepo {
       });
 
       await this.manager.$('user-event').create({
-        userId: user._id,
-        action: 'send-login-link',
-        ip,
-        ua,
-        data: { scope, loginToken: token, impersonated },
+        doc: {
+          userId: user._id,
+          action: 'send-login-link',
+          ip,
+          ua,
+          data: { scope, loginToken: token, impersonated },
+        },
         session,
       });
 
@@ -172,11 +174,13 @@ export default class UserRepo extends AbstractManagementRepo {
           this.manager.$('token').invalidate({ id: get(loginLinkToken, 'doc._id'), options: { session } }),
         ] : []),
         this.manager.$('user-event').create({
-          userId: user._id,
-          action: 'magic-login',
-          ip,
-          ua,
-          data: { loginLinkToken, authToken, impersonated },
+          doc: {
+            userId: user._id,
+            action: 'magic-login',
+            ip,
+            ua,
+            data: { loginLinkToken, authToken, impersonated },
+          },
           session,
         }),
         impersonated ? Promise.resolve() : this.updateOne({

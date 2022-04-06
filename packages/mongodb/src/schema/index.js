@@ -1,4 +1,5 @@
 export { default as applicationSchema } from './application.js';
+export { default as userEventSchema } from './user-event.js';
 export { default as userSchema } from './user.js';
 
 export * from './props/index.js';

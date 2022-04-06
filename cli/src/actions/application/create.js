@@ -66,5 +66,6 @@ export default async () => {
     key,
     roles,
   } = await inquirer.prompt(questions);
-  return confirm ? repos.$('application').create({ name, key, roles }) : null;
+  const doc = { name, key, roles };
+  return confirm ? repos.$('application').create({ doc }) : null;
 };

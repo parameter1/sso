@@ -59,6 +59,6 @@ export default async () => {
     givenName,
     familyName,
   } = await inquirer.prompt(questions);
-
-  return confirm ? repos.$('user').create({ email, givenName, familyName }) : null;
+  const doc = { email, givenName, familyName };
+  return confirm ? repos.$('user').create({ doc }) : null;
 };

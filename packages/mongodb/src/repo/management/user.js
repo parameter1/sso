@@ -1,15 +1,15 @@
-import { ManagedRepo } from '@parameter1/mongodb';
 import { isFunction as isFn, objectHasKeys } from '@parameter1/utils';
 import { PropTypes, validateAsync } from '@sso/prop-types';
 import { get } from '@parameter1/object-path';
 
-import { tokenProps, userEventProps, userProps } from '../../schema/index.js';
+import AbstractManagementRepo from './-abstract.js';
 import {
-  buildInsertCriteria,
-  buildInsertPipeline,
-  buildUpdatePipeline,
-  Expr,
-} from '../../pipelines/index.js';
+  tokenProps,
+  userEventProps,
+  userProps,
+  userSchema,
+} from '../../schema/index.js';
+import { buildUpdatePipeline, Expr } from '../../pipelines/index.js';
 import { userEmails } from '../../pipelines/build/index.js';
 
 const {
@@ -19,7 +19,7 @@ const {
   string,
 } = PropTypes;
 
-export default class UserRepo extends ManagedRepo {
+export default class UserRepo extends AbstractManagementRepo {
   /**
    *
    * @param {object} params
@@ -42,49 +42,7 @@ export default class UserRepo extends ManagedRepo {
         { key: { givenName: 1, familyName: 1, _id: 1 }, collation: { locale: 'en_US' } },
         { key: { familyName: 1, givenName: 1, _id: 1 }, collation: { locale: 'en_US' } },
       ],
-    });
-  }
-
-  /**
-   * Creates a new user.
-   *
-   * @param {object} params
-   * @param {string} params.email
-   * @param {string} params.givenName
-   * @param {string} params.familyName
-   * @param {boolean} [params.verified]
-   * @param {object} [params.session]
-   */
-  async create(params = {}) {
-    const {
-      email,
-      familyName,
-      givenName,
-      verified,
-      session,
-    } = await validateAsync(object({
-      email: userProps.email.required(),
-      familyName: userProps.familyName.required(),
-      givenName: userProps.givenName.required(),
-      verified: userProps.verified.default(false),
-      session: object(),
-    }).required(), params);
-
-    return this.updateOne({
-      query: buildInsertCriteria(),
-      update: buildInsertPipeline({
-        date: { lastLoggedIn: null, lastSeen: null },
-        email,
-        domain: email.split('@')[1],
-        familyName,
-        givenName,
-        loginCount: 0,
-        organizations: [],
-        previousEmails: [],
-        verified,
-        workspaces: [],
-      }),
-      options: { session, upsert: true },
+      schema: userSchema,
     });
   }
 

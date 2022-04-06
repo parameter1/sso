@@ -1,10 +1,12 @@
 import { PropTypes } from '@sso/prop-types';
-import props from './props/application.js';
+import applicationProps from './props/application.js';
 
 const { object } = PropTypes;
 
-export const createApplicationSchema = object({
-  name: props.name.required(),
-  key: props.key.required(),
-  roles: props.roles.default(['Administrator', 'Member']),
-}).required();
+export default {
+  create: object({
+    name: applicationProps.name.required(),
+    key: applicationProps.key.required(),
+    roles: applicationProps.roles.default(['Administrator', 'Member']),
+  }).required(),
+};

@@ -48,6 +48,29 @@ export default class AbstractManagementRepo extends ManagedRepo {
   }
 
   /**
+   * Creates multiple documents and returns a cursor of the documents from the
+   * database.
+   *
+   * @param {object} params
+   * @param {object[]} params.docs
+   * @param {object} [params.projection]
+   * @param {object} [params.session]
+   */
+  async batchCreateAndReturn(params) {
+    const { projection, session } = await validateAsync(object({
+      docs: array().items(this.schema.create).required(),
+      projection: object(),
+      session: object(),
+    }).required(), params);
+    const results = await this.batchCreate({ docs: params.docs, session });
+    const ids = await results.map(({ _id }) => _id);
+    return this.find({
+      query: { _id: { $in: ids } },
+      options: { projection, session },
+    });
+  }
+
+  /**
    * Creates a single document.
    *
    * @param {object} params
@@ -61,5 +84,23 @@ export default class AbstractManagementRepo extends ManagedRepo {
     }).required(), params);
     const [r] = await this.batchCreate({ docs: [params.doc], session });
     return r;
+  }
+
+  /**
+   * Creates a single document and returns it from the database.
+   *
+   * @param {object} params
+   * @param {object} params.doc
+   * @param {object} [params.projection]
+   * @param {object} [params.session]
+   */
+  async createAndReturn(params) {
+    const { projection, session } = await validateAsync(object({
+      doc: this.schema.create,
+      projection: object(),
+      session: object(),
+    }).required(), params);
+    const { _id } = await this.create({ doc: params.doc, session });
+    return this.findByObjectId({ id: _id, options: { projection, session } });
   }
 }

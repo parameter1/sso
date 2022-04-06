@@ -7,15 +7,22 @@ const {
   array,
   object,
   propTypeObject,
+  string,
 } = PropTypes;
 
 export default class AbstractManagementRepo extends ManagedRepo {
-  constructor({ schema, ...rest }) {
-    attempt(schema, object({
-      create: propTypeObject().required(),
-    }));
+  constructor(params) {
+    const { schema, options, ...rest } = attempt(params, object({
+      schema: object({
+        create: propTypeObject().required(),
+      }),
+      options: object({
+        createDatePaths: array().items(string()).default(['date.created', 'date.updated']),
+      }).default(),
+    }).required().unknown());
     super(rest);
     this.schema = schema;
+    this.options = options;
   }
 
   /**
@@ -33,7 +40,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
 
     const operations = docs.map((doc) => {
       const filter = buildInsertCriteria();
-      const update = buildInsertPipeline(doc);
+      const update = buildInsertPipeline(doc, { datePaths: this.options.createDatePaths });
       return { updateOne: { filter, update, upsert: true } };
     });
     const { result } = await this.bulkWrite({ operations, options: { session } });

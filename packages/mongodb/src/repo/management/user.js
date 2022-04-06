@@ -91,11 +91,13 @@ export default class UserRepo extends AbstractManagementRepo {
 
       const data = { ...(scope && { scope }), ...(impersonated && { impersonated }) };
 
-      const token = await this.manager.$('token').create({
-        subject: 'login-link',
-        audience: user._id,
-        ttl: impersonated ? 60 : ttl,
-        ...(objectHasKeys(data) && { data }),
+      const token = await this.manager.$('token').createAndSignToken({
+        doc: {
+          subject: 'login-link',
+          audience: user._id,
+          ttl: impersonated ? 60 : ttl,
+          ...(objectHasKeys(data) && { data }),
+        },
         session,
       });
 

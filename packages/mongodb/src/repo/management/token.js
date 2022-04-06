@@ -3,12 +3,12 @@ import { PropTypes, validateAsync } from '@sso/prop-types';
 import { dateToUnix } from '@parameter1/utils';
 import jwt from 'jsonwebtoken';
 
-import { buildInsertCriteria, buildInsertPipeline } from '../../pipelines/index.js';
-import { tokenProps, userProps } from '../../schema/index.js';
+import AbstractManagementRepo from './-abstract.js';
+import { tokenProps, tokenSchema, userProps } from '../../schema/index.js';
 
 const { boolean, object, string } = PropTypes;
 
-export default class TokenRepo extends ManagedRepo {
+export default class TokenRepo extends AbstractManagementRepo {
   /**
    *
    * @param {object} params
@@ -25,6 +25,8 @@ export default class TokenRepo extends ManagedRepo {
         { key: { audience: 1, subject: 1 } },
         { key: { expiresAt: 1 }, expireAfterSeconds: 0 },
       ],
+      schema: tokenSchema,
+      options: { createDatePaths: [] },
     });
     this.tokenSecret = tokenSecret;
   }
@@ -33,45 +35,9 @@ export default class TokenRepo extends ManagedRepo {
    * Creates, saves and signs a new token from the provided parameters.
    *
    * @param {object} params
-   * @param {object} [params.session]
    */
-  async create(params = {}) {
-    const {
-      subject,
-      audience,
-      issuer,
-      ttl,
-      data,
-      session,
-    } = await validateAsync(object({
-      subject: tokenProps.subject.required(),
-      audience: tokenProps.audience.required(),
-      issuer: tokenProps.issuer,
-      ttl: tokenProps.ttl.default(0),
-      data: tokenProps.data,
-      session: object(),
-    }).required(), params);
-
-    const { upsertedId } = await this.updateOne({
-      query: buildInsertCriteria(),
-      update: buildInsertPipeline({
-        subject,
-        audience,
-        issuer,
-        issuedAt: '$$NOW',
-        ttl,
-        data,
-        ...(ttl && {
-          expiresAt: { $add: ['$$NOW', ttl * 1000] },
-        }),
-      }, { datePaths: [] }),
-      options: { session, upsert: true },
-    });
-
-    const doc = await this.findByObjectId({
-      id: upsertedId,
-      options: { session },
-    });
+  async createAndSignToken(params) {
+    const doc = await this.createAndReturn(params);
     const signed = this.signDocument(doc);
     return { doc, signed };
   }
@@ -99,11 +65,13 @@ export default class TokenRepo extends ManagedRepo {
     };
     const doc = await this.findOne({ query, options: { session } });
     if (doc) return { doc, signed: this.signDocument(doc) };
-    return this.create({
-      subject: 'auth',
-      audience: userId,
-      data: { ...(impersonated && { impersonated: true }) },
-      ttl: impersonated ? 60 * 60 : 60 * 60 * 24,
+    return this.createAndSignToken({
+      doc: {
+        subject: 'auth',
+        audience: userId,
+        data: { ...(impersonated && { impersonated: true }) },
+        ttl: impersonated ? 60 * 60 : 60 * 60 * 24,
+      },
       session,
     });
   }

@@ -37,8 +37,6 @@ export default class UserRepo extends AbstractManagementRepo {
         { key: { 'organizations._id': 1 } },
         { key: { 'workspaces._id': 1 } },
 
-        { key: { 'date.created': 1, _id: 1 } },
-        { key: { 'date.updated': 1, _id: 1 } },
         { key: { givenName: 1, familyName: 1, _id: 1 }, collation: { locale: 'en_US' } },
         { key: { familyName: 1, givenName: 1, _id: 1 }, collation: { locale: 'en_US' } },
       ],
@@ -189,8 +187,8 @@ export default class UserRepo extends AbstractManagementRepo {
           query: { _id: user._id },
           update: buildUpdatePipeline([
             { path: 'verified', value: true },
-            { path: 'date.lastLoggedIn', value: '$$NOW' },
-            { path: 'date.lastSeen', value: '$$NOW' },
+            { path: 'lastLoggedInAt', value: '$$NOW' },
+            { path: 'lastSeenAt', value: '$$NOW' },
             { path: 'loginCount', value: new Expr({ $add: ['$loginCount', 1] }) },
           ], {
             // only change updated date when verified flag changes

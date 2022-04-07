@@ -18,9 +18,6 @@ export default class OrganizationRepo extends AbstractManagementRepo {
       collatableFields: [],
       indexes: [
         { key: { key: 1 }, unique: true },
-
-        { key: { 'date.created': 1, _id: 1 } },
-        { key: { 'date.updated': 1, _id: 1 } },
       ],
       schema: organizationSchema,
     });

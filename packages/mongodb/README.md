@@ -156,8 +156,9 @@ const doc1 = {
   _id: 1,
   _version: {
     n: 1,
-    event: 'create',
+    // becomes the created date and user
     first: { date: ISODate('2022-01-01'), user: null },
+    // becomes the last modified date and user
     last: { date: ISODate('2022-01-01'), user: null },
     history: [],
   },
@@ -170,7 +171,6 @@ const doc2 = {
   _id: 1,
   _version: {
     n: 2,
-    event: 'update',
     first: { date: ISODate('2022-01-01'), user: null },
     last: { date: ISODate('2022-01-02'), user: { _id: 5 } },
     history: [

@@ -15,7 +15,6 @@ export default class UserEventRepo extends AbstractManagementRepo {
         { key: { 'user._id': 1, action: 1 } },
       ],
       schema: userEventSchema,
-      options: { createDatePaths: ['date'] },
     });
   }
 }

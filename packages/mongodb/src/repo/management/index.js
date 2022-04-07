@@ -14,14 +14,28 @@ export default class ManagementRepos extends RepoManager {
    * @param {MongoDBClient} params.client
    * @param {string} [params.dbBame=tenancy]
    * @param {string} params.tokenSecret
+   *
+   * @param {object} params.source
+   * @param {string} params.source.name
+   * @param {string} params.source.v
    */
-  constructor({ client, dbName = 'sso@management', tokenSecret } = {}) {
+  constructor({
+    client,
+    dbName = 'sso@management',
+    tokenSecret,
+    source,
+  } = {}) {
     super({ client, dbName });
     this
-      .add({ key: 'application', ManagedRepo: ApplicationRepo })
-      .add({ key: 'organization', ManagedRepo: OrganizationRepo })
-      .add({ key: 'token', ManagedRepo: TokenRepo, tokenSecret })
-      .add({ key: 'user-event', ManagedRepo: UserEventRepo })
-      .add({ key: 'user', ManagedRepo: UserRepo });
+      .add({ key: 'application', source, ManagedRepo: ApplicationRepo })
+      .add({ key: 'organization', source, ManagedRepo: OrganizationRepo })
+      .add({
+        key: 'token',
+        source,
+        ManagedRepo: TokenRepo,
+        tokenSecret,
+      })
+      .add({ key: 'user-event', source, ManagedRepo: UserEventRepo })
+      .add({ key: 'user', source, ManagedRepo: UserRepo });
   }
 }

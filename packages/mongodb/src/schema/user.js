@@ -13,7 +13,8 @@ export default {
     const domain = user.email.split('@')[1];
     return {
       ...user,
-      date: { lastSeen: null, lastLoggedIn: null },
+      lastSeenAt: null,
+      lastLoggedInAt: null,
       domain,
       loginCount: 0,
       organizations: [],

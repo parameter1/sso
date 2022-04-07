@@ -13,6 +13,8 @@ export default class UserEventRepo extends AbstractManagementRepo {
       collatableFields: [],
       indexes: [
         { key: { 'user._id': 1, action: 1 } },
+
+        { key: { date: 1, _id: 1 } },
       ],
       schema: userEventSchema,
     });

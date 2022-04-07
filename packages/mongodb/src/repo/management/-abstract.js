@@ -1,32 +1,16 @@
 import { ManagedRepo } from '@parameter1/mongodb';
 import { PropTypes, validateAsync, attempt } from '@sso/prop-types';
 
-import cleanDocument from '../../utils/clean-document.js';
 import { contextSchema, contextProps } from '../../schema/index.js';
+import { buildDeletePipeline, buildInsertCriteria, buildInsertPipeline } from '../../pipelines/index.js';
 
 const {
   array,
+  boolean,
   object,
+  objectId,
   propTypeObject,
 } = PropTypes;
-
-const versionDoc = ({ n, source, context }) => ({
-  n,
-  date: '$$NOW',
-  source,
-  user: context.userId ? { _id: context.userId } : null,
-  ip: context.ip,
-  ua: context.ua,
-});
-
-const versionOnCreate = ({ source, context }) => {
-  const version = versionDoc({ n: 1, source, context });
-  return {
-    first: version,
-    current: version,
-    history: [version],
-  };
-};
 
 export default class AbstractManagementRepo extends ManagedRepo {
   constructor(params) {
@@ -34,28 +18,54 @@ export default class AbstractManagementRepo extends ManagedRepo {
       schema,
       options,
       source,
+      isVersioned,
       ...rest
     } = attempt(params, object({
       schema: object({
         create: propTypeObject().required(),
       }),
       source: contextProps.source.required(),
+      isVersioned: boolean().default(true),
     }).required().unknown());
 
-    const indexes = [
-      // global
-      { key: { _id: 1, '_version.current.n': 1 } }, // optional "version locking"
+    const DELETED_PATH = '_version.current.deleted';
+    const indexes = isVersioned ? [
+      // optional "version locking"
+      { key: { _id: 1, '_version.current.n': 1 } },
 
       { key: { '_version.first.date': 1, _id: 1 } }, // allows "created date" sort
       { key: { '_version.current.date': 1, _id: 1 } }, // allows "updated date" sort
-      // repo specific
-      ...(Array.isArray(rest.indexes) ? rest.indexes : []),
-    ];
 
-    super({ ...rest, indexes });
+      // allows for deleting documents while still retaining change stream history
+      {
+        key: { '_version.current.date': 1 },
+        expireAfterSeconds: 0,
+        partialFilterExpression: { [DELETED_PATH]: true },
+      },
+
+      // repo specific
+      ...(Array.isArray(rest.indexes) ? rest.indexes.map((index) => {
+        // and ensure all indexes exclude pending deleted items
+        // since the `DELETED_PATH` is added as global find criteria, this will ensure
+        // that indexes are still used when present in a query
+        const partialFilterExpression = { [DELETED_PATH]: false };
+        return {
+          ...index,
+          partialFilterExpression: { ...index.partialFilterExpression, partialFilterExpression },
+        };
+      }) : []),
+    ] : rest.indexes;
+
+    super({
+      ...rest,
+      indexes,
+      // because the TTL index can hold documents for up to 60 seconds, exclude them when querying
+      globalFindCriteria: isVersioned ? { [DELETED_PATH]: false } : undefined,
+    });
     this.schema = schema;
     this.source = source;
     this.options = options;
+    this.isVersioned = isVersioned;
   }
 
   /**
@@ -77,10 +87,13 @@ export default class AbstractManagementRepo extends ManagedRepo {
       context: contextSchema,
     }).required(), params);
 
-    const filter = { _id: { $lt: 0 } };
+    const filter = buildInsertCriteria();
     const operations = docs.map((doc) => {
-      const obj = { ...doc, _version: versionOnCreate({ source: this.source, context }) };
-      const update = [{ $replaceRoot: { newRoot: { $mergeObjects: [cleanDocument(obj), '$$ROOT'] } } }];
+      const update = buildInsertPipeline(doc, {
+        isVersioned: this.isVersioned,
+        source: this.source,
+        context,
+      });
       return { updateOne: { filter, update, upsert: true } };
     });
     const { result } = await this.bulkWrite({ operations, options: { session } });
@@ -97,17 +110,41 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {object} [params.session]
    */
   async batchCreateAndReturn(params) {
-    const { projection, session } = await validateAsync(object({
+    const { projection, session, context } = await validateAsync(object({
       docs: array().items(this.schema.create).required(),
       projection: object(),
       session: object(),
+      context: contextSchema,
     }).required(), params);
-    const results = await this.batchCreate({ docs: params.docs, session });
+    const results = await this.batchCreate({ docs: params.docs, session, context });
     const ids = await results.map(({ _id }) => _id);
     return this.find({
       query: { _id: { $in: ids } },
       options: { projection, session },
     });
+  }
+
+  /**
+   * Deletes multiple documents.
+   *
+   * @param {object} params
+   * @param {string[]} params.ids
+   * @param {object} [params.session]
+   * @param {object} [params.context]
+   */
+  async batchDelete(params) {
+    const { ids, session, context } = await validateAsync(object({
+      ids: array().items(objectId().required()).required(),
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
+
+    const query = { _id: { $in: ids } };
+
+    if (!this.isVersioned) return this.deleteMany({ query, options: { session } });
+
+    const update = buildDeletePipeline({ source: this.source, context });
+    return this.updateMany({ query, update, options: { session } });
   }
 
   /**
@@ -118,11 +155,12 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {object} [params.session]
    */
   async create(params) {
-    const { session } = await validateAsync(object({
+    const { session, context } = await validateAsync(object({
       doc: this.schema.create,
       session: object(),
+      context: contextSchema,
     }).required(), params);
-    const [r] = await this.batchCreate({ docs: [params.doc], session });
+    const [r] = await this.batchCreate({ docs: [params.doc], session, context });
     return r;
   }
 
@@ -135,12 +173,30 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {object} [params.session]
    */
   async createAndReturn(params) {
-    const { projection, session } = await validateAsync(object({
+    const { projection, session, context } = await validateAsync(object({
       doc: this.schema.create,
       projection: object(),
       session: object(),
+      context: contextSchema,
     }).required(), params);
-    const { _id } = await this.create({ doc: params.doc, session });
+    const { _id } = await this.create({ doc: params.doc, session, context });
     return this.findByObjectId({ id: _id, options: { projection, session } });
+  }
+
+  /**
+   * Deletes a single document.
+   *
+   * @param {object} params
+   * @param {string} params.id
+   * @param {object} [params.session]
+   * @param {object} [params.context]
+   */
+  async delete(params) {
+    const { id, session, context } = await validateAsync(object({
+      id: objectId().required(),
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
+    return this.batchDelete({ ids: [id], session, context });
   }
 }

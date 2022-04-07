@@ -12,5 +12,8 @@ export default {
     ua: userEventProps.ua,
     data: userEventProps.data,
     session: object(),
-  }).required(),
+  }).custom((event) => ({
+    ...event,
+    date: '$$NOW',
+  })).required(),
 };

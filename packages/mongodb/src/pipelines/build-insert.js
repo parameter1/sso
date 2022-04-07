@@ -1,46 +1,18 @@
-import { set } from '@parameter1/object-path';
 import cleanDocument from '../utils/clean-document.js';
+import versionDoc from './version-doc.js';
 
 export function buildInsertCriteria(id) {
   if (id) return { _id: id };
   return { _id: { $lt: 0 } };
 }
 
-export function buildInsertPipeline(doc, {
-  userId,
-  ip,
-  ua,
-  source,
-  datePaths = [],
-  now = '$$NOW',
-} = {}) {
-  const obj = {
-    ...doc,
-    _version: {
-      n: 1,
-      first: {
-        date: now,
-        source,
-        user: userId ? { _id: userId } : null,
-        ip,
-        ua,
-      },
-      last: null,
-      history: [],
-    },
-  };
-  datePaths.forEach((path) => set(obj, path, now));
-
+export function buildInsertPipeline(doc, { isVersioned, source, context } = {}) {
+  const obj = { ...doc };
+  if (isVersioned) {
+    const current = versionDoc({ n: 1, source, context });
+    obj._version = { first: current, current, history: [current] };
+  }
   return [
-    {
-      $replaceRoot: {
-        newRoot: {
-          $mergeObjects: [
-            cleanDocument(obj),
-            '$$ROOT',
-          ],
-        },
-      },
-    },
+    { $replaceRoot: { newRoot: { $mergeObjects: [cleanDocument(obj), '$$ROOT'] } } },
   ];
 }

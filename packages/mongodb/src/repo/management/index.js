@@ -32,10 +32,16 @@ export default class ManagementRepos extends RepoManager {
       .add({
         key: 'token',
         source,
+        isVersioned: false,
         ManagedRepo: TokenRepo,
         tokenSecret,
       })
-      .add({ key: 'user-event', source, ManagedRepo: UserEventRepo })
+      .add({
+        key: 'user-event',
+        source,
+        isVersioned: false,
+        ManagedRepo: UserEventRepo,
+      })
       .add({ key: 'user', source, ManagedRepo: UserRepo });
   }
 }

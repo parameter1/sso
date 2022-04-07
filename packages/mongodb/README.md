@@ -91,14 +91,12 @@ Model objects of this type _cannot_ be created or modified by external users.
 - Other
   - `date.created` (sort)
   - `date.updated` (sort)
-  - `slug` (sort)
 
 ```js
 const organization = {
   _id: ObjectId(),
-  key: 'acbm', // defaults to being generated off name, but can be changed
+  key: 'acbm',
   name: 'AC Business Media',
-  slug: 'ac-business-media', // always generated off name
   date: {
     created: ISODate(),
     updated: ISODate(),

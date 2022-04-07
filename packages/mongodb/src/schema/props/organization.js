@@ -17,5 +17,4 @@ export default {
   key: slug().min(2),
   managerRole: string().valid(...['Owner', 'Administrator']),
   name: string().min(2),
-  slug: slug().min(2),
 };

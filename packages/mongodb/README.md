@@ -149,17 +149,17 @@ const workspace = {
 Define user-to-workspace relationships that signify the instance workspaces that a user is a member of. Each member of an instance workspace can be assigned specific roles and permissions. Only users that are members of an instance workspace can access the instance.
 
 ## Versioning
+In addition to the `n`, `date` and `user` fields, the version document also optionally contains `source`, `ua`, and `ip` context fields.
 
 ```js
 // after create
 const doc1 = {
   _id: 1,
   _version: {
-    n: 1,
     // becomes the created date and user
-    first: { date: ISODate('2022-01-01'), user: null },
+    initial: { n: 1, date: ISODate('2022-01-01'), user: null },
     // becomes the last modified date and user
-    last: { date: ISODate('2022-01-01'), user: null },
+    current: { n: 1, date: ISODate('2022-01-01'), user: null },
     history: [],
   },
   name: 'Jacob',
@@ -170,9 +170,8 @@ const doc1 = {
 const doc2 = {
   _id: 1,
   _version: {
-    n: 2,
-    first: { date: ISODate('2022-01-01'), user: null },
-    last: { date: ISODate('2022-01-02'), user: { _id: 5 } },
+    initial: { n: 1, date: ISODate('2022-01-01'), user: null },
+    current: { n: 2, date: ISODate('2022-01-02'), user: { _id: 5 } },
     history: [
       { n: 1, date: ISODate('2022-01-01'), user: null },
     ],
@@ -185,9 +184,8 @@ const doc2 = {
 const doc3 = {
    _id: 1,
   _version: {
-    n: 3,
-    first: { date: ISODate('2022-01-01'), user: null },
-    last: { date: ISODate('2022-01-03'), user: { _id: 2 } },
+    initial: { n: 1, date: ISODate('2022-01-01'), user: null },
+    current: { n: 3, date: ISODate('2022-01-03'), user: { _id: 2 } },
     history: [
       { n: 2, date: ISODate('2022-01-02'), user: { _id: 5 } },
       { n: 1, date: ISODate('2022-01-01'), user: null },
@@ -203,11 +201,10 @@ const doc3 = {
 const doc4 = {
    _id: 1,
   _version: {
-    n: 5,
-    first: { date: ISODate('2022-01-01'), user: null },
-    last: { date: ISODate('2022-01-05'), user: { _id: 1 } },
+    initial: { n: 1, date: ISODate('2022-01-01'), user: null },
+    current: { n: 5, date: ISODate('2022-01-05'), user: { _id: 1 } },
     history: [
-      { n: 4, date: ISODate('2022-01-04'), user: { _id: 7 } },
+      { n: 4, date: ISODate('2022-01-04'), user: { _id: 7 }, deleted: true },
       { n: 3, date: ISODate('2022-01-03'), user: { _id: 2 } },
       { n: 2, date: ISODate('2022-01-02'), user: { _id: 5 } },
       { n: 1, date: ISODate('2022-01-01'), user: null },
@@ -221,7 +218,7 @@ const doc4 = {
 const docs = [
   {
     _id: { _id: 1, n: 1 },
-    event: 'create',
+    deleted: false,
     date: ISODate('2022-01-01'),
     user: null,
     doc: {
@@ -232,7 +229,7 @@ const docs = [
 
   {
     _id: { _id: 1, n: 2 },
-    event: 'update',
+    deleted: false,
     date: ISODate('2022-01-02'),
     user: { _id: 5 },
     doc: {
@@ -243,7 +240,7 @@ const docs = [
 
   {
     _id: { _id: 1, n: 3 },
-    event: 'update',
+    deleted: false,
     date: ISODate('2022-01-03'),
     user: { _id: 2 },
     doc: {
@@ -254,7 +251,7 @@ const docs = [
 
   {
     _id: { _id: 1, n: 4 },
-    event: 'delete',
+    deleted: true,
     date: ISODate('2022-01-04'),
     user: { _id: 7 },
     doc: {
@@ -265,7 +262,7 @@ const docs = [
 
   {
     _id: { _id: 1, n: 5 },
-    event: 'restore',
+    deleted: false,
     date: ISODate('2022-01-05'),
     user: { _id: 1 },
     doc: {

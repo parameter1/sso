@@ -1,9 +1,7 @@
 import inquirer from 'inquirer';
-import { organizationAttributes as orgAttrs } from '@parameter1/sso-db/schema';
+import { organizationProps } from '@parameter1/sso-mongodb';
 import { getOrgList } from '../utils/index.js';
 import repos from '../../repos.js';
-
-const { log } = console;
 
 export default async () => {
   const questions = [
@@ -18,8 +16,12 @@ export default async () => {
       name: 'name',
       default: ({ org }) => org.name,
       message: 'Enter the new organization name',
+      filter: (input) => {
+        const { value } = organizationProps.name.required().validate(input);
+        return value;
+      },
       validate: async (input) => {
-        const { error } = orgAttrs.name.validate(input);
+        const { error } = organizationProps.name.validate(input);
         if (error) return error;
         return true;
       },
@@ -38,11 +40,8 @@ export default async () => {
     name,
   } = await inquirer.prompt(questions);
 
-  if (!confirm) return;
-
-  const result = await repos.$('organization').updateAttributes({
+  return confirm ? repos.$('organization').updateProps({
     id: org._id,
     name,
-  });
-  log(result);
+  }) : null;
 };

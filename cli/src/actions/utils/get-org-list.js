@@ -9,7 +9,7 @@ export default async ({
 } = {}) => {
   const cursor = await repos.$('organization').find({
     query: { ...query },
-    options: { projection: { ...projection, name: 1, slug: 1 }, sort: { name: 1 } },
+    options: { projection: { ...projection, name: 1, key: 1 }, sort: { name: 1 } },
   });
 
   const orgs = await cursor.toArray();
@@ -17,7 +17,7 @@ export default async ({
     if (isFn(filter)) return filter(doc);
     return true;
   }).map((doc) => ({
-    name: `${doc.name} [${doc.slug}]`,
+    name: `${doc.name} [${doc.key}]`,
     value: doc,
     disabled: isFn(disabledWhen) ? disabledWhen(doc) : false,
   }));

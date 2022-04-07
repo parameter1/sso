@@ -64,47 +64,47 @@ const run = async () => {
           ],
         },
 
-        // {
-        //   key: 'organization',
-        //   choices: [
-        //     { name: 'Create new organization', fnName: 'create' },
-        //     {
-        //       name: 'Change organization name',
-        //       fnName: 'updateName',
-        //       disabled: !documents.has('organization'),
-        //     },
-        //     {
-        //       name: 'Change organization slug',
-        //       fnName: 'updateSlug',
-        //       disabled: !documents.has('organization'),
-        //     },
-        //     {
-        //       name: 'Add organization manager',
-        //       fnName: 'addManager',
-        //       disabled: !documents.has('organization') || !documents.has('user'),
-        //     },
-        //     {
-        //       name: 'Change organization manager role',
-        //       fnName: 'changeManagerRole',
-        //       disabled: !documents.has('organization') || !documents.has('user'),
-        //     },
-        //     {
-        //       name: 'Remove organization manager',
-        //       fnName: 'removeManager',
-        //       disabled: !documents.has('organization') || !documents.has('user'),
-        //     },
-        //     {
-        //       name: 'Add organization email domains',
-        //       fnName: 'addEmailDomains',
-        //       disabled: !documents.has('organization'),
-        //     },
-        //     {
-        //       name: 'Remove organization email domains',
-        //       fnName: 'removeEmailDomains',
-        //       disabled: !documents.has('organization'),
-        //     },
-        //   ],
-        // },
+        {
+          key: 'organization',
+          choices: [
+            { name: 'Create new organization', fnName: 'create' },
+            // {
+            //   name: 'Change organization name',
+            //   fnName: 'updateName',
+            //   disabled: !documents.has('organization'),
+            // },
+            // {
+            //   name: 'Change organization slug',
+            //   fnName: 'updateSlug',
+            //   disabled: !documents.has('organization'),
+            // },
+            // {
+            //   name: 'Add organization manager',
+            //   fnName: 'addManager',
+            //   disabled: !documents.has('organization') || !documents.has('user'),
+            // },
+            // {
+            //   name: 'Change organization manager role',
+            //   fnName: 'changeManagerRole',
+            //   disabled: !documents.has('organization') || !documents.has('user'),
+            // },
+            // {
+            //   name: 'Remove organization manager',
+            //   fnName: 'removeManager',
+            //   disabled: !documents.has('organization') || !documents.has('user'),
+            // },
+            // {
+            //   name: 'Add organization email domains',
+            //   fnName: 'addEmailDomains',
+            //   disabled: !documents.has('organization'),
+            // },
+            // {
+            //   name: 'Remove organization email domains',
+            //   fnName: 'removeEmailDomains',
+            //   disabled: !documents.has('organization'),
+            // },
+          ],
+        },
 
         // {
         //   key: 'workspace',

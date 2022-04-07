@@ -1,9 +1,7 @@
 import inquirer from 'inquirer';
-import { organizationAttributes as orgAttrs } from '@parameter1/sso-db/schema';
+import { organizationProps } from '@parameter1/sso-mongodb';
 import { sluggify } from '@parameter1/slug';
 import repos from '../../repos.js';
-
-const { log } = console;
 
 export default async () => {
   const questions = [
@@ -11,43 +9,48 @@ export default async () => {
       type: 'input',
       name: 'name',
       message: 'Enter the organization name',
+      filter: (input) => {
+        const { value } = organizationProps.name.required().validate(input);
+        return value;
+      },
       validate: (input) => {
-        const { error } = orgAttrs.name.required().validate(input);
+        const { error } = organizationProps.name.required().validate(input);
         if (error) return error;
         return true;
       },
     },
     {
       type: 'input',
-      name: 'slug',
+      name: 'key',
       message: 'Enter the organization slug key',
       default: ({ name }) => sluggify(name),
+      filter: (input) => {
+        const { value } = organizationProps.key.required().validate(input);
+        return value;
+      },
       validate: async (input) => {
-        const repo = repos.$('organization');
-        const { error } = orgAttrs.slug.required().validate(input);
+        const { error } = organizationProps.key.required().validate(input);
         if (error) return error;
 
-        const doc = await repo.findBySlug({
-          slug: input,
+        const doc = await repos.$('organization').findByKey({
+          key: input,
           options: { projection: { _id: 1 } },
         });
-        if (doc) return new Error('An organization already exists with this slug');
-
-        try {
-          await repo.throwIfSlugHasRedirect({ slug: input });
-          return true;
-        } catch (e) {
-          return e;
-        }
+        if (doc) return new Error('An organization already exists with this key');
+        return true;
       },
     },
     {
       type: 'input',
       name: 'emailDomains',
       message: 'Enter comma separated list of organization email domains',
-      filter: (list) => list.split(',').map((v) => v.trim()).filter((v) => v),
+      filter: (list) => {
+        const domains = list.split(',').map((v) => v.trim()).filter((v) => v);
+        const { value } = organizationProps.emailDomains.validate(domains);
+        return value;
+      },
       validate: (domains) => {
-        const { error } = orgAttrs.emailDomains.validate(domains);
+        const { error } = organizationProps.emailDomains.validate(domains);
         if (error) return error;
         return true;
       },
@@ -63,16 +66,10 @@ export default async () => {
   const {
     confirm,
     name,
-    slug,
+    key,
     emailDomains,
   } = await inquirer.prompt(questions);
+  const doc = { name, key, emailDomains };
 
-  if (!confirm) return;
-
-  const result = await repos.$('organization').create({
-    name,
-    slug,
-    emailDomains,
-  });
-  log(result);
+  return confirm ? repos.$('organization').create({ doc }) : null;
 };

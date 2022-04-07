@@ -10,7 +10,7 @@ export function buildInsertPipeline(doc, { isVersioned, source, context } = {}) 
   const obj = { ...doc };
   if (isVersioned) {
     const current = versionDoc({ n: 1, source, context });
-    obj._version = { first: current, current, history: [current] };
+    obj._version = { initial: current, current, history: [current] };
   }
   return [
     { $replaceRoot: { newRoot: { $mergeObjects: [cleanDocument(obj), '$$ROOT'] } } },

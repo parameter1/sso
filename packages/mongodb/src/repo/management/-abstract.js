@@ -33,7 +33,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       // optional "version locking"
       { key: { _id: 1, '_version.current.n': 1 } },
 
-      { key: { '_version.first.date': 1, _id: 1 } }, // allows "created date" sort
+      { key: { '_version.initial.date': 1, _id: 1 } }, // allows "created date" sort
       { key: { '_version.current.date': 1, _id: 1 } }, // allows "updated date" sort
 
       // allows for deleting documents while still retaining change stream history

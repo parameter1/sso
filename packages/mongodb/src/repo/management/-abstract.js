@@ -44,8 +44,10 @@ export default class AbstractManagementRepo extends ManagedRepo {
 
     const indexes = [
       // global
-      { key: { '_version.first.date': 1, _id: 1 } },
-      { key: { '_version.current.date': 1, _id: 1 } },
+      { key: { _id: 1, '_version.current.n': 1 } }, // optional "version locking"
+
+      { key: { '_version.first.date': 1, _id: 1 } }, // allows "created date" sort
+      { key: { '_version.current.date': 1, _id: 1 } }, // allows "updated date" sort
       // repo specific
       ...(Array.isArray(rest.indexes) ? rest.indexes : []),
     ];

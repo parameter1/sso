@@ -3,7 +3,7 @@ import { addToSet } from './utils/index.js';
 
 export function buildDeletePipeline({ source, context }) {
   const current = versionDoc({
-    n: { $add: ['$_version.current.n', 1] },
+    n: '$inc',
     deleted: true,
     source,
     context,

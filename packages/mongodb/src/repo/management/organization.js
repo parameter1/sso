@@ -50,7 +50,10 @@ export default class OrganizationRepo extends AbstractManagementRepo {
     if (!fields.length) return null; // noop
     return this.updateOne({
       query: { _id: id },
-      update: buildUpdatePipeline(fields),
+      update: buildUpdatePipeline(fields, {
+        isVersioned: this.isVersioned,
+        source: this.source,
+      }),
       options: { strict: true },
     });
   }

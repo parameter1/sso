@@ -191,8 +191,10 @@ export default class UserRepo extends AbstractManagementRepo {
             { path: 'lastSeenAt', value: '$$NOW' },
             { path: 'loginCount', value: new Expr({ $add: ['$loginCount', 1] }) },
           ], {
-            // only change updated date when verified flag changes
-            updatedDateCondition: '$__will_change.verified',
+            // only change version when verified flag changes
+            isVersioned: this.isVersioned,
+            source: this.source,
+            versionCondition: '$__will_change.verified',
           }),
           options: { session },
         }),
@@ -247,7 +249,10 @@ export default class UserRepo extends AbstractManagementRepo {
     if (!fields.length) return null; // noop
     return this.updateOne({
       query: { _id: id },
-      update: buildUpdatePipeline(fields),
+      update: buildUpdatePipeline(fields, {
+        isVersioned: this.isVersioned,
+        source: this.source,
+      }),
       options: { strict: true },
     });
   }

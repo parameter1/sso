@@ -3,6 +3,7 @@ import { cleanDocument } from '@parameter1/mongodb';
 import is from '@sindresorhus/is';
 
 import { addToSet, pull, Expr } from './utils/index.js';
+import versionDoc from './version-doc.js';
 
 /**
  *
@@ -41,9 +42,11 @@ export function prepareValue(value) {
 }
 
 export default function buildUpdatePipeline(fields = [], {
-  updatedDatePath = 'date.updated',
-  updatedDateCondition,
-  now = '$$NOW',
+  isVersioned,
+  source,
+  context,
+
+  versionCondition,
 } = {}) {
   const f = fields.map((field) => {
     const { path, value } = field;
@@ -98,6 +101,7 @@ export default function buildUpdatePipeline(fields = [], {
     }, {}),
   };
 
+  const current = versionDoc({ n: '$inc', source, context });
   const pipeline = [
     // add individual field changes and any current values
     { $addFields },
@@ -126,9 +130,14 @@ export default function buildUpdatePipeline(fields = [], {
           ...(isFn(field.set) && field.set(field)),
         };
       }, {
-        ...(updatedDatePath && {
-          [updatedDatePath]: {
-            $cond: [updatedDateCondition || '$__will_change.__any', now, `$${updatedDatePath}`],
+        ...(isVersioned && {
+          '_version.current': { $cond: [versionCondition || '$__will_change.__any', current, '$_version.current'] },
+          '_version.history': {
+            $cond: [
+              versionCondition || '$__will_change.__any',
+              addToSet({ path: '$_version.history', value: current }),
+              '$_version.history',
+            ],
           },
         }),
       }),

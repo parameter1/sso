@@ -9,4 +9,7 @@ export default {
     key: applicationProps.key.required(),
     roles: applicationProps.roles.default(['Administrator', 'Member']),
   }).required(),
+  updateProps: object({
+    name: applicationProps.name,
+  }).default(),
 };

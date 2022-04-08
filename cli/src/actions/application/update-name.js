@@ -42,6 +42,6 @@ export default async () => {
 
   return confirm ? repos.$('application').updateProps({
     id: app._id,
-    name,
+    props: { name },
   }) : null;
 };

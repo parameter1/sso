@@ -42,6 +42,6 @@ export default async () => {
 
   return confirm ? repos.$('organization').updateProps({
     id: org._id,
-    name,
+    props: { name },
   }) : null;
 };

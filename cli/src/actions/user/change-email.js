@@ -47,6 +47,6 @@ export default async () => {
 
   return confirm ? repos.$('user').updateProps({
     id: user._id,
-    email,
+    props: { email },
   }) : null;
 };

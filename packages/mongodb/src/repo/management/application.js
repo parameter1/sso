@@ -1,10 +1,5 @@
-import { PropTypes, validateAsync } from '@sso/prop-types';
-
 import AbstractManagementRepo from './-abstract.js';
-import { applicationProps, applicationSchema } from '../../schema/index.js';
-import { buildUpdatePipeline } from '../../pipelines/index.js';
-
-const { object } = PropTypes;
+import { applicationSchema } from '../../schema/index.js';
 
 export default class ApplicationRepo extends AbstractManagementRepo {
   /**
@@ -32,29 +27,5 @@ export default class ApplicationRepo extends AbstractManagementRepo {
    */
   findByKey({ key, options } = {}) {
     return this.findOne({ query: { key }, options });
-  }
-
-  /**
-   * @param {object} params
-   * @param {ObjectId} params.id
-   * @param {string} [params.name]
-   */
-  async updateProps(params = {}) {
-    const { id, name } = await validateAsync(object({
-      id: applicationProps.id.required(),
-      name: applicationProps.name,
-    }).required(), params);
-
-    const fields = [];
-    if (name) fields.push({ path: 'name', value: name });
-    if (!fields.length) return null; // noop
-    return this.updateOne({
-      query: { _id: id },
-      update: buildUpdatePipeline(fields, {
-        isVersioned: this.isVersioned,
-        source: this.source,
-      }),
-      options: { strict: true },
-    });
   }
 }

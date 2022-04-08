@@ -22,4 +22,9 @@ export default {
       workspaces: [],
     };
   }).required(),
+  updateProps: object({
+    email: userProps.email,
+    givenName: userProps.givenName,
+    familyName: userProps.familyName,
+  }).default(),
 };

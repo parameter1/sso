@@ -41,6 +41,13 @@ export default class UserRepo extends AbstractManagementRepo {
         { key: { familyName: 1, givenName: 1, _id: 1 }, collation: { locale: 'en_US' } },
       ],
       schema: userSchema,
+
+      onPropUpdate: {
+        email: ({ value }) => {
+          if (!value) return null;
+          return { path: 'email', value, set: () => userEmails(value) };
+        },
+      },
     });
   }
 
@@ -212,48 +219,5 @@ export default class UserRepo extends AbstractManagementRepo {
     } finally {
       session.endSession();
     }
-  }
-
-  /**
-   * Updates basic user props for a single user.
-   *
-   * @param {object} params
-   * @param {ObjectId} params.id
-   * @param {string} [params.email]
-   * @param {string} [params.givenName]
-   * @param {string} [params.familyName]
-   */
-  async updateProps(params = {}) {
-    const {
-      id,
-      email,
-      givenName,
-      familyName,
-    } = await validateAsync(object({
-      id: userProps.id.required(),
-      email: userProps.email,
-      givenName: userProps.givenName,
-      familyName: userProps.familyName,
-    }).required(), params);
-
-    const fields = [];
-    if (givenName) fields.push({ path: 'givenName', value: givenName });
-    if (familyName) fields.push({ path: 'familyName', value: familyName });
-    if (email) {
-      fields.push({
-        path: 'email',
-        value: email,
-        set: () => userEmails(email),
-      });
-    }
-    if (!fields.length) return null; // noop
-    return this.updateOne({
-      query: { _id: id },
-      update: buildUpdatePipeline(fields, {
-        isVersioned: this.isVersioned,
-        source: this.source,
-      }),
-      options: { strict: true },
-    });
   }
 }

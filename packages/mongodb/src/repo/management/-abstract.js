@@ -2,7 +2,12 @@ import { ManagedRepo } from '@parameter1/mongodb';
 import { PropTypes, validateAsync, attempt } from '@sso/prop-types';
 
 import { contextSchema, contextProps } from '../../schema/index.js';
-import { buildDeletePipeline, buildInsertCriteria, buildInsertPipeline } from '../../pipelines/index.js';
+import {
+  buildDeletePipeline,
+  buildInsertCriteria,
+  buildInsertPipeline,
+  buildUpdatePipeline,
+} from '../../pipelines/index.js';
 
 const {
   array,
@@ -15,14 +20,17 @@ const {
 export default class AbstractManagementRepo extends ManagedRepo {
   constructor(params) {
     const {
+      onPropUpdate,
       schema,
       options,
       source,
       isVersioned,
       ...rest
     } = attempt(params, object({
+      onPropUpdate: object().unknown().default(),
       schema: object({
         create: propTypeObject().required(),
+        updateProps: propTypeObject(),
       }),
       source: contextProps.source.required(),
       isVersioned: boolean().default(true),
@@ -62,6 +70,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       // because the TTL index can hold documents for up to 60 seconds, exclude them when querying
       globalFindCriteria: isVersioned ? { [DELETED_PATH]: false } : undefined,
     });
+    this.onPropUpdate = onPropUpdate;
     this.schema = schema;
     this.source = source;
     this.options = options;
@@ -198,5 +207,50 @@ export default class AbstractManagementRepo extends ManagedRepo {
       context: contextSchema,
     }).required(), params);
     return this.batchDelete({ ids: [id], session, context });
+  }
+
+  /**
+   * @param {object} params
+   * @param {ObjectId} params.id
+   * @param {object} [params.props]
+   * @param {object} [params.session]
+   * @param {object} [params.context]
+   */
+  async updateProps(params) {
+    if (!this.schema.updateProps) {
+      throw new Error('No update props schema has been defined for this repo.');
+    }
+    const {
+      id,
+      props,
+      session,
+      context,
+    } = await validateAsync(object({
+      id: objectId().required(),
+      props: this.schema.updateProps,
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
+
+    const fields = [];
+    Object.keys(props).forEach((path) => {
+      const value = props[path];
+      const defaultHandler = () => (value ? { path, value } : null);
+      const propHandler = this.onPropUpdate[path];
+      const handler = typeof propHandler === 'function' ? propHandler : defaultHandler;
+
+      const resolved = handler({ props, value });
+      if (resolved) fields.push(resolved);
+    });
+    if (!fields.length) return null; // noop
+    return this.updateOne({
+      query: { _id: id },
+      update: buildUpdatePipeline(fields, {
+        isVersioned: this.isVersioned,
+        source: this.source,
+        context,
+      }),
+      options: { session, strict: true },
+    });
   }
 }

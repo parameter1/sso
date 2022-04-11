@@ -9,11 +9,9 @@ import UserRepo from './user.js';
 
 export default class ManagementRepos extends RepoManager {
   /**
-   * @todo create change history handlers via change streams
-   *       only add items that have a modified date change
    * @param {object} params
    * @param {MongoDBClient} params.client
-   * @param {string} [params.dbBame=tenancy]
+   * @param {string} [params.dbBame=sso@management]
    * @param {string} params.tokenSecret
    *
    * @param {object} params.source

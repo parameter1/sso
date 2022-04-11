@@ -10,19 +10,14 @@ Document objects of this type _cannot_ be created or modified by external users.
 **Indexes**
 - Unique
   - `key`
-- Other
-  - `date.created` (sort)
-  - `date.updated` (sort)
+
+Uses versioning: `true`
 
 ```js
 const application = {
   _id: ObjectId(),
   key: 'mindful-cms',
   name: 'MindfulCMS',
-  date: {
-    created: ISODate(),
-    updated: ISODate(),
-  },
 };
 ```
 
@@ -32,16 +27,11 @@ Define the users within the P1 ecosystem. Users can manage organizations and be 
 **Indexes**
 - Unique
   - `email`
-  - `email` + `organizations._id`
-  - `email` + `workspaces._id`
 - Other
-  - `organizations._id`
-  - `workspaces._id`
-  - `date.created` (sort)
-  - `date.updated` (sort)
   - `givenName` + `familyName` (sort)
   - `familyName` + `givenName` (sort)
 
+Uses versioning: `true`
 
 ```js
 const user = {
@@ -50,33 +40,11 @@ const user = {
   domain: 'parameter1.com',
   givenName: 'Jacob',
   familyName: 'Bare',
-  date: {
-    created: ISODate(),
-    updated: ISODate(),
-    lastSeen: ISODate(),
-    lastLoggedIn: ISODate(),
-  },
+  lastSeenAt: ISODate(),
+  lastLoggedInAt: ISODate(),
   verified: true,
   loginCount: 1,
   previousEmails: [],
-
-  // lists all organizations this user manages.
-  organizations: [
-    {
-      _id: ObjectId(),
-      role: 'Owner',
-      date: { created: ISODate(), updated: ISODate() },
-    }
-  ],
-
-  // lists all workspaces this user is a member of.
-  workspaces: [
-    {
-      _id: ObjectId(),
-      role: 'Admin',
-      date: { created: ISODate(), updated: ISODate() },
-    },
-  ],
 };
 ```
 
@@ -88,41 +56,50 @@ Model objects of this type _cannot_ be created or modified by external users.
 **Indexes**
 - Unique
   - `key`
-- Other
-  - `date.created` (sort)
-  - `date.updated` (sort)
+
+Uses versioning: `true`
 
 ```js
 const organization = {
   _id: ObjectId(),
   key: 'acbm',
   name: 'AC Business Media',
-  date: {
-    created: ISODate(),
-    updated: ISODate(),
-  },
 };
 ```
 
-### Organization Managers (via `user::organizations`)
+### Managers
 Define user-to-organization relationships that signify the organizations that a user can manage. Managers have a specific role that defines what they can manage within their org. Managers - depending on their role - can add/remove/update instance workspace members, can change the roles of other managers, and can invite additional users to manage their orgs. Managers don't have implicit access to instance workspaces and, instead, must either give themself access (if able), have another manager give them access, or receive access from P1.
+
+**Indexes**
+- Unique
+  - `user._id` + `organization._id`
+- Other
+  - `organization._id`
+
+Uses versioning: `true`
+
+```js
+const manager = {
+  _id: ObjectId(),
+  organization: { _id: ObjectId() },
+  role: 'Owner',
+  user: { _id: ObjectId() },
+};
+```
 
 ### Workspaces
 Define the instances of an organization applications. All application instances have a `default` workspace. Users must be directly assigned as members of a workspace in order to gain access to the workspace.
 
 Model objects of this type _cannot_ be created or modified by external users.
 
-
 **Indexes**
 - Unique
   - `organization._id` + `application._id` + `key`
   - `application._id`
 - Other
-  - `date.created` (sort)
-  - `date.updated` (sort)
   - `slug` (sort)
 
-Unique key: `
+Uses versioning: `true`
 
 ```js
 const workspace = {
@@ -137,11 +114,6 @@ const workspace = {
     { env: 'production', value: 'https://acbm.omeda.parameter1.com' },
     { env: 'development', value: 'http://omeda-acbm.dev.parameter1.com' },
   ],
-
-  date: {
-    created: ISODate(),
-    updated: ISODate(),
-  },
 };
 ```
 
@@ -149,7 +121,13 @@ const workspace = {
 Define user-to-workspace relationships that signify the instance workspaces that a user is a member of. Each member of an instance workspace can be assigned specific roles and permissions. Only users that are members of an instance workspace can access the instance.
 
 ## Versioning
-In addition to the `n`, `date` and `user` fields, the version document also optionally contains `source`, `ua`, and `ip` context fields.
+In addition to the `n`, `date` and `user` fields, the version document also optionally contains `source`, `ua`, and `ip` context fields. Documents that use versioning also have a specific set of indexes added.
+
+**Indexes**
+- `_id` + `_version.current.n`
+- `_version.initial.date` + `_id` (sort) [acts as created date]
+- `_version.current.date` + `_id` (sort) [acts as modified date]
+- `_version.current.date` with `expireAfterSeconds: 0` where the document is flagged for deletion
 
 ```js
 // after create

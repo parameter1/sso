@@ -31,11 +31,6 @@ export default class UserRepo extends AbstractManagementRepo {
       collatableFields: [],
       indexes: [
         { key: { email: 1 }, unique: true },
-        { key: { email: 1, 'organizations._id': 1 }, unique: true },
-        { key: { email: 1, 'workspaces._id': 1 }, unique: true },
-
-        { key: { 'organizations._id': 1 } },
-        { key: { 'workspaces._id': 1 } },
 
         { key: { givenName: 1, familyName: 1, _id: 1 }, collation: { locale: 'en_US' } },
         { key: { familyName: 1, givenName: 1, _id: 1 }, collation: { locale: 'en_US' } },

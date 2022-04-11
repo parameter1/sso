@@ -17,9 +17,7 @@ export default {
       lastLoggedInAt: null,
       domain,
       loginCount: 0,
-      organizations: [],
       previousEmails: [],
-      workspaces: [],
     };
   }).required(),
   updateProps: object({

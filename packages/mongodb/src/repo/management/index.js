@@ -1,6 +1,7 @@
 import { RepoManager } from '@parameter1/mongodb';
 
 import ApplicationRepo from './application.js';
+import ManagerRepo from './manager.js';
 import OrganizationRepo from './organization.js';
 import TokenRepo from './token.js';
 import UserEventRepo from './user-event.js';
@@ -28,6 +29,7 @@ export default class ManagementRepos extends RepoManager {
     super({ client, dbName });
     this
       .add({ key: 'application', source, ManagedRepo: ApplicationRepo })
+      .add({ key: 'manager', source, ManagedRepo: ManagerRepo })
       .add({ key: 'organization', source, ManagedRepo: OrganizationRepo })
       .add({
         key: 'token',

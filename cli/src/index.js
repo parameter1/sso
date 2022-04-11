@@ -73,6 +73,11 @@ const run = async () => {
               fnName: 'updateName',
               disabled: !documents.has('organization'),
             },
+            {
+              name: 'Delete organization',
+              fnName: 'delete',
+              disabled: !documents.has('organization'),
+            },
             // {
             //   name: 'Add organization email domains',
             //   fnName: 'addEmailDomains',

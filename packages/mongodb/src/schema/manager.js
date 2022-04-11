@@ -7,8 +7,12 @@ const { object } = PropTypes;
 
 export default {
   create: object({
-    orgId: organizationProps.id.required(),
-    userId: userProps.id.required(),
+    organization: object({
+      _id: organizationProps.id.required(),
+    }).required(),
+    user: object({
+      _id: userProps.id.required(),
+    }).required(),
     role: managerProps.role.required(),
   }).required(),
 };

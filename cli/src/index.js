@@ -9,7 +9,7 @@ import actions from './actions/index.js';
 const { log } = console;
 
 const hasDocuments = async () => {
-  const r = await Promise.all(['application', 'organization', 'user'].map(async (name) => {
+  const r = await Promise.all(['application', 'manager', 'organization', 'user'].map(async (name) => {
     const repo = repos.$(name);
     const doc = await repo.findOne({ query: {}, options: { projection: { _id: 1 } } });
     return { name, hasDocs: Boolean(doc) };
@@ -74,26 +74,6 @@ const run = async () => {
               disabled: !documents.has('organization'),
             },
             // {
-            //   name: 'Change organization slug',
-            //   fnName: 'updateSlug',
-            //   disabled: !documents.has('organization'),
-            // },
-            // {
-            //   name: 'Add organization manager',
-            //   fnName: 'addManager',
-            //   disabled: !documents.has('organization') || !documents.has('user'),
-            // },
-            // {
-            //   name: 'Change organization manager role',
-            //   fnName: 'changeManagerRole',
-            //   disabled: !documents.has('organization') || !documents.has('user'),
-            // },
-            // {
-            //   name: 'Remove organization manager',
-            //   fnName: 'removeManager',
-            //   disabled: !documents.has('organization') || !documents.has('user'),
-            // },
-            // {
             //   name: 'Add organization email domains',
             //   fnName: 'addEmailDomains',
             //   disabled: !documents.has('organization'),
@@ -103,6 +83,28 @@ const run = async () => {
             //   fnName: 'removeEmailDomains',
             //   disabled: !documents.has('organization'),
             // },
+          ],
+        },
+
+        {
+          key: 'manager',
+          choices: [
+            {
+              name: 'Create manager',
+              fnName: 'create',
+              disabled: !documents.has('organization') || !documents.has('user'),
+            },
+            {
+              name: 'Change manager role',
+              fnName: 'changeRole',
+              disabled: !documents.has('manager'),
+            },
+
+            {
+              name: 'Remove manager',
+              fnName: 'remove',
+              disabled: !documents.has('manager'),
+            },
           ],
         },
 

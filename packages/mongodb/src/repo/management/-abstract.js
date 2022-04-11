@@ -134,26 +134,38 @@ export default class AbstractManagementRepo extends ManagedRepo {
   }
 
   /**
-   * Deletes multiple documents.
+   * Performs multiple delete one or many operations
    *
    * @param {object} params
-   * @param {string[]} params.ids
+   * @param {object[]} params.ops
+   * @param {object} params.ops.filter
+   * @param {boolean} params.ops.many
    * @param {object} [params.session]
    * @param {object} [params.context]
    */
-  async batchDelete(params) {
-    const { ids, session, context } = await validateAsync(object({
-      ids: array().items(objectId().required()).required(),
+  async bulkDelete(params) {
+    const { ops, session, context } = await validateAsync(object({
+      ops: array().items(object({
+        filter: object().unknown().required(),
+        many: boolean().required(),
+      }).required()).required(),
       session: object(),
       context: contextSchema,
     }).required(), params);
 
-    const query = { _id: { $in: ids } };
+    const operations = ops.map((op) => {
+      const prefix = this.isVersioned ? 'update' : 'delete';
+      const suffix = op.many ? 'Many' : 'One';
+      const name = `${prefix}${suffix}`;
 
-    if (!this.isVersioned) return this.deleteMany({ query, options: { session } });
+      const operation = { filter: op.filter };
+      if (this.isVersioned) {
+        operation.update = buildDeletePipeline({ source: this.source, context });
+      }
 
-    const update = buildDeletePipeline({ source: this.source, context });
-    return this.updateMany({ query, update, options: { session } });
+      return { [name]: operation };
+    });
+    return this.bulkWrite({ operations, options: { session } });
   }
 
   /**
@@ -193,20 +205,50 @@ export default class AbstractManagementRepo extends ManagedRepo {
   }
 
   /**
-   * Deletes a single document.
+   * Deletes one or more documents based on the provided filter.
    *
    * @param {object} params
-   * @param {string} params.id
+   * @param {object} params.filter
+   * @param {boolean} [params.many=false]
    * @param {object} [params.session]
    * @param {object} [params.context]
    */
   async delete(params) {
+    const {
+      filter,
+      many,
+      session,
+      context,
+    } = await validateAsync(object({
+      filter: object().unknown().required(),
+      many: boolean().default(false),
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
+    return this.bulkDelete({ ops: [{ filter, many }], session, context });
+  }
+
+  /**
+   * Deletes a single document for the provided ID.
+   *
+   * @param {object} params
+   * @param {ObjectId|string} params.id
+   * @param {object} params.session
+   * @param {object} params.context
+   * @returns {Promise<object>}
+   */
+  async deleteForId(params) {
     const { id, session, context } = await validateAsync(object({
       id: objectId().required(),
       session: object(),
       context: contextSchema,
     }).required(), params);
-    return this.batchDelete({ ids: [id], session, context });
+    return this.delete({
+      filter: { _id: id },
+      many: false,
+      session,
+      context,
+    });
   }
 
   /**

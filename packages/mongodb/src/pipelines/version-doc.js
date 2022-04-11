@@ -1,7 +1,8 @@
 import { PropTypes, attempt } from '@sso/prop-types';
 
-import cleanDocument from '../utils/clean-document.js';
+import { CleanDocument } from '../utils/clean-document.js';
 import { contextSchema, contextProps } from '../schema/index.js';
+import Expr from './utils/expr.js';
 
 const {
   alternatives,
@@ -24,8 +25,8 @@ export default (params) => {
     context: contextSchema,
   }).required());
 
-  return cleanDocument({
-    n: n === '$inc' ? { $add: ['$_version.current.n', 1] } : n,
+  return CleanDocument.value({
+    n: n === '$inc' ? new Expr({ $add: ['$_version.current.n', 1] }) : n,
     date: '$$NOW',
     deleted,
     source,

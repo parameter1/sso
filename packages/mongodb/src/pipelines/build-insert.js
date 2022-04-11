@@ -1,4 +1,4 @@
-import cleanDocument from '../utils/clean-document.js';
+import { CleanDocument } from '../utils/clean-document.js';
 import versionDoc from './version-doc.js';
 
 export function buildInsertCriteria(id) {
@@ -13,6 +13,6 @@ export function buildInsertPipeline(doc, { isVersioned, source, context } = {}) 
     obj._version = { initial: current, current, history: [current] };
   }
   return [
-    { $replaceRoot: { newRoot: { $mergeObjects: [cleanDocument(obj), '$$ROOT'] } } },
+    { $replaceRoot: { newRoot: { $mergeObjects: [CleanDocument.value(obj), '$$ROOT'] } } },
   ];
 }

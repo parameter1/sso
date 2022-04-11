@@ -1,45 +1,8 @@
 import { isFunction as isFn } from '@parameter1/utils';
-import { cleanDocument } from '@parameter1/mongodb';
-import is from '@sindresorhus/is';
 
-import { addToSet, pull, Expr } from './utils/index.js';
+import { CleanDocument } from '../utils/clean-document.js';
+import { addToSet, pull } from './utils/index.js';
 import versionDoc from './version-doc.js';
-
-/**
- *
- */
-const cleanArray = (value = []) => {
-  if (!value.length) return [];
-  // filter null and undefined
-  const filtered = value.filter((v) => {
-    if (v == null) return false;
-    if (is.plainObject(v) && is.emptyObject(v)) return false;
-    return true;
-  });
-  if (!filtered.length) return [];
-  if (is.array(filtered, is.number)
-    || is.array(filtered, is.string)
-    || is.array(filtered, is.boolean)
-  ) {
-    return filtered.sort();
-  }
-  if (is.array(filtered, is.plainObject)) {
-    return filtered.sort((a, b) => {
-      const jsonA = JSON.stringify(cleanDocument(a, { preserveEmptyArrays: true }));
-      const jsonB = JSON.stringify(cleanDocument(b, { preserveEmptyArrays: true }));
-      if (jsonA > jsonB) return 1;
-      if (jsonA < jsonB) return -1;
-      return 0;
-    });
-  }
-  throw new Error('Sorting non-scalar, non-plain object or mixed typed arrays is not supported');
-};
-
-export function prepareValue(value) {
-  if (is.directInstanceOf(value, Expr)) return value.expr;
-  if (is.array(value)) return cleanArray(value);
-  return value;
-}
 
 export default function buildUpdatePipeline(fields = [], {
   isVersioned,
@@ -56,7 +19,7 @@ export default function buildUpdatePipeline(fields = [], {
     };
     return {
       ...field,
-      value: prepareValue(value),
+      value: CleanDocument.value(value),
       paths,
       prefixedPaths: Object.keys(paths)
         .reduce((o, key) => ({ ...o, [key]: `$${paths[key]}` }), {}),

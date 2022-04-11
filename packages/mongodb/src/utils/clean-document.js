@@ -26,18 +26,19 @@ export class CleanDocument {
     if (is.directInstanceOf(obj, Expr)) return obj.expr;
     if (is.date(obj)) return obj;
 
-    const cleaned = sortKeys(mapObject(obj, (key, value) => {
+    const mapped = mapObject(obj, (key, value) => {
       const v = CleanDocument.value(value);
       if (is.undefined(v)) return mapObjectSkip;
       return [key, v];
-    }));
-    return is.emptyObject(cleaned) ? null : cleaned;
+    });
+    const sorted = sortKeys(mapped);
+    return is.emptyObject(sorted) ? null : sorted;
   }
 
   static value(value) {
     if (is.function(value)) return null;
-    if (is.plainObject(value)) return CleanDocument.object(value);
     if (is.array(value)) return CleanDocument.array(value);
+    if (is.object(value)) return CleanDocument.object(value);
     return value;
   }
 }

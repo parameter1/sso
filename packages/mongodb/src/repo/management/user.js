@@ -192,6 +192,9 @@ export default class UserRepo extends AbstractManagementRepo {
         }),
         impersonated ? Promise.resolve() : this.updateOne({
           query: { _id: user._id },
+          // @todo handle these in updateProps
+          // need to determine how to handle `Expr` calls
+          // or is there an abstract method that just builds the fields that we send??
           update: buildUpdatePipeline([
             { path: 'verified', value: true },
             { path: 'lastLoggedInAt', value: '$$NOW' },

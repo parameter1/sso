@@ -25,6 +25,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       options,
       source,
       isVersioned,
+      usesSoftDelete,
       ...rest
     } = attempt(params, object({
       onPropUpdate: object().unknown().default(),
@@ -34,47 +35,41 @@ export default class AbstractManagementRepo extends ManagedRepo {
       }),
       source: contextProps.source.required(),
       isVersioned: boolean().default(true),
+      usesSoftDelete: boolean().default(true),
     }).required().unknown());
 
-    const DELETED_PATH = '_version.current.deleted';
+    const DELETED_PATH = '_deleted';
+
     const indexes = isVersioned ? [
       // optional "version locking"
       { key: { _id: 1, '_version.current.n': 1 } },
 
       { key: { '_version.initial.date': 1, _id: 1 } }, // allows "created date" sort
       { key: { '_version.current.date': 1, _id: 1 } }, // allows "updated date" sort
-
-      // allows for deleting documents while still retaining change stream history
-      {
-        key: { '_version.current.date': 1 },
-        expireAfterSeconds: 0,
-        partialFilterExpression: { [DELETED_PATH]: true },
-      },
-
-      // repo specific
-      ...(Array.isArray(rest.indexes) ? rest.indexes.map((index) => {
-        // and ensure all indexes exclude pending deleted items
-        // since the `DELETED_PATH` is added as global find criteria, this will ensure
-        // that indexes are still used when present in a query
-        const partialFilterExpression = { [DELETED_PATH]: false };
-        return {
-          ...index,
-          partialFilterExpression: { ...index.partialFilterExpression, partialFilterExpression },
-        };
-      }) : []),
+      ...(rest.indexes || []),
     ] : rest.indexes;
 
     super({
       ...rest,
-      indexes,
-      // because the TTL index can hold documents for up to 60 seconds, exclude them when querying
-      globalFindCriteria: isVersioned ? { [DELETED_PATH]: false } : undefined,
+      // ensure all indexes exclude soft-deleted items
+      // since the `DELETED_PATH` is added as global find criteria, this will ensure
+      // that indexes are still preserved when querying.
+      indexes: usesSoftDelete ? (indexes || []).map((index) => ({
+        ...index,
+        partialFilterExpression: {
+          ...index.partialFilterExpression,
+          [DELETED_PATH]: false,
+        },
+      })) : indexes,
+      // ensure soft-deleted documents are excluded from all queries.
+      globalFindCriteria: usesSoftDelete ? { [DELETED_PATH]: false } : undefined,
     });
     this.onPropUpdate = onPropUpdate;
     this.schema = schema;
     this.source = source;
     this.options = options;
     this.isVersioned = isVersioned;
+    this.usesSoftDelete = usesSoftDelete;
   }
 
   /**
@@ -100,6 +95,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
     const operations = docs.map((doc) => {
       const update = buildInsertPipeline(doc, {
         isVersioned: this.isVersioned,
+        usesSoftDelete: this.usesSoftDelete,
         source: this.source,
         context,
       });
@@ -154,13 +150,17 @@ export default class AbstractManagementRepo extends ManagedRepo {
     }).required(), params);
 
     const operations = ops.map((op) => {
-      const prefix = this.isVersioned ? 'update' : 'delete';
+      const prefix = this.usesSoftDelete ? 'update' : 'delete';
       const suffix = op.many ? 'Many' : 'One';
       const name = `${prefix}${suffix}`;
 
       const operation = { filter: op.filter };
-      if (this.isVersioned) {
-        operation.update = buildDeletePipeline({ source: this.source, context });
+      if (this.usesSoftDelete) {
+        operation.update = buildDeletePipeline({
+          isVersioned: this.isVersioned,
+          source: this.source,
+          context,
+        });
       }
 
       return { [name]: operation };

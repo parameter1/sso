@@ -6,8 +6,14 @@ export function buildInsertCriteria(id) {
   return { _id: { $lt: 0 } };
 }
 
-export function buildInsertPipeline(doc, { isVersioned, source, context } = {}) {
+export function buildInsertPipeline(doc, {
+  isVersioned,
+  usesSoftDelete,
+  source,
+  context,
+} = {}) {
   const obj = { ...doc };
+  if (usesSoftDelete) obj._deleted = false;
   if (isVersioned) {
     const current = versionDoc({ n: 1, source, context });
     obj._version = { initial: current, current, history: [current] };

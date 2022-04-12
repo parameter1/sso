@@ -18,11 +18,8 @@ export default {
       domain,
       loginCount: 0,
       previousEmails: [],
+      organizations: [],
+      workspaces: [],
     };
   }).required(),
-  updateProps: object({
-    email: userProps.email,
-    givenName: userProps.givenName,
-    familyName: userProps.familyName,
-  }).default(),
 };

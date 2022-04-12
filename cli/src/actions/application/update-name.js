@@ -40,8 +40,10 @@ export default async () => {
     name,
   } = await inquirer.prompt(questions);
 
-  return confirm ? repos.$('application').updateProps({
+  return confirm ? repos.$('application').updatePropsForId({
     id: app._id,
-    props: { name },
+    props: [
+      { path: 'name', value: name },
+    ],
   }) : null;
 };

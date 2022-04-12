@@ -2,50 +2,42 @@ import { ManagedRepo } from '@parameter1/mongodb';
 import { PropTypes, validateAsync, attempt } from '@sso/prop-types';
 
 import { contextSchema, contextProps } from '../../schema/index.js';
-import {
-  buildDeletePipeline,
-  buildInsertCriteria,
-  buildInsertPipeline,
-  buildUpdatePipeline,
-} from '../../pipelines/index.js';
+import { CleanDocument } from '../../utils/clean-document.js';
+import Expr from '../../pipelines/utils/expr.js';
+
+const { isArray } = Array;
+const DELETED_PATH = '_deleted';
 
 const {
+  alternatives,
+  any,
   array,
   boolean,
   object,
   objectId,
   propTypeObject,
+  string,
 } = PropTypes;
 
 export default class AbstractManagementRepo extends ManagedRepo {
   constructor(params) {
     const {
-      onPropUpdate,
       schema,
-      options,
       source,
       isVersioned,
       usesSoftDelete,
       ...rest
     } = attempt(params, object({
-      onPropUpdate: object().unknown().default(),
       schema: object({
         create: propTypeObject().required(),
-        updateProps: propTypeObject(),
       }),
       source: contextProps.source.required(),
       isVersioned: boolean().default(true),
       usesSoftDelete: boolean().default(true),
     }).required().unknown());
 
-    const DELETED_PATH = '_deleted';
-
     const indexes = isVersioned ? [
-      // optional "version locking"
-      { key: { _id: 1, '_version.current.n': 1 } },
-
-      { key: { '_version.initial.date': 1, _id: 1 } }, // allows "created date" sort
-      { key: { '_version.current.date': 1, _id: 1 } }, // allows "updated date" sort
+      { key: { '_touched.date': 1, _id: 1 } }, // allows a quasi "updated date" sort
       ...(rest.indexes || []),
     ] : rest.indexes;
 
@@ -64,10 +56,8 @@ export default class AbstractManagementRepo extends ManagedRepo {
       // ensure soft-deleted documents are excluded from all queries.
       globalFindCriteria: usesSoftDelete ? { [DELETED_PATH]: false } : undefined,
     });
-    this.onPropUpdate = onPropUpdate;
     this.schema = schema;
     this.source = source;
-    this.options = options;
     this.isVersioned = isVersioned;
     this.usesSoftDelete = usesSoftDelete;
   }
@@ -84,24 +74,37 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {string} [params.context.ip]
    * @param {string} [params.context.ua]
    */
-  async batchCreate(params) {
+  async bulkCreate(params) {
     const { docs, session, context } = await validateAsync(object({
       docs: array().items(this.schema.create).required(),
       session: object(),
       context: contextSchema,
     }).required(), params);
 
-    const filter = buildInsertCriteria();
-    const operations = docs.map((doc) => {
-      const update = buildInsertPipeline(doc, {
-        isVersioned: this.isVersioned,
-        usesSoftDelete: this.usesSoftDelete,
-        source: this.source,
-        context,
-      });
-      return { updateOne: { filter, update, upsert: true } };
+    const { result } = await this.bulkUpdate({
+      ops: docs.map((doc) => ({
+        filter: { _id: { $lt: 0 } },
+        update: [
+          {
+            $replaceRoot: {
+              newRoot: new Expr({
+                $mergeObjects: [
+                  CleanDocument.object({
+                    ...doc,
+                    ...(this.usesSoftDelete && { [DELETED_PATH]: false }),
+                  }),
+                  '$$ROOT',
+                ],
+              }),
+            },
+          },
+        ],
+        many: false,
+        upsert: true,
+      })),
+      session,
+      context,
     });
-    const { result } = await this.bulkWrite({ operations, options: { session } });
     return result.upserted;
   }
 
@@ -114,14 +117,14 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {object} [params.projection]
    * @param {object} [params.session]
    */
-  async batchCreateAndReturn(params) {
+  async bulkCreateAndReturn(params) {
     const { projection, session, context } = await validateAsync(object({
       docs: array().items(this.schema.create).required(),
       projection: object(),
       session: object(),
       context: contextSchema,
     }).required(), params);
-    const results = await this.batchCreate({ docs: params.docs, session, context });
+    const results = await this.bulkCreate({ docs: params.docs, session, context });
     const ids = await results.map(({ _id }) => _id);
     return this.find({
       query: { _id: { $in: ids } },
@@ -149,21 +152,93 @@ export default class AbstractManagementRepo extends ManagedRepo {
       context: contextSchema,
     }).required(), params);
 
+    if (this.usesSoftDelete) {
+      return this.bulkUpdate({
+        ops: ops.map((op) => ({
+          filter: op.filter,
+          many: op.many,
+          update: { [DELETED_PATH]: true },
+        })),
+        session,
+        context,
+      });
+    }
+
     const operations = ops.map((op) => {
-      const prefix = this.usesSoftDelete ? 'update' : 'delete';
-      const suffix = op.many ? 'Many' : 'One';
-      const name = `${prefix}${suffix}`;
+      const type = op.many ? 'deleteMany' : 'deleteOne';
+      return { [type]: { filter: op.filter } };
+    });
+    return this.bulkWrite({ operations, options: { session } });
+  }
 
-      const operation = { filter: op.filter };
-      if (this.usesSoftDelete) {
-        operation.update = buildDeletePipeline({
-          isVersioned: this.isVersioned,
-          source: this.source,
-          context,
-        });
-      }
+  async bulkUpdate(params) {
+    const { ops, session, context } = await validateAsync(object({
+      ops: array().items(object({
+        filter: object().unknown().required(),
+        many: boolean().required(),
+        update: alternatives().try(
+          object().unknown(),
+          array().items(object().unknown().required()),
+        ).required(),
+        upsert: boolean().default(false),
+        arrayFilters: array(),
+      }).required()).required(),
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
 
-      return { [name]: operation };
+    const touched = {
+      ip: context.ip,
+      source: this.source,
+      ua: context.ua,
+      user: context.userId ? { _id: context.userId } : null,
+    };
+
+    const operations = ops.map((op) => {
+      const type = op.many ? 'updateMany' : 'updateOne';
+      const update = CleanDocument.value(
+        isArray(op.update) ? [
+          ...op.update,
+          ...(this.isVersioned ? [
+            {
+              $set: {
+                '_touched.date': '$$NOW',
+                '_touched.first': new Expr({
+                  $cond: {
+                    if: { $eq: [{ $type: '$_touched.first' }, 'object'] },
+                    then: '$_touched.first',
+                    else: touched,
+                  },
+                }),
+                '_touched.last': touched,
+                '_touched.n': new Expr({ $add: [{ $ifNull: ['$_touched.n', 0] }, 1] }),
+              },
+            },
+          ] : []),
+        ] : {
+          ...op.update,
+          ...(this.isVersioned && {
+            $currentDate: { ...op.update.$currentDate, '_touched.date': true },
+            $inc: { ...op.update.$inc, '_touched.n': 1 },
+            $set: {
+              ...op.update.$set,
+              '_touched.last': touched,
+            },
+            $setOnInsert: {
+              ...op.update.$setOnInsert,
+              '_touched.first': touched,
+            },
+          }),
+        },
+      );
+      return {
+        [type]: {
+          filter: op.filter,
+          update,
+          upsert: op.upsert,
+          arrayFilters: op.arrayFilters,
+        },
+      };
     });
     return this.bulkWrite({ operations, options: { session } });
   }
@@ -181,7 +256,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       session: object(),
       context: contextSchema,
     }).required(), params);
-    const [r] = await this.batchCreate({ docs: [params.doc], session, context });
+    const [r] = await this.bulkCreate({ docs: [params.doc], session, context });
     return r;
   }
 
@@ -235,7 +310,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {ObjectId|string} params.id
    * @param {object} params.session
    * @param {object} params.context
-   * @returns {Promise<object>}
+   * @returns {Promise<BulkWriteResult>}
    */
   async deleteForId(params) {
     const { id, session, context } = await validateAsync(object({
@@ -243,25 +318,86 @@ export default class AbstractManagementRepo extends ManagedRepo {
       session: object(),
       context: contextSchema,
     }).required(), params);
+    return this.deleteForIds({ ids: [id], session, context });
+  }
+
+  /**
+   * Deletes a multiple documents for the provided ID.
+   *
+   * @param {object} params
+   * @param {ObjectId|string} params.id
+   * @param {object} params.session
+   * @param {object} params.context
+   * @returns {Promise<BulkWriteResult>}
+   */
+  async deleteForIds(params) {
+    const { ids, session, context } = await validateAsync(object({
+      ids: array().items(objectId().required()).required(),
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
     return this.delete({
-      filter: { _id: id },
-      many: false,
+      filter: { _id: { $in: ids } },
+      many: true,
       session,
       context,
     });
   }
 
   /**
+   * Updates one or more documents based on the provided filter.
+   *
+   * @param {object} params
+   * @param {object} params.filter
+   * @param {boolean} [params.many=false]
+   * @param {object|object[]} [params.update]
+   * @param {object[]} [params.arrayFilters]
+   * @param {boolean} [params.upsert=false]
+   * @param {object} [params.session]
+   * @param {object} [params.context]
+   */
+  async update(params) {
+    const {
+      filter,
+      many,
+      update,
+      arrayFilters,
+      upsert,
+      session,
+      context,
+    } = await validateAsync(object({
+      filter: object().unknown().required(),
+      many: boolean().default(false),
+      update: alternatives().try(
+        object().unknown(),
+        array().items(object().unknown().required()),
+      ).required(),
+      arrayFilters: array(),
+      upsert: boolean().default(false),
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
+    const op = {
+      filter,
+      many,
+      update,
+      upsert,
+      arrayFilters,
+    };
+    return this.bulkUpdate({ ops: [op], session, context });
+  }
+
+  /**
+   * Generically updates one or more properties on the document with the provided ID.
+   * Does not directly validate any values, but will skip undefined values.
+   *
    * @param {object} params
    * @param {ObjectId} params.id
    * @param {object} [params.props]
    * @param {object} [params.session]
    * @param {object} [params.context]
    */
-  async updateProps(params) {
-    if (!this.schema.updateProps) {
-      throw new Error('No update props schema has been defined for this repo.');
-    }
+  async updatePropsForId(params) {
     const {
       id,
       props,
@@ -269,30 +405,28 @@ export default class AbstractManagementRepo extends ManagedRepo {
       context,
     } = await validateAsync(object({
       id: objectId().required(),
-      props: this.schema.updateProps,
+      props: array().items(object({
+        path: string().required(),
+        value: any(),
+        op: string().default('$set'),
+      }).required()).required(),
       session: object(),
       context: contextSchema,
     }).required(), params);
 
-    const fields = [];
-    Object.keys(props).forEach((path) => {
-      const value = props[path];
-      const defaultHandler = () => (value ? { path, value } : null);
-      const propHandler = this.onPropUpdate[path];
-      const handler = typeof propHandler === 'function' ? propHandler : defaultHandler;
+    const filtered = props.filter(({ value }) => typeof value !== 'undefined');
+    if (!filtered.length) return null; // noop
 
-      const resolved = handler({ props, value });
-      if (resolved) fields.push(resolved);
-    });
-    if (!fields.length) return null; // noop
-    return this.updateOne({
-      query: { _id: id },
-      update: buildUpdatePipeline(fields, {
-        isVersioned: this.isVersioned,
-        source: this.source,
-        context,
-      }),
-      options: { session, strict: true },
+    const update = filtered.reduce((o, { path, value, op }) => {
+      const values = o[op] ? { ...o[op], [path]: value } : { [path]: value };
+      return { ...o, [op]: { ...values } };
+    }, {});
+
+    return this.update({
+      filter: { _id: id },
+      update,
+      session,
+      context,
     });
   }
 }

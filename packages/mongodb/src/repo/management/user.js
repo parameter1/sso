@@ -4,13 +4,13 @@ import { get } from '@parameter1/object-path';
 
 import AbstractManagementRepo from './-abstract.js';
 import {
+  contextSchema,
+  organizationProps,
   tokenProps,
   userEventProps,
   userProps,
   userSchema,
 } from '../../schema/index.js';
-import { buildUpdatePipeline, Expr } from '../../pipelines/index.js';
-import { userEmails } from '../../pipelines/build/index.js';
 
 const {
   boolean,
@@ -31,20 +31,63 @@ export default class UserRepo extends AbstractManagementRepo {
       collatableFields: [],
       indexes: [
         { key: { email: 1 }, unique: true },
+        { key: { 'organizations._id': 1 } },
+        { key: { 'workspaces._id': 1 } },
 
         { key: { givenName: 1, familyName: 1, _id: 1 }, collation: { locale: 'en_US' } },
         { key: { familyName: 1, givenName: 1, _id: 1 }, collation: { locale: 'en_US' } },
       ],
       schema: userSchema,
-
-      onPropUpdate: {
-        email: ({ value }) => {
-          if (!value) return null;
-          return { path: 'email', value, set: () => userEmails(value) };
-        },
-      },
     });
   }
+
+  /**
+   * Adds an organization manager for the provided user and org IDs.
+   *
+   * @param {object} params
+   * @param {ObjectId|string} params.userId
+   * @param {ObjectId|string} params.orgId
+   * @param {string} params.role
+   * @param {object} [params.session]
+   * @param {object} [params.context]
+   * @returns
+   */
+  async addOrganization(params) {
+    const {
+      userId,
+      orgId,
+      role,
+      session,
+      context,
+    } = await validateAsync(object({
+      userId: userProps.id.required(),
+      orgId: organizationProps.id.required(),
+      role: organizationProps.managerRole.required(),
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
+
+    return this.update({
+      filter: { _id: userId, 'organizations._id': { $ne: orgId } },
+      update: { $addToSet: { _id: orgId, role } },
+      session,
+      context,
+    });
+  }
+
+  // changeOrganizationRole() {
+  //   const filter = {
+  //     _id: userId,
+  //     organizations: { $elemMatch: { _id: orgId, role: { $ne: role } } },
+  //   };
+
+  //   const fields = [
+  //     { path: 'organizations.$[elem].role', value: role },
+  //   ];
+  //   const options = {
+  //     arrayFilters: [{ 'elem._id': orgId }],
+  //   };
+  // }
 
   /**
    * Creates a magic login link token for the provided user ID.
@@ -185,23 +228,14 @@ export default class UserRepo extends AbstractManagementRepo {
           },
           session,
         }),
-        impersonated ? Promise.resolve() : this.updateOne({
-          query: { _id: user._id },
-          // @todo handle these in updateProps
-          // need to determine how to handle `Expr` calls
-          // or is there an abstract method that just builds the fields that we send??
-          update: buildUpdatePipeline([
-            { path: 'verified', value: true },
-            { path: 'lastLoggedInAt', value: '$$NOW' },
-            { path: 'lastSeenAt', value: '$$NOW' },
-            { path: 'loginCount', value: new Expr({ $add: ['$loginCount', 1] }) },
-          ], {
-            // only change version when verified flag changes
-            isVersioned: this.isVersioned,
-            source: this.source,
-            versionCondition: '$__will_change.verified',
-          }),
-          options: { session },
+        impersonated ? Promise.resolve() : this.update({
+          filter: { _id: user._id },
+          update: {
+            $currentDate: { lastLoggedInAt: true, lastSeenAt: true },
+            $inc: { loginCount: 1 },
+            $set: { verified: true },
+          },
+          session,
         }),
       ]);
 

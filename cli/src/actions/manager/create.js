@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { managerProps } from '@parameter1/sso-mongodb';
+// import { managerProps } from '@parameter1/sso-mongodb';
 import { getOrgList, getUserList } from '../utils/index.js';
 import repos from '../../repos.js';
 

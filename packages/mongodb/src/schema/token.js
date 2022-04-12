@@ -1,5 +1,6 @@
 import { PropTypes } from '@sso/prop-types';
 import tokenProps from './props/token.js';
+import Expr from '../pipelines/utils/expr.js';
 
 const { object } = PropTypes;
 
@@ -16,7 +17,7 @@ export default {
       ...token,
       issuedAt: '$$NOW',
       ...(ttl && {
-        expiresAt: { $add: ['$$NOW', ttl * 1000] },
+        expiresAt: new Expr({ $add: ['$$NOW', ttl * 1000] }),
       }),
     };
   }).required(),

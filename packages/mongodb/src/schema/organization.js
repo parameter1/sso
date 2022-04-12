@@ -9,7 +9,4 @@ export default {
     key: organizationProps.key.required(),
     emailDomains: organizationProps.emailDomains.default([]),
   }).required(),
-  updateProps: object({
-    name: organizationProps.name,
-  }).default(),
 };

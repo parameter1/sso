@@ -11,6 +11,14 @@ import {
   userProps,
   userSchema,
 } from '../../schema/index.js';
+import Expr from '../../pipelines/utils/expr.js';
+
+const {
+  $addToSet,
+  $inc,
+  $pull,
+  $mergeArrayObject,
+} = Expr;
 
 const {
   boolean,
@@ -52,7 +60,7 @@ export default class UserRepo extends AbstractManagementRepo {
    * @param {object} [params.context]
    * @returns
    */
-  async addOrganization(params) {
+  async manageOrg(params) {
     const {
       userId,
       orgId,
@@ -69,25 +77,52 @@ export default class UserRepo extends AbstractManagementRepo {
 
     return this.update({
       filter: { _id: userId, 'organizations._id': { $ne: orgId } },
-      update: { $addToSet: { _id: orgId, role } },
+      update: [
+        { $set: $addToSet('organizations', { _id: orgId, role }) },
+      ],
       session,
       context,
     });
   }
 
-  // changeOrganizationRole() {
-  //   const filter = {
-  //     _id: userId,
-  //     organizations: { $elemMatch: { _id: orgId, role: { $ne: role } } },
-  //   };
+  /**
+   * Changes the role for an existing organization manager.
+   *
+   * @param {object} params
+   * @param {ObjectId|string} params.userId
+   * @param {ObjectId|string} params.orgId
+   * @param {string} params.role
+   * @param {object} [params.session]
+   * @param {object} [params.context]
+   * @returns
+   */
+  async changeOrgRole(params) {
+    const {
+      userId,
+      orgId,
+      role,
+      session,
+      context,
+    } = await validateAsync(object({
+      userId: userProps.id.required(),
+      orgId: organizationProps.id.required(),
+      role: organizationProps.managerRole.required(),
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
 
-  //   const fields = [
-  //     { path: 'organizations.$[elem].role', value: role },
-  //   ];
-  //   const options = {
-  //     arrayFilters: [{ 'elem._id': orgId }],
-  //   };
-  // }
+    return this.update({
+      filter: {
+        _id: userId,
+        organizations: { $elemMatch: { _id: orgId, role: { $ne: role } } },
+      },
+      update: [
+        { $set: $mergeArrayObject('organizations', { $eq: ['$$v._id', orgId] }, { role }) },
+      ],
+      session,
+      context,
+    });
+  }
 
   /**
    * Creates a magic login link token for the provided user ID.
@@ -230,11 +265,14 @@ export default class UserRepo extends AbstractManagementRepo {
         }),
         impersonated ? Promise.resolve() : this.update({
           filter: { _id: user._id },
-          update: {
-            $currentDate: { lastLoggedInAt: true, lastSeenAt: true },
-            $inc: { loginCount: 1 },
-            $set: { verified: true },
-          },
+          update: [{
+            $set: {
+              lastLoggedInAt: '$$NOW',
+              lastSeenAt: '$$NOW',
+              ...$inc('loginCount', 1),
+              verified: true,
+            },
+          }],
           session,
         }),
       ]);
@@ -251,5 +289,37 @@ export default class UserRepo extends AbstractManagementRepo {
     } finally {
       session.endSession();
     }
+  }
+
+  /**
+   * Changes the role for an existing organization manager.
+   *
+   * @param {object} params
+   * @param {ObjectId|string} params.userId
+   * @param {ObjectId|string} params.orgId
+   * @param {object} [params.session]
+   * @param {object} [params.context]
+   * @returns
+   */
+  async unmanageOrg(params) {
+    const {
+      userId,
+      orgId,
+      session,
+      context,
+    } = await validateAsync(object({
+      userId: userProps.id.required(),
+      orgId: organizationProps.id.required(),
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
+    return this.update({
+      filter: { _id: userId, 'organizations._id': orgId },
+      update: [
+        { $set: $pull('organizations', { $ne: ['$$v._id', orgId] }) },
+      ],
+      session,
+      context,
+    });
   }
 }

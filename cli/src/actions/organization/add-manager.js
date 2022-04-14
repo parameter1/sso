@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-// import { managerProps } from '@parameter1/sso-mongodb';
+import { organizationProps } from '@parameter1/sso-mongodb';
 import { getOrgList, getUserList } from '../utils/index.js';
 import repos from '../../repos.js';
 
@@ -16,15 +16,9 @@ export default async () => {
       type: 'list',
       name: 'user',
       message: 'Select the user',
-      choices: async ({ org }) => {
-        const userIds = await repos.$('manager').distinct({
-          key: 'user._id',
-          query: { 'organization._id': org._id },
-        });
-        return getUserList({
-          query: { _id: { $nin: [...userIds] } },
-        });
-      },
+      choices: async ({ org }) => getUserList({
+        query: { 'organizations._id': { $ne: org._id } },
+      }),
     },
 
     {
@@ -33,11 +27,11 @@ export default async () => {
       message: 'Select the manager role',
       choices: () => ['Owner', 'Administrator', 'Manager'],
       filter: (input) => {
-        const { value } = managerProps.role.required().validate(input);
+        const { value } = organizationProps.managerRole.required().validate(input);
         return value;
       },
       validate: (input) => {
-        const { error } = managerProps.role.required().validate(input);
+        const { error } = organizationProps.managerRole.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -59,11 +53,9 @@ export default async () => {
     role,
   } = await inquirer.prompt(questions);
 
-  return confirm ? repos.$('manager').create({
-    doc: {
-      organization: { _id: org._id },
-      user: { _id: user._id },
-      role,
-    },
+  return confirm ? repos.$('user').manageOrg({
+    userId: user._id,
+    orgId: org._id,
+    role,
   }) : null;
 };

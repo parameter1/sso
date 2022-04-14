@@ -2,7 +2,6 @@ import { ObjectId } from '@parameter1/mongodb';
 import mapObject, { mapObjectSkip } from 'map-obj';
 import sortKeys from 'sort-keys';
 import is from '@sindresorhus/is';
-import Expr from '../pipelines/utils/expr.js';
 
 export class CleanDocument {
   static array(arr) {
@@ -23,7 +22,7 @@ export class CleanDocument {
     if (!is.object(obj) || (is.plainObject(obj) && is.emptyObject(obj))) return null;
 
     if (is.directInstanceOf(obj, ObjectId)) return obj;
-    if (is.directInstanceOf(obj, Expr)) return obj.expr;
+    if (is.function(obj.toObject)) return obj.toObject();
     if (is.date(obj)) return obj;
 
     const mapped = mapObject(obj, (key, value) => {

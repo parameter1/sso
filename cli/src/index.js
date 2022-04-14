@@ -74,6 +74,21 @@ const run = async () => {
               disabled: !documents.has('organization'),
             },
             {
+              name: 'Add organization manager',
+              fnName: 'addManager',
+              disabled: !documents.has('organization') || !documents.has('user'),
+            },
+            {
+              name: 'Change manager role',
+              fnName: 'changeManagerRole',
+              disabled: !documents.has('organization') || !documents.has('user'),
+            },
+            {
+              name: 'Remove organization manager',
+              fnName: 'removeManager',
+              disabled: !documents.has('organization') || !documents.has('user'),
+            },
+            {
               name: 'Delete organization',
               fnName: 'delete',
               disabled: !documents.has('organization'),
@@ -87,28 +102,6 @@ const run = async () => {
             //   name: 'Remove organization email domains',
             //   fnName: 'removeEmailDomains',
             //   disabled: !documents.has('organization'),
-            // },
-          ],
-        },
-
-        {
-          key: 'manager',
-          choices: [
-            {
-              name: 'Create manager',
-              fnName: 'create',
-              disabled: !documents.has('organization') || !documents.has('user'),
-            },
-            // {
-            //   name: 'Change manager role',
-            //   fnName: 'changeRole',
-            //   disabled: !documents.has('manager'),
-            // },
-
-            // {
-            //   name: 'Remove manager',
-            //   fnName: 'remove',
-            //   disabled: !documents.has('manager'),
             // },
           ],
         },

@@ -56,8 +56,9 @@ export default async () => {
     familyName,
   } = await inquirer.prompt(questions);
 
-  return confirm ? repos.$('user').updateProps({
+  return confirm ? repos.$('user').updateName({
     id: user._id,
-    props: { givenName, familyName },
+    givenName,
+    familyName,
   }) : null;
 };

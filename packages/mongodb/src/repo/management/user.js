@@ -11,6 +11,7 @@ import {
   userProps,
   userSchema,
 } from '../../schema/index.js';
+import { sluggifyUserNames } from '../../schema/user.js';
 import Expr from '../../pipelines/utils/expr.js';
 
 const {
@@ -42,8 +43,8 @@ export default class UserRepo extends AbstractManagementRepo {
         { key: { 'organizations._id': 1 } },
         { key: { 'workspaces._id': 1 } },
 
-        { key: { givenName: 1, familyName: 1, _id: 1 }, collation: { locale: 'en_US' } },
-        { key: { familyName: 1, givenName: 1, _id: 1 }, collation: { locale: 'en_US' } },
+        { key: { 'slug.default': 1, _id: 1 } },
+        { key: { 'slug.reverse': 1, _id: 1 } },
       ],
       schema: userSchema,
     });
@@ -361,6 +362,54 @@ export default class UserRepo extends AbstractManagementRepo {
       update: [{
         $set: {
           organizations: $pull('organizations', { $ne: ['$$v._id', orgId] }),
+        },
+      }],
+      session,
+      context,
+    });
+  }
+
+  /**
+   * Changes a user's given/family name for the provided ID.
+   *
+   * @param {object} params
+   * @param {ObjectId|string} params.id
+   * @param {string} params.email
+   * @param {object} [params.session]
+   * @param {object} [params.context]
+   * @returns {Promise<BulkWriteResult>}
+   */
+  async updateName(params) {
+    const {
+      id,
+      givenName,
+      familyName,
+      session,
+      context,
+    } = await validateAsync(object({
+      id: userProps.id.required(),
+      givenName: userProps.givenName.required(),
+      familyName: userProps.familyName.required(),
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
+
+    const names = [givenName, familyName];
+    return this.update({
+      filter: {
+        _id: id,
+        $or: [
+          { givenName: { $ne: givenName } },
+          { familyName: { $ne: familyName } },
+        ],
+      },
+      many: false,
+      update: [{
+        $set: {
+          givenName,
+          familyName,
+          'slug.default': sluggifyUserNames(names),
+          'slug.reverse': sluggifyUserNames(names, true),
         },
       }],
       session,

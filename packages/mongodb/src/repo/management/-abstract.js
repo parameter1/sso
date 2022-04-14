@@ -5,11 +5,9 @@ import { contextSchema, contextProps } from '../../schema/index.js';
 import { CleanDocument } from '../../utils/clean-document.js';
 import Expr from '../../pipelines/utils/expr.js';
 
-const { isArray } = Array;
 const DELETED_PATH = '_deleted';
 
 const {
-  alternatives,
   any,
   array,
   boolean,
@@ -37,7 +35,8 @@ export default class AbstractManagementRepo extends ManagedRepo {
     }).required().unknown());
 
     const indexes = isVersioned ? [
-      { key: { '_touched.date': 1, _id: 1 } }, // allows a quasi "updated date" sort
+      { key: { '_touched.first.date': 1, _id: 1 } }, // allows a quasi "created date" sort
+      { key: { '_touched.last.date': 1, _id: 1 } }, // allows a quasi "updated date" sort
       ...(rest.indexes || []),
     ] : rest.indexes;
 
@@ -176,18 +175,15 @@ export default class AbstractManagementRepo extends ManagedRepo {
       ops: array().items(object({
         filter: object().unknown().required(),
         many: boolean().required(),
-        update: alternatives().try(
-          object().unknown(),
-          array().items(object().unknown().required()),
-        ).required(),
+        update: array().items(object().unknown().required()),
         upsert: boolean().default(false),
-        arrayFilters: array(),
       }).required()).required(),
       session: object(),
       context: contextSchema,
     }).required(), params);
 
     const touched = {
+      date: '$$NOW',
       ip: context.ip,
       source: this.source,
       ua: context.ua,
@@ -196,41 +192,24 @@ export default class AbstractManagementRepo extends ManagedRepo {
 
     const operations = ops.map((op) => {
       const type = op.many ? 'updateMany' : 'updateOne';
-      const update = CleanDocument.value(
-        isArray(op.update) ? [
-          ...op.update,
-          ...(this.isVersioned ? [
-            {
-              $set: {
-                '_touched.date': '$$NOW',
-                '_touched.first': new Expr({
-                  $cond: {
-                    if: { $eq: [{ $type: '$_touched.first' }, 'object'] },
-                    then: '$_touched.first',
-                    else: touched,
-                  },
-                }),
-                '_touched.last': touched,
-                '_touched.n': new Expr({ $add: [{ $ifNull: ['$_touched.n', 0] }, 1] }),
-              },
-            },
-          ] : []),
-        ] : {
-          ...op.update,
-          ...(this.isVersioned && {
-            $currentDate: { ...op.update.$currentDate, '_touched.date': true },
-            $inc: { ...op.update.$inc, '_touched.n': 1 },
+      const update = CleanDocument.value([
+        ...op.update,
+        ...(this.isVersioned ? [
+          {
             $set: {
-              ...op.update.$set,
+              '_touched.first': new Expr({
+                $cond: {
+                  if: { $eq: [{ $type: '$_touched.first' }, 'object'] },
+                  then: '$_touched.first',
+                  else: touched,
+                },
+              }),
               '_touched.last': touched,
+              '_touched.n': new Expr({ $add: [{ $ifNull: ['$_touched.n', 0] }, 1] }),
             },
-            $setOnInsert: {
-              ...op.update.$setOnInsert,
-              '_touched.first': touched,
-            },
-          }),
-        },
-      );
+          },
+        ] : []),
+      ]);
       return {
         [type]: {
           filter: this.globalFindCriteria ? {
@@ -353,7 +332,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {object} params.filter
    * @param {boolean} [params.many=false]
    * @param {object|object[]} [params.update]
-   * @param {object[]} [params.arrayFilters]
    * @param {boolean} [params.upsert=false]
    * @param {object} [params.session]
    * @param {object} [params.context]
@@ -363,18 +341,13 @@ export default class AbstractManagementRepo extends ManagedRepo {
       filter,
       many,
       update,
-      arrayFilters,
       upsert,
       session,
       context,
     } = await validateAsync(object({
       filter: object().unknown().required(),
       many: boolean().default(false),
-      update: alternatives().try(
-        object().unknown(),
-        array().items(object().unknown().required()),
-      ).required(),
-      arrayFilters: array(),
+      update: array().items(object().unknown().required()),
       upsert: boolean().default(false),
       session: object(),
       context: contextSchema,
@@ -384,7 +357,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
       many,
       update,
       upsert,
-      arrayFilters,
     };
     return this.bulkUpdate({ ops: [op], session, context });
   }
@@ -410,7 +382,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
       props: array().items(object({
         path: string().required(),
         value: any(),
-        op: string().default('$set'),
       }).required()).required(),
       session: object(),
       context: contextSchema,
@@ -419,14 +390,11 @@ export default class AbstractManagementRepo extends ManagedRepo {
     const filtered = props.filter(({ value }) => typeof value !== 'undefined');
     if (!filtered.length) return null; // noop
 
-    const update = filtered.reduce((o, { path, value, op }) => {
-      const values = o[op] ? { ...o[op], [path]: value } : { [path]: value };
-      return { ...o, [op]: { ...values } };
-    }, {});
-
     return this.update({
       filter: { _id: id },
-      update,
+      update: [{
+        $set: filtered.reduce((o, { path, value }) => ({ ...o, [path]: value }), {}),
+      }],
       session,
       context,
     });

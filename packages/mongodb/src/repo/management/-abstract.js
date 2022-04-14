@@ -17,6 +17,13 @@ const {
   string,
 } = PropTypes;
 
+const { $inc } = Expr;
+
+const propsSchema = array().items(object({
+  path: string().required(),
+  value: any(),
+}).required()).required();
+
 export default class AbstractManagementRepo extends ManagedRepo {
   constructor(params) {
     const {
@@ -205,7 +212,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
                 },
               }),
               '_touched.last': touched,
-              '_touched.n': new Expr({ $add: [{ $ifNull: ['$_touched.n', 0] }, 1] }),
+              '_touched.n': $inc(new Expr({ $ifNull: ['$_touched.n', 0] }), 1),
             },
           },
         ] : []),
@@ -368,35 +375,70 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {object} params
    * @param {ObjectId} params.id
    * @param {object} [params.props]
+   * @param {object} [params.query] Additional query params to apply
    * @param {object} [params.session]
    * @param {object} [params.context]
+   * @returns {Promise<BulkWriteResult|null>}
    */
   async updatePropsForId(params) {
     const {
       id,
       props,
+      query,
       session,
       context,
     } = await validateAsync(object({
       id: objectId().required(),
-      props: array().items(object({
-        path: string().required(),
-        value: any(),
+      props: propsSchema,
+      query: object().unknown(),
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
+
+    return this.updatePropsForIds({
+      sets: [{ id, props, query }],
+      session,
+      context,
+    });
+  }
+
+  /**
+   * Generically updates documents based on sets of IDs + properties. This method does not directly
+   * validate the prop values, but will skip undefined values.
+   *
+   * @param {object} params
+   * @param {object[]} params.sets
+   * @param {ObjectId|string} params.sets.id
+   * @param {object[]} params.sets.props
+   * @param {object} [params.sets.query] Additional query params to apply
+   * @param {object} [params.session]
+   * @param {object} [params.context]
+   * @returns {Promise<BulkWriteResult|null>}
+   */
+  async updatePropsForIds(params) {
+    const {
+      sets,
+      session,
+      context,
+    } = await validateAsync(object({
+      sets: array().items(object({
+        id: objectId().required(),
+        props: propsSchema,
+        query: object().unknown(),
       }).required()).required(),
       session: object(),
       context: contextSchema,
     }).required(), params);
 
-    const filtered = props.filter(({ value }) => typeof value !== 'undefined');
-    if (!filtered.length) return null; // noop
-
-    return this.update({
-      filter: { _id: id },
-      update: [{
-        $set: filtered.reduce((o, { path, value }) => ({ ...o, [path]: value }), {}),
-      }],
-      session,
-      context,
+    const ops = [];
+    sets.forEach(({ id, props, query }) => {
+      const filtered = props.filter(({ value }) => typeof value !== 'undefined');
+      if (!filtered.length) return; // noop
+      const $set = filtered.reduce((o, { path, value }) => ({ ...o, [path]: value }), {});
+      const filter = { ...query, _id: id };
+      ops.push({ filter, update: [{ $set }], many: false });
     });
+    if (!ops.length) return null; // noop
+    return this.bulkUpdate({ ops, session, context });
   }
 }

@@ -77,9 +77,50 @@ export default class UserRepo extends AbstractManagementRepo {
 
     return this.update({
       filter: { _id: userId, 'organizations._id': { $ne: orgId } },
-      update: [
-        { $set: $addToSet('organizations', { _id: orgId, role }) },
-      ],
+      update: [{
+        $set: {
+          organizations: $addToSet('organizations', { _id: orgId, role }),
+        },
+      }],
+      session,
+      context,
+    });
+  }
+
+  /**
+   * Changes a user's email address for the provided ID.
+   *
+   * @param {object} params
+   * @param {ObjectId|string} params.id
+   * @param {string} params.email
+   * @param {object} [params.session]
+   * @param {object} [params.context]
+   * @returns {Promise<BulkWriteResult>}
+   */
+  async changeEmailAddress(params) {
+    const {
+      id,
+      email,
+      session,
+      context,
+    } = await validateAsync(object({
+      id: userProps.id.required(),
+      email: userProps.email.required(),
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
+
+    return this.update({
+      filter: { _id: id, email: { $ne: email } },
+      many: false,
+      update: [{
+        $set: {
+          domain: email.split('@')[1],
+          email,
+          verified: false,
+          previousEmails: $pull($addToSet('previousEmails', '$email'), { $ne: ['$$v', email] }),
+        },
+      }],
       session,
       context,
     });
@@ -116,9 +157,11 @@ export default class UserRepo extends AbstractManagementRepo {
         _id: userId,
         organizations: { $elemMatch: { _id: orgId, role: { $ne: role } } },
       },
-      update: [
-        { $set: $mergeArrayObject('organizations', { $eq: ['$$v._id', orgId] }, { role }) },
-      ],
+      update: [{
+        $set: {
+          organizations: $mergeArrayObject('organizations', { $eq: ['$$v._id', orgId] }, { role }),
+        },
+      }],
       session,
       context,
     });
@@ -269,7 +312,7 @@ export default class UserRepo extends AbstractManagementRepo {
             $set: {
               lastLoggedInAt: '$$NOW',
               lastSeenAt: '$$NOW',
-              ...$inc('loginCount', 1),
+              loginCount: $inc('loginCount', 1),
               verified: true,
             },
           }],
@@ -315,9 +358,11 @@ export default class UserRepo extends AbstractManagementRepo {
     }).required(), params);
     return this.update({
       filter: { _id: userId, 'organizations._id': orgId },
-      update: [
-        { $set: $pull('organizations', { $ne: ['$$v._id', orgId] }) },
-      ],
+      update: [{
+        $set: {
+          organizations: $pull('organizations', { $ne: ['$$v._id', orgId] }),
+        },
+      }],
       session,
       context,
     });

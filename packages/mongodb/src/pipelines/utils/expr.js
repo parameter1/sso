@@ -12,40 +12,38 @@ export default class Expr {
     return this.expr;
   }
 
-  static $addToSet(path, value) {
+  static $addToSet(pathOrExpr, value) {
     const values = CleanDocument.value(is.array(value) ? value : [value]);
-    return {
-      [path]: new Expr({ $setUnion: [$(path), values] }),
-    };
+    return new Expr({ $setUnion: [Expr.getInput(pathOrExpr), values] });
   }
 
-  static $inc(path, value) {
-    return {
-      [path]: new Expr({ $add: [$(path), value] }),
-    };
+  static $inc(pathOrExpr, value) {
+    return new Expr({ $add: [Expr.getInput(pathOrExpr), value] });
   }
 
-  static $pull(path, cond) {
-    return {
-      [path]: new Expr({ $filter: { input: $(path), as: 'v', cond } }),
-    };
+  static $pull(pathOrExpr, cond) {
+    return new Expr({
+      $filter: { input: Expr.getInput(pathOrExpr), as: 'v', cond },
+    });
   }
 
-  static $mergeArrayObject(path, cond, value) {
-    return {
-      [path]: new Expr({
-        $map: {
-          input: $(path),
-          as: 'v',
-          in: {
-            $cond: {
-              if: cond,
-              then: { $mergeObject: ['$$v', CleanDocument.object(value)] },
-              else: '$$v',
-            },
+  static $mergeArrayObject(pathOrExpr, cond, value) {
+    return new Expr({
+      $map: {
+        input: Expr.getInput(pathOrExpr),
+        as: 'v',
+        in: {
+          $cond: {
+            if: cond,
+            then: { $mergeObject: ['$$v', CleanDocument.object(value)] },
+            else: '$$v',
           },
         },
-      }),
-    };
+      },
+    });
+  }
+
+  static getInput(pathOrExpr) {
+    return pathOrExpr instanceof Expr ? pathOrExpr.toObject() : $(pathOrExpr);
   }
 }

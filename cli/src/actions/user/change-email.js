@@ -45,8 +45,8 @@ export default async () => {
     email,
   } = await inquirer.prompt(questions);
 
-  return confirm ? repos.$('user').updateProps({
+  return confirm ? repos.$('user').changeEmailAddress({
     id: user._id,
-    props: { email },
+    email,
   }) : null;
 };

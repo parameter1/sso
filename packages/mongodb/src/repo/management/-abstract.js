@@ -233,7 +233,9 @@ export default class AbstractManagementRepo extends ManagedRepo {
       );
       return {
         [type]: {
-          filter: op.filter,
+          filter: this.globalFindCriteria ? {
+            $and: [op.filter, this.globalFindCriteria],
+          } : op.filter,
           update,
           upsert: op.upsert,
           arrayFilters: op.arrayFilters,

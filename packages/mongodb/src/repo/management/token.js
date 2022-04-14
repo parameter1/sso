@@ -26,7 +26,6 @@ export default class TokenRepo extends AbstractManagementRepo {
         { key: { expiresAt: 1 }, expireAfterSeconds: 0 },
       ],
       schema: tokenSchema,
-      options: { createDatePaths: [] },
     });
     this.tokenSecret = tokenSecret;
   }

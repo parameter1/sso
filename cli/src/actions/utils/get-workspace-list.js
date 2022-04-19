@@ -7,18 +7,42 @@ export default async ({
   query,
   projection,
 } = {}) => {
-  const cursor = await repos.$('workspace').find({
-    query: { ...query },
-    options: {
-      projection: {
-        ...projection,
-        app: 1,
-        org: 1,
-        name: 1,
-        slug: 1,
+  const cursor = await repos.$('workspace').aggregate({
+    pipeline: [
+      { $match: { ...query } },
+      {
+        $lookup: {
+          from: 'applications',
+          foreignField: '_id',
+          localField: 'application._id',
+          as: 'application',
+        },
       },
-      sort: { 'app.name': 1, 'org.name': 1, name: 1 },
-    },
+      {
+        $lookup: {
+          from: 'organizations',
+          foreignField: '_id',
+          localField: 'organization._id',
+          as: 'organization',
+        },
+      },
+      { $unwind: '$application' },
+      { $unwind: '$organization' },
+      {
+        $project: {
+          ...projection,
+          'application._id': 1,
+          'application.name': 1,
+          'application.key': 1,
+
+          'organization._id': 1,
+          'organization.name': 1,
+          'organization.key': 1,
+          name: 1,
+          key: 1,
+        },
+      },
+    ],
   });
 
   const workspaces = await cursor.toArray();
@@ -26,9 +50,9 @@ export default async ({
     if (isFn(filter)) return filter(doc);
     return true;
   }).map((doc) => {
-    const { app, org } = doc;
+    const { application: app, organization: org } = doc;
     const name = [app.name, org.name, doc.name].join(' > ');
-    const ns = [app.slug, org.slug, doc.slug].join('.');
+    const ns = [app.key, org.key, doc.key].join('.');
     return {
       name: `${name} [${ns}]`,
       value: doc,

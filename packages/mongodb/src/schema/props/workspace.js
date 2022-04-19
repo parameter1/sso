@@ -16,9 +16,6 @@ export default {
   id: objectId(),
   key: slug().min(2),
   name: string().min(2),
-  namespace: string(),
-  role: string(),
-  slug: slug().min(2),
   url: appUrl,
   urls: object({
     ...environments.reduce((o, key) => ({ ...o, [key]: appUrl.required() }), {}),

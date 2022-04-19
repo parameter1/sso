@@ -1,10 +1,10 @@
 import { PropTypes, validateAsync } from '@sso/prop-types';
 
 import AbstractManagementRepo from './-abstract.js';
-import { contextSchema, organizationSchema } from '../../schema/index.js';
+import { contextSchema, organizationProps, organizationSchema } from '../../schema/index.js';
 import runTransaction from '../../utils/run-transaction.js';
 
-const { object, objectId } = PropTypes;
+const { array, object, objectId } = PropTypes;
 
 export default class OrganizationRepo extends AbstractManagementRepo {
   /**
@@ -24,38 +24,30 @@ export default class OrganizationRepo extends AbstractManagementRepo {
   }
 
   /**
-   * Deletes a single organization by ID and all associated documents.
+   * Deletes multiple documents for the provided IDs. Overloaded to ensure workspaces are also
+   * deleted.
    *
    * @param {object} params
    * @param {ObjectId|string} params.id
    * @param {object} params.session
    * @param {object} params.context
-   * @returns {Promise<object>}
+   * @returns {Promise<BulkWriteResult>}
    */
-  async deleteForId(params) {
-    const { id, session: currentSession, context } = await validateAsync(object({
-      id: objectId().required(),
+  async deleteForIds(params) {
+    const { ids, session: currentSession, context } = await validateAsync(object({
+      ids: array().items(objectId().required()).required(),
       session: object(),
       context: contextSchema,
     }).required(), params);
 
     return runTransaction(async ({ session }) => {
-      const r = await Promise.all([
-        // delete the org
-        super.deleteForId({
-          id,
-          session,
-          context,
-        }),
-        // delete all related managers
-        this.manager.$('manager').delete({
-          filter: { 'organization._id': id },
-          many: true,
-          context,
-          session,
-        }),
-        // @todo, delete all related workspaces and workspace members
-      ]);
+      const r = await super.deleteForIds({ ids, session, context });
+      await this.manager.$('workspace').delete({
+        filter: { 'organization._id': { $in: ids } },
+        many: true,
+        session,
+        context,
+      });
       return r;
     }, { client: this.client, currentSession });
   }
@@ -69,5 +61,37 @@ export default class OrganizationRepo extends AbstractManagementRepo {
    */
   findByKey({ key, options } = {}) {
     return this.findOne({ query: { key }, options });
+  }
+
+  /**
+   * Changes the name for the provided organization ID.
+   *
+   * @param {object} params
+   * @param {ObjectId|string} params.id
+   * @param {string} params.name
+   * @param {object} [params.session]
+   * @param {object} [params.context]
+   * @returns {Promise<BulkWriteResult>}
+   */
+  async updateName(params) {
+    const {
+      id,
+      name,
+      session,
+      context,
+    } = await validateAsync(object({
+      id: organizationProps.id.required(),
+      name: organizationProps.name.required(),
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
+
+    return this.update({
+      filter: { _id: id, name: { $ne: name } },
+      many: false,
+      update: [{ $set: { name } }],
+      session,
+      context,
+    });
   }
 }

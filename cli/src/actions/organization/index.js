@@ -6,7 +6,6 @@ import deleteOrg from './delete.js';
 import removeEmailDomains from './remove-email-domains.js';
 import removeManager from './remove-manager.js';
 import updateName from './update-name.js';
-import updateSlug from './update-slug.js';
 
 export default {
   addEmailDomains,
@@ -17,5 +16,4 @@ export default {
   removeEmailDomains,
   removeManager,
   updateName,
-  updateSlug,
 };

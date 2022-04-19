@@ -1,8 +1,10 @@
-import { isFunction as isFn } from '@parameter1/utils';
+import { asArray, isFunction as isFn } from '@parameter1/utils';
 
 import { CleanDocument } from '../utils/clean-document.js';
 import { addToSet, pull } from './utils/index.js';
 import versionDoc from './version-doc.js';
+
+const { isArray } = Array;
 
 export default function buildUpdatePipeline(fields = [], {
   isVersioned,
@@ -17,9 +19,10 @@ export default function buildUpdatePipeline(fields = [], {
       field: path,
       willChange: `__will_change.${path}`,
     };
+    const cleaned = CleanDocument.value(value);
     return {
       ...field,
-      value: CleanDocument.value(value),
+      value: field.arrayMode && !isArray(cleaned) ? [cleaned] : cleaned,
       paths,
       prefixedPaths: Object.keys(paths)
         .reduce((o, key) => ({ ...o, [key]: `$${paths[key]}` }), {}),
@@ -40,7 +43,7 @@ export default function buildUpdatePipeline(fields = [], {
         return {
           ...o,
           [paths.willChange]: {
-            $gt: [{ $size: { $setDifference: [value, prefixedPaths.field] } }, 0],
+            $gt: [{ $size: { $setDifference: [asArray(value), prefixedPaths.field] } }, 0],
           },
         };
       }
@@ -51,7 +54,7 @@ export default function buildUpdatePipeline(fields = [], {
         return {
           ...o,
           [paths.willChange]: {
-            $gt: [{ $size: { $setIntersection: [value, prefixedPaths.field] } }, 0],
+            $gt: [{ $size: { $setIntersection: [asArray(value), prefixedPaths.field] } }, 0],
           },
         };
       }

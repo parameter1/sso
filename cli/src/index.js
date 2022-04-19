@@ -39,6 +39,11 @@ const run = async () => {
               fnName: 'updateName',
               disabled: !documents.has('application'),
             },
+            {
+              name: 'Delete application',
+              fnName: 'delete',
+              disabled: !documents.has('application'),
+            },
           ],
         },
 

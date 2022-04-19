@@ -310,7 +310,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
   }
 
   /**
-   * Deletes a multiple documents for the provided ID.
+   * Deletes multiple documents for the provided IDs.
    *
    * @param {object} params
    * @param {ObjectId|string} params.id

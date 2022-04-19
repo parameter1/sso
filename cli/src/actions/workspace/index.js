@@ -3,7 +3,6 @@ import changeMemberRole from './change-member-role.js';
 import create from './create.js';
 import removeMember from './remove-member.js';
 import updateName from './update-name.js';
-import updateSlug from './update-slug.js';
 
 export default {
   addMember,
@@ -11,5 +10,4 @@ export default {
   create,
   removeMember,
   updateName,
-  updateSlug,
 };

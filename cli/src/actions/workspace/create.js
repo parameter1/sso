@@ -89,8 +89,8 @@ export default async () => {
     doc: {
       key,
       name,
-      appId: app._id,
-      orgId: org._id,
+      application: { _id: app._id },
+      organization: { _id: org._id },
     },
   }) : null;
 };

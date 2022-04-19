@@ -374,7 +374,8 @@ export default class UserRepo extends AbstractManagementRepo {
    *
    * @param {object} params
    * @param {ObjectId|string} params.id
-   * @param {string} params.email
+   * @param {string} params.givenName
+   * @param {string} params.familyName
    * @param {object} [params.session]
    * @param {object} [params.context]
    * @returns {Promise<BulkWriteResult>}

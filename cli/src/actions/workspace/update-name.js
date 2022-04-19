@@ -1,9 +1,7 @@
 import inquirer from 'inquirer';
-import { workspaceAttributes as workspaceAttrs } from '@parameter1/sso-db/schema';
+import { workspaceProps } from '@parameter1/sso-mongodb';
 import { getWorkspaceList } from '../utils/index.js';
 import repos from '../../repos.js';
-
-const { log } = console;
 
 export default async () => {
   const questions = [
@@ -18,8 +16,12 @@ export default async () => {
       name: 'name',
       default: ({ workspace }) => workspace.name,
       message: 'Enter the new workspace name',
+      filter: (input) => {
+        const { value } = workspaceProps.name.required().validate(input);
+        return value;
+      },
       validate: async (input) => {
-        const { error } = workspaceAttrs.name.required().validate(input);
+        const { error } = workspaceProps.name.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -38,11 +40,8 @@ export default async () => {
     name,
   } = await inquirer.prompt(questions);
 
-  if (!confirm) return;
-
-  const result = await repos.$('workspace').updateAttributes({
+  return confirm ? repos.$('workspace').updateName({
     id: workspace._id,
     name,
-  });
-  log(result);
+  }) : null;
 };

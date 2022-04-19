@@ -10,6 +10,7 @@ import {
   userEventProps,
   userProps,
   userSchema,
+  workspaceProps,
 } from '../../schema/index.js';
 import { sluggifyUserNames } from '../../schema/user.js';
 import Expr from '../../pipelines/utils/expr.js';
@@ -47,6 +48,44 @@ export default class UserRepo extends AbstractManagementRepo {
         { key: { 'slug.reverse': 1, _id: 1 } },
       ],
       schema: userSchema,
+    });
+  }
+
+  /**
+   * Adds a workspace membership for the provided user and workspace IDs.
+   *
+   * @param {object} params
+   * @param {ObjectId|string} params.userId
+   * @param {ObjectId|string} params.workspaceId
+   * @param {string} params.role
+   * @param {object} [params.session]
+   * @param {object} [params.context]
+   * @returns
+   */
+  async joinWorkspace(params) {
+    const {
+      userId,
+      workspaceId,
+      role,
+      session,
+      context,
+    } = await validateAsync(object({
+      userId: userProps.id.required(),
+      workspaceId: workspaceProps.id.required(),
+      role: workspaceProps.memberRole.required(),
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
+
+    return this.update({
+      filter: { _id: userId, 'workspaces._id': { $ne: workspaceId } },
+      update: [{
+        $set: {
+          workspaces: $addToSet('workspaces', { _id: workspaceId, role }),
+        },
+      }],
+      session,
+      context,
     });
   }
 

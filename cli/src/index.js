@@ -106,41 +106,41 @@ const run = async () => {
           ],
         },
 
-        // {
-        //   key: 'workspace',
-        //   choices: [
-        //     {
-        //       name: 'Create new workspace',
-        //       fnName: 'create',
-        //       disabled: !documents.has('application') || !documents.has('organization'),
-        //     },
-        //     {
-        //       name: 'Change workspace name',
-        //       fnName: 'updateName',
-        //       disabled: !documents.has('workspace'),
-        //     },
-        //     {
-        //       name: 'Change workspace slug',
-        //       fnName: 'updateSlug',
-        //       disabled: !documents.has('workspace'),
-        //     },
-        //     {
-        //       name: 'Add workspace member',
-        //       fnName: 'addMember',
-        //       disabled: !documents.has('workspace') || !documents.has('user'),
-        //     },
-        //     {
-        //       name: 'Change workspace member role',
-        //       fnName: 'changeMemberRole',
-        //       disabled: !documents.has('workspace') || !documents.has('user'),
-        //     },
-        //     {
-        //       name: 'Remove workspace member',
-        //       fnName: 'removeMember',
-        //       disabled: !documents.has('workspace') || !documents.has('user'),
-        //     },
-        //   ],
-        // },
+        {
+          key: 'workspace',
+          choices: [
+            {
+              name: 'Create new workspace',
+              fnName: 'create',
+              disabled: !documents.has('application') || !documents.has('organization'),
+            },
+            // {
+            //   name: 'Change workspace name',
+            //   fnName: 'updateName',
+            //   disabled: !documents.has('workspace'),
+            // },
+            // {
+            //   name: 'Change workspace slug',
+            //   fnName: 'updateSlug',
+            //   disabled: !documents.has('workspace'),
+            // },
+            // {
+            //   name: 'Add workspace member',
+            //   fnName: 'addMember',
+            //   disabled: !documents.has('workspace') || !documents.has('user'),
+            // },
+            // {
+            //   name: 'Change workspace member role',
+            //   fnName: 'changeMemberRole',
+            //   disabled: !documents.has('workspace') || !documents.has('user'),
+            // },
+            // {
+            //   name: 'Remove workspace member',
+            //   fnName: 'removeMember',
+            //   disabled: !documents.has('workspace') || !documents.has('user'),
+            // },
+          ],
+        },
 
         {
           key: 'general',

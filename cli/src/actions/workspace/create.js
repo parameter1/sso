@@ -1,10 +1,8 @@
 import inquirer from 'inquirer';
-import { workspaceAttributes as workspaceAttrs, environments } from '@parameter1/sso-db/schema';
+import { workspaceProps } from '@parameter1/sso-mongodb';
 import { sluggify } from '@parameter1/slug';
 import { getAppList, getOrgList } from '../utils/index.js';
 import repos from '../../repos.js';
-
-const { log } = console;
 
 export default async () => {
   const questions = [
@@ -25,45 +23,51 @@ export default async () => {
       name: 'name',
       message: 'Enter the workspace name',
       default: 'Default',
+      filter: (input) => {
+        const { value } = workspaceProps.name.required().validate(input);
+        return value;
+      },
+      validate: (input) => {
+        const { error } = workspaceProps.name.required().validate(input);
+        if (error) return error;
+        return true;
+      },
     },
     {
       type: 'input',
-      name: 'slug',
-      message: 'Enter the workspace slug key',
+      name: 'key',
+      message: 'Enter the workspace key',
       default: ({ name }) => sluggify(name),
+      filter: (input) => {
+        const { value } = workspaceProps.key.required().validate(input);
+        return value;
+      },
       validate: async (input, { app, org }) => {
-        const repo = repos.$('workspace');
-        const { error } = workspaceAttrs.slug.required().validate(input);
+        const { error } = workspaceProps.key.required().validate(input);
         if (error) return error;
 
-        const doc = await repo.findOne({
+        const doc = await repos.$('workspace').findOne({
           query: {
-            'app._id': app._id,
-            'org._id': org._id,
-            slug: input,
+            'organization._id': org._id,
+            'application._id': app._id,
+            key: input,
           },
           options: { projection: { _id: 1 } },
         });
         if (doc) return new Error('A workspace already exists with this slug');
-
-        try {
-          await repo.throwIfSlugHasRedirect({ slug: input, appId: app._id, orgId: org._id });
-          return true;
-        } catch (e) {
-          return e;
-        }
-      },
-    },
-    ...environments.map((env) => ({
-      type: 'input',
-      name: `urls.${env}`,
-      message: `Enter the ${env} app URL`,
-      validate: async (input) => {
-        const { error } = await workspaceAttrs.url.required().validateAsync(input);
-        if (error) return error;
         return true;
       },
-    })),
+    },
+    // ...environments.map((env) => ({
+    //   type: 'input',
+    //   name: `urls.${env}`,
+    //   message: `Enter the ${env} app URL`,
+    //   validate: async (input) => {
+    //     const { error } = await workspaceAttrs.url.required().validateAsync(input);
+    //     if (error) return error;
+    //     return true;
+    //   },
+    // })),
     {
       type: 'confirm',
       name: 'confirm',
@@ -77,18 +81,16 @@ export default async () => {
     app,
     org,
     name,
-    slug,
-    urls,
+    key,
+    // urls,
   } = await inquirer.prompt(questions);
 
-  if (!confirm) return;
-
-  const result = await repos.$('workspace').create({
-    app: { _id: app._id, slug: app.slug, name: app.name },
-    org: { _id: org._id, slug: org.slug, name: org.name },
-    slug,
-    name,
-    urls,
-  });
-  log(result);
+  return confirm ? repos.$('workspace').create({
+    doc: {
+      key,
+      name,
+      appId: app._id,
+      orgId: org._id,
+    },
+  }) : null;
 };

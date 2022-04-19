@@ -1,5 +1,4 @@
 import inquirer from 'inquirer';
-import { asArray } from '@parameter1/utils';
 import { getUserList, getWorkspaceList } from '../utils/index.js';
 import repos from '../../repos.js';
 
@@ -11,15 +10,16 @@ export default async () => {
       type: 'list',
       name: 'eligible',
       message: 'Select the workspace',
-      choices: () => getWorkspaceList({ projection: { members: 1 } }),
+      choices: async () => {
+        const workspaceIds = await repos.$('user').distinct({
+          key: 'workspaces._id',
+        });
+        return getWorkspaceList({ query: { _id: { $in: workspaceIds } } });
+      },
       filter: async (workspace) => {
-        const memberEmails = asArray(workspace.members).reduce((set, member) => {
-          set.add(member.user.email);
-          return set;
-        }, new Set());
-
         const users = await getUserList({
-          query: { email: { $in: [...memberEmails] } },
+          projection: { workspaces: 1 },
+          query: { 'workspaces._id': workspace._id },
         });
         return { workspace, users };
       },
@@ -48,16 +48,12 @@ export default async () => {
 
   if (!user) {
     log('> No eligible users were found for this workspace');
-    return;
+    return null;
   }
 
-  if (!confirm) return;
-
   const { workspace } = eligible;
-
-  const result = await repos.$('workspace').removeMember({
+  return confirm ? repos.$('user').leaveWorkspace({
     workspaceId: workspace._id,
     userId: user._id,
-  });
-  log(result);
+  }) : null;
 };

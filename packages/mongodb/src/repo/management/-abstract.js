@@ -163,7 +163,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
         ops: ops.map((op) => ({
           filter: op.filter,
           many: op.many,
-          update: { [DELETED_PATH]: true },
+          update: [{ $set: { [DELETED_PATH]: true } }],
         })),
         session,
         context,

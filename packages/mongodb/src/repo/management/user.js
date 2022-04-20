@@ -450,7 +450,7 @@ export default class UserRepo extends AbstractManagementRepo {
         ] : []),
         this.manager.$('user-event').create({
           doc: {
-            userId: user._id,
+            user: { _id: user._id },
             action: 'magic-login',
             ip,
             ua,
@@ -583,18 +583,20 @@ export default class UserRepo extends AbstractManagementRepo {
       const { doc } = await this.manager.$('token').verify({ token: authToken, subject: 'auth' });
       const { audience: userId } = doc;
       const impersonated = get(doc, 'data.impersonated');
+
+      const user = await this.findByObjectId({
+        id: userId,
+        options: { projection, strict: true },
+      });
+
       if (!impersonated) {
         await this.update({
-          filter: { _id: userId },
+          filter: { _id: user._id },
           many: false,
           update: [{ $set: { lastSeenAt: '$$NOW' } }],
           versioningEnabled: false,
         });
       }
-      const user = await this.findByObjectId({
-        id: userId,
-        options: { projection, strict: true },
-      });
       return user;
     } catch (e) {
       throw AbstractManagementRepo.createError(401, `Authentication failed: ${e.message}`);

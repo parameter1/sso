@@ -35,7 +35,7 @@ export default class Expr {
         in: {
           $cond: {
             if: cond,
-            then: { $mergeObject: ['$$v', CleanDocument.object(value)] },
+            then: { $mergeObjects: ['$$v', CleanDocument.object(value)] },
             else: '$$v',
           },
         },

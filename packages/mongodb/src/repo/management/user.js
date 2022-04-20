@@ -531,4 +531,36 @@ export default class UserRepo extends AbstractManagementRepo {
       context,
     });
   }
+
+  /**
+   * @param {object} params
+   * @param {string} params.authToken
+   * @param {object} [params.projection]
+   */
+  async verifyAuthToken(params = {}) {
+    const { authToken, projection } = await validateAsync(object({
+      authToken: string().required(),
+      projection: object(),
+    }).required(), params);
+    try {
+      const { doc } = await this.manager.$('token').verify({ token: authToken, subject: 'auth' });
+      const { audience: userId } = doc;
+      const impersonated = get(doc, 'data.impersonated');
+      if (!impersonated) {
+        await this.update({
+          filter: { _id: userId },
+          many: false,
+          update: [{ $set: { lastSeenAt: '$$NOW' } }],
+          versioningEnabled: false,
+        });
+      }
+      const user = await this.findByObjectId({
+        id: userId,
+        options: { projection, strict: true },
+      });
+      return user;
+    } catch (e) {
+      throw AbstractManagementRepo.createError(401, `Authentication failed: ${e.message}`);
+    }
+  }
 }

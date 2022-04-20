@@ -23,7 +23,7 @@ export const {
   EXPOSED_HOST: str({ desc: 'The host that the service is exposed on.', default: '0.0.0.0' }),
   EXPOSED_PORT: port({ desc: 'The port that the service is exposed on.', default: 80 }),
   HOST: str({ desc: 'The host that the service will run on.', default: '0.0.0.0' }),
-  MONGO_DB_NAME: str({ desc: 'The MongoDB database name to use.', default: 'tenancy' }),
+  MONGO_DB_NAME: str({ desc: 'The MongoDB database name to use.', default: 'sso@management' }),
   MONGO_URL: str({ desc: 'The MongoDB URL to connect to.' }),
   PORT: port({ desc: 'The port that the service will run on.', default: 80 }),
   SENDGRID_API_KEY: str({ desc: 'The Sendgrid API key.' }),

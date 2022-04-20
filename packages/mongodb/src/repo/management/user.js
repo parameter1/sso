@@ -361,6 +361,53 @@ export default class UserRepo extends AbstractManagementRepo {
   }
 
   /**
+   * @param {object} params
+   * @param {string} params.authToken
+   * @param {string} [params.ip]
+   * @param {string} [params.ua]
+   */
+  async logout(params = {}) {
+    const { authToken: token, ip, ua } = await validateAsync(object({
+      authToken: string().required(),
+      ip: userEventProps.ip,
+      ua: userEventProps.ua,
+    }).required(), params);
+
+    const authToken = await this.manager.$('token').verify({ token, subject: 'auth' });
+    const userId = get(authToken, 'doc.audience');
+    const impersonated = get(authToken, 'doc.data.impersonated');
+
+    return runTransaction(async ({ session }) => {
+      const user = await this.findByObjectId({
+        id: userId,
+        options: { strict: true, projection: { _id: 1 }, session },
+      });
+
+      await Promise.all([
+        this.manager.$('token').invalidate({ id: get(authToken, 'doc._id'), options: { session } }),
+        this.manager.$('user-event').create({
+          doc: {
+            user: { _id: user._id },
+            action: 'logout',
+            ip,
+            ua,
+            data: { authToken, impersonated },
+          },
+          session,
+        }),
+        impersonated ? Promise.resolve() : this.update({
+          filter: { _id: user._id },
+          many: false,
+          update: [{ $set: { lastSeenAt: '$$NOW' } }],
+          versioningEnabled: false,
+        }),
+      ]);
+      await session.commitTransaction();
+      return 'ok';
+    }, { client: this.client });
+  }
+
+  /**
    * Magically logs a user in using the provided login token.
    *
    * @param {object} params

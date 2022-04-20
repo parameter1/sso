@@ -20,7 +20,7 @@ export default class ManagementRepos extends RepoManager {
    */
   constructor({
     client,
-    dbName = 'sso@management',
+    dbName = 'sso@write',
     tokenSecret,
     source,
   } = {}) {

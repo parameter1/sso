@@ -1,16 +1,17 @@
 import { ApolloServer } from 'apollo-server-fastify';
 import { STATUS_CODES } from 'http';
+import { get, set } from '@parameter1/object-path';
 import {
   ApolloServerPluginDrainHttpServer,
   ApolloServerPluginLandingPageGraphQLPlayground,
   ApolloServerPluginLandingPageDisabled,
 } from 'apollo-server-core';
 import fastify from 'fastify';
-import { get, set } from '@parameter1/object-path';
 import {
   CloseFastifyPlugin,
   OnShutdownPlugin,
 } from '@parameter1/graphql/plugins';
+
 import schema from './schema.js';
 import context from './context/index.js';
 

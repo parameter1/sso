@@ -20,9 +20,8 @@
   },
   "dependencies": {
     "@parameter1/graphql": "^2.4.1",
-    "@parameter1/joi": "^2.2.1",
     "@parameter1/object-path": "^2.0.0",
-    "@parameter1/sso-db": "^0.1.0",
+    "@parameter1/sso-mongodb": "^0.1.0",
     "@parameter1/utils": "^2.0.0",
     "@sendgrid/mail": "^7.6.1",
     "apollo-server-core": "^3.6.3",

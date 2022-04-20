@@ -2,5 +2,5 @@ import { gulpfile } from '@parameter1/gulp';
 
 gulpfile({
   entry: 'src/index.js',
-  watchPaths: ['src/**/*.js', '../packages/db/src/**/*.js', '../packages/model/src/**/*.js'],
+  watchPaths: ['src/**/*.js', '../packages/mongodb/src/**/*.js'],
 });

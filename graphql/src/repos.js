@@ -1,5 +1,11 @@
-import { Repos } from '@parameter1/sso-db';
+import { ManagementRepos } from '@parameter1/sso-mongodb';
 import client from './mongodb.js';
 import { MONGO_DB_NAME, TOKEN_SECRET } from './env.js';
+import pkg from '../package.js';
 
-export default new Repos({ client, dbName: MONGO_DB_NAME, tokenSecret: TOKEN_SECRET });
+export default new ManagementRepos({
+  client,
+  dbName: MONGO_DB_NAME,
+  tokenSecret: TOKEN_SECRET,
+  source: { name: pkg.name, v: pkg.version },
+});

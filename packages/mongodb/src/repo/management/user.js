@@ -201,6 +201,47 @@ export default class UserRepo extends AbstractManagementRepo {
   }
 
   /**
+   * Changes the role for an existing workspace member.
+   *
+   * @param {object} params
+   * @param {ObjectId|string} params.userId
+   * @param {ObjectId|string} params.workspaceId
+   * @param {string} params.role
+   * @param {object} [params.session]
+   * @param {object} [params.context]
+   * @returns
+   */
+  async changeWorkspaceRole(params) {
+    const {
+      userId,
+      workspaceId,
+      role,
+      session,
+      context,
+    } = await validateAsync(object({
+      userId: userProps.id.required(),
+      workspaceId: workspaceProps.id.required(),
+      role: workspaceProps.memberRole.required(),
+      session: object(),
+      context: contextSchema,
+    }).required(), params);
+
+    return this.update({
+      filter: {
+        _id: userId,
+        workspaces: { $elemMatch: { _id: workspaceId, role: { $ne: role } } },
+      },
+      update: [{
+        $set: {
+          workspaces: $mergeArrayObject('workspaces', { $eq: ['$$v._id', workspaceId] }, { role }),
+        },
+      }],
+      session,
+      context,
+    });
+  }
+
+  /**
    * Changes the role for an existing organization manager.
    *
    * @param {object} params

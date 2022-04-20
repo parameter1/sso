@@ -129,11 +129,11 @@ const run = async () => {
               fnName: 'addMember',
               disabled: !documents.has('workspace') || !documents.has('user'),
             },
-            // {
-            //   name: 'Change workspace member role',
-            //   fnName: 'changeMemberRole',
-            //   disabled: !documents.has('workspace') || !documents.has('user'),
-            // },
+            {
+              name: 'Change workspace member role',
+              fnName: 'changeMemberRole',
+              disabled: !documents.has('workspace') || !documents.has('user'),
+            },
             {
               name: 'Remove workspace member',
               fnName: 'removeMember',

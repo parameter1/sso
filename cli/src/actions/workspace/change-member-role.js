@@ -1,6 +1,5 @@
 import inquirer from 'inquirer';
-import { asArray } from '@parameter1/utils';
-import { workspaceAttributes as workspaceAttrs } from '@parameter1/sso-db/schema';
+import { workspaceProps } from '@parameter1/sso-mongodb';
 import { getUserList, getWorkspaceList } from '../utils/index.js';
 import repos from '../../repos.js';
 
@@ -12,15 +11,16 @@ export default async () => {
       type: 'list',
       name: 'eligible',
       message: 'Select the workspace',
-      choices: () => getWorkspaceList({ projection: { members: 1 } }),
+      choices: async () => {
+        const workspaceIds = await repos.$('user').distinct({
+          key: 'workspaces._id',
+        });
+        return getWorkspaceList({ query: { _id: { $in: workspaceIds } } });
+      },
       filter: async (workspace) => {
-        const memberEmails = asArray(workspace.members).reduce((set, member) => {
-          set.add(member.user.email);
-          return set;
-        }, new Set());
-
         const users = await getUserList({
-          query: { email: { $in: [...memberEmails] } },
+          projection: { workspaces: 1 },
+          query: { 'workspaces._id': workspace._id },
         });
         return { workspace, users };
       },
@@ -38,16 +38,20 @@ export default async () => {
       message: 'Select the member role',
       when: ({ eligible }) => Boolean(eligible.users.length),
       choices: async ({ user, eligible }) => {
-        const app = await repos.$('application').findBySlug({ slug: eligible.workspace.app.slug });
-        const { role } = eligible.workspace.members.find(({ user: u }) => `${u._id}` === `${user._id}`);
+        const { workspace } = eligible;
+        const app = await repos.$('application').findByObjectId({ id: workspace.application._id, options: { strict: true } });
+        const { role } = user.workspaces.find(({ _id }) => `${_id}` === `${workspace._id}`);
         return app.roles.map((r) => ({
-          name: r,
+          name: r === role ? `${r} (current role)` : r,
           value: r,
-          disabled: r === role ? 'current role' : false,
         }));
       },
+      filter: (input) => {
+        const { value } = workspaceProps.memberRole.required().validate(input);
+        return value;
+      },
       validate: (input) => {
-        const { error } = workspaceAttrs.role.required().validate(input);
+        const { error } = workspaceProps.memberRole.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -70,17 +74,14 @@ export default async () => {
 
   if (!user) {
     log('> No eligible users were found for this workspace');
-    return;
+    return null;
   }
-
-  if (!confirm) return;
 
   const { workspace } = eligible;
 
-  const result = await repos.$('workspace').changeMemberRole({
+  return confirm ? repos.$('user').changeWorkspaceRole({
     workspaceId: workspace._id,
     userId: user._id,
     role,
-  });
-  log(result);
+  }) : null;
 };

@@ -14,6 +14,7 @@ import {
 } from '../../schema/index.js';
 import { sluggifyUserNames } from '../../schema/user.js';
 import Expr from '../../pipelines/utils/expr.js';
+import runTransaction from '../../utils/run-transaction.js';
 
 const {
   $addToSet,
@@ -286,7 +287,7 @@ export default class UserRepo extends AbstractManagementRepo {
    * Creates a magic login link token for the provided user ID.
    *
    * @param {object} params
-   * @param {string} params.userId
+   * @param {string} params.email
    * @param {string} [params.ip]
    * @param {string} [params.ua]
    * @param {string} [params.ttl=3600]
@@ -296,7 +297,7 @@ export default class UserRepo extends AbstractManagementRepo {
    */
   async createLoginLinkToken(params = {}) {
     const {
-      userId,
+      email,
       ip,
       ua,
       ttl,
@@ -305,7 +306,7 @@ export default class UserRepo extends AbstractManagementRepo {
       session: currentSession,
       inTransaction,
     } = await validateAsync(object({
-      userId: userProps.id.required(),
+      email: userProps.email.required(),
       ip: userEventProps.ip,
       ua: userEventProps.ua,
       ttl: tokenProps.ttl.default(3600),
@@ -315,16 +316,11 @@ export default class UserRepo extends AbstractManagementRepo {
       inTransaction: func(),
     }).required(), params);
 
-    const session = currentSession || await this.client.startSession();
-    const previouslyStarted = session.inTransaction();
-    if (!previouslyStarted) session.startTransaction();
-
-    try {
-      const user = await this.findByObjectId({
-        id: userId,
+    return runTransaction(async ({ session }) => {
+      const user = await this.findByEmail({
+        email,
         options: { strict: true, projection: { email: 1 }, session },
       });
-
       const data = { ...(scope && { scope }), ...(impersonated && { impersonated }) };
 
       const token = await this.manager.$('token').createAndSignToken({
@@ -339,7 +335,7 @@ export default class UserRepo extends AbstractManagementRepo {
 
       await this.manager.$('user-event').create({
         doc: {
-          userId: user._id,
+          user: { _id: user._id },
           action: 'send-login-link',
           ip,
           ua,
@@ -349,14 +345,8 @@ export default class UserRepo extends AbstractManagementRepo {
       });
 
       if (isFn(inTransaction)) await inTransaction({ user, token });
-      if (!previouslyStarted) await session.commitTransaction();
       return token.signed;
-    } catch (e) {
-      if (!previouslyStarted) await session.abortTransaction();
-      throw e;
-    } finally {
-      if (!previouslyStarted) session.endSession();
-    }
+    }, { currentSession, client: this.client });
   }
 
   /**

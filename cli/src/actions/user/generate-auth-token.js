@@ -26,7 +26,7 @@ export default async () => {
   if (!confirm) return null;
 
   const loginLinkToken = await repos.$('user').createLoginLinkToken({
-    userId: user._id,
+    email: user.email,
     impersonated: true,
   });
   const { authToken } = await repos.$('user').magicLogin({ loginLinkToken });

@@ -178,7 +178,12 @@ export default class AbstractManagementRepo extends ManagedRepo {
   }
 
   async bulkUpdate(params) {
-    const { ops, session, context } = await validateAsync(object({
+    const {
+      ops,
+      session,
+      context,
+      versioningEnabled,
+    } = await validateAsync(object({
       ops: array().items(object({
         filter: object().unknown().required(),
         many: boolean().required(),
@@ -187,6 +192,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       }).required()).required(),
       session: object(),
       context: contextSchema,
+      versioningEnabled: boolean().default(true),
     }).required(), params);
 
     const touched = {
@@ -201,7 +207,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       const type = op.many ? 'updateMany' : 'updateOne';
       const update = CleanDocument.value([
         ...op.update,
-        ...(this.isVersioned ? [
+        ...(this.isVersioned && versioningEnabled ? [
           {
             $set: {
               '_touched.first': new Expr({
@@ -224,7 +230,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
           } : op.filter,
           update,
           upsert: op.upsert,
-          arrayFilters: op.arrayFilters,
         },
       };
     });
@@ -342,6 +347,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {boolean} [params.upsert=false]
    * @param {object} [params.session]
    * @param {object} [params.context]
+   * @param {boolean} [params.versioningEnabled=true]
    */
   async update(params) {
     const {
@@ -351,6 +357,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       upsert,
       session,
       context,
+      versioningEnabled,
     } = await validateAsync(object({
       filter: object().unknown().required(),
       many: boolean().default(false),
@@ -358,6 +365,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       upsert: boolean().default(false),
       session: object(),
       context: contextSchema,
+      versioningEnabled: boolean().default(true),
     }).required(), params);
     const op = {
       filter,
@@ -365,7 +373,12 @@ export default class AbstractManagementRepo extends ManagedRepo {
       update,
       upsert,
     };
-    return this.bulkUpdate({ ops: [op], session, context });
+    return this.bulkUpdate({
+      ops: [op],
+      session,
+      context,
+      versioningEnabled,
+    });
   }
 
   /**

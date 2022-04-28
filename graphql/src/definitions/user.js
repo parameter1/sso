@@ -23,27 +23,20 @@ extend type Mutation {
 
 type User {
   "The unique user identifier"
-  id: ObjectID! @project(field: "_id")
-  "The user's email address. This value is unique across all users."
-  email: String! @project
-  "The user's given/first name."
-  givenName: String! @project
-  "The user's family/last name."
-  familyName: String! @project
-  "The user's full name."
-  name: String! @project(field: "givenName", needs: ["familyName"])
-  "Whether the user email address has been verified."
-  verified: Boolean! @project
+  _id: ObjectID! @project
+  "Dates associated with this user, such as first created and last touched."
+  date: UserDate! @project(field: "", deep: true) @object
+  "The user's current email address, domain, and any previously used addresses."
+  email: UserEmail! @project(field: "", deep: true) @object
   "The number of times the user has logged in."
   loginCount: Int! @project
-  "The ISO date when the user was created."
-  createdAt: DateTime! @project(field: "date.created")
-  "The ISO date when the user was last updated."
-  updatedAt: DateTime! @project(field: "date.updated")
-  "The ISO date when the user last logged in."
-  lastLoggedInAt: DateTime @project(field: "date.lastLoggedIn")
-  "The ISO date when the user was last seen accessing the system."
-  lastSeenAt: DateTime @project(field: "date.lastSeen")
+  "The user's given, family and full names."
+  name: UserName! @project(field: "", deep: true) @object
+  "The user slugs."
+  slug: UserSlug! @project(deep: true)
+  "Whether the user email address has been verified."
+  verified: Boolean! @project
+
   "Gets a workspace membership role for the provided input, or will return null if the user is not a member."
   workspaceRole(input: UserWorkspaceRoleInput!): String
     @auth
@@ -58,6 +51,46 @@ type UserAuth {
   authToken: String!
   "The ISO date of when this token expires."
   expiresAt: DateTime!
+}
+
+type UserDate {
+  "The ISO date when the user was created."
+  created: DateTime! @project(field: "_touched.first.date")
+  "The ISO date when the user was last touched."
+  touched: DateTime! @project(field: "_touched.last.date")
+  "The ISO date when the user last logged in."
+  lastLoggedIn: DateTime @project(field: "lastLoggedInAt")
+  "The ISO date when the user was last seen accessing the system."
+  lastSeen: DateTime @project(field: "lastSeenAt")
+}
+
+type UserEmail {
+  "The user's email address. This value is unique across all users."
+  address: String! @project(field: "email")
+  "The user's email domain."
+  domain: String! @project(field: "domain")
+  "Any previously used email addresses."
+  previous: [String!]! @project(field: "previousEmails") @array
+}
+
+type UserName {
+  "The user's family/last name."
+  family: String! @project(field: "familyName")
+  "An alias for the user's given name."
+  first: String! @project(field: "givenName")
+  "The user's given/first name."
+  given: String! @project(field: "givenName")
+  "The user's full name."
+  full: String! @project(field: "givenName", needs: ["familyName"])
+  "An alias for the user's family name."
+  last: String! @project(field: "familyName")
+}
+
+type UserSlug {
+  "The default user slug, starting with the user's given name."
+  default: String! @project
+  "The reversed user slug, starting with the user's family name."
+  reverse: String! @project
 }
 
 input MutateLoginUserFromLinkInput {

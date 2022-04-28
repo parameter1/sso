@@ -91,13 +91,6 @@ export default {
     /**
      *
      */
-    name({ givenName, familyName }) {
-      return [givenName, familyName].join(' ');
-    },
-
-    /**
-     *
-     */
     workspaceRole({ memberships }, { input }) {
       const { id } = input;
       const membership = memberships.find((m) => `${m.workspace._id}` === `${id}`);
@@ -122,6 +115,18 @@ export default {
     user({ userId }, _, { repos }, info) {
       const { projection } = getProjectionForType(info);
       return repos.$('user').findByObjectId({ id: userId, options: { projection } });
+    },
+  },
+
+  /**
+   *
+   */
+  UserName: {
+    /**
+     *
+     */
+    full({ givenName, familyName }) {
+      return [givenName, familyName].join(' ');
     },
   },
 };

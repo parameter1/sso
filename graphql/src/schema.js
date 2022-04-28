@@ -3,10 +3,10 @@ import { enumDefaultValuesTransformer } from '@parameter1/graphql/transformers';
 import {
   arrayDirectiveTransformer,
   objectDirectiveTransformer,
-  projectDirectiveTransformer,
 } from '@parameter1/graphql/directives';
 
 import authDirectiveTransformer from './directives/auth.js';
+import projectDirectiveTransformer from './directives/project.js';
 import enums from './enums.js';
 import resolvers from './resolvers/index.js';
 import typeDefs from './definitions/index.js';

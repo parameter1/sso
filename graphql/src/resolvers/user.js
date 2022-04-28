@@ -1,4 +1,4 @@
-import { getProjectionForType } from '@parameter1/graphql/projection';
+import { getProjectionForType } from '../projection/index.js';
 import createLoginLinkTemplate from '../email-templates/login-link.js';
 import { send } from '../sendgrid.js';
 
@@ -40,7 +40,7 @@ export default {
         givenName: input.givenName,
         familyName: input.familyName,
       });
-      const projection = getProjectionForType(info);
+      const { projection } = getProjectionForType(info);
       return user.findByObjectId({ id, options: { projection } });
     },
 
@@ -79,8 +79,8 @@ export default {
      */
     async currentUser(_, __, { auth, repos }, info) {
       const id = await auth.getUserId();
-      const options = { projection: getProjectionForType(info) };
-      return repos.$('user').findByObjectId({ id, options });
+      const { projection } = getProjectionForType(info);
+      return repos.$('user').findByObjectId({ id, options: { projection } });
     },
   },
 
@@ -120,8 +120,8 @@ export default {
      *
      */
     user({ userId }, _, { repos }, info) {
-      const options = { projection: getProjectionForType(info) };
-      return repos.$('user').findByObjectId({ id: userId, options });
+      const { projection } = getProjectionForType(info);
+      return repos.$('user').findByObjectId({ id: userId, options: { projection } });
     },
   },
 };

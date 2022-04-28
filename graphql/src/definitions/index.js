@@ -16,7 +16,8 @@ scalar ObjectID
 
 directive @auth on FIELD_DEFINITION
 directive @array(field: String) on FIELD_DEFINITION
-directive @project(field: String, needs: [String!]! = []) on FIELD_DEFINITION
+directive @object(field: String) on FIELD_DEFINITION
+directive @project(field: String, needs: [String!]! = [], deep: Boolean! = false, resolve: Boolean! = true) on FIELD_DEFINITION
 
 type Query {
   "A simple ping/pong query."

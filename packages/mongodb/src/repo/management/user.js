@@ -1,5 +1,5 @@
 import { isFunction as isFn, objectHasKeys } from '@parameter1/utils';
-import { PropTypes, validateAsync } from '@parameter1/sso-prop-types';
+import { PropTypes, validateAsync } from '@parameter1/prop-types';
 import { get } from '@parameter1/object-path';
 
 import AbstractManagementRepo from './-abstract.js';

@@ -1,4 +1,4 @@
-import { PropTypes } from '@parameter1/sso-prop-types';
+import { PropTypes } from '@parameter1/prop-types';
 import { sluggify } from '@parameter1/slug';
 import userProps from './props/user.js';
 

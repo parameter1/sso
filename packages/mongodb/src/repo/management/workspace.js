@@ -1,4 +1,4 @@
-import { PropTypes, validateAsync } from '@parameter1/sso-prop-types';
+import { PropTypes, validateAsync } from '@parameter1/prop-types';
 
 import AbstractManagementRepo from './-abstract.js';
 import { contextSchema, workspaceProps, workspaceSchema } from '../../schema/index.js';

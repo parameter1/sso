@@ -1,4 +1,4 @@
-import { PropTypes } from '@parameter1/sso-prop-types';
+import { PropTypes } from '@parameter1/prop-types';
 import tokenProps from './props/token.js';
 import Expr from '../pipelines/utils/expr.js';
 

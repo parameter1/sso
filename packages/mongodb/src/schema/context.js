@@ -1,4 +1,4 @@
-import { PropTypes } from '@parameter1/sso-prop-types';
+import { PropTypes } from '@parameter1/prop-types';
 import userProps from './props/user.js';
 import contextProps from './props/context.js';
 

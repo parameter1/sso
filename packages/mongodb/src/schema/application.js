@@ -1,4 +1,4 @@
-import { PropTypes } from '@parameter1/sso-prop-types';
+import { PropTypes } from '@parameter1/prop-types';
 import applicationProps from './props/application.js';
 
 const { object } = PropTypes;

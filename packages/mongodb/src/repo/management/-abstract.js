@@ -1,5 +1,5 @@
 import { ManagedRepo } from '@parameter1/mongodb';
-import { PropTypes, validateAsync, attempt } from '@parameter1/sso-prop-types';
+import { PropTypes, validateAsync, attempt } from '@parameter1/prop-types';
 
 import { contextSchema, contextProps } from '../../schema/index.js';
 import { CleanDocument } from '../../utils/clean-document.js';

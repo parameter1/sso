@@ -1,5 +1,5 @@
 {
-  "name": "@sso/prop-types",
+  "name": "@parameter1/sso-prop-types",
   "version": "0.1.0",
   "type": "module",
   "description": "Property type schemas and validators.",

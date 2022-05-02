@@ -19,7 +19,7 @@ const SEND_USER_LOGIN_LINK = gql`
 const LOGIN_USER_FROM_LINK = gql`
   mutation LoginUserFromLink($input: MutateLoginUserFromLinkInput!) {
     loginUserFromLink(input: $input) {
-      user { id }
+      user { _id }
       authToken
       expiresAt
     }

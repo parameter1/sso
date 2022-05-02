@@ -1,12 +1,10 @@
 import gql from 'graphql-tag';
 
 // eslint-disable-next-line
-export const CURRENT_USER_FRAGMENT = gql`
+export const CurrentUserFragment = gql`
   fragment CurrentUserFragment on User {
-    id
-    email
-    name
-    givenName
-    familyName
+    _id
+    email { address }
+    name { given family }
   }
 `;

@@ -1,5 +1,5 @@
 import gql from 'graphql-tag';
-import { CURRENT_USER_FRAGMENT } from './fragments';
+import { CurrentUserFragment } from './fragments';
 
 export const CURRENT_USER = gql`
   query CurrentUser {
@@ -7,7 +7,7 @@ export const CURRENT_USER = gql`
       ...CurrentUserFragment
     }
   }
-  ${CURRENT_USER_FRAGMENT}
+  ${CurrentUserFragment}
 `;
 
 export const PING = gql`

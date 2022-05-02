@@ -4,9 +4,8 @@ import gql from 'graphql-tag';
 export const UPDATE_OWN_USER_PROFILE = gql`
   mutation UpdateOwnUserProfile($input: MutateOwnUserProfileInput!) {
     ownUserProfile(input: $input) {
-      id
-      givenName
-      familyName
+      _id
+      name { given family }
     }
   }
 `;

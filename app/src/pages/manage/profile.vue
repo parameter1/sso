@@ -10,8 +10,8 @@
 
     <form v-else @submit.prevent="saveProfile">
       <fieldset :disabled="isSaving">
-        <user-given-name-field v-model="currentUser.givenName" />
-        <user-family-name-field v-model="currentUser.familyName" />
+        <user-given-name-field v-model="currentUser.name.given" />
+        <user-family-name-field v-model="currentUser.name.family" />
 
         <button-element :loading="isSaving" type="submit">
           Save
@@ -60,7 +60,10 @@ export default {
   },
 
   data: () => ({
-    currentUser: {},
+    currentUser: {
+      email: {},
+      name: {},
+    },
     isLoading: false,
     isSaving: false,
     loadError: null,
@@ -72,8 +75,8 @@ export default {
       try {
         this.saveError = null;
         this.isSaving = true;
-        const { givenName, familyName } = this.currentUser;
-        const input = { givenName, familyName };
+        const { given, family } = this.currentUser.name;
+        const input = { givenName: given, familyName: family };
         await this.$apollo.mutate({
           mutation: UPDATE_OWN_USER_PROFILE,
           variables: { input },

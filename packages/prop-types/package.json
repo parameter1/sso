@@ -26,6 +26,6 @@
     "win32"
   ],
   "dependencies": {
-    "@parameter1/joi": "^2.2.1"
+    "@parameter1/joi": "^2.2.2"
   }
 }

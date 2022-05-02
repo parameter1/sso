@@ -4,21 +4,21 @@ export default gql`
 
 extend type Query {
   "Returns the currently logged-in user. Will return an authentication error if no user is currently logged-in."
-  currentUser: User!
+  currentUser: User! # good
     @auth
 }
 
 extend type Mutation {
   "Logs a user in via a magic login link token."
-  loginUserFromLink(input: MutateLoginUserFromLinkInput!): UserAuth!
+  loginUserFromLink(input: MutateLoginUserFromLinkInput!): UserAuth! # good
   "Logs out the currently logged-in user."
-  logoutUser: String!
+  logoutUser: String! #good
     @auth
   "Updates the current user's basic profile details."
   ownUserProfile(input: MutateOwnUserProfileInput!): User!
     @auth
   "Sends a magic login link to a user. The user must already exist."
-  sendUserLoginLink(input: MutateSendUserLoginLinkInput!): String!
+  sendUserLoginLink(input: MutateSendUserLoginLinkInput!): String! # good
 }
 
 type User {

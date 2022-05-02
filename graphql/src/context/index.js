@@ -11,5 +11,6 @@ export default async ({ request } = {}) => {
     ip: request.ip,
     repos,
     ua: request.headers['user-agent'],
+    // @todo need to add ip and ua to context fields, or find a way to wrap the repo methods??
   };
 };

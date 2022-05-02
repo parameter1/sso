@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@parameter1/email-utils": "^2.0.0",
-    "@parameter1/mongodb": "^2.13.0",
+    "@parameter1/mongodb": "^2.14.0",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/slug": "^2.0.0",
     "@parameter1/utils": "^2.0.0",

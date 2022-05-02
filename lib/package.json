@@ -27,7 +27,7 @@
     "prepublish": "yarn build"
   },
   "devDependencies": {
-    "vite": "^2.8.6"
+    "vite": "^2.9.7"
   },
   "publishConfig": {
     "access": "public"

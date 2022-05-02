@@ -1,5 +1,7 @@
-import Joi, { validate } from '@parameter1/joi';
+import { PropTypes, validate } from '@parameter1/sso-prop-types';
 import { APP_URL } from '../env.js';
+
+const { object, string } = PropTypes;
 
 /**
  * @param {object} params
@@ -7,9 +9,9 @@ import { APP_URL } from '../env.js';
  * @param {string} [params.redirectTo]
  */
 export default (params = {}) => {
-  const { loginToken, redirectTo } = validate(Joi.object({
-    loginToken: Joi.string().required(),
-    redirectTo: Joi.string().allow(null),
+  const { loginToken, redirectTo } = validate(object({
+    loginToken: string().required(),
+    redirectTo: string().allow(null),
   }).required(), params);
 
   let url = `${APP_URL}/authenticate?token=${loginToken}`;

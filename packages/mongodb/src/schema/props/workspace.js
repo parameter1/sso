@@ -1,4 +1,4 @@
-import { PropTypes } from '@sso/prop-types';
+import { PropTypes } from '@parameter1/sso-prop-types';
 import { cleanPath } from '@parameter1/utils';
 import environments from '../environments.js';
 

@@ -1,4 +1,4 @@
-import { PropTypes, attempt } from '@sso/prop-types';
+import { PropTypes, attempt } from '@parameter1/sso-prop-types';
 
 import { CleanDocument } from '../utils/clean-document.js';
 import { contextSchema, contextProps } from '../schema/index.js';

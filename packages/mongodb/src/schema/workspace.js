@@ -1,4 +1,4 @@
-import { PropTypes } from '@sso/prop-types';
+import { PropTypes } from '@parameter1/sso-prop-types';
 import applicationProps from './props/application.js';
 import organizationProps from './props/organization.js';
 import workspaceProps from './props/workspace.js';

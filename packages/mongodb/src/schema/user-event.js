@@ -1,4 +1,4 @@
-import { PropTypes } from '@sso/prop-types';
+import { PropTypes } from '@parameter1/sso-prop-types';
 import userProps from './props/user.js';
 import userEventProps from './props/user-event.js';
 

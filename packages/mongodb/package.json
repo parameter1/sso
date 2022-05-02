@@ -15,17 +15,16 @@
   "main": "./src/index.js",
   "scripts": {
     "lint": "eslint --ext .js ./",
-    "test": "yarn lint && yarn test-nolint",
-    "test-nolint": "mocha ./test/**/*.spec.js"
+    "test": "yarn lint"
   },
   "dependencies": {
     "@parameter1/email-utils": "^2.0.0",
     "@parameter1/mongodb": "^2.14.0",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/slug": "^2.0.0",
+    "@parameter1/sso-prop-types": "^0.1.0",
     "@parameter1/utils": "^2.0.0",
     "@sindresorhus/is": "^4.6.0",
-    "@sso/prop-types": "^0.1.0",
     "jsonwebtoken": "^8.5.1",
     "map-obj": "^5.0.1",
     "sort-keys": "^5.0.0"

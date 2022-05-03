@@ -18,6 +18,8 @@ export default class ApplicationRepo extends AbstractManagementRepo {
       collatableFields: [],
       indexes: [
         { key: { key: 1 }, unique: true },
+
+        { key: { name: 1, _id: 1 }, collation: { locale: 'en_US' } },
       ],
       schema: applicationSchema,
     });

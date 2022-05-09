@@ -26,6 +26,7 @@
     "@parameter1/utils": "^2.0.0",
     "@sindresorhus/is": "^4.6.0",
     "jsonwebtoken": "^8.5.1",
+    "lodash.clonedeep": "^4.5.0",
     "map-obj": "^5.0.1",
     "sort-keys": "^5.0.0"
   }

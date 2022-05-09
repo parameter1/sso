@@ -8,3 +8,4 @@ export {
 
 export * from './repo/index.js';
 export * from './schema/index.js';
+export * from './repo/materializer.js';

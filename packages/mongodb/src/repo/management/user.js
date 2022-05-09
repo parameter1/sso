@@ -434,10 +434,7 @@ export default class UserRepo extends AbstractManagementRepo {
       options: { projection: { email: 1 }, strict: true },
     });
 
-    const session = await this.client.startSession();
-    session.startTransaction();
-
-    try {
+    return runTransaction(async ({ session }) => {
       const authToken = await this.manager.$('token').getOrCreateAuthToken({
         userId: user._id,
         impersonated,
@@ -472,18 +469,12 @@ export default class UserRepo extends AbstractManagementRepo {
         }),
       ]);
 
-      await session.commitTransaction();
       return {
         authToken: authToken.signed,
         userId: user._id,
         authDoc: authToken.doc,
       };
-    } catch (e) {
-      await session.abortTransaction();
-      throw e;
-    } finally {
-      session.endSession();
-    }
+    }, { client: this.client });
   }
 
   /**

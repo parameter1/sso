@@ -1,4 +1,6 @@
 import { PropTypes } from '@parameter1/prop-types';
+import { sluggify } from '@parameter1/slug';
+
 import applicationProps from './props/application.js';
 import organizationProps from './props/organization.js';
 import workspaceProps from './props/workspace.js';
@@ -15,5 +17,8 @@ export default {
     }).required(),
     name: workspaceProps.name.required(),
     key: workspaceProps.key.required(),
-  }).required(),
+  }).custom((workspace) => ({
+    ...workspace,
+    slug: sluggify(workspace.name),
+  })).required(),
 };

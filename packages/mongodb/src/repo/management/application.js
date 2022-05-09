@@ -1,4 +1,5 @@
 import { PropTypes, validateAsync } from '@parameter1/prop-types';
+import { sluggify } from '@parameter1/slug';
 
 import AbstractManagementRepo from './-abstract.js';
 import { applicationProps, applicationSchema, contextSchema } from '../../schema/index.js';
@@ -18,8 +19,7 @@ export default class ApplicationRepo extends AbstractManagementRepo {
       collatableFields: [],
       indexes: [
         { key: { key: 1 }, unique: true },
-
-        { key: { name: 1, _id: 1 }, collation: { locale: 'en_US' } },
+        { key: { slug: 1 } },
       ],
       schema: applicationSchema,
     });
@@ -91,7 +91,7 @@ export default class ApplicationRepo extends AbstractManagementRepo {
     return this.update({
       filter: { _id: id, name: { $ne: name } },
       many: false,
-      update: [{ $set: { name } }],
+      update: [{ $set: { name, slug: sluggify(name) } }],
       session,
       context,
     });

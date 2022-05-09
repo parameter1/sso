@@ -1,4 +1,5 @@
 import { PropTypes, validateAsync } from '@parameter1/prop-types';
+import { sluggify } from '@parameter1/slug';
 
 import AbstractManagementRepo from './-abstract.js';
 import { contextSchema, workspaceProps, workspaceSchema } from '../../schema/index.js';
@@ -17,7 +18,7 @@ export default class WorkspaceRepo extends AbstractManagementRepo {
       collatableFields: [],
       indexes: [
         { key: { 'organization._id': 1, 'application._id': 1, key: 1 }, unique: true },
-
+        { key: { slug: 1 } },
         { key: { 'application._id': 1 } },
       ],
       schema: workspaceSchema,
@@ -50,7 +51,7 @@ export default class WorkspaceRepo extends AbstractManagementRepo {
     return this.update({
       filter: { _id: id, name: { $ne: name } },
       many: false,
-      update: [{ $set: { name } }],
+      update: [{ $set: { name, slug: sluggify(name) } }],
       session,
       context,
     });

@@ -27,11 +27,11 @@ const dateProjection = (fn) => wrap({
   },
 }, fn);
 
-const standardProjection = (fn) => wrap({
+const standardProjection = (fn, dateFn) => wrap({
   _connection: 1,
   _edge: 1,
   _deleted: 1,
-  ...dateProjection(),
+  ...dateProjection(dateFn),
 }, fn);
 
 const applicationProjection = (fn) => wrap({
@@ -51,11 +51,14 @@ const organizationProjection = (fn) => wrap({
 }, fn);
 
 const userProjection = (fn) => wrap({
-  ...standardProjection(),
+  ...standardProjection(null, ({ _date }) => ({
+    _date: { ..._date, lastLoggedIn: '$lastLoggedInAt', lastSeen: '$lastSeenAt' },
+  })),
   domain: 1,
   email: 1,
   familyName: 1,
   givenName: 1,
+  loginCount: 1,
   previousEmails: 1,
   slug: 1,
   verified: 1,

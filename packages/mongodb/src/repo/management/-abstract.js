@@ -1,5 +1,6 @@
 import { ManagedRepo } from '@parameter1/mongodb';
 import { PropTypes, validateAsync, attempt } from '@parameter1/prop-types';
+import { isFunction as isFn } from '@parameter1/utils';
 
 import { contextSchema, contextProps } from '../../schema/index.js';
 import { CleanDocument } from '../../utils/clean-document.js';
@@ -11,6 +12,7 @@ const {
   any,
   array,
   boolean,
+  func,
   object,
   objectId,
   propTypeObject,
@@ -31,6 +33,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       source,
       isVersioned,
       usesSoftDelete,
+      materializedPipelineBuilder,
       ...rest
     } = attempt(params, object({
       schema: object({
@@ -39,6 +42,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       source: contextProps.source.required(),
       isVersioned: boolean().default(true),
       usesSoftDelete: boolean().default(true),
+      materializedPipelineBuilder: func(),
     }).required().unknown());
 
     const indexes = isVersioned ? [
@@ -66,6 +70,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
     this.source = source;
     this.isVersioned = isVersioned;
     this.usesSoftDelete = usesSoftDelete;
+    this.materializedPipelineBuilder = materializedPipelineBuilder;
   }
 
   /**
@@ -335,6 +340,47 @@ export default class AbstractManagementRepo extends ManagedRepo {
       session,
       context,
     });
+  }
+
+  /**
+   * Materializes data for the provided filter criteria.
+   * Used by the read/denormalized database repos.
+   *
+   * @param {object} params
+   * @param {object} [params.filter]
+   * @returns {Promise<string>}
+   */
+  async materialize(params) {
+    const { filter } = await validateAsync(object({
+      filter: object().unknown().default({}),
+    }).default(), params);
+    const { materializedPipelineBuilder: builder } = this;
+    if (!isFn(builder)) throw new Error(`No materialized pipeline builder function has been registered for ${this.name}`);
+
+    const pipeline = builder({ $match: filter });
+    // bypass the repo `aggregate` function so `_deleted` items will still be included.
+    const collection = await this.collection();
+    const cursor = await collection.aggregate(pipeline);
+    await cursor.toArray();
+    return 'ok';
+  }
+
+  /**
+   * Materializes data for the provided filter criteria when the bulk write result
+   * detects a change.
+   *
+   * @param {object} params
+   * @param {object} [params.filter]
+   * @returns {Promise<string>}
+   */
+  async matertializeWhenModified(params) {
+    const { filter, bulkWriteResult } = await validateAsync(object({
+      filter: object().unknown().default({}),
+      bulkWriteResult: object().unknown().required(),
+    }).default(), params);
+    const { nModified } = bulkWriteResult.result;
+    if (nModified) return this.materialize({ filter });
+    return null;
   }
 
   /**

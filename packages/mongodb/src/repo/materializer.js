@@ -119,7 +119,7 @@ const workspaceOrganizationStages = () => [
   { $unwind: '$_edge.organization.node' },
 ];
 
-export const buildApplicationPipeline = ({ $match = {}, withMerge = true } = {}) => {
+export const buildMaterializedApplicationPipeline = ({ $match = {}, withMerge = true } = {}) => {
   const pipeline = [];
   pipeline.push({ $match });
   pipeline.push({ $sort: { _id: 1 } });
@@ -128,7 +128,7 @@ export const buildApplicationPipeline = ({ $match = {}, withMerge = true } = {})
   return pipeline;
 };
 
-export const buildOrganizationPipeline = ({ $match = {}, withMerge = true } = {}) => {
+export const buildMaterializedOrganizationPipeline = ({ $match = {}, withMerge = true } = {}) => {
   const pipeline = [];
   pipeline.push({ $match });
   pipeline.push({ $sort: { _id: 1 } });

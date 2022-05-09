@@ -116,6 +116,10 @@ export default class AbstractManagementRepo extends ManagedRepo {
       session,
       context,
     });
+    const ids = result.upserted.map(({ _id }) => _id);
+    if (isFn(this.materializedPipelineBuilder) && ids.length) {
+      await this.materialize({ filter: { _id: { $in: ids } } });
+    }
     return result.upserted;
   }
 

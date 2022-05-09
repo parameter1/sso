@@ -1,3 +1,4 @@
 import createIndexes from './create-indexes.js';
+import materialize from './materialize.js';
 
-export default { createIndexes };
+export default { createIndexes, materialize };

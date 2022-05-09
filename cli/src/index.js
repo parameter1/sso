@@ -145,6 +145,7 @@ const run = async () => {
         {
           key: 'general',
           choices: [
+            { name: 'Create materialized collections', fnName: 'materialize' },
             { name: 'Create database indexes', fnName: 'createIndexes' },
           ],
         },

@@ -1,6 +1,7 @@
 import { ManagedRepo } from '@parameter1/mongodb';
 import { PropTypes, validateAsync, attempt } from '@parameter1/prop-types';
 import { isFunction as isFn } from '@parameter1/utils';
+import { get } from '@parameter1/object-path';
 
 import { contextSchema, contextProps } from '../../schema/index.js';
 import { CleanDocument } from '../../utils/clean-document.js';
@@ -116,10 +117,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
       session,
       context,
     });
-    const ids = result.upserted.map(({ _id }) => _id);
-    if (isFn(this.materializedPipelineBuilder) && ids.length) {
-      await this.materialize({ filter: { _id: { $in: ids } } });
-    }
     return result.upserted;
   }
 
@@ -154,6 +151,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {object} params
    * @param {object[]} params.ops
    * @param {object} params.ops.filter
+   * @param {object} [params.ops.materializeFilter]
    * @param {boolean} params.ops.many
    * @param {object} [params.session]
    * @param {object} [params.context]
@@ -162,6 +160,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
     const { ops, session, context } = await validateAsync(object({
       ops: array().items(object({
         filter: object().unknown().required(),
+        materializeFilter: object().unknown(),
         many: boolean().required(),
       }).required()).required(),
       session: object(),
@@ -172,6 +171,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       return this.bulkUpdate({
         ops: ops.map((op) => ({
           filter: op.filter,
+          materializeFilter: op.materializeFilter,
           many: op.many,
           update: [{ $set: { [DELETED_PATH]: true } }],
         })),
@@ -196,6 +196,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {boolean} params.ops.many
    * @param {object[]} params.ops.update
    * @param {boolean} [params.ops.upsert=false]
+   * @param {object} [params.ops.materializeFilter]
    * @param {object} [params.session]
    * @param {object} [params.context]
    * @param {boolean} [params.versioningEnabled=true]
@@ -212,6 +213,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
         many: boolean().required(),
         update: array().items(object().unknown().required()),
         upsert: boolean().default(false),
+        materializeFilter: object().unknown(),
       }).required()).required(),
       session: object(),
       context: contextSchema,
@@ -226,6 +228,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       user: context.userId ? { _id: context.userId } : null,
     };
 
+    const materializeFilters = [];
     const operations = ops.map((op) => {
       const type = op.many ? 'updateMany' : 'updateOne';
       const update = CleanDocument.value([
@@ -246,6 +249,11 @@ export default class AbstractManagementRepo extends ManagedRepo {
           },
         ] : []),
       ]);
+
+      const materializeFilter = op.materializeFilter || op.filter;
+      if (!AbstractManagementRepo.isCreateFilter(materializeFilter)) {
+        materializeFilters.push(materializeFilter);
+      }
       return {
         [type]: {
           filter: this.globalFindCriteria ? {
@@ -256,7 +264,32 @@ export default class AbstractManagementRepo extends ManagedRepo {
         },
       };
     });
-    return this.bulkWrite({ operations, options: { session } });
+
+    const bulkWriteResult = await this.bulkWrite({ operations, options: { session } });
+    if (this.materializedPipelineBuilder) {
+      // @todo while this works in most cases, updates that require materializing _related_
+      // documents will not be caught by this, and need to be handled manually in code. as such,
+      // change stream triggers would ultimatey be best.
+      await Promise.all([
+        // handle creates via upsert
+        (async () => {
+          const ids = bulkWriteResult.result.upserted.map(({ _id }) => _id);
+          if (!ids.length) return;
+          console.log({ UPSERTED: ids });
+          await this.materialize({ filter: { _id: { $in: ids } } });
+        })(),
+        // handle updates (including soft deletes)
+        (async () => {
+          if (!materializeFilters.length) return;
+          console.log({ materializeFilters });
+          await this.matertializeWhenModified({
+            filter: { $or: materializeFilters },
+            bulkWriteResult,
+          });
+        })(),
+      ]);
+    }
+    return bulkWriteResult;
   }
 
   /**
@@ -300,6 +333,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
    *
    * @param {object} params
    * @param {object} params.filter
+   * @param {object} [params.materializeFilter]
    * @param {boolean} [params.many=false]
    * @param {object} [params.session]
    * @param {object} [params.context]
@@ -307,16 +341,18 @@ export default class AbstractManagementRepo extends ManagedRepo {
   async delete(params) {
     const {
       filter,
+      materializeFilter,
       many,
       session,
       context,
     } = await validateAsync(object({
       filter: object().unknown().required(),
+      materializeFilter: object().unknown(),
       many: boolean().default(false),
       session: object(),
       context: contextSchema,
     }).required(), params);
-    return this.bulkDelete({ ops: [{ filter, many }], session, context });
+    return this.bulkDelete({ ops: [{ filter, materializeFilter, many }], session, context });
   }
 
   /**
@@ -389,6 +425,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
    *
    * @param {object} params
    * @param {object} [params.filter]
+   * @param {BulkWriteResult} params.bulkWriteResult
    * @returns {Promise<string>}
    */
   async matertializeWhenModified(params) {
@@ -412,6 +449,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {object} [params.session]
    * @param {object} [params.context]
    * @param {boolean} [params.versioningEnabled=true]
+   * @param {object} params.materializeFilter
    */
   async update(params) {
     const {
@@ -422,6 +460,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       session,
       context,
       versioningEnabled,
+      materializeFilter,
     } = await validateAsync(object({
       filter: object().unknown().required(),
       many: boolean().default(false),
@@ -430,12 +469,14 @@ export default class AbstractManagementRepo extends ManagedRepo {
       session: object(),
       context: contextSchema,
       versioningEnabled: boolean().default(true),
+      materializeFilter: object().unknown(),
     }).required(), params);
     const op = {
       filter,
       many,
       update,
       upsert,
+      materializeFilter,
     };
     return this.bulkUpdate({
       ops: [op],
@@ -453,6 +494,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {ObjectId} params.id
    * @param {object} [params.props]
    * @param {object} [params.query] Additional query params to apply
+   * @param {object} params.materializeFilter
    * @param {object} [params.session]
    * @param {object} [params.context]
    * @returns {Promise<BulkWriteResult|null>}
@@ -462,18 +504,25 @@ export default class AbstractManagementRepo extends ManagedRepo {
       id,
       props,
       query,
+      materializeFilter,
       session,
       context,
     } = await validateAsync(object({
       id: objectId().required(),
       props: propsSchema,
       query: object().unknown(),
+      materializeFilter: object().unknown(),
       session: object(),
       context: contextSchema,
     }).required(), params);
 
     return this.updatePropsForIds({
-      sets: [{ id, props, query }],
+      sets: [{
+        id,
+        props,
+        query,
+        materializeFilter,
+      }],
       session,
       context,
     });
@@ -487,6 +536,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {object[]} params.sets
    * @param {ObjectId|string} params.sets.id
    * @param {object[]} params.sets.props
+   * @param {object} params.sets.materializeFilter
    * @param {object} [params.sets.query] Additional query params to apply
    * @param {object} [params.session]
    * @param {object} [params.context]
@@ -502,20 +552,41 @@ export default class AbstractManagementRepo extends ManagedRepo {
         id: objectId().required(),
         props: propsSchema,
         query: object().unknown(),
+        materializeFilter: object().unknown(),
       }).required()).required(),
       session: object(),
       context: contextSchema,
     }).required(), params);
 
     const ops = [];
-    sets.forEach(({ id, props, query }) => {
+    sets.forEach(({
+      id,
+      props,
+      query,
+      materializeFilter,
+    }) => {
       const filtered = props.filter(({ value }) => typeof value !== 'undefined');
       if (!filtered.length) return; // noop
       const $set = filtered.reduce((o, { path, value }) => ({ ...o, [path]: value }), {});
       const filter = { ...query, _id: id };
-      ops.push({ filter, update: [{ $set }], many: false });
+      ops.push({
+        filter,
+        materializeFilter,
+        update: [{ $set }],
+        many: false,
+      });
     });
     if (!ops.length) return null; // noop
     return this.bulkUpdate({ ops, session, context });
+  }
+
+  /**
+   * Determines if the provided update filter is used for creating a new document via upsert.
+   *
+   * @param {object} filter
+   * @returns {boolean}
+   */
+  static isCreateFilter(filter) {
+    return get(filter, '_id.$lt') === 0;
   }
 }

@@ -148,7 +148,8 @@ export default class AbstractManagementRepo extends ManagedRepo {
   }
 
   /**
-   * Performs multiple delete one or many operations
+   * Performs multiple delete one or many operations. If the repo has soft delete enabled, the
+   * deleted performs `bulkUpdate` operations that set the `DELETED_PATH` to `true`.
    *
    * @param {object} params
    * @param {object[]} params.ops
@@ -186,6 +187,19 @@ export default class AbstractManagementRepo extends ManagedRepo {
     return this.bulkWrite({ operations, options: { session } });
   }
 
+  /**
+   * Performs multiple update one or many operations.
+   *
+   * @param {object} params
+   * @param {object[]} params.ops
+   * @param {object} params.ops.filter
+   * @param {boolean} params.ops.many
+   * @param {object[]} params.ops.update
+   * @param {boolean} [params.ops.upsert=false]
+   * @param {object} [params.session]
+   * @param {object} [params.context]
+   * @param {boolean} [params.versioningEnabled=true]
+   */
   async bulkUpdate(params) {
     const {
       ops,

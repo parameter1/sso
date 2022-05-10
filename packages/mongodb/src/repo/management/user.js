@@ -15,6 +15,7 @@ import {
 import { sluggifyUserNames } from '../../schema/user.js';
 import Expr from '../../pipelines/utils/expr.js';
 import runTransaction from '../../utils/run-transaction.js';
+import { buildMaterializedUserPipeline } from '../materializer.js';
 
 const {
   $addToSet,
@@ -49,6 +50,7 @@ export default class UserRepo extends AbstractManagementRepo {
         { key: { 'slug.reverse': 1, _id: 1 } },
       ],
       schema: userSchema,
+      materializedPipelineBuilder: buildMaterializedUserPipeline,
     });
   }
 
@@ -80,6 +82,7 @@ export default class UserRepo extends AbstractManagementRepo {
 
     return this.update({
       filter: { _id: userId, 'workspaces._id': { $ne: workspaceId } },
+      materializeFilter: { _id: userId },
       update: [{
         $set: {
           workspaces: $addToSet('workspaces', { _id: workspaceId, role }),
@@ -114,6 +117,7 @@ export default class UserRepo extends AbstractManagementRepo {
     }).required(), params);
     return this.update({
       filter: { _id: userId, 'workspaces._id': workspaceId },
+      materializeFilter: { _id: userId },
       update: [{
         $set: {
           workspaces: $pull('workspaces', { $ne: ['$$v._id', workspaceId] }),
@@ -152,6 +156,7 @@ export default class UserRepo extends AbstractManagementRepo {
 
     return this.update({
       filter: { _id: userId, 'organizations._id': { $ne: orgId } },
+      materializeFilter: { _id: userId },
       update: [{
         $set: {
           organizations: $addToSet('organizations', { _id: orgId, role }),
@@ -187,6 +192,7 @@ export default class UserRepo extends AbstractManagementRepo {
 
     return this.update({
       filter: { _id: id, email: { $ne: email } },
+      materializeFilter: { _id: id },
       many: false,
       update: [{
         $set: {
@@ -232,6 +238,7 @@ export default class UserRepo extends AbstractManagementRepo {
         _id: userId,
         workspaces: { $elemMatch: { _id: workspaceId, role: { $ne: role } } },
       },
+      materializeFilter: { _id: userId },
       update: [{
         $set: {
           workspaces: $mergeArrayObject('workspaces', { $eq: ['$$v._id', workspaceId] }, { role }),
@@ -273,6 +280,7 @@ export default class UserRepo extends AbstractManagementRepo {
         _id: userId,
         organizations: { $elemMatch: { _id: orgId, role: { $ne: role } } },
       },
+      materializeFilter: { _id: userId },
       update: [{
         $set: {
           organizations: $mergeArrayObject('organizations', { $eq: ['$$v._id', orgId] }, { role }),
@@ -501,6 +509,7 @@ export default class UserRepo extends AbstractManagementRepo {
     }).required(), params);
     return this.update({
       filter: { _id: userId, 'organizations._id': orgId },
+      materializeFilter: { _id: userId },
       update: [{
         $set: {
           organizations: $pull('organizations', { $ne: ['$$v._id', orgId] }),
@@ -546,7 +555,7 @@ export default class UserRepo extends AbstractManagementRepo {
           { familyName: { $ne: familyName } },
         ],
       },
-      many: false,
+      materializeFilter: { _id: id },
       update: [{
         $set: {
           givenName,
@@ -583,7 +592,6 @@ export default class UserRepo extends AbstractManagementRepo {
       if (!impersonated) {
         await this.update({
           filter: { _id: user._id },
-          many: false,
           update: [{ $set: { lastSeenAt: '$$NOW' } }],
           versioningEnabled: false,
         });

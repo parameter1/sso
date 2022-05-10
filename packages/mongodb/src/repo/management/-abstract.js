@@ -54,16 +54,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
 
     super({
       ...rest,
-      // ensure all indexes exclude soft-deleted items
-      // since the `DELETED_PATH` is added as global find criteria, this will ensure
-      // that indexes are still preserved when querying.
-      indexes: usesSoftDelete ? (indexes || []).map((index) => ({
-        ...index,
-        partialFilterExpression: {
-          ...index.partialFilterExpression,
-          [DELETED_PATH]: false,
-        },
-      })) : indexes,
+      indexes,
       // ensure soft-deleted documents are excluded from all queries.
       globalFindCriteria: usesSoftDelete ? { [DELETED_PATH]: false } : undefined,
     });

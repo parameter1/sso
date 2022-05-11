@@ -10,4 +10,10 @@ export default {
     USER: 'user',
     WORKSPACE: 'workspace',
   },
+
+  OrganizationManagerRoleEnum: {
+    OWNER: 'Owner',
+    ADMINISTRATOR: 'Administrator',
+    MANAGER: 'Manager',
+  },
 };

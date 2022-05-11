@@ -2,6 +2,12 @@ import { gql } from '@parameter1/graphql/tag';
 
 export default gql`
 
+enum OrganizationManagerRoleEnum {
+  OWNER
+  ADMINISTRATOR
+  MANAGER
+}
+
 interface OrganizationInterface {
   "The unique organization identifier"
   _id: ObjectID! @project

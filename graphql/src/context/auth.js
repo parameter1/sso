@@ -69,8 +69,16 @@ export default function AuthContext({ header } = {}) {
     }
   };
 
+  const checkIsCurrentUser = async (id, message = 'You do not have the proper permissions to perform this operation.') => {
+    if (!id) throw new Error('A user ID is required in order to check if the current user matches');
+    const currentUserId = await getUserId();
+    if (`${currentUserId}` !== `${id}`) throw Errors.forbidden(message);
+    return true;
+  };
+
   return {
     check,
+    checkIsCurrentUser,
     getAuthToken,
     getUser,
     getUserId,

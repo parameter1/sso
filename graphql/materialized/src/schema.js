@@ -2,6 +2,7 @@ import { makeExecutableSchema } from '@parameter1/graphql/schema';
 import { enumDefaultValuesTransformer } from '@parameter1/graphql/transformers';
 import {
   arrayDirectiveTransformer,
+  interfaceFieldsDirectiveTransformer,
   objectDirectiveTransformer,
 } from '@parameter1/graphql/directives';
 import {
@@ -19,7 +20,8 @@ const schema = makeExecutableSchema({
   typeDefs,
 });
 
-const withProject = projectDirectiveTransformer(schema);
+const withInterfaceFields = interfaceFieldsDirectiveTransformer(schema);
+const withProject = projectDirectiveTransformer(withInterfaceFields);
 const withConnectionProject = connectionProjectDirectiveTransformer(withProject);
 const withAuth = authDirectiveTransformer(withConnectionProject);
 const withArray = arrayDirectiveTransformer(withAuth);

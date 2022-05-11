@@ -109,10 +109,40 @@ const workspaceOrganizationStages = () => [
   { $unwind: '$_edge.organization.node' },
 ];
 
+const userAttributionStages = () => [
+  {
+    $lookup: {
+      from: 'users',
+      as: '_edge.createdBy.node',
+      localField: '_touched.first.user._id',
+      foreignField: '_id',
+      pipeline: [{ $project: userProjection() }],
+    },
+  },
+  { $unwind: { path: '$_edge.createdBy.node', preserveNullAndEmptyArrays: true } },
+  {
+    $lookup: {
+      from: 'users',
+      as: '_edge.updatedBy.node',
+      localField: '_touched.last.user._id',
+      foreignField: '_id',
+      pipeline: [{ $project: userProjection() }],
+    },
+  },
+  { $unwind: { path: '$_edge.updatedBy.node', preserveNullAndEmptyArrays: true } },
+  {
+    $addFields: {
+      '_edge.createdBy': { $ifNull: ['$_edge.createdBy.node', null] },
+      '_edge.updatedBy': { $ifNull: ['$_edge.updatedBy.node', null] },
+    },
+  },
+];
+
 export const buildMaterializedApplicationPipeline = ({ $match = {}, withMerge = true } = {}) => {
   const pipeline = [];
   pipeline.push({ $match });
   pipeline.push({ $sort: { _id: 1 } });
+  pipeline.push(...userAttributionStages());
   pipeline.push({ $project: applicationProjection() });
   if (withMerge) pipeline.push({ $merge: mergeStage({ coll: 'applications' }) });
   return pipeline;
@@ -122,6 +152,7 @@ export const buildMaterializedOrganizationPipeline = ({ $match = {}, withMerge =
   const pipeline = [];
   pipeline.push({ $match });
   pipeline.push({ $sort: { _id: 1 } });
+  pipeline.push(...userAttributionStages());
   pipeline.push({ $project: organizationProjection() });
   if (withMerge) pipeline.push({ $merge: mergeStage({ coll: 'organizations' }) });
   return pipeline;
@@ -131,6 +162,7 @@ export const buildMaterializedUserPipeline = ({ $match = {}, withMerge = true } 
   const pipeline = [];
   pipeline.push({ $match });
   pipeline.push({ $sort: { _id: 1 } });
+  pipeline.push(...userAttributionStages());
 
   // managed organizations
   pipeline.push({
@@ -275,6 +307,7 @@ export const buildMaterializedWorkspacePipeline = ({ $match = {}, withMerge = tr
   const pipeline = [];
   pipeline.push({ $match });
   pipeline.push({ $sort: { _id: 1 } });
+  pipeline.push(...userAttributionStages());
 
   // application
   pipeline.push(...workspaceApplicationStages());

@@ -5,6 +5,7 @@ import {
 } from '@parameter1/graphql/features';
 
 import application from './application.js';
+import organization from './organization.js';
 import user from './user.js';
 
 export default gql`
@@ -42,6 +43,7 @@ ${paginationDefinitions}
 ${sortOrderDefinitions}
 
 ${application}
+${organization}
 ${user}
 
 `;

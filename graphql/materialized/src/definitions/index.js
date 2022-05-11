@@ -4,6 +4,8 @@ import {
   sortOrderDefinitions,
 } from '@parameter1/graphql/features';
 
+import user from './user.js';
+
 export default gql`
 
 scalar DateTime
@@ -27,5 +29,7 @@ type Mutation {
 
 ${paginationDefinitions}
 ${sortOrderDefinitions}
+
+${user}
 
 `;

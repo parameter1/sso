@@ -4,19 +4,22 @@ export default gql`
 
 type Application {
   "The unique application identifier"
-  id: ObjectID! @project(field: "_id")
+  _id: ObjectID! @project
+  "Dates associated with this application, such as first created and last touched."
+  date: ApplicationDate! @project(field: "", deep: true) @object
+  "The unique application key."
+  key: String! @project
   "The application name."
   name: String! @project
-  "The unique application slug."
-  slug: String! @project
-  "Any previous slugs that this application used that are now considered redirects."
-  redirects: [String!]! @project @array
   "Membership roles that this application supports."
   roles: [String!]! @project @array
+}
+
+type ApplicationDate {
   "The ISO date when the application was created."
-  createdAt: DateTime! @project(field: "date.created")
-  "The ISO date when the application was last updated."
-  updatedAt: DateTime! @project(field: "date.updated")
+  created: DateTime! @project(field: "_touched.first.date")
+  "The ISO date when the application was last touched."
+  touched: DateTime! @project(field: "_touched.last.date")
 }
 
 `;

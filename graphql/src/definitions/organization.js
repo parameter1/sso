@@ -4,19 +4,22 @@ export default gql`
 
 type Organization {
   "The unique organization identifier"
-  id: ObjectID! @project(field: "_id")
-  "The organization name."
-  name: String! @project
-  "The unique organization slug."
-  slug: String! @project
-  "Any previous slugs that this organization used that are now considered redirects."
-  redirects: [String!]! @project @array
+  _id: ObjectID! @project
+  "Dates associated with this organization, such as first created and last touched."
+  date: OrganizationDate! @project(field: "", deep: true) @object
   "Email domains associated with this organization."
   emailDomains: [String!]! @project @array
+  "The unique organization key."
+  key: String! @project
+  "The organization name."
+  name: String! @project
+}
+
+type OrganizationDate {
   "The ISO date when the organization was created."
-  createdAt: DateTime! @project(field: "date.created")
-  "The ISO date when the organization was last updated."
-  updatedAt: DateTime! @project(field: "date.updated")
+  created: DateTime! @project(field: "_touched.first.date")
+  "The ISO date when the organization was last touched."
+  touched: DateTime! @project(field: "_touched.last.date")
 }
 
 `;

@@ -43,6 +43,11 @@ type User_Connection {
     @project(deep: true)
     @object
     @auth
+  "The workspaces that this user is a member of."
+  workspace: User_ConnectionWorkspace!
+    @project(deep: true)
+    @object
+    @auth
   "Applications of this user of by way the user's workspace memberships."
   workspaceApplication: User_ConnectionWorkspaceApplication!
     @project(deep: true)
@@ -76,6 +81,26 @@ type User_ConnectionOrganizationEdgeRole {
   name: String! @project(field: "role")
 }
 
+type User_ConnectionWorkspace {
+  edges: [User_ConnectionWorkspaceEdge!]!
+    @project(field: "", deep: true, needs: ["node._deleted"])
+    @filterDeleted(field: "node")
+    @array
+}
+
+type User_ConnectionWorkspaceEdge {
+  "The user's workspace membership role."
+  role: User_ConnectionWorkspaceEdgeRole! @project(field: "", deep: true)
+  "The workspace the user is a member of."
+  node: WorkspacePartial! @project(deep: true)
+}
+
+type User_ConnectionWorkspaceEdgeRole {
+  "The role identifier."
+  _id: OrganizationManagerRoleEnum! @project(field: "role")
+  "The role name."
+  name: String! @project(field: "role")
+}
 
 type User_ConnectionWorkspaceApplication {
   edges: [User_ConnectionWorkspaceApplicationEdge!]!

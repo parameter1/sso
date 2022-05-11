@@ -132,8 +132,12 @@ const userAttributionStages = () => [
   { $unwind: { path: '$_edge.updatedBy.node', preserveNullAndEmptyArrays: true } },
   {
     $addFields: {
-      '_edge.createdBy': { $ifNull: ['$_edge.createdBy.node', null] },
-      '_edge.updatedBy': { $ifNull: ['$_edge.updatedBy.node', null] },
+      '_edge.createdBy': {
+        $cond: [{ $eq: [{ $ifNull: ['$_edge.createdBy.node', null] }, null] }, null, { node: '$_edge.createdBy.node' }],
+      },
+      '_edge.updatedBy': {
+        $cond: [{ $eq: [{ $ifNull: ['$_edge.updatedBy.node', null] }, null] }, null, { node: '$_edge.updatedBy.node' }],
+      },
     },
   },
 ];

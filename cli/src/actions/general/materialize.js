@@ -1,17 +1,11 @@
 import inquirer from 'inquirer';
-import {
-  buildMaterializedApplicationPipeline,
-  buildMaterializedOrganizationPipeline,
-  buildMaterializedUserPipeline,
-  buildMaterializedWorkspacePipeline,
-} from '@parameter1/sso-mongodb';
 import repos from '../../repos.js';
 
-const pipelineMap = new Map([
-  ['application', buildMaterializedApplicationPipeline],
-  ['organization', buildMaterializedOrganizationPipeline],
-  ['user', buildMaterializedUserPipeline],
-  ['workspace', buildMaterializedWorkspacePipeline],
+const pipelineMap = new Set([
+  'application',
+  'organization',
+  'user',
+  'workspace',
 ]);
 
 export default async () => {
@@ -44,10 +38,7 @@ export default async () => {
   const { types, confirm } = await inquirer.prompt(questions);
 
   return confirm ? Promise.all(types.map(async (type) => {
-    const builder = pipelineMap.get(type);
-    const pipeline = builder();
-    const cursor = await repos.$(type).aggregate({ pipeline });
-    await cursor.toArray();
+    await repos.$(type).materialize();
     return { [type]: 'ok' };
   })) : [];
 };

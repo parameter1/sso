@@ -31,6 +31,8 @@ const {
   string,
 } = PropTypes;
 
+const { error: logError } = console;
+
 export default class UserRepo extends AbstractManagementRepo {
   /**
    *
@@ -590,11 +592,13 @@ export default class UserRepo extends AbstractManagementRepo {
       });
 
       if (!impersonated) {
-        await this.update({
+        // do not await
+        // @todo determine how to log this
+        this.update({
           filter: { _id: user._id },
           update: [{ $set: { lastSeenAt: '$$NOW' } }],
           versioningEnabled: false,
-        });
+        }).catch((e) => logError(e));
       }
       return user;
     } catch (e) {

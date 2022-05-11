@@ -7,6 +7,7 @@ export default function introspect({
   returnType,
   schema,
   fragments,
+  shallow = false,
 }, { parentFieldPath = '', map = new Map() } = {}) {
   const selections = getAsArray(selectionSet, 'selections');
   if (!selections.length) return map;
@@ -43,12 +44,14 @@ export default function introspect({
         ...getAsArray(selection, 'selectionSet.selections'),
       ];
 
-      introspect({
-        selectionSet: selection.selectionSet,
-        returnType: field.type,
-        schema,
-        fragments,
-      }, { parentFieldPath: path, map });
+      if (!shallow) {
+        introspect({
+          selectionSet: selection.selectionSet,
+          returnType: field.type,
+          schema,
+          fragments,
+        }, { parentFieldPath: path, map });
+      }
     }
 
     if (selection.kind === Kind.FRAGMENT_SPREAD) {

@@ -12,7 +12,7 @@ interface OrganizationInterface {
   "The unique organization identifier"
   _id: ObjectID! @project
   "Dates associated with this organization, such as first created and last updated."
-  date: OrganizationDate! @project(field: "", deep: true) @object
+  date: OrganizationDate! @project(field: "_date", deep: true) @object
   "Email domains associated with this organization."
   emailDomains: [String!]! @project @array
   "The unique organization key."

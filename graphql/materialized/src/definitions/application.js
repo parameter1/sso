@@ -6,7 +6,7 @@ interface ApplicationInterface {
   "The unique application identifier"
   _id: ObjectID! @project
   "Dates associated with this application, such as first created and last updated."
-  date: ApplicationDate! @project(field: "", deep: true) @object
+  date: ApplicationDate! @project(field: "_date", deep: true) @object
   "The unique application key."
   key: String! @project
   "The application name."

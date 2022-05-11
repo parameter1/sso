@@ -1,5 +1,7 @@
 import { RepoManager, ManagedRepo } from '@parameter1/mongodb';
 
+const DELETED_PATH = '_deleted';
+
 const repos = [
   { key: 'application', collectionName: 'applications', indexes: [] },
   { key: 'organization', collectionName: 'organizations', indexes: [] },
@@ -16,7 +18,11 @@ export default class MaterializedRepos extends RepoManager {
   constructor({ client, dbName = 'sso@materialized' } = {}) {
     super({ client, dbName });
     repos.forEach((params) => {
-      this.add({ ...params, ManagedRepo });
+      this.add({
+        ...params,
+        globalFindCriteria: { [DELETED_PATH]: false },
+        ManagedRepo,
+      });
     });
   }
 }

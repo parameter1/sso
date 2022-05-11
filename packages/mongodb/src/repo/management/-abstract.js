@@ -307,8 +307,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
               if (!materializedIds.length) return;
               // load update operations from the hook
               const updates = await this.onMaterialize({ materializedIds });
-              console.log({ updates });
-              // excute the updates
+              // execute the updates
               await Promise.all([...updates]
                 .filter(([repoName, filter]) => repoName && filter)
                 .map(async ([repoName, filter]) => this.manager.$(repoName).materialize({
@@ -459,7 +458,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
     if (!isFn(builder)) throw new Error(`No materialized pipeline builder function has been registered for the ${this.name} repo.`);
 
     const pipeline = builder({ $match: filter });
-    console.log(this.name, pipeline);
     const cursor = await this.aggregate({ pipeline, options: { useGlobalFindCriteria: false } });
     await cursor.toArray();
     return 'ok';

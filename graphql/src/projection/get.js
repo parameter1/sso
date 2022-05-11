@@ -16,7 +16,6 @@ const getDeepSelections = ({
 }) => {
   if (!selections.length) return map;
   const type = getReturnType(returnType);
-  // will need to figure out fragments...
   selections.forEach((selection) => {
     const subSelections = getAsArray(selection, 'selectionSet.selections');
 

@@ -3,9 +3,9 @@ import { sluggify } from '@parameter1/slug';
 
 import AbstractManagementRepo from './-abstract.js';
 import { applicationProps, applicationSchema, contextSchema } from '../../schema/index.js';
-import runTransaction from '../../utils/run-transaction.js';
+import { buildMaterializedApplicationPipeline } from '../materializer.js';
 
-const { array, object, objectId } = PropTypes;
+const { object } = PropTypes;
 
 export default class ApplicationRepo extends AbstractManagementRepo {
   /**
@@ -22,36 +22,19 @@ export default class ApplicationRepo extends AbstractManagementRepo {
         { key: { slug: 1 } },
       ],
       schema: applicationSchema,
+      materializedPipelineBuilder: buildMaterializedApplicationPipeline,
+      onMaterialize: async ({ materializedIds }) => {
+        const update = new Map();
+        update.set('workspace', { 'application._id': { $in: materializedIds } });
+        const workspaceIds = await this.manager.$('workspace').distinct({
+          key: '_id',
+          query: { 'application._id': { $in: materializedIds } },
+          options: { useGlobalFindCriteria: false },
+        });
+        if (workspaceIds.length) update.set('user', { 'workspaces._id': { $in: workspaceIds } });
+        return update;
+      },
     });
-  }
-
-  /**
-   * Deletes multiple documents for the provided IDs. Overloaded to ensure workspaces are also
-   * deleted.
-   *
-   * @param {object} params
-   * @param {ObjectId|string} params.id
-   * @param {object} params.session
-   * @param {object} params.context
-   * @returns {Promise<BulkWriteResult>}
-   */
-  async deleteForIds(params) {
-    const { ids, session: currentSession, context } = await validateAsync(object({
-      ids: array().items(objectId().required()).required(),
-      session: object(),
-      context: contextSchema,
-    }).required(), params);
-
-    return runTransaction(async ({ session }) => {
-      const r = await super.deleteForIds({ ids, session, context });
-      await this.manager.$('workspace').delete({
-        filter: { 'application._id': { $in: ids } },
-        many: true,
-        session,
-        context,
-      });
-      return r;
-    }, { client: this.client, currentSession });
   }
 
   /**
@@ -90,6 +73,7 @@ export default class ApplicationRepo extends AbstractManagementRepo {
 
     return this.update({
       filter: { _id: id, name: { $ne: name } },
+      materializeFilter: { _id: id },
       many: false,
       update: [{ $set: { name, slug: sluggify(name) } }],
       session,

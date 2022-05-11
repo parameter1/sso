@@ -3,6 +3,7 @@ import { sluggify } from '@parameter1/slug';
 
 import AbstractManagementRepo from './-abstract.js';
 import { contextSchema, workspaceProps, workspaceSchema } from '../../schema/index.js';
+import { buildMaterializedWorkspacePipeline } from '../materializer.js';
 
 const { object } = PropTypes;
 
@@ -22,6 +23,12 @@ export default class WorkspaceRepo extends AbstractManagementRepo {
         { key: { 'application._id': 1 } },
       ],
       schema: workspaceSchema,
+      materializedPipelineBuilder: buildMaterializedWorkspacePipeline,
+      onMaterialize: async ({ materializedIds }) => {
+        const update = new Map();
+        update.set('user', { 'workspaces._id': { $in: materializedIds } });
+        return update;
+      },
     });
   }
 
@@ -50,6 +57,7 @@ export default class WorkspaceRepo extends AbstractManagementRepo {
 
     return this.update({
       filter: { _id: id, name: { $ne: name } },
+      materializeFilter: { _id: id },
       many: false,
       update: [{ $set: { name, slug: sluggify(name) } }],
       session,

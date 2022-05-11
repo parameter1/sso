@@ -3,9 +3,9 @@ import { sluggify } from '@parameter1/slug';
 
 import AbstractManagementRepo from './-abstract.js';
 import { contextSchema, organizationProps, organizationSchema } from '../../schema/index.js';
-import runTransaction from '../../utils/run-transaction.js';
+import { buildMaterializedOrganizationPipeline } from '../materializer.js';
 
-const { array, object, objectId } = PropTypes;
+const { object } = PropTypes;
 
 export default class OrganizationRepo extends AbstractManagementRepo {
   /**
@@ -22,36 +22,24 @@ export default class OrganizationRepo extends AbstractManagementRepo {
         { key: { slug: 1 } },
       ],
       schema: organizationSchema,
+      materializedPipelineBuilder: buildMaterializedOrganizationPipeline,
+      onMaterialize: async ({ materializedIds }) => {
+        const update = new Map();
+        update.set('workspace', { 'organization._id': { $in: materializedIds } });
+        const workspaceIds = await this.manager.$('workspace').distinct({
+          key: '_id',
+          query: { 'organization._id': { $in: materializedIds } },
+          options: { useGlobalFindCriteria: false },
+        });
+        update.set('user', {
+          $or: [
+            { 'workspaces._id': { $in: workspaceIds } },
+            { 'organizations._id': { $in: materializedIds } },
+          ],
+        });
+        return update;
+      },
     });
-  }
-
-  /**
-   * Deletes multiple documents for the provided IDs. Overloaded to ensure workspaces are also
-   * deleted.
-   *
-   * @param {object} params
-   * @param {ObjectId|string} params.id
-   * @param {object} params.session
-   * @param {object} params.context
-   * @returns {Promise<BulkWriteResult>}
-   */
-  async deleteForIds(params) {
-    const { ids, session: currentSession, context } = await validateAsync(object({
-      ids: array().items(objectId().required()).required(),
-      session: object(),
-      context: contextSchema,
-    }).required(), params);
-
-    return runTransaction(async ({ session }) => {
-      const r = await super.deleteForIds({ ids, session, context });
-      await this.manager.$('workspace').delete({
-        filter: { 'organization._id': { $in: ids } },
-        many: true,
-        session,
-        context,
-      });
-      return r;
-    }, { client: this.client, currentSession });
   }
 
   /**
@@ -90,6 +78,7 @@ export default class OrganizationRepo extends AbstractManagementRepo {
 
     return this.update({
       filter: { _id: id, name: { $ne: name } },
+      materializeFilter: { _id: id },
       many: false,
       update: [{ $set: { name, slug: sluggify(name) } }],
       session,

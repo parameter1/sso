@@ -1,4 +1,4 @@
-import { AuthenticationError } from 'apollo-server-fastify';
+import Errors from '../utils/errors.js';
 import repos from '../repos.js';
 
 const requiredUserFields = ['name'];
@@ -11,12 +11,6 @@ const parseHeader = (header) => {
   return { type, value };
 };
 
-// const forbidden = (message) => {
-//   const e = new ApolloError(message);
-//   e.statusCode = 403;
-//   return e;
-// };
-
 export default function AuthContext({ header } = {}) {
   let authToken;
   let error;
@@ -28,7 +22,7 @@ export default function AuthContext({ header } = {}) {
       promise = (async () => {
         if (!header) return;
         const { type, value } = parseHeader(header);
-        if (type !== 'Bearer') throw new AuthenticationError(`The auth type '${type}' is not supported.`);
+        if (type !== 'Bearer') throw Errors.notAuthenticated(`The auth type '${type}' is not supported.`);
         if (!value) return;
         authToken = value;
         user = await repos.$('user').verifyAuthToken({
@@ -46,8 +40,8 @@ export default function AuthContext({ header } = {}) {
 
   const check = async () => {
     await load();
-    if (error) throw new AuthenticationError(error.message);
-    if (!user) throw new AuthenticationError('You must be logged-in to access this resource.');
+    if (error) throw Errors.notAuthenticated(error.message);
+    if (!user) throw Errors.notAuthenticated('You must be logged-in to access this resource.');
     return true;
   };
 

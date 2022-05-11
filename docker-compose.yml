@@ -70,6 +70,22 @@ services:
     depends_on:
       - mongodb-secondary
 
+  graphql-materialized:
+    <<: *node
+    working_dir: /sso/graphql/materialized
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: [*env, *env-core]
+      EXPOSED_HOST: sso.dev.parameter1.com
+      EXPOSED_PORT: 7915
+      HOST: sso.dev.parameter1.com
+    ports:
+      - "7915:80"
+    hostname: sso.dev.parameter1.com
+    depends_on:
+      - mongodb-secondary
+
   lib:
     <<: *node
     working_dir: /sso/lib

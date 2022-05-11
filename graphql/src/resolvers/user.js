@@ -93,20 +93,6 @@ export default {
   /**
    *
    */
-  User: {
-    /**
-     *
-     */
-    workspaceRole({ memberships }, { input }) {
-      const { id } = input;
-      const membership = memberships.find((m) => `${m.workspace._id}` === `${id}`);
-      return membership ? membership.role : null;
-    },
-  },
-
-  /**
-   *
-   */
   UserAuth: {
     /**
      *

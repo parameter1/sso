@@ -36,11 +36,6 @@ type User {
   slug: UserSlug! @project(deep: true)
   "Whether the user email address has been verified."
   verified: Boolean! @project
-
-  "Gets a workspace membership role for the provided input, or will return null if the user is not a member."
-  workspaceRole(input: UserWorkspaceRoleInput!): String
-    @auth
-    @project(field: "memberships")
 }
 
 

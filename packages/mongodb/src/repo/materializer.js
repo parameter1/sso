@@ -66,6 +66,13 @@ const userProjection = (fn) => wrap({
 
 const workspaceProjection = (fn) => wrap({
   ...standardProjection(),
+  _deleted: {
+    $or: [
+      { $eq: ['$_deleted', true] },
+      { $eq: ['$_edge.application.node._deleted', true] },
+      { $eq: ['$_edge.organization.node._deleted', true] },
+    ],
+  },
   key: 1,
   name: 1,
   path: {
@@ -85,16 +92,6 @@ const workspaceApplicationStages = () => [
       as: '_edge.application.node',
       localField: 'application._id',
       foreignField: '_id',
-      pipeline: [
-        { $match: { $expr: { $eq: ['$_deleted', false] } } },
-        {
-          $project: applicationProjection((project) => {
-            const p = { ...project };
-            delete p._deleted;
-            return p;
-          }),
-        },
-      ],
     },
   },
   { $unwind: '$_edge.application.node' },
@@ -107,16 +104,6 @@ const workspaceOrganizationStages = () => [
       as: '_edge.organization.node',
       localField: 'organization._id',
       foreignField: '_id',
-      pipeline: [
-        { $match: { $expr: { $eq: ['$_deleted', false] } } },
-        {
-          $project: organizationProjection((project) => {
-            const p = { ...project };
-            delete p._deleted;
-            return p;
-          }),
-        },
-      ],
     },
   },
   { $unwind: '$_edge.organization.node' },
@@ -154,7 +141,6 @@ export const buildMaterializedUserPipeline = ({ $match = {}, withMerge = true } 
       foreignField: '_id',
       let: { organizations: '$organizations' },
       pipeline: [
-        { $match: { $expr: { $eq: ['$_deleted', false] } } },
         { $sort: { slug: 1 } },
         { $project: organizationProjection() },
 
@@ -166,7 +152,7 @@ export const buildMaterializedUserPipeline = ({ $match = {}, withMerge = true } 
           },
         },
 
-        { $unset: ['docs._id', '_deleted'] },
+        { $unset: ['docs._id'] },
         { $unwind: '$docs' },
 
         {
@@ -202,8 +188,6 @@ export const buildMaterializedUserPipeline = ({ $match = {}, withMerge = true } 
       let: { workspaces: '$workspaces' },
 
       pipeline: [
-        { $match: { $expr: { $eq: ['$_deleted', false] } } },
-
         // workspace application
         ...workspaceApplicationStages(),
 
@@ -220,7 +204,7 @@ export const buildMaterializedUserPipeline = ({ $match = {}, withMerge = true } 
           },
         },
 
-        { $unset: ['docs._id', '_deleted'] },
+        { $unset: ['docs._id'] },
         { $unwind: '$docs' },
 
         {

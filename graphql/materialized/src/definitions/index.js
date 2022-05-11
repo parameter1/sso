@@ -4,6 +4,7 @@ import {
   sortOrderDefinitions,
 } from '@parameter1/graphql/features';
 
+import application from './application.js';
 import user from './user.js';
 
 export default gql`
@@ -40,6 +41,7 @@ enum LoadOwnerDirectiveTypeEnum {
 ${paginationDefinitions}
 ${sortOrderDefinitions}
 
+${application}
 ${user}
 
 `;

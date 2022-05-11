@@ -6,6 +6,7 @@ import {
 } from '@parameter1/graphql/directives';
 
 import authDirectiveTransformer from './directives/auth.js';
+import connectionProjectDirectiveTransformer from './directives/connection-project.js';
 import projectDirectiveTransformer from './directives/project.js';
 import enums from './enums.js';
 import resolvers from './resolvers/index.js';
@@ -16,8 +17,9 @@ const schema = makeExecutableSchema({
   typeDefs,
 });
 
-const withProjectSchema = projectDirectiveTransformer(schema);
-const withAuth = authDirectiveTransformer(withProjectSchema);
+const withProject = projectDirectiveTransformer(schema);
+const withConnectionProject = connectionProjectDirectiveTransformer(withProject);
+const withAuth = authDirectiveTransformer(withConnectionProject);
 const withArray = arrayDirectiveTransformer(withAuth);
 const withObject = objectDirectiveTransformer(withArray);
 

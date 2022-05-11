@@ -32,13 +32,19 @@ export default {
     /**
      *
      */
-    async ownUserProfile(_, { input }, { auth, repos }, info) {
+    async ownUserProfile(_, { input }, {
+      auth,
+      ip,
+      repos,
+      ua,
+    }, info) {
       const id = await auth.getUserId();
       const user = repos.$('user');
       await user.updateName({
         id,
         givenName: input.givenName,
         familyName: input.familyName,
+        context: { userId: id, ip, ua },
       });
       const { projection } = getProjectionForType(info);
       return user.findByObjectId({ id, options: { projection } });

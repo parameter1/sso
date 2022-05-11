@@ -4,10 +4,12 @@ import {
   arrayDirectiveTransformer,
   objectDirectiveTransformer,
 } from '@parameter1/graphql/directives';
+import {
+  authDirectiveTransformer,
+  connectionProjectDirectiveTransformer,
+  projectDirectiveTransformer,
+} from '@parameter1/sso-graphql';
 
-import authDirectiveTransformer from './directives/auth.js';
-import connectionProjectDirectiveTransformer from './directives/connection-project.js';
-import projectDirectiveTransformer from './directives/project.js';
 import enums from './enums.js';
 import resolvers from './resolvers/index.js';
 import typeDefs from './definitions/index.js';

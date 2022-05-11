@@ -7,7 +7,6 @@ import {
 import application from './application.js';
 import organization from './organization.js';
 import user from './user.js';
-import workspace from './workspace.js';
 
 export default gql`
 
@@ -36,6 +35,5 @@ ${sortOrderDefinitions}
 ${application}
 ${organization}
 ${user}
-${workspace}
 
 `;

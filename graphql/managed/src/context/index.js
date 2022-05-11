@@ -1,10 +1,11 @@
-import AuthContext from './auth.js';
+import { AuthContext } from '@parameter1/sso-graphql';
 import repos from '../repos.js';
 
 export default async ({ request } = {}) => {
   const dataloaders = await repos.createDataloaders();
   return {
     auth: AuthContext({
+      managementRepos: repos,
       header: request.headers.authorization,
     }),
     dataloaders,

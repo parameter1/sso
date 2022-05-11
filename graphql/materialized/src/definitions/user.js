@@ -25,33 +25,99 @@ interface UserInterface {
   verified: Boolean! @project
 }
 
-type EmbeddedUser implements UserInterface @interfaceFields {
-  "The unique user identifier"
-  _id: ObjectID! @project
+type UserPartial implements UserInterface @interfaceFields {
   "The owning document."
   _owner: User! @loadOwner(type: USER)
 }
 
 type User implements UserInterface @interfaceFields {
+  "Related connections."
+  _connection: User_Connection! @project(deep: true) @object
   "Related edges."
   _edge: User_Edge! @project(deep: true) @object
 }
 
+type User_Connection {
+  "The organizations that this user manages."
+  organization: User_ConnectionOrganization!
+    @project(deep: true)
+    @object
+    @auth
+  "Applications of this user of by way the user's workspace memberships."
+  workspaceApplication: User_ConnectionWorkspaceApplication!
+    @project(deep: true)
+    @object
+    @auth
+  "Organizations of this user of by way the user's workspace memberships."
+  workspaceOrganization: User_ConnectionWorkspaceOrganization!
+    @project(deep: true)
+    @object
+    @auth
+}
+
+type User_ConnectionOrganization {
+  edges: [User_ConnectionOrganizationEdge!]!
+    @project(field: "", deep: true, needs: ["node._deleted"])
+    @filterDeleted(field: "node")
+    @array
+}
+
+type User_ConnectionOrganizationEdge {
+  "The user's organization management role."
+  role: User_ConnectionOrganizationEdgeRole! @project(field: "", deep: true)
+  "The managed organization."
+  node: OrganizationPartial! @project(deep: true)
+}
+
+type User_ConnectionOrganizationEdgeRole {
+  "The role identifier."
+  _id: OrganizationManagerRoleEnum! @project(field: "role")
+  "The role name."
+  name: String! @project(field: "role")
+}
+
+
+type User_ConnectionWorkspaceApplication {
+  edges: [User_ConnectionWorkspaceApplicationEdge!]!
+    @project(field: "", deep: true, needs: ["node._deleted"])
+    @filterDeleted(field: "node")
+    @array
+}
+
+type User_ConnectionWorkspaceApplicationEdge {
+  node: ApplicationPartial! @project(deep: true)
+}
+
+type User_ConnectionWorkspaceOrganization {
+  edges: [User_ConnectionWorkspaceOrganizationEdge!]!
+    @project(field: "", deep: true, needs: ["node._deleted"])
+    @filterDeleted(field: "node")
+    @array
+}
+
+type User_ConnectionWorkspaceOrganizationEdge {
+  node: OrganizationPartial! @project(deep: true)
+}
+
 type User_Edge {
   "The created by edge."
-  createdBy: User_EdgeCreatedBy @project(deep: true)
+  createdBy: User_EdgeCreatedBy
+    @project(deep: true)
+    @filterDeleted(field: "node")
   "The updated by edge."
-  updatedBy: User_EdgeUpdatedBy @project(deep: true)
+  updatedBy: User_EdgeUpdatedBy
+    @project(deep: true)
+    @filterDeleted(field: "node")
 }
 
 type User_EdgeCreatedBy {
   "The user that first created the user."
-  node: EmbeddedUser! @project(deep: true)
+  node: UserPartial! @project(deep: true, needs: ["node._deleted"])
 }
 
 type User_EdgeUpdatedBy {
   "The user that last updated the user."
-  node: EmbeddedUser! @project(deep: true)
+  node: UserPartial! @project(deep: true, needs: ["node._deleted"])
 }
 
 type UserDate {

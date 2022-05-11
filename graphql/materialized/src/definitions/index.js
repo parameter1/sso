@@ -15,6 +15,7 @@ directive @auth on FIELD_DEFINITION
 directive @array(field: String) on FIELD_DEFINITION
 directive @connectionProject(type: String!) on OBJECT
 directive @interfaceFields on OBJECT
+directive @loadOwner(type: LoadOwnerDirectiveTypeEnum!) on FIELD_DEFINITION
 directive @object(field: String) on FIELD_DEFINITION
 directive @project(field: String, needs: [String!]! = [], deep: Boolean! = false, resolve: Boolean! = true) on FIELD_DEFINITION
 
@@ -26,6 +27,13 @@ type Query {
 type Mutation {
   "A simple ping/pong mutation."
   ping: String!
+}
+
+enum LoadOwnerDirectiveTypeEnum {
+  APPLICATION
+  ORGANIZATION
+  USER
+  WORKSPACE
 }
 
 ${paginationDefinitions}

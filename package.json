@@ -12,7 +12,7 @@
   "workspaces": [
     "app",
     "cli",
-    "graphql",
+    "graphql/*",
     "lib",
     "packages/*",
     "service"

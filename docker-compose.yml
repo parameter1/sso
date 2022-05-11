@@ -30,9 +30,9 @@ services:
       <<: *env
       HOST: sso.dev.parameter1.com
       PORT: 7913
-      VITE_GRAPHQL_URL: ${VITE_GRAPHQL_URL-http://sso.dev.parameter1.com:7912/graphql}
+      VITE_GRAPHQL_URL: ${VITE_GRAPHQL_URL-http://sso.dev.parameter1.com:7912/graphql/managed}
     depends_on:
-      - graphql
+      - graphql-managed
     ports:
       - "7913:7913"
     hostname: sso.dev.parameter1.com
@@ -52,9 +52,9 @@ services:
     entrypoint: ["tail"]
     command: ["-f", "/dev/null"]
 
-  graphql:
+  graphql-managed:
     <<: *node
-    working_dir: /sso/graphql
+    working_dir: /sso/graphql/managed
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:

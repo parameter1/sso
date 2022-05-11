@@ -36,5 +36,5 @@ const { log } = console;
   });
 
   await server.listen({ host: HOST, port: PORT });
-  log(`Ready on http://${EXPOSED_HOST}:${EXPOSED_PORT}/graphql`);
+  log(`Ready on http://${EXPOSED_HOST}:${EXPOSED_PORT}/graphql/managed`);
 })().catch(immediatelyThrow);

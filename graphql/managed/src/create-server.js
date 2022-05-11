@@ -60,7 +60,7 @@ export default async (options = {}) => {
 
   await apollo.start();
   app.register(apollo.createHandler({
-    path: '/graphql',
+    path: '/graphql/managed',
     onHealthCheck: options.onHealthCheck,
   }));
   return app;

@@ -15,11 +15,12 @@ export default class MaterializedRepos extends RepoManager {
    * @param {MongoDBClient} params.client
    * @param {string} [params.dbBame=sso@materialized]
    */
-  constructor({ client, dbName = 'sso@materialized' } = {}) {
+  constructor({ client, dbName = 'sso@materialized', logger } = {}) {
     super({ client, dbName });
     repos.forEach((params) => {
       this.add({
         ...params,
+        logger,
         globalFindCriteria: { [DELETED_PATH]: false },
         ManagedRepo,
       });

@@ -56,7 +56,17 @@ export default class AbstractManagementRepo extends ManagedRepo {
 
     super({
       ...rest,
-      indexes,
+      // ensure unique indexes exclude soft-deleted items
+      indexes: usesSoftDelete ? (indexes || []).map((index) => {
+        if (index.unique) return index;
+        return {
+          ...index,
+          partialFilterExpression: {
+            ...index.partialFilterExpression,
+            [DELETED_PATH]: false,
+          },
+        };
+      }) : indexes,
       // ensure soft-deleted documents are excluded from all queries.
       globalFindCriteria: usesSoftDelete ? { [DELETED_PATH]: false } : undefined,
     });

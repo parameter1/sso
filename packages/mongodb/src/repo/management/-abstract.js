@@ -8,6 +8,7 @@ import { CleanDocument } from '../../utils/clean-document.js';
 import Expr from '../../pipelines/utils/expr.js';
 
 const DELETED_PATH = '_deleted';
+const { error: logError } = console;
 
 const {
   any,
@@ -285,7 +286,9 @@ export default class AbstractManagementRepo extends ManagedRepo {
         ? { $or: materializeFilters }
         : materializeFilters[0];
 
-      await Promise.all([
+      // do not await the materialization
+      // @todo determine how to log this!
+      Promise.all([
         // handle creates via upsert
         (async () => {
           const ids = bulkWriteResult.result.upserted.map(({ _id }) => _id);
@@ -326,7 +329,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
             })(),
           ]);
         })(),
-      ]);
+      ]).catch((e) => logError(e));
     }
     return bulkWriteResult;
   }

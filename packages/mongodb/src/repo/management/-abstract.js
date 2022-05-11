@@ -35,6 +35,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       isVersioned,
       usesSoftDelete,
       materializedPipelineBuilder,
+      onMaterialize,
       ...rest
     } = attempt(params, object({
       schema: object({
@@ -44,6 +45,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       isVersioned: boolean().default(true),
       usesSoftDelete: boolean().default(true),
       materializedPipelineBuilder: func(),
+      onMaterialize: func(),
     }).required().unknown());
 
     const indexes = isVersioned ? [
@@ -63,6 +65,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
     this.isVersioned = isVersioned;
     this.usesSoftDelete = usesSoftDelete;
     this.materializedPipelineBuilder = materializedPipelineBuilder;
+    this.onMaterialize = onMaterialize;
   }
 
   /**
@@ -143,7 +146,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {object[]} params.ops
    * @param {object} params.ops.filter
    * @param {object} [params.ops.materializeFilter]
-   * @param {function} [params.ops.onMaterialize]
    * @param {boolean} params.ops.many
    * @param {object} [params.session]
    * @param {object} [params.context]
@@ -153,7 +155,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
       ops: array().items(object({
         filter: object().unknown().required(),
         materializeFilter: object().unknown(),
-        onMaterialize: func(),
         many: boolean().required(),
       }).required()).required(),
       session: object(),
@@ -165,7 +166,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
         ops: ops.map((op) => ({
           filter: op.filter,
           materializeFilter: op.materializeFilter,
-          onMaterialize: op.onMaterialize,
           many: op.many,
           update: [{ $set: { [DELETED_PATH]: true } }],
         })),
@@ -191,7 +191,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {object[]} params.ops.update
    * @param {boolean} [params.ops.upsert=false]
    * @param {object} [params.ops.materializeFilter]
-   * @param {function} [params.ops.onMaterialize]
    * @param {object} [params.session]
    * @param {object} [params.context]
    * @param {boolean} [params.versioningEnabled=true]
@@ -209,7 +208,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
         update: array().items(object().unknown().required()),
         upsert: boolean().default(false),
         materializeFilter: object().unknown(),
-        onMaterialize: func(),
       }).required()).required(),
       session: object(),
       context: contextSchema,
@@ -225,7 +223,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
     };
 
     const materializeFilters = [];
-    const materializeFunctions = [];
     const operations = ops.map((op) => {
       const type = op.many ? 'updateMany' : 'updateOne';
       const update = CleanDocument.value([
@@ -251,7 +248,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
       if (!AbstractManagementRepo.isCreateFilter(materializeFilter)) {
         materializeFilters.push(materializeFilter);
       }
-      if (op.onMaterialize) materializeFunctions.push(op.onMaterialize);
       return {
         [type]: {
           filter: this.globalFindCriteria ? {
@@ -266,8 +262,19 @@ export default class AbstractManagementRepo extends ManagedRepo {
     const bulkWriteResult = await this.bulkWrite({ operations, options: { session } });
     if (this.materializedPipelineBuilder) {
       // @todo while this works in most cases, updates that require materializing _related_
-      // documents will not be caught by this, and need to be handled manually in code. as such,
-      // change stream triggers would be better.
+      // need to be handled manually in code with the `onMaterialize` hook. This hook requires
+      // additional trips to the database (to read the updated docs) and also can over query/update
+      // when only portions of the bulkwrite _actually_ update docs. While this will "work" for now,
+      // triggering the materialization calls within change streams would be preferred and more
+      // efficient. this also passes the query overhead to the end user. transactions also cannot be
+      // used with the `$merge` stage, so there's a possibility that some data may be materialized
+      // even when the main document write fails (inside a transaction). change streams would avoid
+      // this since the writes to the master documents are already committed. plus, any direct
+      // changes made to the root documents in the db would also be picked up by the change stream.
+      const toMaterializeFilter = materializeFilters.length > 1
+        ? { $or: materializeFilters }
+        : materializeFilters[0];
+
       await Promise.all([
         // handle creates via upsert
         (async () => {
@@ -278,25 +285,37 @@ export default class AbstractManagementRepo extends ManagedRepo {
         // handle updates (including soft deletes)
         (async () => {
           if (!materializeFilters.length) return;
-          await this.materializeWhenModified({
-            filter: materializeFilters.length > 1
-              ? { $or: materializeFilters }
-              : materializeFilters[0],
-            bulkWriteResult,
-          });
-        })(),
-        // handle related materialization functions
-        (async () => {
-          if (!materializeFunctions.length) return;
-          await Promise.all(materializeFunctions.map(async (fn) => {
-            const updates = await fn();
-            await Promise.all([...updates]
-              .filter(([repoName, filter]) => repoName && filter)
-              .map(async ([repoName, filter]) => this.manager.$(repoName).materializeWhenModified({
-                filter,
-                bulkWriteResult,
-              })));
-          }));
+          await Promise.all([
+            // materialize the root docs
+            this.materializeWhenModified({
+              filter: toMaterializeFilter,
+              bulkWriteResult,
+            }),
+            // call the `onMaterialize` hook to handle any related operations
+            (async () => {
+              // bail when nothing was modified
+              if (!bulkWriteResult.result.nModified) return;
+              // bail when no hook has been registered
+              if (!this.onMaterialize) return;
+              // find the materialized IDs
+              const materializedIds = await this.distinct({
+                key: '_id',
+                query: toMaterializeFilter,
+                options: { useGlobalFindCriteria: false },
+              });
+              // bail when no materialized IDs were found
+              if (!materializedIds.length) return;
+              // load update operations from the hook
+              const updates = await this.onMaterialize({ materializedIds });
+              console.log({ updates });
+              // excute the updates
+              await Promise.all([...updates]
+                .filter(([repoName, filter]) => repoName && filter)
+                .map(async ([repoName, filter]) => this.manager.$(repoName).materialize({
+                  filter,
+                })));
+            })(),
+          ]);
         })(),
       ]);
     }
@@ -345,7 +364,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {object} params
    * @param {object} params.filter
    * @param {object} [params.materializeFilter]
-   * @param {function} [params.onMaterialize]
    * @param {boolean} [params.many=false]
    * @param {object} [params.session]
    * @param {object} [params.context]
@@ -354,14 +372,12 @@ export default class AbstractManagementRepo extends ManagedRepo {
     const {
       filter,
       materializeFilter,
-      onMaterialize,
       many,
       session,
       context,
     } = await validateAsync(object({
       filter: object().unknown().required(),
       materializeFilter: object().unknown(),
-      onMaterialize: func(),
       many: boolean().default(false),
       session: object(),
       context: contextSchema,
@@ -369,7 +385,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
     const op = {
       filter,
       materializeFilter,
-      onMaterialize,
       many,
     };
     return this.bulkDelete({ ops: [op], session, context });
@@ -380,7 +395,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
    *
    * @param {object} params
    * @param {ObjectId|string} params.id
-   * @param {function} [params.onMaterialize]
    * @param {object} params.session
    * @param {object} params.context
    * @returns {Promise<BulkWriteResult>}
@@ -388,18 +402,15 @@ export default class AbstractManagementRepo extends ManagedRepo {
   async deleteForId(params) {
     const {
       id,
-      onMaterialize,
       session,
       context,
     } = await validateAsync(object({
       id: objectId().required(),
-      onMaterialize: func(),
       session: object(),
       context: contextSchema,
     }).required(), params);
     return this.deleteForIds({
       ids: [id],
-      onMaterialize,
       session,
       context,
     });
@@ -410,7 +421,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
    *
    * @param {object} params
    * @param {ObjectId[]|string[]} params.ids
-   * @param {function} [params.onMaterialize]
    * @param {object} params.session
    * @param {object} params.context
    * @returns {Promise<BulkWriteResult>}
@@ -418,18 +428,15 @@ export default class AbstractManagementRepo extends ManagedRepo {
   async deleteForIds(params) {
     const {
       ids,
-      onMaterialize,
       session,
       context,
     } = await validateAsync(object({
       ids: array().items(objectId().required()).required(),
-      onMaterialize: func(),
       session: object(),
       context: contextSchema,
     }).required(), params);
     return this.delete({
       filter: { _id: { $in: ids } },
-      onMaterialize,
       many: true,
       session,
       context,
@@ -452,6 +459,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
     if (!isFn(builder)) throw new Error(`No materialized pipeline builder function has been registered for the ${this.name} repo.`);
 
     const pipeline = builder({ $match: filter });
+    console.log(this.name, pipeline);
     const cursor = await this.aggregate({ pipeline, options: { useGlobalFindCriteria: false } });
     await cursor.toArray();
     return 'ok';
@@ -488,7 +496,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {object} [params.context]
    * @param {boolean} [params.versioningEnabled=true]
    * @param {object} [params.materializeFilter]
-   * @param {function} [params.onMaterialize]
    */
   async update(params) {
     const {
@@ -500,7 +507,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
       context,
       versioningEnabled,
       materializeFilter,
-      onMaterialize,
     } = await validateAsync(object({
       filter: object().unknown().required(),
       many: boolean().default(false),
@@ -510,7 +516,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
       context: contextSchema,
       versioningEnabled: boolean().default(true),
       materializeFilter: object().unknown(),
-      onMaterialize: func(),
     }).required(), params);
     const op = {
       filter,
@@ -518,7 +523,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
       update,
       upsert,
       materializeFilter,
-      onMaterialize,
     };
     return this.bulkUpdate({
       ops: [op],
@@ -537,7 +541,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {object} [params.props]
    * @param {object} [params.query] Additional query params to apply
    * @param {object} [params.materializeFilter]
-   * @param {function} [params.onMaterialize]
    * @param {object} [params.session]
    * @param {object} [params.context]
    * @returns {Promise<BulkWriteResult|null>}
@@ -548,7 +551,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
       props,
       query,
       materializeFilter,
-      onMaterialize,
       session,
       context,
     } = await validateAsync(object({
@@ -556,7 +558,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
       props: propsSchema,
       query: object().unknown(),
       materializeFilter: object().unknown(),
-      onMaterialize: func(),
       session: object(),
       context: contextSchema,
     }).required(), params);
@@ -567,7 +568,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
         props,
         query,
         materializeFilter,
-        onMaterialize,
       }],
       session,
       context,
@@ -583,7 +583,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
    * @param {ObjectId|string} params.sets.id
    * @param {object[]} params.sets.props
    * @param {object} [params.sets.materializeFilter]
-   * @param {function} params.sets.onMaterialize
    * @param {object} [params.sets.query] Additional query params to apply
    * @param {object} [params.session]
    * @param {object} [params.context]
@@ -600,7 +599,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
         props: propsSchema,
         query: object().unknown(),
         materializeFilter: object().unknown(),
-        onMaterialize: func(),
       }).required()).required(),
       session: object(),
       context: contextSchema,
@@ -612,7 +610,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
       props,
       query,
       materializeFilter,
-      onMaterialize,
     }) => {
       const filtered = props.filter(({ value }) => typeof value !== 'undefined');
       if (!filtered.length) return; // noop
@@ -623,7 +620,6 @@ export default class AbstractManagementRepo extends ManagedRepo {
         materializeFilter,
         update: [{ $set }],
         many: false,
-        onMaterialize,
       });
     });
     if (!ops.length) return null; // noop

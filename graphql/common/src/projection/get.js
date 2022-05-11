@@ -21,6 +21,10 @@ const getDeepSelections = ({
 
     if (selection.kind === Kind.FIELD) {
       const field = type.getFields()[selection.name.value];
+      if (selection.name.value === '_owner') {
+        // ensure _owner selections always include the _id value.
+        map.set(parentFieldName ? `${parentFieldName}._id` : '_id', parentFieldName);
+      }
       const $project = get(field, 'astNode.$project');
       if (!$project) return;
 

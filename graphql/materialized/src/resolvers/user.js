@@ -8,10 +8,10 @@ export default {
     /**
      *
      */
-    async currentUser(_, __, { auth, repos }, info) {
-      const id = await auth.getUserId();
+    async currentUser(_, __, { auth, dataloaders }, info) {
+      const _id = await auth.getUserId();
       const { projection } = getProjectionForType(info);
-      return repos.$('user').findByObjectId({ id, options: { projection } });
+      return dataloaders.get('user').load({ value: _id, strict: true, projection });
     },
   },
 };

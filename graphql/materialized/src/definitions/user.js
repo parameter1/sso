@@ -8,7 +8,7 @@ extend type Query {
     @auth
 }
 
-type User {
+interface UserInterface {
   "The unique user identifier"
   _id: ObjectID! @project
   "Dates associated with this user, such as first created and last touched."
@@ -23,6 +23,35 @@ type User {
   slug: UserSlug! @project(deep: true)
   "Whether the user email address has been verified."
   verified: Boolean! @project
+}
+
+type EmbeddedUser implements UserInterface @interfaceFields {
+  "The unique user identifier"
+  _id: ObjectID! @project
+  "The owning document."
+  _owner: User! @loadOwner(type: USER)
+}
+
+type User implements UserInterface @interfaceFields {
+  "Related edges."
+  _edge: User_Edge! @project(deep: true) @object
+}
+
+type User_Edge {
+  "The created by edge."
+  createdBy: User_EdgeCreatedBy @project(deep: true)
+  "The updated by edge."
+  updatedBy: User_EdgeUpdatedBy @project(deep: true)
+}
+
+type User_EdgeCreatedBy {
+  "The user that first created the user."
+  node: EmbeddedUser! @project(deep: true)
+}
+
+type User_EdgeUpdatedBy {
+  "The user that last updated the user."
+  node: EmbeddedUser! @project(deep: true)
 }
 
 type UserDate {

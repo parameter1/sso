@@ -14,7 +14,10 @@ import {
 import enums from './enums.js';
 import resolvers from './resolvers/index.js';
 import typeDefs from './definitions/index.js';
-import { loadOwnerDirectiveTransformer } from './directives/index.js';
+import {
+  filterDeletedDirectiveTransformer,
+  loadOwnerDirectiveTransformer,
+} from './directives/index.js';
 
 const schema = makeExecutableSchema({
   resolvers,
@@ -32,5 +35,6 @@ const withObject = objectDirectiveTransformer(withArray);
 const withEnumDefaults = enumDefaultValuesTransformer(withObject, enums);
 
 const withLoadOwner = loadOwnerDirectiveTransformer(withEnumDefaults);
+const withFilterDeleted = filterDeletedDirectiveTransformer(withLoadOwner);
 
-export default withLoadOwner;
+export default withFilterDeleted;

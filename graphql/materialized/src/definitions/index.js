@@ -14,6 +14,7 @@ scalar ObjectID
 directive @auth on FIELD_DEFINITION
 directive @array(field: String) on FIELD_DEFINITION
 directive @connectionProject(type: String!) on OBJECT
+directive @filterDeleted(field: String) on FIELD_DEFINITION
 directive @interfaceFields on OBJECT
 directive @loadOwner(type: LoadOwnerDirectiveTypeEnum!) on FIELD_DEFINITION
 directive @object(field: String) on FIELD_DEFINITION

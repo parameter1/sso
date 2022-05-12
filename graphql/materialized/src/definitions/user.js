@@ -8,6 +8,10 @@ extend type Query {
     @auth
 }
 
+enum User_ConnectionWorkspaceSortFieldEnum {
+  NODE_PATH
+}
+
 interface UserInterface {
   "The unique user identifier"
   _id: ObjectID! @project
@@ -44,8 +48,23 @@ type User_Connection {
     @object
     @auth
   "The workspaces that this user is a member of."
-  workspace: User_ConnectionWorkspace!
-    @project(deep: true)
+  workspace(input: User_ConnectionWorkspaceInput! = {}): User_ConnectionWorkspace!
+    @project(
+      deep: true
+      prefixNeedsWith: "workspace.node"
+      needs: [
+        # core
+        "_id",
+        "_deleted",
+        # sorting
+        "path",
+        # filtering
+        "_edge.application.node._id",
+        "_edge.application.node.key",
+        "_edge.organization.node._id",
+        "_edge.organization.node.key",
+      ]
+    )
     @object
     @auth
   "Applications of this user of by way the user's workspace memberships."
@@ -83,16 +102,23 @@ type User_ConnectionOrganizationEdgeRole {
 
 type User_ConnectionWorkspace {
   edges: [User_ConnectionWorkspaceEdge!]!
-    @project(field: "", deep: true, needs: ["node._deleted"])
-    @filterDeleted(field: "node")
-    @array
+    @project(
+      field: ""
+      deep: true
+      resolve: false
+    )
+  pageInfo: PageInfo!
+  totalCount: Int!
 }
 
 type User_ConnectionWorkspaceEdge {
+  cursor: String!
   "The user's workspace membership role."
-  role: User_ConnectionWorkspaceEdgeRole! @project(field: "", deep: true)
+  role: User_ConnectionWorkspaceEdgeRole!
+    @project(field: "", deep: true)
   "The workspace the user is a member of."
-  node: WorkspacePartial! @project(deep: true)
+  node: WorkspacePartial!
+    @project(deep: true)
 }
 
 type User_ConnectionWorkspaceEdgeRole {
@@ -185,5 +211,24 @@ type UserSlug {
   reverse: String! @project
 }
 
+input User_ConnectionWorkspaceInput {
+  "Filters the user workspaces by one or more application IDs. An empty value (default) will return all workspaces."
+  applicationIds: [ObjectID!]! = []
+  "Filters the user workspaces by one or more application keys. An empty value (default) will return all workspaces."
+  applicationKeys: [String!]! = []
+  "Filters the user workspaces by one or more organization IDs. An empty value (default) will return all workspaces."
+  organizationIds: [ObjectID!]! = []
+  "Filters the user workspaces by one or more organization keys. An empty value (default) will return all workspaces."
+  organizationKeys: [String!]! = []
+  "Paginates the results."
+  pagination: PaginationInput = {}
+  "Sorts the results by one or more sort fields."
+  sort: [User_ConnectionWorkspaceSortInput!] = [{}]
+}
+
+input User_ConnectionWorkspaceSortInput {
+  field: User_ConnectionWorkspaceSortFieldEnum! = NODE_PATH
+  order: SortOrderEnum! = ASC
+}
 
 `;

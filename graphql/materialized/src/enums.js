@@ -16,4 +16,8 @@ export default {
     ADMINISTRATOR: 'Administrator',
     MANAGER: 'Manager',
   },
+
+  User_ConnectionWorkspaceSortFieldEnum: {
+    NODE_PATH: 'node.path',
+  },
 };

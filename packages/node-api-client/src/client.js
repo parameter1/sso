@@ -62,10 +62,10 @@ export default function SSOClient(options) {
         query SSOClientGetCurrentUser {
           currentUser {
             _id
-            ...${spreadFragmentName}
+            ${spreadFragmentName}
           }
         }
-        ${processedFragment};
+        ${processedFragment}
       `;
       const headers = { authorization: `Bearer ${authToken}` };
       const { data } = await graphql.query({ query, headers });

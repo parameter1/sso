@@ -4,6 +4,7 @@ import { GraphQLDateTime, GraphQLObjectId } from '@parameter1/graphql/scalars';
 
 import application from './application.js';
 import user from './user.js';
+import workspace from './workspace.js';
 
 export default merge({
   DateTime: GraphQLDateTime,
@@ -32,4 +33,4 @@ export default merge({
       return 'pong';
     },
   },
-}, application, user);
+}, application, user, workspace);

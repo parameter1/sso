@@ -2,6 +2,11 @@ import { gql } from '@parameter1/graphql/tag';
 
 export default gql`
 
+extend type Query {
+  "Determines if the provided workspace ID exists."
+  workspaceExists(input: QueryWorkspaceExistsInput!): Boolean!
+}
+
 interface WorkspaceInterface {
   "The unique workspace identifier"
   _id: ObjectID! @project
@@ -86,6 +91,13 @@ type WorkspaceDate {
   created: DateTime! @project
   "The ISO date when the workspace was last updated."
   updated: DateTime! @project
+}
+
+input QueryWorkspaceExistsInput {
+  "The workspace ID to check."
+  _id: ObjectID!
+  "If set, will also check that the workspace ID uses the provided application ID."
+  applicationId: ObjectID
 }
 
 `;

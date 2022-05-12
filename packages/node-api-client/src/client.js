@@ -5,6 +5,7 @@ import { extractFragmentData } from '@parameter1/graphql/fragments';
 import GraphQLClient from './graphql.js';
 
 const {
+  alternatives,
   object,
   objectId,
   string,
@@ -14,20 +15,20 @@ const {
 /**
  * Creates the SSO client instance.
  *
- * @param {object} params
- * @param {string} params.appId The active SSO application ID.
- * @param {string} params.graphqlUrl The SSO GraphQL URL to connect to.
- * @param {string} params.name The client name.
- * @param {string} params.version The client version.
- * @param {object} [params.headers] Headers to send with all requests.
+ * @param {object} options
+ * @param {string} options.appId The active SSO application ID.
+ * @param {string} options.graphqlUrl The SSO GraphQL URL to connect to.
+ * @param {string} options.name The client name.
+ * @param {string} options.version The client version.
+ * @param {object} [options.headers] Headers to send with all requests.
  */
-export default function SSOClient(params) {
+export default function SSOClient(options) {
   const {
     graphqlUrl,
     name,
     version,
-    headers,
-  } = attempt(params, object({
+    headers: globalHeaders,
+  } = attempt(options, object({
     appId: objectId().required(),
     graphqlUrl: url().required(),
     name: string().required(),
@@ -39,17 +40,23 @@ export default function SSOClient(params) {
     url: graphqlUrl,
     name,
     version,
-    headers,
+    headers: globalHeaders,
   });
 
   return {
     /**
      *
      * @param {object} params
-     * @param {object} params.fragment The query fragment to use.
+     * @param {string} params.authToken The user authentication token to use.
+     * @param {object} [params.fragment] The query fragment to use.
      * @returns {Promise<object>} The current user.
      */
-    getCurrentUser: async ({ fragment } = {}) => {
+    getCurrentUser: async (params) => {
+      const { authToken, fragment } = attempt(params, object({
+        authToken: string().required(),
+        fragment: alternatives().try(string(), object()),
+      }).required());
+
       const { processedFragment, spreadFragmentName } = extractFragmentData(fragment);
       const query = gql`
         query SSOClientGetCurrentUser {
@@ -60,7 +67,8 @@ export default function SSOClient(params) {
         }
         ${processedFragment};
       `;
-      const { data } = await graphql.query({ query });
+      const headers = { authorization: `Bearer ${authToken}` };
+      const { data } = await graphql.query({ query, headers });
       return data.currentUser;
     },
   };

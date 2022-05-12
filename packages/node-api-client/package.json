@@ -17,6 +17,8 @@
     "test": "yarn lint"
   },
   "dependencies": {
+    "@parameter1/graphql": "^2.6.0",
+    "@parameter1/prop-types": "^2.0.0",
     "node-fetch": "^3.2.4"
   },
   "publishConfig": {

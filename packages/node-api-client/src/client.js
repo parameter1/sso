@@ -9,7 +9,6 @@ const {
   object,
   objectId,
   string,
-  url,
 } = PropTypes;
 
 /**
@@ -30,7 +29,7 @@ export default function SSOClient(options) {
     headers: globalHeaders,
   } = attempt(options, object({
     appId: objectId().required(),
-    graphqlUrl: url().required(),
+    graphqlUrl: string().required(),
     name: string().required(),
     version: string().required(),
     headers: object().unknown(),

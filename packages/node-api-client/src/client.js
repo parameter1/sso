@@ -11,6 +11,12 @@ const {
   string,
 } = PropTypes;
 
+const APPLICATION_EXISTS = gql`
+  query SSOClientDoesApplicationExist($input: QueryApplicationExistsInput!) {
+    result: applicationExists(input: $input)
+  }
+`;
+
 /**
  * Creates the SSO client instance.
  *
@@ -43,6 +49,21 @@ export default function SSOClient(options) {
   });
 
   return {
+    /**
+     *
+     * @param {object} params
+     * @param {string|ObjectId} params._id The application ID to check.
+     * @returns {Promise<boolean>} The current user.
+     */
+    doesApplicationExist: async (params) => {
+      const { _id } = attempt(params, object({
+        _id: objectId().required(),
+      }).required());
+      const variables = { input: { _id } };
+      const { data } = await graphql.query({ query: APPLICATION_EXISTS, variables });
+      return data.result;
+    },
+
     /**
      *
      * @param {object} params

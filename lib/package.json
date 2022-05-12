@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-lib",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The SSO browser library.",
   "author": "Jacob Bare <jacob@parameter1.com>",
   "homepage": "https://github.com/parameter1/sso/tree/main/lib#readme",

@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-db",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "The SSO database repositories.",
   "author": "Jacob Bare <jacob@parameter1.com>",
@@ -27,7 +27,7 @@
     "@parameter1/joi": "^2.2.2",
     "@parameter1/mongodb": "^2.15.0",
     "@parameter1/object-path": "^2.0.0",
-    "@parameter1/sso-model": "^0.1.0",
+    "@parameter1/sso-model": "^0.2.0",
     "@parameter1/utils": "^2.0.0",
     "@sindresorhus/is": "^4.6.0",
     "jsonwebtoken": "^8.5.1"

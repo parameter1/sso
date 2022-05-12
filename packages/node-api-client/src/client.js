@@ -17,6 +17,12 @@ const APPLICATION_EXISTS = gql`
   }
 `;
 
+const WORKSPACE_EXISTS = gql`
+  query SSOClientDoesWorkspaceExist($input: QueryWorkspaceExistsInput!) {
+    result: workspaceExists(input: $input)
+  }
+`;
+
 /**
  * Creates the SSO client instance.
  *
@@ -61,6 +67,23 @@ export default function SSOClient(options) {
       }).required());
       const variables = { input: { _id } };
       const { data } = await graphql.query({ query: APPLICATION_EXISTS, variables });
+      return data.result;
+    },
+
+    /**
+     *
+     * @param {object} params
+     * @param {string|ObjectId} params._id The workspace ID to check.
+     * @param {string|ObjectId} [params.applicationId] The optional application ID to also check.
+     * @returns {Promise<boolean>} The current user.
+     */
+    doesWorkspaceExist: async (params) => {
+      const { _id, applicationId } = attempt(params, object({
+        _id: objectId().required(),
+        applicationId: objectId(),
+      }).required());
+      const variables = { input: { _id, applicationId } };
+      const { data } = await graphql.query({ query: WORKSPACE_EXISTS, variables });
       return data.result;
     },
 

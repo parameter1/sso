@@ -1,2 +1,2 @@
-export { default as ManagementRepos } from './management/index.js';
+export { default as ManagedRepos } from './managed/index.js';
 export { default as MaterializedRepos } from './materialized/index.js';

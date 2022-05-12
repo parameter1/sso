@@ -7,11 +7,11 @@ import UserEventRepo from './user-event.js';
 import UserRepo from './user.js';
 import WorkspaceRepo from './workspace.js';
 
-export default class ManagementRepos extends RepoManager {
+export default class ManagedRepos extends RepoManager {
   /**
    * @param {object} params
    * @param {MongoDBClient} params.client
-   * @param {string} [params.dbBame=sso@management]
+   * @param {string} [params.dbBame=sso@managed]
    * @param {string} params.tokenSecret
    *
    * @param {object} params.source
@@ -20,7 +20,7 @@ export default class ManagementRepos extends RepoManager {
    */
   constructor({
     client,
-    dbName = 'sso@management',
+    dbName = 'sso@managed',
     tokenSecret,
     source,
   } = {}) {

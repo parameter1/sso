@@ -10,7 +10,7 @@ const parseHeader = (header) => {
   return { type, value };
 };
 
-export default function AuthContext({ header, managementRepos } = {}) {
+export default function AuthContext({ header, managedRepos } = {}) {
   let authToken;
   let error;
   let promise;
@@ -24,7 +24,7 @@ export default function AuthContext({ header, managementRepos } = {}) {
         if (type !== 'Bearer') throw Errors.notAuthenticated(`The auth type '${type}' is not supported.`);
         if (!value) return;
         authToken = value;
-        user = await managementRepos.$('user').verifyAuthToken({
+        user = await managedRepos.$('user').verifyAuthToken({
           authToken,
           projection: { email: 1, ...requiredUserFieldProjection },
         });

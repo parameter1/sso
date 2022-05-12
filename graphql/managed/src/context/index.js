@@ -5,7 +5,7 @@ export default async ({ request } = {}) => {
   const dataloaders = await repos.createDataloaders();
   return {
     auth: AuthContext({
-      managementRepos: repos,
+      managedRepos: repos,
       header: request.headers.authorization,
     }),
     dataloaders,

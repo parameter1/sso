@@ -143,7 +143,7 @@ type User_ConnectionWorkspaceEdge {
 
 type User_ConnectionWorkspaceEdgeRole {
   "The role identifier."
-  _id: OrganizationManagerRoleEnum! @project(field: "role")
+  _id: String! @project(field: "role")
   "The role name."
   name: String! @project(field: "role")
 }

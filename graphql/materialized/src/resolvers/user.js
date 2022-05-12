@@ -35,9 +35,7 @@ export default {
         sort,
       } = input;
       return findWithObjects(organization, {
-        query: {
-          'node._deleted': false,
-        },
+        query: { 'node._deleted': false },
         limit: pagination.limit,
         cursor: pagination.cursor.value,
         direction: pagination.cursor.direction,

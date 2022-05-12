@@ -102,8 +102,6 @@ type User_ConnectionOrganization {
       deep: true
       resolve: false
     )
-    @filterDeleted(field: "node")
-    @array
   pageInfo: PageInfo!
   totalCount: Int!
 }

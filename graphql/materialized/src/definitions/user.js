@@ -8,7 +8,13 @@ extend type Query {
     @auth
 }
 
+enum User_ConnectionOrganizationSortFieldEnum {
+  "Sort by the organization's slug."
+  NODE_SLUG
+}
+
 enum User_ConnectionWorkspaceSortFieldEnum {
+  "Sort by the workspaces's path that includes the app slug, org slug, and workspace slug."
   NODE_PATH
 }
 
@@ -43,8 +49,18 @@ type User implements UserInterface @interfaceFields {
 
 type User_Connection {
   "The organizations that this user manages."
-  organization: User_ConnectionOrganization!
-    @project(deep: true)
+  organization(input: User_ConnectionOrganizationInput! = {}): User_ConnectionOrganization!
+    @project(
+      deep: true
+      prefixNeedsWith: "organization.node"
+      needs: [
+        # core
+        "_id",
+        "_deleted",
+        # sorting
+        "slug",
+      ]
+    )
     @object
     @auth
   "The workspaces that this user is a member of."
@@ -81,9 +97,15 @@ type User_Connection {
 
 type User_ConnectionOrganization {
   edges: [User_ConnectionOrganizationEdge!]!
-    @project(field: "", deep: true, needs: ["node._deleted"])
+    @project(
+      field: ""
+      deep: true
+      resolve: false
+    )
     @filterDeleted(field: "node")
     @array
+  pageInfo: PageInfo!
+  totalCount: Int!
 }
 
 type User_ConnectionOrganizationEdge {
@@ -209,6 +231,18 @@ type UserSlug {
   default: String! @project
   "The reversed user slug, starting with the user's family name."
   reverse: String! @project
+}
+
+input User_ConnectionOrganizationInput {
+  "Paginates the results."
+  pagination: PaginationInput = {}
+  "Sorts the results by one or more sort fields."
+  sort: [User_ConnectionOrganizationSortInput!] = [{}]
+}
+
+input User_ConnectionOrganizationSortInput {
+  field: User_ConnectionOrganizationSortFieldEnum! = NODE_SLUG
+  order: SortOrderEnum! = ASC
 }
 
 input User_ConnectionWorkspaceInput {

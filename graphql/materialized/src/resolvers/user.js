@@ -3,6 +3,7 @@ import { findWithObjects } from '@parameter1/sso-mongodb';
 import enums from '../enums.js';
 
 const {
+  User_ConnectionOrganizationSortFieldEnum: userOrganizationSortField,
   User_ConnectionWorkspaceSortFieldEnum: userWorkspaceSortField,
 } = enums;
 
@@ -25,6 +26,27 @@ export default {
    *
    */
   User_Connection: {
+    /**
+     *
+     */
+    async organization({ organization }, { input }) {
+      const {
+        pagination,
+        sort,
+      } = input;
+      return findWithObjects(organization, {
+        query: {
+          'node._deleted': false,
+        },
+        limit: pagination.limit,
+        cursor: pagination.cursor.value,
+        direction: pagination.cursor.direction,
+        sort: sort.length
+          ? sort
+          : [{ field: userOrganizationSortField.NODE_SLUG, order: 1 }],
+      });
+    },
+
     /**
      *
      */

@@ -17,6 +17,10 @@ export default {
     MANAGER: 'Manager',
   },
 
+  User_ConnectionOrganizationSortFieldEnum: {
+    NODE_SLUG: 'node.slug',
+  },
+
   User_ConnectionWorkspaceSortFieldEnum: {
     NODE_PATH: 'node.path',
   },

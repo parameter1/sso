@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import pkg from '../package.js';
-import GraphQLError from '../error.js';
+import GraphQLError from './error.js';
 
 /**
  * Creates a GraphQL client.

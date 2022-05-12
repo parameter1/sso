@@ -21,7 +21,13 @@ directive @filterDeleted(field: String) on FIELD_DEFINITION
 directive @interfaceFields on OBJECT
 directive @loadOwner(type: LoadOwnerDirectiveTypeEnum!) on FIELD_DEFINITION
 directive @object(field: String) on FIELD_DEFINITION
-directive @project(field: String, needs: [String!]! = [], deep: Boolean! = false, resolve: Boolean! = true) on FIELD_DEFINITION
+directive @project(
+  field: String
+  needs: [String!]! = []
+  deep: Boolean! = false
+  resolve: Boolean! = true
+  prefixNeedsWith: String
+) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
 type Query {
   "A simple ping/pong query."

@@ -40,6 +40,22 @@ const getDeepSelections = ({
         map.set(needs, parentFieldName);
       });
 
+      // handle input projection
+      if (field.args) {
+        field.args.forEach((arg) => {
+          const { astNode } = getReturnType(arg.type);
+          if (!astNode || astNode.kind !== Kind.INPUT_OBJECT_TYPE_DEFINITION) return;
+          astNode.fields.forEach((inputField) => {
+            if (!inputField.$project) return;
+            const { name: inputName } = inputField.$project;
+            const inputNameParts = inputName.split('.');
+
+            inputNameParts.pop();
+            map.set(`${fieldName}.${inputName}`, `${[fieldName, ...inputNameParts].join('.')}`);
+          });
+        });
+      }
+
       if (subSelections.length && $project.deep) {
         getDeepSelections({
           schema,

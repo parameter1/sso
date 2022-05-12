@@ -75,6 +75,13 @@ const workspaceProjection = (fn) => wrap({
   },
   key: 1,
   name: 1,
+  namespace: {
+    $concat: [
+      '$_edge.application.node.key', '/',
+      '$_edge.organization.node.key', '/',
+      '$key',
+    ],
+  },
   path: {
     $concat: [
       '$_edge.application.node.slug', '/',

@@ -3,6 +3,8 @@ import { gql } from '@parameter1/graphql/tag';
 export default gql`
 
 extend type Query {
+  "Returns a single application by ID."
+  applicationById(input: QueryApplicationByIdInput!): Application
   "Determines if the provided application ID exists."
   applicationExists(input: QueryApplicationExistsInput!): Boolean!
 }
@@ -19,7 +21,7 @@ interface ApplicationInterface {
   "The application slug."
   slug: String! @project
   "Membership roles that this application supports."
-  roles: [String!]! @project @array
+  roles: [String!]! @project @array @auth
 }
 
 type Application implements ApplicationInterface @interfaceFields {
@@ -58,6 +60,13 @@ type ApplicationDate {
   created: DateTime! @project
   "The ISO date when the application was last updated."
   updated: DateTime! @project
+}
+
+input QueryApplicationByIdInput {
+  "The application ID to return."
+  _id: ObjectID!
+  "When in strict mode (default), an error will be throw when the application is not found."
+  strict: Boolean! = true
 }
 
 input QueryApplicationExistsInput {

@@ -24,4 +24,8 @@ export default {
   User_ConnectionWorkspaceSortFieldEnum: {
     NODE_PATH: 'node.path',
   },
+
+  User_ConnectionWorkspaceOrganizationSortFieldEnum: {
+    NODE_SLUG: 'node.slug',
+  },
 };

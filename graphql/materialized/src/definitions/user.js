@@ -18,6 +18,11 @@ enum User_ConnectionWorkspaceSortFieldEnum {
   NODE_PATH
 }
 
+enum User_ConnectionWorkspaceOrganizationSortFieldEnum {
+  "Sort by the workspace organization's slug."
+  NODE_SLUG
+}
+
 interface UserInterface {
   "The unique user identifier"
   _id: ObjectID! @project
@@ -83,14 +88,24 @@ type User_Connection {
     )
     @object
     @auth
-  "@todo change me Applications of this user of by way the user's workspace memberships."
-  workspaceApplication: User_ConnectionWorkspaceApplication!
-    @project(deep: true)
-    @object
-    @auth
-  "@todo change me Organizations of this user of by way the user's workspace memberships."
-  workspaceOrganization: User_ConnectionWorkspaceOrganization!
-    @project(deep: true)
+  "Organizations of this user of by way the user's workspace memberships."
+  workspaceOrganization(input: User_ConnectionWorkspaceOrganizationInput! = {}): User_ConnectionWorkspaceOrganization!
+    @project(
+      field: "workspace"
+      deep: true
+      prefixNeedsWith: "workspace.edges.node"
+      needs: [
+        # core
+        "_id",
+        "_edge.organization.node._id",
+        "_deleted",
+        # sorting
+        "_edge.organization.node.slug",
+        # filtering
+        "_edge.application.node._id",
+        "_edge.application.node.key",
+      ]
+    )
     @object
     @auth
 }
@@ -140,26 +155,19 @@ type User_ConnectionWorkspaceEdgeRole {
   name: String! @project(field: "role")
 }
 
-type User_ConnectionWorkspaceApplication {
-  edges: [User_ConnectionWorkspaceApplicationEdge!]!
-    @project(field: "", deep: true, needs: ["node._deleted"])
-    @filterDeleted(field: "node")
-    @array
-}
-
-type User_ConnectionWorkspaceApplicationEdge {
-  node: ApplicationPartial! @project(deep: true)
-}
-
 type User_ConnectionWorkspaceOrganization {
   edges: [User_ConnectionWorkspaceOrganizationEdge!]!
-    @project(field: "", deep: true, needs: ["node._deleted"])
-    @filterDeleted(field: "node")
+    @project(deep: true, resolve: false)
     @array
 }
 
 type User_ConnectionWorkspaceOrganizationEdge {
-  node: OrganizationPartial! @project(deep: true)
+  node: OrganizationPartial!
+    @project(
+      field: "node._edge.organization.node"
+      resolve: false
+      deep: true
+    )
 }
 
 type User_Edge {
@@ -225,9 +233,9 @@ type UserSlug {
 
 input User_ConnectionOrganizationInput {
   "Paginates the results."
-  pagination: PaginationInput = {}
+  pagination: PaginationInput! = {}
   "Sorts the results by one or more sort fields."
-  sort: [User_ConnectionOrganizationSortInput!] = [{}]
+  sort: [User_ConnectionOrganizationSortInput!]! = [{}]
 }
 
 input User_ConnectionOrganizationSortInput {
@@ -245,13 +253,28 @@ input User_ConnectionWorkspaceInput {
   "Filters the user workspaces by one or more organization keys. An empty value (default) will return all workspaces."
   organizationKeys: [String!]! = []
   "Paginates the results."
-  pagination: PaginationInput = {}
+  pagination: PaginationInput! = {}
   "Sorts the results by one or more sort fields."
-  sort: [User_ConnectionWorkspaceSortInput!] = [{}]
+  sort: [User_ConnectionWorkspaceSortInput!]! = [{}]
 }
 
 input User_ConnectionWorkspaceSortInput {
   field: User_ConnectionWorkspaceSortFieldEnum! = NODE_PATH
+  order: SortOrderEnum! = ASC
+}
+
+input User_ConnectionWorkspaceOrganizationInput {
+  "Filters the user workspace orgs by one or more application IDs. An empty value (default) will return all workspaces."
+  applicationIds: [ObjectID!]! = []
+  "Filters the user workspace orgs by one or more application keys. An empty value (default) will return all workspaces."
+  applicationKeys: [String!]! = []
+  "Paginates the results."
+  pagination: PaginationInput! = {}
+  sort: [User_ConnectionWorkspaceOrganizationSortInput!]! = [{}]
+}
+
+input User_ConnectionWorkspaceOrganizationSortInput {
+  field: User_ConnectionWorkspaceOrganizationSortFieldEnum! = NODE_SLUG
   order: SortOrderEnum! = ASC
 }
 

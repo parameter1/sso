@@ -10,11 +10,16 @@
     <script type="module">
       import SSO from './src/main.js';
 
-      const sso = new SSO({ origin: 'http://sso.dev.parameter1.com:7913' });
+      const sso = new SSO({
+        appId: '627e6238d92bdc5068f0c13c',
+        origin: 'http://sso.dev.parameter1.com:7913',
+        graphqlUri: 'http://sso.dev.parameter1.com:7915/graphql/materialized',
+      });
 
       (async () => {
-        const hasAuthToken = await sso.hasAuthToken();
-        console.log({ hasAuthToken });
+        const user = await sso.getCurrentUser();
+        if (!user) sso.redirectToLoginPage();
+        console.log({ user });
       })();
 
     </script>

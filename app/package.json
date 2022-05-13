@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-app",
-  "version": "0.2.0",
+  "version": "0.2.8",
   "description": "The SSO management application.",
   "author": "Jacob Bare <jacob@parameter1.com>",
   "homepage": "https://github.com/parameter1/sso/tree/main/app#readme",

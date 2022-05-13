@@ -50,6 +50,16 @@ type User implements UserInterface @interfaceFields {
   _connection: User_Connection! @project(deep: true) @object
   "Related edges."
   _edge: User_Edge! @project(deep: true) @object
+  "Gets the user membership role for the provided workspace ID. Will return null if the user is not a member of the workspace."
+  workspaceRoleFromId(input: UserWorkspaceRoleFromIdInput!): String
+    @project(
+      field: "_connection.workspace.edges.node._id"
+      prefixNeedsWith: "_connection.workspace.edges"
+      needs: [
+        "node._deleted",
+        "role"
+      ]
+    )
 }
 
 type User_Connection {
@@ -276,6 +286,11 @@ input User_ConnectionWorkspaceOrganizationInput {
 input User_ConnectionWorkspaceOrganizationSortInput {
   field: User_ConnectionWorkspaceOrganizationSortFieldEnum! = NODE_SLUG
   order: SortOrderEnum! = ASC
+}
+
+input UserWorkspaceRoleFromIdInput {
+  "The workspace ID to return the role from."
+  _id: ObjectID!
 }
 
 `;

@@ -27,6 +27,22 @@ export default {
   /**
    *
    */
+  User: {
+    /**
+     *
+     */
+    workspaceRoleFromId({ _connection }, { input }) {
+      const [workspace] = filterObjects(_connection.workspace.edges, {
+        'node._deleted': false,
+        'node._id': input._id,
+      });
+      return workspace ? workspace.role : null;
+    },
+  },
+
+  /**
+   *
+   */
   User_Connection: {
     /**
      *

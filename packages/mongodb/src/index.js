@@ -6,7 +6,7 @@ export {
   iterateMongoCursor,
 } from '@parameter1/mongodb';
 
-export { findWithObjects } from '@parameter1/mongodb/pagination';
+export { filterObjects, findWithObjects } from '@parameter1/mongodb/pagination';
 
 export * from './repo/index.js';
 export * from './schema/index.js';

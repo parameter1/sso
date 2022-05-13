@@ -45,8 +45,8 @@ export default class UserRepo extends AbstractManagementRepo {
       collatableFields: [],
       indexes: [
         { key: { email: 1 }, unique: true },
-        { key: { 'organizations._id': 1 } },
-        { key: { 'workspaces._id': 1 } },
+        { key: { '_connection.organization.edges._id': 1 } },
+        { key: { '_connection.workspace.edges._id': 1 } },
 
         { key: { 'slug.default': 1, _id: 1 } },
         { key: { 'slug.reverse': 1, _id: 1 } },
@@ -83,11 +83,11 @@ export default class UserRepo extends AbstractManagementRepo {
     }).required(), params);
 
     return this.update({
-      filter: { _id: userId, 'workspaces._id': { $ne: workspaceId } },
+      filter: { _id: userId, '_connection.workspace.edges._id': { $ne: workspaceId } },
       materializeFilter: { _id: userId },
       update: [{
         $set: {
-          workspaces: $addToSet('workspaces', { _id: workspaceId, role }),
+          '_connection.workspace.edges': $addToSet('_connection.workspace.edges', { _id: workspaceId, role }),
         },
       }],
       session,
@@ -118,11 +118,11 @@ export default class UserRepo extends AbstractManagementRepo {
       context: contextSchema,
     }).required(), params);
     return this.update({
-      filter: { _id: userId, 'workspaces._id': workspaceId },
+      filter: { _id: userId, '_connection.workspace.edges._id': workspaceId },
       materializeFilter: { _id: userId },
       update: [{
         $set: {
-          workspaces: $pull('workspaces', { $ne: ['$$v._id', workspaceId] }),
+          '_connection.workspace.edges': $pull('_connection.workspace.edges', { $ne: ['$$v._id', workspaceId] }),
         },
       }],
       session,
@@ -157,11 +157,11 @@ export default class UserRepo extends AbstractManagementRepo {
     }).required(), params);
 
     return this.update({
-      filter: { _id: userId, 'organizations._id': { $ne: orgId } },
+      filter: { _id: userId, '_connection.organization.edges._id': { $ne: orgId } },
       materializeFilter: { _id: userId },
       update: [{
         $set: {
-          organizations: $addToSet('organizations', { _id: orgId, role }),
+          '_connection.organization.edges': $addToSet('_connection.organization.edges', { _id: orgId, role }),
         },
       }],
       session,
@@ -238,12 +238,12 @@ export default class UserRepo extends AbstractManagementRepo {
     return this.update({
       filter: {
         _id: userId,
-        workspaces: { $elemMatch: { _id: workspaceId, role: { $ne: role } } },
+        '_connection.workspace.edges': { $elemMatch: { _id: workspaceId, role: { $ne: role } } },
       },
       materializeFilter: { _id: userId },
       update: [{
         $set: {
-          workspaces: $mergeArrayObject('workspaces', { $eq: ['$$v._id', workspaceId] }, { role }),
+          '_connection.workspace.edges': $mergeArrayObject('_connection.workspace.edges', { $eq: ['$$v._id', workspaceId] }, { role }),
         },
       }],
       session,
@@ -280,12 +280,12 @@ export default class UserRepo extends AbstractManagementRepo {
     return this.update({
       filter: {
         _id: userId,
-        organizations: { $elemMatch: { _id: orgId, role: { $ne: role } } },
+        '_connection.organization.edges': { $elemMatch: { _id: orgId, role: { $ne: role } } },
       },
       materializeFilter: { _id: userId },
       update: [{
         $set: {
-          organizations: $mergeArrayObject('organizations', { $eq: ['$$v._id', orgId] }, { role }),
+          '_connection.organization.edges': $mergeArrayObject('_connection.organization.edges', { $eq: ['$$v._id', orgId] }, { role }),
         },
       }],
       session,
@@ -345,7 +345,7 @@ export default class UserRepo extends AbstractManagementRepo {
 
       await this.manager.$('user-event').create({
         doc: {
-          user: { _id: user._id },
+          _edge: { user: { _id: user._id } },
           action: 'send-login-link',
           ip,
           ua,
@@ -397,7 +397,7 @@ export default class UserRepo extends AbstractManagementRepo {
         this.manager.$('token').invalidate({ id: get(authToken, 'doc._id'), options: { session } }),
         this.manager.$('user-event').create({
           doc: {
-            user: { _id: user._id },
+            _edge: { user: { _id: user._id } },
             action: 'logout',
             ip,
             ua,
@@ -457,7 +457,7 @@ export default class UserRepo extends AbstractManagementRepo {
         ] : []),
         this.manager.$('user-event').create({
           doc: {
-            user: { _id: user._id },
+            _edge: { user: { _id: user._id } },
             action: 'magic-login',
             ip,
             ua,
@@ -510,11 +510,11 @@ export default class UserRepo extends AbstractManagementRepo {
       context: contextSchema,
     }).required(), params);
     return this.update({
-      filter: { _id: userId, 'organizations._id': orgId },
+      filter: { _id: userId, '_connection.organization.edges._id': orgId },
       materializeFilter: { _id: userId },
       update: [{
         $set: {
-          organizations: $pull('organizations', { $ne: ['$$v._id', orgId] }),
+          '_connection.organization.edges': $pull('_connection.organization.edges', { $ne: ['$$v._id', orgId] }),
         },
       }],
       session,

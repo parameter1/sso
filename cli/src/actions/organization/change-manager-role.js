@@ -13,14 +13,14 @@ export default async () => {
       message: 'Select the organization',
       choices: async () => {
         const orgIds = await repos.$('user').distinct({
-          key: 'organizations._id',
+          key: '_connection.organization.edges._id',
         });
         return getOrgList({ query: { _id: { $in: orgIds } } });
       },
       filter: async (org) => {
         const users = await getUserList({
-          projection: { organizations: 1 },
-          query: { 'organizations._id': org._id },
+          projection: { '_connection.organization.edges': 1 },
+          query: { '_connection.organization.edges._id': org._id },
         });
         return { org, users };
       },
@@ -38,7 +38,7 @@ export default async () => {
       message: 'Select the manager role',
       when: ({ eligible }) => Boolean(eligible.users.length),
       choices: ({ user, eligible }) => {
-        const { role } = user.organizations.find(({ _id }) => `${_id}` === `${eligible.org._id}`);
+        const { role } = user._connection.organization.edges.find(({ _id }) => `${_id}` === `${eligible.org._id}`);
         return ['Owner', 'Administrator', 'Manager'].map((r) => ({
           name: r === role ? `${r} (current role)` : r,
           value: r,

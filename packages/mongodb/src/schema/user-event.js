@@ -6,8 +6,10 @@ const { object } = PropTypes;
 
 export default {
   create: object({
-    user: object({
-      _id: userProps.id.required(),
+    _edge: object({
+      user: object({
+        _id: userProps.id.required(),
+      }).required(),
     }).required(),
     action: userEventProps.action.required(),
     ip: userEventProps.ip,

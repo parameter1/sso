@@ -12,14 +12,14 @@ export default async () => {
       message: 'Select the workspace',
       choices: async () => {
         const workspaceIds = await repos.$('user').distinct({
-          key: 'workspaces._id',
+          key: '_connection.workspace.edges._id',
         });
         return getWorkspaceList({ query: { _id: { $in: workspaceIds } } });
       },
       filter: async (workspace) => {
         const users = await getUserList({
-          projection: { workspaces: 1 },
-          query: { 'workspaces._id': workspace._id },
+          projection: { '_connection.workspace.edges': 1 },
+          query: { '_connection.workspace.edges._id': workspace._id },
         });
         return { workspace, users };
       },

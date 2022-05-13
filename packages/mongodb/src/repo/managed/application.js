@@ -25,13 +25,13 @@ export default class ApplicationRepo extends AbstractManagementRepo {
       materializedPipelineBuilder: buildMaterializedApplicationPipeline,
       onMaterialize: async ({ materializedIds }) => {
         const update = new Map();
-        update.set('workspace', { 'application._id': { $in: materializedIds } });
+        update.set('workspace', { '_edge.application._id': { $in: materializedIds } });
         const workspaceIds = await this.manager.$('workspace').distinct({
           key: '_id',
-          query: { 'application._id': { $in: materializedIds } },
+          query: { '_edge.application._id': { $in: materializedIds } },
           options: { useGlobalFindCriteria: false },
         });
-        if (workspaceIds.length) update.set('user', { 'workspaces._id': { $in: workspaceIds } });
+        if (workspaceIds.length) update.set('user', { '_connection.workspace.edges._id': { $in: workspaceIds } });
         return update;
       },
     });

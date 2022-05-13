@@ -14,7 +14,7 @@ export default async ({
         $lookup: {
           from: 'applications',
           foreignField: '_id',
-          localField: 'application._id',
+          localField: '_edge.application._id',
           as: 'application',
         },
       },
@@ -22,7 +22,7 @@ export default async ({
         $lookup: {
           from: 'organizations',
           foreignField: '_id',
-          localField: 'organization._id',
+          localField: '_edge.organization._id',
           as: 'organization',
         },
       },
@@ -38,10 +38,11 @@ export default async ({
           'organization._id': 1,
           'organization.name': 1,
           'organization.key': 1,
-          name: 1,
-          key: 1,
+          name: { $concat: ['$application.name', ' > ', '$organization.name', ' > ', '$name'] },
+          ns: { $concat: ['$application.key', '.', '$organization.key', '.', '$key'] },
         },
       },
+      { $sort: { fullName: 1 } },
     ],
   });
 
@@ -49,14 +50,9 @@ export default async ({
   return workspaces.filter((doc) => {
     if (isFn(filter)) return filter(doc);
     return true;
-  }).map((doc) => {
-    const { application: app, organization: org } = doc;
-    const name = [app.name, org.name, doc.name].join(' > ');
-    const ns = [app.key, org.key, doc.key].join('.');
-    return {
-      name: `${name} [${ns}]`,
-      value: doc,
-      disabled: isFn(disabledWhen) ? disabledWhen(doc) : false,
-    };
-  });
+  }).map((doc) => ({
+    name: `${doc.name} [${doc.ns}]`,
+    value: doc,
+    disabled: isFn(disabledWhen) ? disabledWhen(doc) : false,
+  }));
 };

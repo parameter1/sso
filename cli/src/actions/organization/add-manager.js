@@ -17,7 +17,7 @@ export default async () => {
       name: 'user',
       message: 'Select the user',
       choices: async ({ org }) => getUserList({
-        query: { 'organizations._id': { $ne: org._id } },
+        query: { '_connection.organization.edges._id': { $ne: org._id } },
       }),
     },
 

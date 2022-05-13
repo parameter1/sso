@@ -12,7 +12,7 @@ export default class UserEventRepo extends AbstractManagementRepo {
       collectionName: 'user-events',
       collatableFields: [],
       indexes: [
-        { key: { 'user._id': 1, action: 1 } },
+        { key: { '_edge.user._id': 1, action: 1 } },
 
         { key: { date: 1, _id: 1 } },
       ],

@@ -20,17 +20,19 @@ export default {
     const names = [user.givenName, user.familyName];
     return {
       ...user,
+      _connection: {
+        organization: { edges: [] },
+        workspace: { edges: [] },
+      },
       lastSeenAt: null,
       lastLoggedInAt: null,
       domain,
       loginCount: 0,
       previousEmails: [],
-      organizations: [],
       slug: {
         default: sluggifyUserNames(names),
         reverse: sluggifyUserNames(names, true),
       },
-      workspaces: [],
     };
   }).required(),
 };

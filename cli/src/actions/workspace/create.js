@@ -87,10 +87,12 @@ export default async () => {
 
   return confirm ? repos.$('workspace').create({
     doc: {
+      _edge: {
+        application: { _id: app._id },
+        organization: { _id: org._id },
+      },
       key,
       name,
-      application: { _id: app._id },
-      organization: { _id: org._id },
     },
   }) : null;
 };

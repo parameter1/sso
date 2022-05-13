@@ -9,11 +9,13 @@ const { object } = PropTypes;
 
 export default {
   create: object({
-    application: object({
-      _id: applicationProps.id.required(),
-    }).required(),
-    organization: object({
-      _id: organizationProps.id.required(),
+    _edge: object({
+      application: object({
+        _id: applicationProps.id.required(),
+      }).required(),
+      organization: object({
+        _id: organizationProps.id.required(),
+      }).required(),
     }).required(),
     name: workspaceProps.name.required(),
     key: workspaceProps.key.required(),

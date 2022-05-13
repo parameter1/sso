@@ -18,15 +18,15 @@ export default class WorkspaceRepo extends AbstractManagementRepo {
       collectionName: 'workspaces',
       collatableFields: [],
       indexes: [
-        { key: { 'organization._id': 1, 'application._id': 1, key: 1 }, unique: true },
+        { key: { '_edge.organization._id': 1, '_edge.application._id': 1, key: 1 }, unique: true },
         { key: { slug: 1 } },
-        { key: { 'application._id': 1 } },
+        { key: { '_edge.application._id': 1 } },
       ],
       schema: workspaceSchema,
       materializedPipelineBuilder: buildMaterializedWorkspacePipeline,
       onMaterialize: async ({ materializedIds }) => {
         const update = new Map();
-        update.set('user', { 'workspaces._id': { $in: materializedIds } });
+        update.set('user', { '_connection.workspace.edges._id': { $in: materializedIds } });
         return update;
       },
     });

@@ -25,16 +25,16 @@ export default class OrganizationRepo extends AbstractManagementRepo {
       materializedPipelineBuilder: buildMaterializedOrganizationPipeline,
       onMaterialize: async ({ materializedIds }) => {
         const update = new Map();
-        update.set('workspace', { 'organization._id': { $in: materializedIds } });
+        update.set('workspace', { '_edge.organization._id': { $in: materializedIds } });
         const workspaceIds = await this.manager.$('workspace').distinct({
           key: '_id',
-          query: { 'organization._id': { $in: materializedIds } },
+          query: { '_edge.organization._id': { $in: materializedIds } },
           options: { useGlobalFindCriteria: false },
         });
         update.set('user', {
           $or: [
-            { 'workspaces._id': { $in: workspaceIds } },
-            { 'organizations._id': { $in: materializedIds } },
+            { '_connection.workspace.edges._id': { $in: workspaceIds } },
+            { '_connection.organization.edges._id': { $in: materializedIds } },
           ],
         });
         return update;

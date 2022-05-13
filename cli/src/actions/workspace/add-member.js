@@ -16,7 +16,7 @@ export default async () => {
       name: 'user',
       message: 'Select the user',
       choices: async ({ workspace }) => getUserList({
-        query: { 'workspaces._id': { $ne: workspace._id } },
+        query: { '_connection.workspace.edges._id': { $ne: workspace._id } },
       }),
     },
     {

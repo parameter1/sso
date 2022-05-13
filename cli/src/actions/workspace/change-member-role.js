@@ -13,14 +13,14 @@ export default async () => {
       message: 'Select the workspace',
       choices: async () => {
         const workspaceIds = await repos.$('user').distinct({
-          key: 'workspaces._id',
+          key: '_connection.workspace.edges._id',
         });
         return getWorkspaceList({ query: { _id: { $in: workspaceIds } } });
       },
       filter: async (workspace) => {
         const users = await getUserList({
-          projection: { workspaces: 1 },
-          query: { 'workspaces._id': workspace._id },
+          projection: { '_connection.workspace.edges': 1 },
+          query: { '_connection.workspace.edges._id': workspace._id },
         });
         return { workspace, users };
       },
@@ -40,7 +40,7 @@ export default async () => {
       choices: async ({ user, eligible }) => {
         const { workspace } = eligible;
         const app = await repos.$('application').findByObjectId({ id: workspace.application._id, options: { strict: true } });
-        const { role } = user.workspaces.find(({ _id }) => `${_id}` === `${workspace._id}`);
+        const { role } = user._connection.workspace.edges.find(({ _id }) => `${_id}` === `${workspace._id}`);
         return app.roles.map((r) => ({
           name: r === role ? `${r} (current role)` : r,
           value: r,

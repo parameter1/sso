@@ -114,5 +114,10 @@ export default function SSOClient(options) {
       const { data } = await graphql.query({ query, headers });
       return data.currentUser;
     },
+
+    /**
+     *
+     */
+    graphql,
   };
 }

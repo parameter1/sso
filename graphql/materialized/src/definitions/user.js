@@ -52,7 +52,7 @@ type User_Connection {
   organization(input: User_ConnectionOrganizationInput! = {}): User_ConnectionOrganization!
     @project(
       deep: true
-      prefixNeedsWith: "organization.node"
+      prefixNeedsWith: "organization.edges.node"
       needs: [
         # core
         "_id",
@@ -67,7 +67,7 @@ type User_Connection {
   workspace(input: User_ConnectionWorkspaceInput! = {}): User_ConnectionWorkspace!
     @project(
       deep: true
-      prefixNeedsWith: "workspace.node"
+      prefixNeedsWith: "workspace.edges.node"
       needs: [
         # core
         "_id",
@@ -83,12 +83,12 @@ type User_Connection {
     )
     @object
     @auth
-  "Applications of this user of by way the user's workspace memberships."
+  "@todo change me Applications of this user of by way the user's workspace memberships."
   workspaceApplication: User_ConnectionWorkspaceApplication!
     @project(deep: true)
     @object
     @auth
-  "Organizations of this user of by way the user's workspace memberships."
+  "@todo change me Organizations of this user of by way the user's workspace memberships."
   workspaceOrganization: User_ConnectionWorkspaceOrganization!
     @project(deep: true)
     @object
@@ -97,11 +97,7 @@ type User_Connection {
 
 type User_ConnectionOrganization {
   edges: [User_ConnectionOrganizationEdge!]!
-    @project(
-      field: ""
-      deep: true
-      resolve: false
-    )
+    @project(deep: true, resolve: false)
   pageInfo: PageInfo!
   totalCount: Int!
 }
@@ -122,11 +118,7 @@ type User_ConnectionOrganizationEdgeRole {
 
 type User_ConnectionWorkspace {
   edges: [User_ConnectionWorkspaceEdge!]!
-    @project(
-      field: ""
-      deep: true
-      resolve: false
-    )
+    @project(deep: true resolve: false)
   pageInfo: PageInfo!
   totalCount: Int!
 }

@@ -34,7 +34,7 @@ export default {
         pagination,
         sort,
       } = input;
-      return findWithObjects(organization, {
+      return findWithObjects(organization.edges, {
         query: { 'node._deleted': false },
         limit: pagination.limit,
         cursor: pagination.cursor.value,
@@ -57,7 +57,7 @@ export default {
         pagination,
         sort,
       } = input;
-      return findWithObjects(workspace, {
+      return findWithObjects(workspace.edges, {
         query: {
           'node._deleted': false,
           ...addArrayFilter('node._edge.application.node._id', applicationIds),

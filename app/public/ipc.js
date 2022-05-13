@@ -34,6 +34,17 @@ const sendRemove = () => {
 
 init();
 
+window.addEventListener('message', (event) => {
+  // @todo need to determine app URLs that can send this
+  const message = parseJSON(event.data);
+  if (!message || message.key !== keys.token) return;
+
+  if (message.action === 'remove') {
+    // remove application has requested a user logout. remove the token from storage.
+    localStorage.removeItem(keys.token);
+  }
+});
+
 window.addEventListener('storage', (event) => {
   const { key, newValue } = event;
   // if key is null, all of local storage was cleared. signal a token removal.

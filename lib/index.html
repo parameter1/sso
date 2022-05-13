@@ -18,10 +18,23 @@
 
       (async () => {
         const user = await sso.getCurrentUser();
-        if (!user) sso.redirectToLoginPage();
-        console.log({ user });
+        if (!user) {
+          sso.redirectToLoginPage();
+        } else {
+          console.log({ user });
+          const btn = document.getElementById('logout');
+          btn.style.display = 'block';
+          btn.onclick = () => sso.logout();
+        }
       })();
-
     </script>
+
+    <button
+      id="logout"
+      type="button"
+      style="display: none;"
+    >
+      Logout
+    </button>
   </body>
 </html>

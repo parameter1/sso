@@ -91,7 +91,7 @@ type User_Connection {
         "path",
         # filtering
         "key",
-        "namespace",
+        "namespace.default",
         "_edge.application.node._id",
         "_edge.application.node.key",
         "_edge.organization.node._id",

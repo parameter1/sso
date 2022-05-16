@@ -58,7 +58,7 @@ export default {
       const application = applicationKey
         ? await repos.$('application').findOne({
           query: { key: applicationKey },
-          options: { projection: { name: 1 } },
+          options: { projection: { name: 1 }, strict: true },
         }) : null;
       await repos.$('user').createLoginLinkToken({
         email,

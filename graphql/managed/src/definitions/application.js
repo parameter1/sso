@@ -2,6 +2,11 @@ import { gql } from '@parameter1/graphql/tag';
 
 export default gql`
 
+extend type Query {
+  "Returns a single application by ID."
+  applicationById(input: QueryApplicationByIdInput!): Application
+}
+
 type Application {
   "The unique application identifier"
   _id: ObjectID! @project
@@ -20,6 +25,13 @@ type ApplicationDate {
   created: DateTime! @project(field: "_touched.first.date")
   "The ISO date when the application was last touched."
   touched: DateTime! @project(field: "_touched.last.date")
+}
+
+input QueryApplicationByIdInput {
+  "The application ID to return."
+  _id: ObjectID!
+  "When in strict mode (default), an error will be throw when the application is not found."
+  strict: Boolean! = true
 }
 
 `;

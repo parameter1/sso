@@ -3,8 +3,6 @@ import { gql } from '@parameter1/graphql/tag';
 export default gql`
 
 extend type Query {
-  "Returns a single application by ID."
-  applicationById(input: QueryApplicationByIdInput!): Application
   "Determines if the provided application ID exists."
   applicationExists(input: QueryApplicationExistsInput!): Boolean!
 }
@@ -60,13 +58,6 @@ type ApplicationDate {
   created: DateTime! @project
   "The ISO date when the application was last updated."
   updated: DateTime! @project
-}
-
-input QueryApplicationByIdInput {
-  "The application ID to return."
-  _id: ObjectID!
-  "When in strict mode (default), an error will be throw when the application is not found."
-  strict: Boolean! = true
 }
 
 input QueryApplicationExistsInput {

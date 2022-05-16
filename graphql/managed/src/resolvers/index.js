@@ -2,6 +2,7 @@ import merge from 'lodash.merge';
 import { ObjectId } from '@parameter1/sso-mongodb';
 import { GraphQLDateTime, GraphQLObjectId } from '@parameter1/graphql/scalars';
 
+import application from './application.js';
 import user from './user.js';
 
 export default merge({
@@ -31,4 +32,4 @@ export default merge({
       return 'pong';
     },
   },
-}, user);
+}, application, user);

@@ -73,6 +73,7 @@ export default {
         keys,
         organizationIds,
         organizationKeys,
+        namespaces,
         pagination,
         sort,
       } = input;
@@ -82,6 +83,7 @@ export default {
           ...addArrayFilter('node._edge.application.node._id', applicationIds),
           ...addArrayFilter('node._edge.application.node.key', applicationKeys),
           ...addArrayFilter('node.key', keys),
+          ...addArrayFilter('node.namespace.default', namespaces),
           ...addArrayFilter('node._edge.organization.node._id', organizationIds),
           ...addArrayFilter('node._edge.organization.node.key', organizationKeys),
         },

@@ -91,6 +91,7 @@ type User_Connection {
         "path",
         # filtering
         "key",
+        "namespace",
         "_edge.application.node._id",
         "_edge.application.node.key",
         "_edge.organization.node._id",
@@ -261,6 +262,8 @@ input User_ConnectionWorkspaceInput {
   applicationKeys: [String!]! = []
   "Filters the user workspaces by one or more workspace keys. An empty value (default) will return all workspaces."
   keys: [String!]! = []
+  "Filters the user workspaces by one or more workspace namespaces. An empty value (default) will return all workspaces."
+  namespaces: [String!]! = []
   "Filters the user workspaces by one or more organization IDs. An empty value (default) will return all workspaces."
   organizationIds: [ObjectID!]! = []
   "Filters the user workspaces by one or more organization keys. An empty value (default) will return all workspaces."

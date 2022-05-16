@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import repos from '../../repos.js';
+import managedRepos, { materializedRepos } from '../../repos.js';
 
 export default async () => {
   const questions = [
@@ -14,5 +14,8 @@ export default async () => {
   const {
     confirm,
   } = await inquirer.prompt(questions);
-  return confirm ? repos.createAllIndexes() : null;
+  return confirm ? Promise.all([
+    managedRepos.createAllIndexes(),
+    materializedRepos.createAllIndexes(),
+  ]) : null;
 };

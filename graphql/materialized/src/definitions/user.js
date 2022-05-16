@@ -27,15 +27,15 @@ interface UserInterface {
   "The unique user identifier"
   _id: ObjectID! @project
   "Dates associated with this user, such as first created and last touched."
-  date: UserDate! @project(field: "_date", deep: true) @object
+  date: UserInterfaceDate! @project(field: "_date", deep: true) @object
   "The user's current email address, domain, and any previously used addresses."
-  email: UserEmail! @project(field: "", deep: true) @object
+  email: UserInterfaceEmail! @project(field: "", deep: true) @object
   "The number of times the user has logged in."
   loginCount: Int! @project
   "The user's given, family and full names."
-  name: UserName! @project(field: "", deep: true) @object
+  name: UserInterfaceName! @project(field: "", deep: true) @object
   "The user slugs."
-  slug: UserSlug! @project(deep: true)
+  slug: UserInterfaceSlug! @project(deep: true)
   "Whether the user email address has been verified."
   verified: Boolean! @project
 }
@@ -202,7 +202,7 @@ type User_EdgeUpdatedBy {
   node: UserPartial! @project(deep: true, needs: ["node._deleted"])
 }
 
-type UserDate {
+type UserInterfaceDate {
   "The ISO date when the user was created."
   created: DateTime! @project
   "The ISO date when the user last logged in."
@@ -213,7 +213,7 @@ type UserDate {
   updated: DateTime! @project
 }
 
-type UserEmail {
+type UserInterfaceEmail {
   "The user's email address. This value is unique across all users."
   address: String! @project(field: "email")
   "The user's email domain."
@@ -222,7 +222,7 @@ type UserEmail {
   previous: [String!]! @project(field: "previousEmails") @array
 }
 
-type UserName {
+type UserInterfaceName {
   "The user's family/last name."
   family: String! @project(field: "familyName")
   "An alias for the user's given name."
@@ -235,7 +235,7 @@ type UserName {
   last: String! @project(field: "familyName")
 }
 
-type UserSlug {
+type UserInterfaceSlug {
   "The default user slug, starting with the user's given name."
   default: String! @project
   "The reversed user slug, starting with the user's family name."

@@ -11,7 +11,7 @@ interface ApplicationInterface {
   "The unique application identifier"
   _id: ObjectID! @project
   "Dates associated with this application, such as first created and last updated."
-  date: ApplicationDate! @project(field: "_date", deep: true) @object
+  date: ApplicationInterfaceDate! @project(field: "_date", deep: true) @object
   "The unique application key."
   key: String! @project
   "The application name."
@@ -53,7 +53,7 @@ type Application_EdgeUpdatedBy {
   node: UserPartial! @project(deep: true, needs: ["node._deleted"])
 }
 
-type ApplicationDate {
+type ApplicationInterfaceDate {
   "The ISO date when the application was created."
   created: DateTime! @project
   "The ISO date when the application was last updated."

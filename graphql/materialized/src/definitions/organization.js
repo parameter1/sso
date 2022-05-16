@@ -12,7 +12,7 @@ interface OrganizationInterface {
   "The unique organization identifier"
   _id: ObjectID! @project
   "Dates associated with this organization, such as first created and last updated."
-  date: OrganizationDate! @project(field: "_date", deep: true) @object
+  date: OrganizationInterfaceDate! @project(field: "_date", deep: true) @object
   "Email domains associated with this organization."
   emailDomains: [String!]! @project @array
   "The unique organization key."
@@ -54,7 +54,7 @@ type Organization_EdgeUpdatedBy {
   node: UserPartial! @project(deep: true, needs: ["node._deleted"])
 }
 
-type OrganizationDate {
+type OrganizationInterfaceDate {
   "The ISO date when the organization was created."
   created: DateTime! @project
   "The ISO date when the organization was last updated."

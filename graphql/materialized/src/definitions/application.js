@@ -3,8 +3,8 @@ import { gql } from '@parameter1/graphql/tag';
 export default gql`
 
 extend type Query {
-  "Determines if the provided application ID exists."
-  applicationExists(input: QueryApplicationExistsInput!): Boolean!
+  "Determines if the provided application key exists."
+  applicationKeyExists(input: QueryApplicationKeyExistsInput!): Boolean!
 }
 
 interface ApplicationInterface {
@@ -60,9 +60,9 @@ type ApplicationDate {
   updated: DateTime! @project
 }
 
-input QueryApplicationExistsInput {
-  "The application ID to check."
-  _id: ObjectID!
+input QueryApplicationKeyExistsInput {
+  "The application key to check."
+  value: String!
 }
 
 `;

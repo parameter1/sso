@@ -6,9 +6,9 @@ export default {
     /**
      *
      */
-    async applicationExists(_, { input }, { repos }) {
-      const doc = await repos.$('application').findByObjectId({
-        id: input._id,
+    async applicationKeyExists(_, { input }, { repos }) {
+      const doc = await repos.$('application').findOne({
+        query: { key: input.key },
         options: { projection: { _id: 1 } },
       });
       return Boolean(doc);

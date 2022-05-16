@@ -42,8 +42,8 @@ import userService from '../services/user';
 import GraphQLError from '../graphql/error';
 
 const QUERY = gql`
-  query LoginApplication($input: QueryApplicationByIdInput!) {
-    application: applicationById(input: $input) { _id name }
+  query LoginApplication($input: QueryApplicationByKeyInput!) {
+    application: applicationByKey(input: $input) { _id name }
   }
 `;
 
@@ -61,10 +61,10 @@ export default {
       query: QUERY,
       fetchPolicy: 'cache-and-network',
       skip() {
-        return !this.appId;
+        return !this.appKey || !this.next;
       },
       variables() {
-        const input = { _id: this.appId };
+        const input = { key: this.appKey };
         return { input };
       },
       error(e) { this.error.app = new GraphQLError(e); },
@@ -76,7 +76,7 @@ export default {
   },
 
   props: {
-    appId: {
+    appKey: {
       type: String,
       default: null,
     },
@@ -103,7 +103,7 @@ export default {
         await userService.sendUserLoginLink({
           email: this.email,
           next: this.next,
-          appId: this.appId,
+          appKey: this.appKey,
         });
         this.linkWasSent = true;
       } catch (e) {

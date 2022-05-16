@@ -4,22 +4,11 @@ import { extractFragmentData } from '@parameter1/graphql/fragments';
 
 import GraphQLClient from './graphql.js';
 
-const {
-  alternatives,
-  object,
-  objectId,
-  string,
-} = PropTypes;
+const { alternatives, object, string } = PropTypes;
 
 const APPLICATION_EXISTS = gql`
-  query SSOClientDoesApplicationExist($input: QueryApplicationExistsInput!) {
-    result: applicationExists(input: $input)
-  }
-`;
-
-const WORKSPACE_EXISTS = gql`
-  query SSOClientDoesWorkspaceExist($input: QueryWorkspaceExistsInput!) {
-    result: workspaceExists(input: $input)
+  query SSOClientDoesApplicationExist($input: QueryApplicationKeyExistsInput!) {
+    result: applicationKeyExists(input: $input)
   }
 `;
 
@@ -27,7 +16,6 @@ const WORKSPACE_EXISTS = gql`
  * Creates the SSO client instance.
  *
  * @param {object} options
- * @param {string} options.appId The active SSO application ID.
  * @param {string} options.graphqlUrl The SSO GraphQL URL to connect to.
  * @param {string} options.name The client name.
  * @param {string} options.version The client version.
@@ -40,7 +28,6 @@ export default function SSOClient(options) {
     version,
     headers: globalHeaders,
   } = attempt(options, object({
-    appId: objectId().required(),
     graphqlUrl: string().required(),
     name: string().required(),
     version: string().required(),
@@ -58,32 +45,15 @@ export default function SSOClient(options) {
     /**
      *
      * @param {object} params
-     * @param {string|ObjectId} params._id The application ID to check.
+     * @param {string} params.key The application key to check.
      * @returns {Promise<boolean>} The current user.
      */
     doesApplicationExist: async (params) => {
-      const { _id } = attempt(params, object({
-        _id: objectId().required(),
+      const { key } = attempt(params, object({
+        key: string().required(),
       }).required());
-      const variables = { input: { _id } };
+      const variables = { input: { value: key } };
       const { data } = await graphql.query({ query: APPLICATION_EXISTS, variables });
-      return data.result;
-    },
-
-    /**
-     *
-     * @param {object} params
-     * @param {string|ObjectId} params._id The workspace ID to check.
-     * @param {string|ObjectId} [params.applicationId] The optional application ID to also check.
-     * @returns {Promise<boolean>} The current user.
-     */
-    doesWorkspaceExist: async (params) => {
-      const { _id, applicationId } = attempt(params, object({
-        _id: objectId().required(),
-        applicationId: objectId(),
-      }).required());
-      const variables = { input: { _id, applicationId } };
-      const { data } = await graphql.query({ query: WORKSPACE_EXISTS, variables });
       return data.result;
     },
 

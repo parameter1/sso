@@ -15,5 +15,16 @@ export default {
         options: { projection, strict: input.strict },
       });
     },
+
+    /**
+     *
+     */
+    async applicationByKey(_, { input }, { repos }, info) {
+      const { projection } = getProjectionForType(info);
+      return repos.$('application').findOne({
+        query: { key: input.key },
+        options: { projection, strict: input.strict },
+      });
+    },
   },
 };

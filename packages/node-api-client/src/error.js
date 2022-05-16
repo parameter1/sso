@@ -11,5 +11,6 @@ export default class GraphQLError extends Error {
     this.statusCode = res.status;
     this.json = json;
     this.res = res;
+    this.allErrors = json && json.errors ? json.errors : [];
   }
 }

@@ -13,7 +13,7 @@ export default (params = {}) => {
     application: object({
       _id: objectId().required(),
       name: string().required(),
-    }),
+    }).allow(null),
     loginToken: string().required(),
     redirectTo: string().allow(null),
   }).required(), params);

@@ -1,12 +1,18 @@
-import { RepoManager, ManagedRepo } from '@parameter1/mongodb';
-
-const DELETED_PATH = '_deleted';
+import { RepoManager } from '@parameter1/mongodb';
+import AbstractMaterializedRepo from './-abstract.js';
 
 const repos = [
-  { key: 'application', collectionName: 'applications', indexes: [] },
-  { key: 'organization', collectionName: 'organizations', indexes: [] },
-  { key: 'user', collectionName: 'users', indexes: [] },
-  { key: 'workspace', collectionName: 'workspaces', indexes: [] },
+  {
+    key: 'application',
+    collectionName: 'applications',
+    usesSoftDelete: true,
+    indexes: [
+      { key: { key: 1 }, unique: true },
+    ],
+  },
+  { key: 'organization', collectionName: 'organizations', usesSoftDelete: true },
+  { key: 'user', collectionName: 'users', usesSoftDelete: true },
+  { key: 'workspace', collectionName: 'workspaces', usesSoftDelete: true },
 ];
 
 export default class MaterializedRepos extends RepoManager {
@@ -21,8 +27,7 @@ export default class MaterializedRepos extends RepoManager {
       this.add({
         ...params,
         logger,
-        globalFindCriteria: { [DELETED_PATH]: false },
-        ManagedRepo,
+        ManagedRepo: AbstractMaterializedRepo,
       });
     });
   }

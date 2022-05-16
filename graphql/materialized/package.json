@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-materialized-graphql-server",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "type": "module",
   "description": "The SSO GraphQL API server.",
   "author": "Jacob Bare <jacob@parameter1.com>",

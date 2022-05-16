@@ -54,10 +54,10 @@ export default {
      *
      */
     async sendUserLoginLink(_, { input }, { ip, repos, ua }) {
-      const { applicationId, email, redirectTo } = input;
-      const application = applicationId
-        ? await repos.$('application').findByObjectId({
-          id: applicationId,
+      const { applicationKey, email, redirectTo } = input;
+      const application = applicationKey
+        ? await repos.$('application').findOne({
+          query: { key: applicationKey },
           options: { projection: { name: 1 } },
         }) : null;
       await repos.$('user').createLoginLinkToken({

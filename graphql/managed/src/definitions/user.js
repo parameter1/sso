@@ -101,8 +101,8 @@ input MutateOwnUserProfileInput {
 }
 
 input MutateSendUserLoginLinkInput {
-  "An optional application ID that signifies the application source where the login attempt is being made."
-  applicationId: ObjectID
+  "An optional application key that signifies the application source where the login attempt is being made."
+  applicationKey: String
   "The user email address to send the login to. The user must exist."
   email: String!
   "A location to redirect the user to after successful authentication."

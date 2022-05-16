@@ -100,9 +100,9 @@ export default {
     }
   },
 
-  sendUserLoginLink: async ({ email, next, appId } = {}) => {
+  sendUserLoginLink: async ({ email, next, appKey } = {}) => {
     const redirectTo = isRedirect(next) ? next : null;
-    const input = { email, redirectTo, applicationId: appId };
+    const input = { email, redirectTo, applicationKey: appKey };
     await apollo.mutate({
       mutation: SEND_USER_LOGIN_LINK,
       variables: { input },

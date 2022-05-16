@@ -40,6 +40,7 @@ const routes = [
     meta: { whenAuthed: { then: 'manage', otherwise: true } },
     component: () => import('../pages/login.vue'),
     props: ({ query }) => ({
+      appId: query.appId,
       next: query.next,
     }),
   },

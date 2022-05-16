@@ -54,13 +54,19 @@ export default {
      *
      */
     async sendUserLoginLink(_, { input }, { ip, repos, ua }) {
-      const { email, redirectTo } = input;
+      const { applicationId, email, redirectTo } = input;
+      const application = applicationId
+        ? await repos.$('applicationId').findByObjectId({
+          id: applicationId,
+          options: { projection: { name: 1 } },
+        }) : null;
       await repos.$('user').createLoginLinkToken({
         email,
         ip,
         ua,
         inTransaction: async (data) => {
           const { subject, html, text } = createLoginLinkTemplate({
+            application,
             loginToken: data.token.signed,
             redirectTo,
           });

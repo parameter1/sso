@@ -1,7 +1,7 @@
 import { PropTypes, validate } from '@parameter1/prop-types';
 import { APP_URL } from '../env.js';
 
-const { object, string } = PropTypes;
+const { object, objectId, string } = PropTypes;
 
 /**
  * @param {object} params
@@ -9,7 +9,11 @@ const { object, string } = PropTypes;
  * @param {string} [params.redirectTo]
  */
 export default (params = {}) => {
-  const { loginToken, redirectTo } = validate(object({
+  const { application, loginToken, redirectTo } = validate(object({
+    application: object({
+      _id: objectId().required(),
+      name: string().required(),
+    }),
     loginToken: string().required(),
     redirectTo: string().allow(null),
   }).required(), params);
@@ -20,11 +24,11 @@ export default (params = {}) => {
   return {
     subject: 'Your personal login link',
     html: `
-      <p>You requested to login.</p>
+      <p>You requested to login${application ? ` from ${application.name}` : ''}.</p>
       <p><a href="${url}">Login</a></p>
     `,
     text: `
-      You requested to login.
+      You requested to login${application ? ` from ${application.name}` : ''}.
       Link: ${url}
     `,
   };

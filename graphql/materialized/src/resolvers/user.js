@@ -70,6 +70,7 @@ export default {
       const {
         applicationIds,
         applicationKeys,
+        keys,
         organizationIds,
         organizationKeys,
         pagination,
@@ -80,6 +81,7 @@ export default {
           'node._deleted': false,
           ...addArrayFilter('node._edge.application.node._id', applicationIds),
           ...addArrayFilter('node._edge.application.node.key', applicationKeys),
+          ...addArrayFilter('node.key', keys),
           ...addArrayFilter('node._edge.organization.node._id', organizationIds),
           ...addArrayFilter('node._edge.organization.node.key', organizationKeys),
         },

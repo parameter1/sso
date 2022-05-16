@@ -12,10 +12,12 @@ interface WorkspaceInterface {
   _id: ObjectID! @project
   "Dates associated with this workspace, such as first created and last updated."
   date: WorkspaceDate! @project(field: "_date", deep: true) @object
-  "The unique workspace key."
+  "The workspace key."
   key: String! @project
   "The workspace name."
   name: String! @project
+  "The unique workspace namespace."
+  namespace: String! @project
   "The workspace path."
   path: String! @project
   "The workspace slug."

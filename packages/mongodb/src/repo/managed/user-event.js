@@ -1,7 +1,7 @@
-import AbstractManagementRepo from './-abstract.js';
+import AbstractManagedRepo from './-abstract.js';
 import { userEventSchema } from '../../schema/index.js';
 
-export default class UserEventRepo extends AbstractManagementRepo {
+export default class UserEventRepo extends AbstractManagedRepo {
   /**
    *
    * @param {object} params

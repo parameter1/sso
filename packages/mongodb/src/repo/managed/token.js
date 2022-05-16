@@ -3,12 +3,12 @@ import { PropTypes, validateAsync } from '@parameter1/prop-types';
 import { dateToUnix } from '@parameter1/utils';
 import jwt from 'jsonwebtoken';
 
-import AbstractManagementRepo from './-abstract.js';
+import AbstractManagedRepo from './-abstract.js';
 import { tokenProps, tokenSchema, userProps } from '../../schema/index.js';
 
 const { boolean, object, string } = PropTypes;
 
-export default class TokenRepo extends AbstractManagementRepo {
+export default class TokenRepo extends AbstractManagedRepo {
   /**
    *
    * @param {object} params

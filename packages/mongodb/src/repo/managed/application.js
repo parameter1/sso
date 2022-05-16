@@ -1,13 +1,13 @@
 import { PropTypes, validateAsync } from '@parameter1/prop-types';
 import { sluggify } from '@parameter1/slug';
 
-import AbstractManagementRepo from './-abstract.js';
+import AbstractManagedRepo from './-abstract.js';
 import { applicationProps, applicationSchema, contextSchema } from '../../schema/index.js';
 import { buildMaterializedApplicationPipeline } from '../materializer.js';
 
 const { object } = PropTypes;
 
-export default class ApplicationRepo extends AbstractManagementRepo {
+export default class ApplicationRepo extends AbstractManagedRepo {
   /**
    *
    * @param {object} params

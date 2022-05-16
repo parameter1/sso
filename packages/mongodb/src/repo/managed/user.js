@@ -2,7 +2,7 @@ import { isFunction as isFn, objectHasKeys } from '@parameter1/utils';
 import { PropTypes, validateAsync } from '@parameter1/prop-types';
 import { get } from '@parameter1/object-path';
 
-import AbstractManagementRepo from './-abstract.js';
+import AbstractManagedRepo from './-abstract.js';
 import {
   contextSchema,
   organizationProps,
@@ -33,7 +33,7 @@ const {
 
 const { error: logError } = console;
 
-export default class UserRepo extends AbstractManagementRepo {
+export default class UserRepo extends AbstractManagedRepo {
   /**
    *
    * @param {object} params
@@ -602,7 +602,7 @@ export default class UserRepo extends AbstractManagementRepo {
       }
       return user;
     } catch (e) {
-      throw AbstractManagementRepo.createError(401, `Authentication failed: ${e.message}`);
+      throw AbstractManagedRepo.createError(401, `Authentication failed: ${e.message}`);
     }
   }
 }

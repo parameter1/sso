@@ -28,7 +28,7 @@ const propsSchema = array().items(object({
   value: any(),
 }).required()).required();
 
-export default class AbstractManagementRepo extends ManagedRepo {
+export default class AbstractManagedRepo extends ManagedRepo {
   constructor(params) {
     const {
       schema,
@@ -256,7 +256,7 @@ export default class AbstractManagementRepo extends ManagedRepo {
       ]);
 
       const materializeFilter = op.materializeFilter || op.filter;
-      if (!AbstractManagementRepo.isCreateFilter(materializeFilter)) {
+      if (!AbstractManagedRepo.isCreateFilter(materializeFilter)) {
         materializeFilters.push(materializeFilter);
       }
       return {

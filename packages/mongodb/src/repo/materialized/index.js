@@ -12,7 +12,14 @@ const repos = [
   },
   { key: 'organization', collectionName: 'organizations', usesSoftDelete: true },
   { key: 'user', collectionName: 'users', usesSoftDelete: true },
-  { key: 'workspace', collectionName: 'workspaces', usesSoftDelete: true },
+  {
+    key: 'workspace',
+    collectionName: 'workspaces',
+    usesSoftDelete: true,
+    indexes: [
+      { key: { 'namespace.default': 1 }, unique: true },
+    ],
+  },
 ];
 
 export default class MaterializedRepos extends RepoManager {

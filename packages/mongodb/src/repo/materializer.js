@@ -102,11 +102,19 @@ const commonWorkspaceProjection = () => wrap({
   key: 1,
   name: 1,
   namespace: {
-    $concat: [
-      '$_edge.application.node.key', '/',
-      '$_edge.organization.node.key', '/',
-      '$key',
-    ],
+    default: {
+      $concat: [
+        '$_edge.application.node.key', '/',
+        '$_edge.organization.node.key', '/',
+        '$key',
+      ],
+    },
+    application: {
+      $concat: [
+        '$_edge.organization.node.key', '/',
+        '$key',
+      ],
+    },
   },
   path: {
     $concat: [

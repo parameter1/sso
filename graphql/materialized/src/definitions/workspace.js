@@ -6,17 +6,24 @@ interface WorkspaceInterface {
   "The unique workspace identifier"
   _id: ObjectID! @project
   "Dates associated with this workspace, such as first created and last updated."
-  date: WorkspaceDate! @project(field: "_date", deep: true) @object
+  date: WorkspaceInterfaceDate! @project(field: "_date", deep: true) @object
   "The workspace key."
   key: String! @project
   "The workspace name."
   name: String! @project
-  "The unique workspace namespace."
-  namespace: String! @project
+  "The workspace namespaces."
+  namespace: WorkspaceInterfaceNamespace! @project(deep: true) @object
   "The workspace path."
   path: String! @project
   "The workspace slug."
   slug: String! @project
+}
+
+type WorkspaceInterfaceNamespace {
+  "The full, default and unique workspace namespace."
+  default: String! @project
+  "The namespace when used inside an application."
+  application: String! @project
 }
 
 type Workspace implements WorkspaceInterface @interfaceFields {
@@ -83,7 +90,7 @@ type WorkspacePartial_EdgeOrganization {
   node: OrganizationPartial! @project(deep: true, needs: ["node._deleted"])
 }
 
-type WorkspaceDate {
+type WorkspaceInterfaceDate {
   "The ISO date when the workspace was created."
   created: DateTime! @project
   "The ISO date when the workspace was last updated."

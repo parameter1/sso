@@ -124,22 +124,6 @@ services:
     volumes:
       - mongodb-secondary:/bitnami
 
-  service:
-    <<: *node
-    working_dir: /sso/service
-    entrypoint: ["yarn"]
-    command: ["dev"]
-    environment:
-      <<: [*env, *env-core]
-      EXPOSED_HOST: sso-service.dev.parameter1.com
-      EXPOSED_PORT: 7911
-      HOST: sso-service.dev.parameter1.com
-    ports:
-      - "7911:80"
-    hostname: sso-service.dev.parameter1.com
-    depends_on:
-      - mongodb-secondary
-
 volumes:
   yarn-cache: {}
   mongodb-primary: {}

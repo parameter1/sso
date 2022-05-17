@@ -1142,10 +1142,10 @@
     joi "^17.6.0"
     mongodb "^4.6.0"
 
-"@parameter1/mongodb@^3.0.0":
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/@parameter1/mongodb/-/mongodb-3.0.0.tgz#129f4f36fd9393d84042b28811ef99ff34641462"
-  integrity sha512-XF63CUQdnSVRMuosyL/TlTQoWKm9aUEbbQpC5V/Z2KgsnrswQt07ptglXmVW0trpGvNt+/ZdrgCVha+i4J8mQQ==
+"@parameter1/mongodb@^3.0.1":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@parameter1/mongodb/-/mongodb-3.0.1.tgz#6050beae567717d04bc9d3015a4514cecdaa3946"
+  integrity sha512-tUrscuyWLah0IpawerWPA800ezXktH98Ew7BI3vkTClJHsvx6c1ASAI5PMN3FVVtLijQanFDKlXEQRhXZsGtoQ==
   dependencies:
     "@parameter1/object-path" "^2.0.0"
     "@parameter1/prop-types" "^2.1.0"

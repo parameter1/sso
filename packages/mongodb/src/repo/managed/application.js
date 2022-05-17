@@ -1,13 +1,13 @@
+import { PipelinedRepo } from '@parameter1/mongodb';
 import { PropTypes, validateAsync } from '@parameter1/prop-types';
 import { sluggify } from '@parameter1/slug';
 
-import AbstractManagedRepo from './-abstract.js';
 import { applicationProps, applicationSchema, contextSchema } from '../../schema/index.js';
 import { buildMaterializedApplicationPipeline } from '../materializer.js';
 
 const { object } = PropTypes;
 
-export default class ApplicationRepo extends AbstractManagedRepo {
+export default class ApplicationRepo extends PipelinedRepo {
   /**
    *
    * @param {object} params
@@ -16,7 +16,6 @@ export default class ApplicationRepo extends AbstractManagedRepo {
     super({
       ...params,
       collectionName: 'applications',
-      collatableFields: [],
       indexes: [
         { key: { key: 1 }, unique: true },
         { key: { slug: 1 } },

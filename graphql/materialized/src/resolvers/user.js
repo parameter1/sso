@@ -130,4 +130,16 @@ export default {
       });
     },
   },
+
+  /**
+   *
+   */
+  UserInterfaceName: {
+    /**
+     *
+     */
+    full({ givenName, familyName }) {
+      return [givenName, familyName].join(' ');
+    },
+  },
 };

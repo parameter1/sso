@@ -1,14 +1,13 @@
-import { ManagedRepo } from '@parameter1/mongodb';
+import { PipelinedRepo } from '@parameter1/mongodb';
 import { PropTypes, validateAsync } from '@parameter1/prop-types';
 import { dateToUnix } from '@parameter1/utils';
 import jwt from 'jsonwebtoken';
 
-import AbstractManagedRepo from './-abstract.js';
 import { tokenProps, tokenSchema, userProps } from '../../schema/index.js';
 
 const { boolean, object, string } = PropTypes;
 
-export default class TokenRepo extends AbstractManagedRepo {
+export default class TokenRepo extends PipelinedRepo {
   /**
    *
    * @param {object} params
@@ -20,7 +19,6 @@ export default class TokenRepo extends AbstractManagedRepo {
     super({
       ...rest,
       collectionName: 'tokens',
-      collatableFields: [],
       indexes: [
         { key: { audience: 1, subject: 1 } },
         { key: { expiresAt: 1 }, expireAfterSeconds: 0 },
@@ -125,7 +123,7 @@ export default class TokenRepo extends AbstractManagedRepo {
       options: object().default({}),
     }).required(), params);
 
-    const { createError } = ManagedRepo;
+    const { createError } = PipelinedRepo;
     try {
       // Verify the token signature.
       const verified = jwt.verify(token, this.tokenSecret, { algorithms: ['HS256'] });

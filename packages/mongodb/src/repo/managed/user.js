@@ -1,10 +1,15 @@
+import {
+  contextSchema,
+  runTransaction,
+  PipelinedRepo,
+  PipelineExpr,
+} from '@parameter1/mongodb';
 import { isFunction as isFn, objectHasKeys } from '@parameter1/utils';
 import { PropTypes, validateAsync } from '@parameter1/prop-types';
 import { get } from '@parameter1/object-path';
 
 import AbstractManagedRepo from './-abstract.js';
 import {
-  contextSchema,
   organizationProps,
   tokenProps,
   userEventProps,
@@ -13,8 +18,6 @@ import {
   workspaceProps,
 } from '../../schema/index.js';
 import { sluggifyUserNames } from '../../schema/user.js';
-import Expr from '../../pipelines/utils/expr.js';
-import runTransaction from '../../utils/run-transaction.js';
 import { buildMaterializedUserPipeline } from '../materializer.js';
 
 const {
@@ -22,7 +25,7 @@ const {
   $inc,
   $pull,
   $mergeArrayObject,
-} = Expr;
+} = PipelineExpr;
 
 const {
   boolean,
@@ -33,7 +36,7 @@ const {
 
 const { error: logError } = console;
 
-export default class UserRepo extends AbstractManagedRepo {
+export default class UserRepo extends PipelinedRepo {
   /**
    *
    * @param {object} params
@@ -42,7 +45,6 @@ export default class UserRepo extends AbstractManagedRepo {
     super({
       ...params,
       collectionName: 'users',
-      collatableFields: [],
       indexes: [
         { key: { email: 1 }, unique: true },
         { key: { '_connection.organization.edges._id': 1 } },

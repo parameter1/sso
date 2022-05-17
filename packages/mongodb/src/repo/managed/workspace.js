@@ -1,13 +1,13 @@
+import { PipelinedRepo, contextSchema } from '@parameter1/mongodb';
 import { PropTypes, validateAsync } from '@parameter1/prop-types';
 import { sluggify } from '@parameter1/slug';
 
-import AbstractManagedRepo from './-abstract.js';
-import { contextSchema, workspaceProps, workspaceSchema } from '../../schema/index.js';
+import { workspaceProps, workspaceSchema } from '../../schema/index.js';
 import { buildMaterializedWorkspacePipeline } from '../materializer.js';
 
 const { object } = PropTypes;
 
-export default class WorkspaceRepo extends AbstractManagedRepo {
+export default class WorkspaceRepo extends PipelinedRepo {
   /**
    *
    * @param {object} params
@@ -16,7 +16,6 @@ export default class WorkspaceRepo extends AbstractManagedRepo {
     super({
       ...params,
       collectionName: 'workspaces',
-      collatableFields: [],
       indexes: [
         { key: { '_edge.organization._id': 1, '_edge.application._id': 1, key: 1 }, unique: true },
         { key: { slug: 1 } },

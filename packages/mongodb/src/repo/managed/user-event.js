@@ -1,7 +1,8 @@
-import AbstractManagedRepo from './-abstract.js';
+import { PipelinedRepo } from '@parameter1/mongodb';
+
 import { userEventSchema } from '../../schema/index.js';
 
-export default class UserEventRepo extends AbstractManagedRepo {
+export default class UserEventRepo extends PipelinedRepo {
   /**
    *
    * @param {object} params
@@ -10,7 +11,6 @@ export default class UserEventRepo extends AbstractManagedRepo {
     super({
       ...params,
       collectionName: 'user-events',
-      collatableFields: [],
       indexes: [
         { key: { '_edge.user._id': 1, action: 1 } },
 

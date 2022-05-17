@@ -1,13 +1,13 @@
+import { PipelinedRepo, contextSchema } from '@parameter1/mongodb';
 import { PropTypes, validateAsync } from '@parameter1/prop-types';
 import { sluggify } from '@parameter1/slug';
 
-import AbstractManagedRepo from './-abstract.js';
-import { contextSchema, organizationProps, organizationSchema } from '../../schema/index.js';
+import { organizationProps, organizationSchema } from '../../schema/index.js';
 import { buildMaterializedOrganizationPipeline } from '../materializer.js';
 
 const { object } = PropTypes;
 
-export default class OrganizationRepo extends AbstractManagedRepo {
+export default class OrganizationRepo extends PipelinedRepo {
   /**
    *
    * @param {object} params
@@ -16,7 +16,6 @@ export default class OrganizationRepo extends AbstractManagedRepo {
     super({
       ...params,
       collectionName: 'organizations',
-      collatableFields: [],
       indexes: [
         { key: { key: 1 }, unique: true },
         { key: { slug: 1 } },

@@ -1,8 +1,8 @@
-import { PipelinedRepo } from '@parameter1/mongodb';
+import { PipelinedRepo, contextSchema } from '@parameter1/mongodb';
 import { PropTypes, validateAsync } from '@parameter1/prop-types';
 import { sluggify } from '@parameter1/slug';
 
-import { applicationProps, applicationSchema, contextSchema } from '../../schema/index.js';
+import { applicationProps, applicationSchema } from '../../schema/index.js';
 import { buildMaterializedApplicationPipeline } from '../materializer.js';
 
 const { object } = PropTypes;

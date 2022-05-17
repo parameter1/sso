@@ -5,7 +5,5 @@ export { default as userEventSchema } from './user-event.js';
 export { default as userSchema } from './user.js';
 export { default as workspaceSchema } from './workspace.js';
 
-export { default as contextSchema } from './context.js';
-
 export * from './props/index.js';
 export { default as environments } from './environments.js';

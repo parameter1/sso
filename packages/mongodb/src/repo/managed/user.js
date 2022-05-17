@@ -8,7 +8,6 @@ import { isFunction as isFn, objectHasKeys } from '@parameter1/utils';
 import { PropTypes, validateAsync } from '@parameter1/prop-types';
 import { get } from '@parameter1/object-path';
 
-import AbstractManagedRepo from './-abstract.js';
 import {
   organizationProps,
   tokenProps,
@@ -604,7 +603,7 @@ export default class UserRepo extends PipelinedRepo {
       }
       return user;
     } catch (e) {
-      throw AbstractManagedRepo.createError(401, `Authentication failed: ${e.message}`);
+      throw PipelinedRepo.createError(401, `Authentication failed: ${e.message}`);
     }
   }
 }

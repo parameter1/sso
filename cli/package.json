@@ -18,7 +18,7 @@
     "test": "yarn lint"
   },
   "dependencies": {
-    "@parameter1/joi": "^2.2.2",
+    "@parameter1/joi": "^2.3.0",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/slug": "^2.0.0",
     "@parameter1/sso-mongodb": "^0.2.15",

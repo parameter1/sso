@@ -11,7 +11,7 @@ x-env-core: &env-core
 x-node-defaults: &node
   tty: true
   init: true
-  image: node:16.13-alpine
+  image: node:16.15-alpine
   working_dir: /sso
   volumes:
     - .:/sso:cached

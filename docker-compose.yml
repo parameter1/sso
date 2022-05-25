@@ -100,7 +100,7 @@ services:
     hostname: test-sso-app.dev.parameter1.com
 
   mongodb-primary:
-    image: bitnami/mongodb:5.0
+    image: bitnami/mongodb:5.0.8
     environment:
       - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
       - MONGODB_REPLICA_SET_MODE=primary
@@ -112,7 +112,7 @@ services:
       - "7910:27017"
 
   mongodb-secondary:
-    image: bitnami/mongodb:5.0
+    image: bitnami/mongodb:5.0.8
     depends_on:
       - mongodb-primary
     environment:

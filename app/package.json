@@ -17,20 +17,20 @@
     "lint": "eslint --ext .js --ext .vue --max-warnings 5 ./"
   },
   "dependencies": {
-    "@apollo/client": "^3.6.4",
+    "@apollo/client": "^3.6.5",
     "@vue/apollo-option": "^4.0.0-alpha.17",
     "graphql": "^16.5.0",
     "graphql-tag": "^2.12.6",
     "js-cookie": "^3.0.1",
     "lodash.clonedeep": "^4.5.0",
     "object-path": "^0.11.8",
-    "vue": "^3.2.34",
+    "vue": "^3.2.36",
     "vue-router": "^4.0.15"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^2.3.3",
-    "@vue/compiler-sfc": "^3.2.34",
-    "eslint-plugin-vue": "^8.7.1",
+    "@vue/compiler-sfc": "^3.2.36",
+    "eslint-plugin-vue": "^9.0.1",
     "vite": "^2.9.9"
   }
 }

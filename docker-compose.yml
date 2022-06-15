@@ -5,7 +5,7 @@ x-env-defaults: &env
   YARN_CACHE_FOLDER: /.yarn-cache
 
 x-env-core: &env-core
-  MONGO_URL: ${MONGO_URL-mongodb://root:password123@mongodb-primary:27017,mongodb-secondary:27017/?authSource=admin&readPreference=primary}
+  MONGO_URL: ${MONGO_URL-}
   TOKEN_SECRET: ${TOKEN_SECRET-thisisnotsecretdonotuse}
 
 x-node-defaults: &node
@@ -44,8 +44,6 @@ services:
     command: ["src/index.js"]
     environment:
       <<: [*env, *env-core]
-    depends_on:
-      - mongodb-secondary
 
   commands:
     <<: *node
@@ -67,8 +65,6 @@ services:
     ports:
       - "7912:80"
     hostname: sso.dev.parameter1.com
-    depends_on:
-      - mongodb-secondary
 
   graphql-materialized:
     <<: *node
@@ -83,8 +79,6 @@ services:
     ports:
       - "7915:80"
     hostname: sso.dev.parameter1.com
-    depends_on:
-      - mongodb-secondary
 
   lib:
     <<: *node
@@ -99,32 +93,5 @@ services:
       - "7914:7914"
     hostname: test-sso-app.dev.parameter1.com
 
-  mongodb-primary:
-    image: bitnami/mongodb:5.0.8
-    environment:
-      - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
-      - MONGODB_REPLICA_SET_MODE=primary
-      - MONGODB_ROOT_PASSWORD=password123
-      - MONGODB_REPLICA_SET_KEY=tenancy
-    volumes:
-      - mongodb-primary:/bitnami
-    ports:
-      - "7910:27017"
-
-  mongodb-secondary:
-    image: bitnami/mongodb:5.0.8
-    depends_on:
-      - mongodb-primary
-    environment:
-      - MONGODB_ADVERTISED_HOSTNAME=mongodb-secondary
-      - MONGODB_REPLICA_SET_MODE=secondary
-      - MONGODB_PRIMARY_HOST=mongodb-primary
-      - MONGODB_PRIMARY_ROOT_PASSWORD=password123
-      - MONGODB_REPLICA_SET_KEY=tenancy
-    volumes:
-      - mongodb-secondary:/bitnami
-
 volumes:
   yarn-cache: {}
-  mongodb-primary: {}
-  mongodb-secondary: {}

@@ -11,7 +11,7 @@ export default class ManagedRepos extends RepoManager {
   /**
    * @param {object} params
    * @param {MongoDBClient} params.client
-   * @param {string} [params.dbBame=sso@managed]
+   * @param {string} [params.dbBame=sso]
    * @param {string} params.tokenSecret
    *
    * @param {object} params.source
@@ -20,7 +20,7 @@ export default class ManagedRepos extends RepoManager {
    */
   constructor({
     client,
-    dbName = 'sso@managed',
+    dbName = 'sso',
     tokenSecret,
     source,
   } = {}) {

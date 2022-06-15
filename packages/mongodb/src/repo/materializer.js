@@ -3,7 +3,7 @@ import clone from 'lodash.clonedeep';
 const wrap = (projection) => clone(projection);
 
 const mergeStage = ({ coll }) => ({
-  into: { db: 'sso@materialized', coll },
+  into: { db: 'sso', coll: `${coll}/materialized` },
   on: '_id',
   whenMatched: 'replace',
   whenNotMatched: 'insert',

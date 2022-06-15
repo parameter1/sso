@@ -1,6 +1,12 @@
 import clone from 'lodash.clonedeep';
 
-const wrap = (projection) => clone(projection);
+const prepareProjection = (projection, defaults = {}) => Object
+  .keys(projection).sort().reduce((o, key) => {
+    const v = projection[key];
+    return { ...o, [key]: v === 1 ? `$${key}` : v };
+  }, defaults);
+
+const wrap = (projection) => clone(prepareProjection(projection));
 
 const mergeStage = ({ coll }) => ({
   into: { db: 'sso', coll: `${coll}/materialized` },

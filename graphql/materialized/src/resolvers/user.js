@@ -1,12 +1,12 @@
-import { get } from '@parameter1/object-path';
+import { get, getAsArray } from '@parameter1/object-path';
 import { addArrayFilter, getProjectionForType } from '@parameter1/sso-graphql';
 import { filterObjects, findWithObjects } from '@parameter1/sso-mongodb';
 import enums from '../enums.js';
 
 const {
-  User_ConnectionOrganizationSortFieldEnum: userOrganizationSortField,
-  User_ConnectionWorkspaceOrganizationSortFieldEnum: userWorkspaceOrganizationSortField,
-  User_ConnectionWorkspaceSortFieldEnum: userWorkspaceSortField,
+  UserOrganizationConnectionSortFieldEnum,
+  UserWorkspaceConnectionSortFieldEnum,
+  UserWorkspaceOrganizationConnectionSortFieldEnum,
 } = enums;
 
 export default {
@@ -31,42 +31,27 @@ export default {
     /**
      *
      */
-    workspaceRoleFromId({ _connection }, { input }) {
-      const [workspace] = filterObjects(_connection.workspace.edges, {
-        'node._deleted': false,
-        'node._id': input._id,
-      });
-      return workspace ? workspace.role : null;
-    },
-  },
-
-  /**
-   *
-   */
-  User_Connection: {
-    /**
-     *
-     */
-    async organization({ organization }, { input }) {
+    organizationConnection({ _connection }, { input }) {
+      const edges = getAsArray(_connection, 'organization.edges');
       const {
         pagination,
         sort,
       } = input;
-      return findWithObjects(organization.edges, {
-        query: { 'node._deleted': false },
+      return findWithObjects(edges, {
         limit: pagination.limit,
         cursor: pagination.cursor.value,
         direction: pagination.cursor.direction,
         sort: sort.length
           ? sort
-          : [{ field: userOrganizationSortField.NODE_SLUG, order: 1 }],
+          : [{ field: UserOrganizationConnectionSortFieldEnum.NODE_SLUG, order: 1 }],
       });
     },
 
     /**
      *
      */
-    async workspace({ workspace }, { input }) {
+    workspaceConnection({ _connection }, { input }) {
+      const edges = getAsArray(_connection, 'workspace.edges');
       const {
         applicationIds,
         applicationKeys,
@@ -77,9 +62,8 @@ export default {
         pagination,
         sort,
       } = input;
-      return findWithObjects(workspace.edges, {
+      return findWithObjects(edges, {
         query: {
-          'node._deleted': false,
           ...addArrayFilter('node._edge.application.node._id', applicationIds),
           ...addArrayFilter('node._edge.application.node.key', applicationKeys),
           ...addArrayFilter('node.key', keys),
@@ -92,14 +76,18 @@ export default {
         direction: pagination.cursor.direction,
         sort: sort.length
           ? sort
-          : [{ field: userWorkspaceSortField.NODE_PATH, order: 1 }],
+          : [{ field: UserWorkspaceConnectionSortFieldEnum.NODE_PATH, order: 1 }],
       });
     },
 
     /**
      *
      */
-    workspaceOrganization({ workspace }, { input }) {
+    /**
+     *
+     */
+    workspaceOrganizationConnection({ _connection }, { input }) {
+      const edges = getAsArray(_connection, 'workspace.edges');
       const {
         applicationIds,
         applicationKeys,
@@ -107,8 +95,7 @@ export default {
         sort,
       } = input;
 
-      const workspaces = filterObjects(workspace.edges, {
-        'node._deleted': false,
+      const workspaces = filterObjects(edges, {
         ...addArrayFilter('node._edge.application.node._id', applicationIds),
         ...addArrayFilter('node._edge.application.node.key', applicationKeys),
       });
@@ -126,8 +113,18 @@ export default {
         direction: pagination.cursor.direction,
         sort: sort.length
           ? sort
-          : [{ field: userWorkspaceOrganizationSortField.NODE_SLUG, order: 1 }],
+          : [{ field: UserWorkspaceOrganizationConnectionSortFieldEnum.NODE_SLUG, order: 1 }],
       });
+    },
+
+    /**
+     *
+     */
+    workspaceRoleFromId({ _connection }, { input }) {
+      const [workspace] = filterObjects(_connection.workspace.edges, {
+        'node._id': input._id,
+      });
+      return workspace ? workspace.role : null;
     },
   },
 

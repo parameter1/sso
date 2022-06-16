@@ -10,25 +10,33 @@ enum OrganizationManagerRoleEnum {
 
 interface OrganizationInterface {
   "The unique organization identifier"
-  _id: ObjectID! @project
+  _id: ObjectID!
+    @project
   "Email domains associated with this organization."
-  emailDomains: [String!]! @project @array
+  emailDomains: [String!]!
+    @project
+    @array
   "The unique organization key."
-  key: String! @project
+  key: String!
+    @project
   "The organization name."
-  name: String! @project
+  name: String!
+    @project
   "The organization slug."
-  slug: String! @project
+  slug: String!
+    @project
 }
 
 type Organization implements OrganizationInterface @interfaceFields {
   "The unique organization identifier"
-  _id: ObjectID! @project
+  _id: ObjectID!
+    @project
 }
 
 type PartialOrganization implements OrganizationInterface @interfaceFields {
   "The owning document."
-  _owner: Organization! @loadOwner(type: ORGANIZATION)
+  _owner: Organization!
+    @loadOwner(type: ORGANIZATION)
 }
 
 `;

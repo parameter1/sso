@@ -9,70 +9,78 @@ extend type Query {
 
 interface WorkspaceInterface {
   "The unique workspace identifier"
-  _id: ObjectID! @project
+  _id: ObjectID!
+    @project
   "The workspace key."
-  key: String! @project
+  key: String!
+    @project
   "The workspace name."
-  name: String! @project
+  name: String!
+    @project
   "The workspace namespaces."
-  namespace: WorkspaceInterfaceNamespace! @project(deep: true) @object
+  namespace: WorkspaceInterfaceNamespace!
+    @project(deep: true)
+    @object
   "The workspace path."
-  path: String! @project
+  path: String!
+    @project
   "The workspace slug."
-  slug: String! @project
-}
-
-type PartialWorkspace implements WorkspaceInterface @interfaceFields {
-  "The owning document."
-  _owner: Workspace! @loadOwner(type: WORKSPACE)
-  "Related edges."
-  _edge: PartialWorkspace_Edge! @project(deep: true) @object
-}
-
-type PartialWorkspace_Edge {
-  application: PartialWorkspace_EdgeApplication!
-    @project(deep: true)
-    @filterDeleted(field: "node")
-  organization: PartialWorkspace_EdgeOrganization!
-    @project(deep: true)
-    @filterDeleted(field: "node")
-}
-
-type PartialWorkspace_EdgeApplication {
-  node: PartialApplication! @project(deep: true, needs: ["node._deleted"])
-}
-
-type PartialWorkspace_EdgeOrganization {
-  node: PartialOrganization! @project(deep: true, needs: ["node._deleted"])
+  slug: String!
+    @project
 }
 
 type WorkspaceInterfaceNamespace {
   "The full, default and unique workspace namespace."
-  default: String! @project
+  default: String!
+    @project
   "The namespace when used inside an application."
-  application: String! @project
+  application: String!
+    @project
+}
+
+type PartialWorkspace implements WorkspaceInterface @interfaceFields {
+  "The owning document."
+  _owner: Workspace!
+    @loadOwner(type: WORKSPACE)
+  "The workspace application."
+  applicationEdge: PartialWorkspaceApplicationEdge!
+    @project(deep: true, field: "_edge.application")
+  "The workspace organization."
+  organizationEdge: PartialWorkspaceOrganizationEdge!
+    @project(deep: true, field: "_edge.organization")
+}
+
+type PartialWorkspaceApplicationEdge {
+  "The partial application."
+  node: PartialApplication!
+    @project(deep: true)
+}
+
+type PartialWorkspaceOrganizationEdge {
+  "The partial organization."
+  node: PartialOrganization!
+    @project(deep: true)
 }
 
 type Workspace implements WorkspaceInterface @interfaceFields {
-  "Related edges."
-  _edge: Workspace_Edge! @project(deep: true) @object
+  "The workspace application."
+  applicationEdge: WorkspaceApplicationEdge!
+    @project(deep: true, field: "_edge.application")
+  "The workspace organization."
+  organizationEdge: WorkspaceOrganizationEdge!
+    @project(deep: true, field: "_edge.organization")
 }
 
-type Workspace_Edge {
-  application: Workspace_EdgeApplication!
+type WorkspaceApplicationEdge {
+  "The partial application."
+  node: PartialApplication!
     @project(deep: true)
-    @filterDeleted(field: "node")
-  organization: Workspace_EdgeOrganization!
+}
+
+type WorkspaceOrganizationEdge {
+  "The partial organization."
+  node: PartialOrganization!
     @project(deep: true)
-    @filterDeleted(field: "node")
-}
-
-type Workspace_EdgeApplication {
-  node: PartialApplication! @project(deep: true, needs: ["node._deleted"])
-}
-
-type Workspace_EdgeOrganization {
-  node: PartialOrganization! @project(deep: true, needs: ["node._deleted"])
 }
 
 input QueryWorkspaceByNamespaceInput {

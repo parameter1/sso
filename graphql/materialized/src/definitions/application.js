@@ -9,25 +9,34 @@ extend type Query {
 
 interface ApplicationInterface {
   "The unique application identifier"
-  _id: ObjectID! @project
+  _id: ObjectID!
+    @project
   "The unique application key."
-  key: String! @project
+  key: String!
+    @project
   "The application name."
-  name: String! @project
+  name: String!
+    @project
   "The application slug."
-  slug: String! @project
+  slug: String!
+    @project
   "Membership roles that this application supports."
-  roles: [String!]! @project @array @auth
+  roles: [String!]!
+    @project
+    @array
+    @auth
 }
 
 type Application implements ApplicationInterface @interfaceFields {
   "The unique application identifier"
-  _id: ObjectID! @project
+  _id: ObjectID!
+    @project
 }
 
 type PartialApplication implements ApplicationInterface @interfaceFields {
   "The owning document."
-  _owner: Application! @loadOwner(type: APPLICATION)
+  _owner: Application!
+    @loadOwner(type: APPLICATION)
 }
 
 input QueryApplicationKeyExistsInput {

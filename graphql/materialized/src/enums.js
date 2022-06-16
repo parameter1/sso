@@ -17,15 +17,15 @@ export default {
     MANAGER: 'Manager',
   },
 
-  User_ConnectionOrganizationSortFieldEnum: {
+  UserOrganizationConnectionSortFieldEnum: {
     NODE_SLUG: 'node.slug',
   },
 
-  User_ConnectionWorkspaceSortFieldEnum: {
+  UserWorkspaceConnectionSortFieldEnum: {
     NODE_PATH: 'node.path',
   },
 
-  User_ConnectionWorkspaceOrganizationSortFieldEnum: {
+  UserWorkspaceOrganizationConnectionSortFieldEnum: {
     NODE_SLUG: 'node.slug',
   },
 };

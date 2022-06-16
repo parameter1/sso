@@ -40,7 +40,7 @@ interface UserInterface {
   verified: Boolean! @project
 }
 
-type UserPartial implements UserInterface @interfaceFields {
+type PartialUser implements UserInterface @interfaceFields {
   "The owning document."
   _owner: User! @loadOwner(type: USER)
 }
@@ -131,7 +131,7 @@ type User_ConnectionOrganizationEdge {
   "The user's organization management role."
   role: User_ConnectionOrganizationEdgeRole! @project(field: "", deep: true)
   "The managed organization."
-  node: OrganizationPartial! @project(deep: true)
+  node: PartialOrganization! @project(deep: true)
 }
 
 type User_ConnectionOrganizationEdgeRole {
@@ -154,7 +154,7 @@ type User_ConnectionWorkspaceEdge {
   role: User_ConnectionWorkspaceEdgeRole!
     @project(field: "", deep: true)
   "The workspace the user is a member of."
-  node: WorkspacePartial!
+  node: PartialWorkspace!
     @project(deep: true)
 }
 
@@ -172,7 +172,7 @@ type User_ConnectionWorkspaceOrganization {
 }
 
 type User_ConnectionWorkspaceOrganizationEdge {
-  node: OrganizationPartial!
+  node: PartialOrganization!
     @project(
       field: "node._edge.organization.node"
       resolve: false

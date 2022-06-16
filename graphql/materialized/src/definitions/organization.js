@@ -26,7 +26,7 @@ type Organization implements OrganizationInterface @interfaceFields {
   _id: ObjectID! @project
 }
 
-type OrganizationPartial implements OrganizationInterface @interfaceFields {
+type PartialOrganization implements OrganizationInterface @interfaceFields {
   "The owning document."
   _owner: Organization! @loadOwner(type: ORGANIZATION)
 }

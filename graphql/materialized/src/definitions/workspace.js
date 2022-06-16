@@ -22,6 +22,30 @@ interface WorkspaceInterface {
   slug: String! @project
 }
 
+type PartialWorkspace implements WorkspaceInterface @interfaceFields {
+  "The owning document."
+  _owner: Workspace! @loadOwner(type: WORKSPACE)
+  "Related edges."
+  _edge: PartialWorkspace_Edge! @project(deep: true) @object
+}
+
+type PartialWorkspace_Edge {
+  application: PartialWorkspace_EdgeApplication!
+    @project(deep: true)
+    @filterDeleted(field: "node")
+  organization: PartialWorkspace_EdgeOrganization!
+    @project(deep: true)
+    @filterDeleted(field: "node")
+}
+
+type PartialWorkspace_EdgeApplication {
+  node: PartialApplication! @project(deep: true, needs: ["node._deleted"])
+}
+
+type PartialWorkspace_EdgeOrganization {
+  node: PartialOrganization! @project(deep: true, needs: ["node._deleted"])
+}
+
 type WorkspaceInterfaceNamespace {
   "The full, default and unique workspace namespace."
   default: String! @project
@@ -34,13 +58,6 @@ type Workspace implements WorkspaceInterface @interfaceFields {
   _edge: Workspace_Edge! @project(deep: true) @object
 }
 
-type WorkspacePartial implements WorkspaceInterface @interfaceFields {
-  "The owning document."
-  _owner: Workspace! @loadOwner(type: WORKSPACE)
-  "Related edges."
-  _edge: WorkspacePartial_Edge! @project(deep: true) @object
-}
-
 type Workspace_Edge {
   application: Workspace_EdgeApplication!
     @project(deep: true)
@@ -51,28 +68,11 @@ type Workspace_Edge {
 }
 
 type Workspace_EdgeApplication {
-  node: ApplicationPartial! @project(deep: true, needs: ["node._deleted"])
+  node: PartialApplication! @project(deep: true, needs: ["node._deleted"])
 }
 
 type Workspace_EdgeOrganization {
-  node: OrganizationPartial! @project(deep: true, needs: ["node._deleted"])
-}
-
-type WorkspacePartial_Edge {
-  application: WorkspacePartial_EdgeApplication!
-    @project(deep: true)
-    @filterDeleted(field: "node")
-  organization: WorkspacePartial_EdgeOrganization!
-    @project(deep: true)
-    @filterDeleted(field: "node")
-}
-
-type WorkspacePartial_EdgeApplication {
-  node: ApplicationPartial! @project(deep: true, needs: ["node._deleted"])
-}
-
-type WorkspacePartial_EdgeOrganization {
-  node: OrganizationPartial! @project(deep: true, needs: ["node._deleted"])
+  node: PartialOrganization! @project(deep: true, needs: ["node._deleted"])
 }
 
 input QueryWorkspaceByNamespaceInput {

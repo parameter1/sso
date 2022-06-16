@@ -25,7 +25,7 @@ type Application implements ApplicationInterface @interfaceFields {
   _id: ObjectID! @project
 }
 
-type ApplicationPartial implements ApplicationInterface @interfaceFields {
+type PartialApplication implements ApplicationInterface @interfaceFields {
   "The owning document."
   _owner: Application! @loadOwner(type: APPLICATION)
 }

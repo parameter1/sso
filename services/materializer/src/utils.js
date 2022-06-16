@@ -1,6 +1,7 @@
 import {
   buildMaterializedApplicationPipeline,
   buildMaterializedOrganizationPipeline,
+  buildMaterializedUserPipeline,
   buildMaterializedWorkspacePipeline,
 } from '@parameter1/sso-mongodb';
 import mongodb from './mongodb.js';
@@ -8,6 +9,7 @@ import mongodb from './mongodb.js';
 const pipelineBuilders = new Map([
   ['applications', buildMaterializedApplicationPipeline],
   ['organizations', buildMaterializedOrganizationPipeline],
+  ['users', buildMaterializedUserPipeline],
   ['workspaces', buildMaterializedWorkspacePipeline],
 ]);
 

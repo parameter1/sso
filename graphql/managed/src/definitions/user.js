@@ -49,10 +49,6 @@ type UserAuth {
 }
 
 type UserDate {
-  "The ISO date when the user was created."
-  created: DateTime! @project(field: "_touched.first.date")
-  "The ISO date when the user was last touched."
-  touched: DateTime! @project(field: "_touched.last.date")
   "The ISO date when the user last logged in."
   lastLoggedIn: DateTime @project(field: "lastLoggedInAt")
   "The ISO date when the user was last seen accessing the system."

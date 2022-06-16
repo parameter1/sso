@@ -10,8 +10,6 @@ extend type Query {
 interface ApplicationInterface {
   "The unique application identifier"
   _id: ObjectID! @project
-  "Dates associated with this application, such as first created and last updated."
-  date: ApplicationInterfaceDate! @project(field: "_date", deep: true) @object
   "The unique application key."
   key: String! @project
   "The application name."
@@ -51,13 +49,6 @@ type Application_EdgeCreatedBy {
 type Application_EdgeUpdatedBy {
   "The user that last updated the application."
   node: UserPartial! @project(deep: true, needs: ["node._deleted"])
-}
-
-type ApplicationInterfaceDate {
-  "The ISO date when the application was created."
-  created: DateTime! @project
-  "The ISO date when the application was last updated."
-  updated: DateTime! @project
 }
 
 input QueryApplicationKeyExistsInput {

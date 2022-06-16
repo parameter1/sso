@@ -11,8 +11,6 @@ enum OrganizationManagerRoleEnum {
 interface OrganizationInterface {
   "The unique organization identifier"
   _id: ObjectID! @project
-  "Dates associated with this organization, such as first created and last updated."
-  date: OrganizationInterfaceDate! @project(field: "_date", deep: true) @object
   "Email domains associated with this organization."
   emailDomains: [String!]! @project @array
   "The unique organization key."
@@ -52,13 +50,6 @@ type Organization_EdgeCreatedBy {
 type Organization_EdgeUpdatedBy {
   "The user that last updated the organization."
   node: UserPartial! @project(deep: true, needs: ["node._deleted"])
-}
-
-type OrganizationInterfaceDate {
-  "The ISO date when the organization was created."
-  created: DateTime! @project
-  "The ISO date when the organization was last updated."
-  updated: DateTime! @project
 }
 
 `;

@@ -204,14 +204,10 @@ type User_EdgeUpdatedBy {
 }
 
 type UserInterfaceDate {
-  "The ISO date when the user was created."
-  created: DateTime! @project
   "The ISO date when the user last logged in."
   lastLoggedIn: DateTime @project
   "The ISO date when the user was last seen accessing the system."
   lastSeen: DateTime @project
-  "The ISO date when the user was last updated."
-  updated: DateTime! @project
 }
 
 type UserInterfaceEmail {

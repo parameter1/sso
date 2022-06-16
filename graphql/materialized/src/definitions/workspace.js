@@ -10,8 +10,6 @@ extend type Query {
 interface WorkspaceInterface {
   "The unique workspace identifier"
   _id: ObjectID! @project
-  "Dates associated with this workspace, such as first created and last updated."
-  date: WorkspaceInterfaceDate! @project(field: "_date", deep: true) @object
   "The workspace key."
   key: String! @project
   "The workspace name."
@@ -93,13 +91,6 @@ type WorkspacePartial_EdgeApplication {
 
 type WorkspacePartial_EdgeOrganization {
   node: OrganizationPartial! @project(deep: true, needs: ["node._deleted"])
-}
-
-type WorkspaceInterfaceDate {
-  "The ISO date when the workspace was created."
-  created: DateTime! @project
-  "The ISO date when the workspace was last updated."
-  updated: DateTime! @project
 }
 
 input QueryWorkspaceByNamespaceInput {

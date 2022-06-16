@@ -48,8 +48,8 @@ export default async () => {
 
         const doc = await repos.$('workspace').findOne({
           query: {
-            'organization._id': org._id,
-            'application._id': app._id,
+            '_edge.organization._id': org._id,
+            '_edge.application._id': app._id,
             key: input,
           },
           options: { projection: { _id: 1 } },

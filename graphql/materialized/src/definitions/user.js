@@ -48,8 +48,6 @@ type UserPartial implements UserInterface @interfaceFields {
 type User implements UserInterface @interfaceFields {
   "Related connections."
   _connection: User_Connection! @project(deep: true) @object
-  "Related edges."
-  _edge: User_Edge! @project(deep: true) @object
   "Gets the user membership role for the provided workspace ID. Will return null if the user is not a member of the workspace."
   workspaceRoleFromId(input: UserWorkspaceRoleFromIdInput!): String
     @project(
@@ -180,27 +178,6 @@ type User_ConnectionWorkspaceOrganizationEdge {
       resolve: false
       deep: true
     )
-}
-
-type User_Edge {
-  "The created by edge."
-  createdBy: User_EdgeCreatedBy
-    @project(deep: true)
-    @filterDeleted(field: "node")
-  "The updated by edge."
-  updatedBy: User_EdgeUpdatedBy
-    @project(deep: true)
-    @filterDeleted(field: "node")
-}
-
-type User_EdgeCreatedBy {
-  "The user that first created the user."
-  node: UserPartial! @project(deep: true, needs: ["node._deleted"])
-}
-
-type User_EdgeUpdatedBy {
-  "The user that last updated the user."
-  node: UserPartial! @project(deep: true, needs: ["node._deleted"])
 }
 
 type UserInterfaceDate {

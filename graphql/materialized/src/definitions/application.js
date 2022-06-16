@@ -21,34 +21,13 @@ interface ApplicationInterface {
 }
 
 type Application implements ApplicationInterface @interfaceFields {
-  "Related edges."
-  _edge: Application_Edge! @project(deep: true) @object
+  "The unique application identifier"
+  _id: ObjectID! @project
 }
 
 type ApplicationPartial implements ApplicationInterface @interfaceFields {
   "The owning document."
   _owner: Application! @loadOwner(type: APPLICATION)
-}
-
-type Application_Edge {
-  "The created by edge."
-  createdBy: Application_EdgeCreatedBy
-    @project(deep: true)
-    @filterDeleted(field: "node")
-  "The updated by edge."
-  updatedBy: Application_EdgeUpdatedBy
-    @project(deep: true)
-    @filterDeleted(field: "node")
-}
-
-type Application_EdgeCreatedBy {
-  "The user that first created the application."
-  node: UserPartial! @project(deep: true, needs: ["node._deleted"])
-}
-
-type Application_EdgeUpdatedBy {
-  "The user that last updated the application."
-  node: UserPartial! @project(deep: true, needs: ["node._deleted"])
 }
 
 input QueryApplicationKeyExistsInput {

@@ -3,7 +3,6 @@ import { PropTypes, validateAsync } from '@parameter1/prop-types';
 import { sluggify } from '@parameter1/slug';
 
 import { workspaceProps, workspaceSchema } from '../../schema/index.js';
-import { buildMaterializedWorkspacePipeline } from '../materializer.js';
 
 const { object } = PropTypes;
 
@@ -22,12 +21,6 @@ export default class WorkspaceRepo extends PipelinedRepo {
         { key: { '_edge.application._id': 1 } },
       ],
       schema: workspaceSchema,
-      materializedPipelineBuilder: buildMaterializedWorkspacePipeline,
-      onMaterialize: async ({ materializedIds }) => {
-        const update = new Map();
-        update.set('user', { '_connection.workspace.edges._id': { $in: materializedIds } });
-        return update;
-      },
     });
   }
 
@@ -56,7 +49,6 @@ export default class WorkspaceRepo extends PipelinedRepo {
 
     return this.update({
       filter: { _id: id, name: { $ne: name } },
-      materializeFilter: { _id: id },
       many: false,
       update: [{ $set: { name, slug: sluggify(name) } }],
       session,

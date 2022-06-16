@@ -3,7 +3,6 @@ import { PropTypes, validateAsync } from '@parameter1/prop-types';
 import { sluggify } from '@parameter1/slug';
 
 import { applicationProps, applicationSchema } from '../../schema/index.js';
-import { buildMaterializedApplicationPipeline } from '../materializer.js';
 
 const { object } = PropTypes;
 
@@ -21,18 +20,6 @@ export default class ApplicationRepo extends PipelinedRepo {
         { key: { slug: 1 } },
       ],
       schema: applicationSchema,
-      materializedPipelineBuilder: buildMaterializedApplicationPipeline,
-      onMaterialize: async ({ materializedIds }) => {
-        const update = new Map();
-        update.set('workspace', { '_edge.application._id': { $in: materializedIds } });
-        const workspaceIds = await this.manager.$('workspace').distinct({
-          key: '_id',
-          query: { '_edge.application._id': { $in: materializedIds } },
-          options: { useGlobalFindCriteria: false },
-        });
-        if (workspaceIds.length) update.set('user', { '_connection.workspace.edges._id': { $in: workspaceIds } });
-        return update;
-      },
     });
   }
 
@@ -72,7 +59,6 @@ export default class ApplicationRepo extends PipelinedRepo {
 
     return this.update({
       filter: { _id: id, name: { $ne: name } },
-      materializeFilter: { _id: id },
       many: false,
       update: [{ $set: { name, slug: sluggify(name) } }],
       session,

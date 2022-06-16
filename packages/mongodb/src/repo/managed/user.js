@@ -17,7 +17,6 @@ import {
   workspaceProps,
 } from '../../schema/index.js';
 import { sluggifyUserNames } from '../../schema/user.js';
-import { buildMaterializedUserPipeline } from '../materializer.js';
 
 const {
   $addToSet,
@@ -53,7 +52,6 @@ export default class UserRepo extends PipelinedRepo {
         { key: { 'slug.reverse': 1, _id: 1 } },
       ],
       schema: userSchema,
-      materializedPipelineBuilder: buildMaterializedUserPipeline,
     });
   }
 
@@ -85,7 +83,6 @@ export default class UserRepo extends PipelinedRepo {
 
     return this.update({
       filter: { _id: userId, '_connection.workspace.edges._id': { $ne: workspaceId } },
-      materializeFilter: { _id: userId },
       update: [{
         $set: {
           '_connection.workspace.edges': $addToSet('_connection.workspace.edges', { _id: workspaceId, role }),
@@ -120,7 +117,6 @@ export default class UserRepo extends PipelinedRepo {
     }).required(), params);
     return this.update({
       filter: { _id: userId, '_connection.workspace.edges._id': workspaceId },
-      materializeFilter: { _id: userId },
       update: [{
         $set: {
           '_connection.workspace.edges': $pull('_connection.workspace.edges', { $ne: ['$$v._id', workspaceId] }),
@@ -159,7 +155,6 @@ export default class UserRepo extends PipelinedRepo {
 
     return this.update({
       filter: { _id: userId, '_connection.organization.edges._id': { $ne: orgId } },
-      materializeFilter: { _id: userId },
       update: [{
         $set: {
           '_connection.organization.edges': $addToSet('_connection.organization.edges', { _id: orgId, role }),
@@ -195,7 +190,6 @@ export default class UserRepo extends PipelinedRepo {
 
     return this.update({
       filter: { _id: id, email: { $ne: email } },
-      materializeFilter: { _id: id },
       many: false,
       update: [{
         $set: {
@@ -241,7 +235,6 @@ export default class UserRepo extends PipelinedRepo {
         _id: userId,
         '_connection.workspace.edges': { $elemMatch: { _id: workspaceId, role: { $ne: role } } },
       },
-      materializeFilter: { _id: userId },
       update: [{
         $set: {
           '_connection.workspace.edges': $mergeArrayObject('_connection.workspace.edges', { $eq: ['$$v._id', workspaceId] }, { role }),
@@ -283,7 +276,6 @@ export default class UserRepo extends PipelinedRepo {
         _id: userId,
         '_connection.organization.edges': { $elemMatch: { _id: orgId, role: { $ne: role } } },
       },
-      materializeFilter: { _id: userId },
       update: [{
         $set: {
           '_connection.organization.edges': $mergeArrayObject('_connection.organization.edges', { $eq: ['$$v._id', orgId] }, { role }),
@@ -512,7 +504,6 @@ export default class UserRepo extends PipelinedRepo {
     }).required(), params);
     return this.update({
       filter: { _id: userId, '_connection.organization.edges._id': orgId },
-      materializeFilter: { _id: userId },
       update: [{
         $set: {
           '_connection.organization.edges': $pull('_connection.organization.edges', { $ne: ['$$v._id', orgId] }),
@@ -558,7 +549,6 @@ export default class UserRepo extends PipelinedRepo {
           { familyName: { $ne: familyName } },
         ],
       },
-      materializeFilter: { _id: id },
       update: [{
         $set: {
           givenName,

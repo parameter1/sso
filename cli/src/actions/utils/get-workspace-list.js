@@ -31,6 +31,8 @@ export default async ({
       {
         $project: {
           ...projection,
+          name: 1,
+          key: 1,
           'application._id': 1,
           'application.name': 1,
           'application.key': 1,
@@ -38,7 +40,7 @@ export default async ({
           'organization._id': 1,
           'organization.name': 1,
           'organization.key': 1,
-          name: { $concat: ['$application.name', ' > ', '$organization.name', ' > ', '$name'] },
+          fullName: { $concat: ['$application.name', ' > ', '$organization.name', ' > ', '$name'] },
           ns: { $concat: ['$application.key', '.', '$organization.key', '.', '$key'] },
         },
       },
@@ -51,7 +53,7 @@ export default async ({
     if (isFn(filter)) return filter(doc);
     return true;
   }).map((doc) => ({
-    name: `${doc.name} [${doc.ns}]`,
+    name: `${doc.fullName} [${doc.ns}]`,
     value: doc,
     disabled: isFn(disabledWhen) ? disabledWhen(doc) : false,
   }));

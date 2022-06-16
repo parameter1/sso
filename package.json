@@ -14,7 +14,8 @@
     "cli",
     "graphql/*",
     "lib",
-    "packages/*"
+    "packages/*",
+    "services/*"
   ],
   "devDependencies": {
     "chai": "^4.3.6",

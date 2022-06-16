@@ -37,6 +37,14 @@ services:
       - "7913:7913"
     hostname: sso.dev.parameter1.com
 
+  change-manager:
+    <<: *node
+    working_dir: /sso/services/change-manager
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: [*env, *env-core]
+
   cli:
     <<: *node
     working_dir: /sso/cli
@@ -65,6 +73,9 @@ services:
     ports:
       - "7912:80"
     hostname: sso.dev.parameter1.com
+    depends_on:
+      - change-manager
+      - materializer
 
   graphql-materialized:
     <<: *node
@@ -92,6 +103,15 @@ services:
     ports:
       - "7914:7914"
     hostname: test-sso-app.dev.parameter1.com
+
+  materializer:
+    <<: *node
+    working_dir: /sso/services/materializer
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: [*env, *env-core]
+
 
 volumes:
   yarn-cache: {}

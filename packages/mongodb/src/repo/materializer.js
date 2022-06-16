@@ -15,10 +15,10 @@ const mergeStage = ({ coll }) => ({
   whenNotMatched: 'insert',
 });
 
-const userEdgeProjection = () => wrap({
-  '_edge.createdBy': 1,
-  '_edge.updatedBy': 1,
-});
+// const userEdgeProjection = () => wrap({
+//   '_edge.createdBy': 1,
+//   '_edge.updatedBy': 1,
+// });
 
 const globalProjection = () => wrap({
   _date: {
@@ -26,7 +26,6 @@ const globalProjection = () => wrap({
     materialized: '$$NOW',
     updated: '$_touched.last.date',
   },
-  _deleted: 1,
 });
 
 const commonAppProjection = () => wrap({
@@ -39,7 +38,7 @@ const commonAppProjection = () => wrap({
 
 const fullAppProjection = () => wrap({
   ...commonAppProjection(),
-  ...userEdgeProjection(),
+  // ...userEdgeProjection(),
 });
 
 const partialAppProjection = () => wrap({
@@ -56,7 +55,7 @@ const commonOrgProjection = () => wrap({
 
 const fullOrgProjection = () => wrap({
   ...commonOrgProjection(),
-  ...userEdgeProjection(),
+  // ...userEdgeProjection(),
 });
 
 const partialOrgProjection = () => wrap({
@@ -85,24 +84,17 @@ const commonUserProjection = () => {
 
 const fullUserProjection = () => wrap({
   ...commonUserProjection(),
-  ...userEdgeProjection(),
+  // ...userEdgeProjection(),
   '_connection.organization': 1,
   '_connection.workspace': 1,
 });
 
-const partialUserProjection = () => wrap({
-  ...commonUserProjection(),
-});
+// const partialUserProjection = () => wrap({
+//   ...commonUserProjection(),
+// });
 
 const commonWorkspaceProjection = () => wrap({
   ...globalProjection(),
-  _deleted: {
-    $or: [
-      { $eq: ['$_deleted', true] },
-      { $eq: ['$_edge.application.node._deleted', true] },
-      { $eq: ['$_edge.organization.node._deleted', true] },
-    ],
-  },
   '_edge.application': 1,
   '_edge.organization': 1,
   key: 1,
@@ -134,7 +126,7 @@ const commonWorkspaceProjection = () => wrap({
 
 const fullWorkspaceProjection = () => wrap({
   ...commonWorkspaceProjection(),
-  ...userEdgeProjection(),
+  // ...userEdgeProjection(),
 });
 
 const partialWorkspaceProjection = () => wrap({
@@ -169,44 +161,54 @@ const workspaceOrganizationStages = () => [
   { $unset: '_edge.organization._id' },
 ];
 
-const userAttributionStages = () => [
-  {
-    $lookup: {
-      from: 'users',
-      as: '_edge.createdBy.node',
-      localField: '_touched.first.user._id',
-      foreignField: '_id',
-      pipeline: [{ $project: partialUserProjection() }],
-    },
-  },
-  { $unwind: { path: '$_edge.createdBy.node', preserveNullAndEmptyArrays: true } },
-  {
-    $lookup: {
-      from: 'users',
-      as: '_edge.updatedBy.node',
-      localField: '_touched.last.user._id',
-      foreignField: '_id',
-      pipeline: [{ $project: partialUserProjection() }],
-    },
-  },
-  { $unwind: { path: '$_edge.updatedBy.node', preserveNullAndEmptyArrays: true } },
-  {
-    $addFields: {
-      '_edge.createdBy': {
-        $cond: [{ $eq: [{ $ifNull: ['$_edge.createdBy.node', null] }, null] }, null, { node: '$_edge.createdBy.node' }],
-      },
-      '_edge.updatedBy': {
-        $cond: [{ $eq: [{ $ifNull: ['$_edge.updatedBy.node', null] }, null] }, null, { node: '$_edge.updatedBy.node' }],
-      },
-    },
-  },
-];
+// const userAttributionStages = () => [
+//   {
+//     $lookup: {
+//       from: 'users',
+//       as: '_edge.createdBy.node',
+//       localField: '_touched.first.user._id',
+//       foreignField: '_id',
+//       pipeline: [{ $project: partialUserProjection() }],
+//     },
+//   },
+//   { $unwind: { path: '$_edge.createdBy.node', preserveNullAndEmptyArrays: true } },
+//   {
+//     $lookup: {
+//       from: 'users',
+//       as: '_edge.updatedBy.node',
+//       localField: '_touched.last.user._id',
+//       foreignField: '_id',
+//       pipeline: [{ $project: partialUserProjection() }],
+//     },
+//   },
+//   { $unwind: { path: '$_edge.updatedBy.node', preserveNullAndEmptyArrays: true } },
+//   {
+//     $addFields: {
+//       '_edge.createdBy': {
+//         $cond: [{
+//           $eq: [
+//             { $ifNull: ['$_edge.createdBy.node', null] },
+//             null,
+//           ],
+//         }, null, { node: '$_edge.createdBy.node' }],
+//       },
+//       '_edge.updatedBy': {
+//         $cond: [{
+//           $eq: [
+//             { $ifNull: ['$_edge.updatedBy.node', null] },
+//             null,
+//           ],
+//         }, null, { node: '$_edge.updatedBy.node' }],
+//       },
+//     },
+//   },
+// ];
 
 export const buildMaterializedApplicationPipeline = ({ $match = {}, withMerge = true } = {}) => {
   const pipeline = [];
   pipeline.push({ $match });
   pipeline.push({ $sort: { _id: 1 } });
-  pipeline.push(...userAttributionStages());
+  // pipeline.push(...userAttributionStages());
   pipeline.push({ $project: fullAppProjection() });
   if (withMerge) pipeline.push({ $merge: mergeStage({ coll: 'applications' }) });
   return pipeline;
@@ -216,7 +218,7 @@ export const buildMaterializedOrganizationPipeline = ({ $match = {}, withMerge =
   const pipeline = [];
   pipeline.push({ $match });
   pipeline.push({ $sort: { _id: 1 } });
-  pipeline.push(...userAttributionStages());
+  // pipeline.push(...userAttributionStages());
   pipeline.push({ $project: fullOrgProjection() });
   if (withMerge) pipeline.push({ $merge: mergeStage({ coll: 'organizations' }) });
   return pipeline;
@@ -226,7 +228,7 @@ export const buildMaterializedUserPipeline = ({ $match = {}, withMerge = true } 
   const pipeline = [];
   pipeline.push({ $match });
   pipeline.push({ $sort: { _id: 1 } });
-  pipeline.push(...userAttributionStages());
+  // pipeline.push(...userAttributionStages());
 
   // managed organizations
   pipeline.push({
@@ -369,7 +371,7 @@ export const buildMaterializedWorkspacePipeline = ({ $match = {}, withMerge = tr
   const pipeline = [];
   pipeline.push({ $match });
   pipeline.push({ $sort: { _id: 1 } });
-  pipeline.push(...userAttributionStages());
+  // pipeline.push(...userAttributionStages());
 
   // application
   pipeline.push(...workspaceApplicationStages());

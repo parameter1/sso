@@ -5,17 +5,17 @@ const repos = [
   {
     key: 'application',
     collectionName: 'applications',
-    usesSoftDelete: true,
+    usesSoftDelete: false,
     indexes: [
       { key: { key: 1 }, unique: true },
     ],
   },
-  { key: 'organization', collectionName: 'organizations', usesSoftDelete: true },
-  { key: 'user', collectionName: 'users', usesSoftDelete: true },
+  { key: 'organization', collectionName: 'organizations', usesSoftDelete: false },
+  { key: 'user', collectionName: 'users', usesSoftDelete: false },
   {
     key: 'workspace',
     collectionName: 'workspaces',
-    usesSoftDelete: true,
+    usesSoftDelete: false,
     indexes: [
       { key: { 'namespace.default': 1 }, unique: true },
     ],

@@ -26,8 +26,20 @@ export default class ManagedRepos extends RepoManager {
   } = {}) {
     super({ client, dbName });
     this
-      .add({ key: 'application', source, ManagedRepo: ApplicationRepo })
-      .add({ key: 'organization', source, ManagedRepo: OrganizationRepo })
+      .add({
+        key: 'application',
+        source,
+        isVersioned: false, // determine better way of versioning...
+        usesSoftDelete: false, // we may want to bring this back, but have it auto-delete after time
+        ManagedRepo: ApplicationRepo,
+      })
+      .add({
+        key: 'organization',
+        source,
+        isVersioned: false, // determine better way of versioning...
+        usesSoftDelete: false, // we may want to bring this back, but have it auto-delete after time
+        ManagedRepo: OrganizationRepo,
+      })
       .add({
         key: 'token',
         source,
@@ -43,7 +55,19 @@ export default class ManagedRepos extends RepoManager {
         usesSoftDelete: false,
         ManagedRepo: UserEventRepo,
       })
-      .add({ key: 'user', source, ManagedRepo: UserRepo })
-      .add({ key: 'workspace', source, ManagedRepo: WorkspaceRepo });
+      .add({
+        key: 'user',
+        source,
+        isVersioned: false, // determine better way of versioning...
+        usesSoftDelete: false, // we may want to bring this back, but have it auto-delete after time
+        ManagedRepo: UserRepo,
+      })
+      .add({
+        key: 'workspace',
+        source,
+        isVersioned: false, // determine better way of versioning...
+        usesSoftDelete: false, // we may want to bring this back, but have it auto-delete after time
+        ManagedRepo: WorkspaceRepo,
+      });
   }
 }

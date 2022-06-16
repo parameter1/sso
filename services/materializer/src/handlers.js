@@ -1,10 +1,12 @@
 import application from './handlers/application.js';
 import organization from './handlers/organization.js';
+import user from './handlers/user.js';
 import workspace from './handlers/workspace.js';
 
 const map = new Map([
   ['applications', application],
   ['organizations', organization],
+  ['users', user],
   ['workspaces', workspace],
 ]);
 

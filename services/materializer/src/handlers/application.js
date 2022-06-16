@@ -1,4 +1,6 @@
-import { deleteMaterializedRecord, materializeData } from '../utils.js';
+import { deleteMaterializedRecord, materializeData, relatedWorkspaceIds } from '../utils.js';
+
+const workspaceIdsFor = ({ db, _id }) => relatedWorkspaceIds({ db }, { '_edge.application._id': _id });
 
 export default {
   /**
@@ -22,24 +24,30 @@ export default {
   /**
    *
    */
-  replace: ({ change }) => {
+  replace: async ({ change }) => {
     const { _id } = change.documentKey;
     const { db, coll } = change.ns;
     return Promise.all([
       materializeData({ db, coll }, { _id }),
       materializeData({ db, coll: 'workspaces' }, { '_edge.application._id': _id }),
+      materializeData({ db, coll: 'users' }, {
+        '_connection.workspace.edges._id': { $in: await workspaceIdsFor({ db, _id }) },
+      }),
     ]);
   },
 
   /**
    *
    */
-  update: ({ change }) => {
+  update: async ({ change }) => {
     const { _id } = change.documentKey;
     const { db, coll } = change.ns;
     return Promise.all([
       materializeData({ db, coll }, { _id }),
       materializeData({ db, coll: 'workspaces' }, { '_edge.application._id': _id }),
+      materializeData({ db, coll: 'users' }, {
+        '_connection.workspace.edges._id': { $in: await workspaceIdsFor({ db, _id }) },
+      }),
     ]);
   },
 };

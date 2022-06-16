@@ -27,7 +27,6 @@ export default {
     const { db, coll } = change.ns;
     return Promise.all([
       materializeData({ db, coll }, { _id }),
-      materializeData({ db, coll: 'users' }, { '_connection.workspace.edges._id': _id }),
     ]);
   },
 
@@ -39,7 +38,6 @@ export default {
     const { db, coll } = change.ns;
     return Promise.all([
       materializeData({ db, coll }, { _id }),
-      materializeData({ db, coll: 'users' }, { '_connection.workspace.edges._id': _id }),
     ]);
   },
 };

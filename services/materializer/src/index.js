@@ -25,7 +25,7 @@ const { log } = console;
     {
       $match: {
         'ns.db': 'sso',
-        'ns.coll': /^[a-z0-9-]+[^\\/materialized]$/,
+        'ns.coll': /^[a-z0-9-]+$/,
       },
     },
   ], { fullDocument: 'updateLookup' });

@@ -34,3 +34,8 @@ export async function materializeData({ db, coll }, filter = {}) {
   const cursor = await managedCollection.aggregate(pipeline);
   return cursor.toArray();
 }
+
+export async function relatedWorkspaceIds({ db }, filter = {}) {
+  const workspaces = await getManagedCollection({ db, coll: 'workspaces' });
+  return workspaces.distinct('_id', filter);
+}

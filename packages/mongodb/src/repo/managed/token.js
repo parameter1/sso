@@ -59,6 +59,7 @@ export default class TokenRepo extends PipelinedRepo {
       subject: 'auth',
       audience: userId,
       'data.impersonated': impersonated ? true : { $ne: true },
+      expiresAt: { $gt: new Date() },
     };
     const doc = await this.findOne({ query, options: { session } });
     if (doc) return { doc, signed: this.signDocument(doc) };

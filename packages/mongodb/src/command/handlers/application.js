@@ -26,17 +26,21 @@ export class ApplicationCommandHandler extends BaseCommandHandler {
     super({ store, entityType: 'application' });
   }
 
-  // async changeName(params) {
-  //   const commands = await validateAsync(oneOrMany(object({
-  //     entityId: eventProps.entityId.required(),
-  //     date: eventProps.date,
-  //     name: applicationProps.name.required(),
-  //     userId: eventProps.userId,
-  //   })).required().custom((vals) => {
-  //     console.log(vals);
-  //   }), params);
-  //   throw new Error('foo');
-  // }
+  async changeName(params) {
+    const commands = await validateAsync(oneOrMany(object({
+      entityId: eventProps.entityId.required(),
+      date: eventProps.date,
+      name: applicationProps.name.required(),
+      userId: eventProps.userId,
+    })).required().custom((vals) => vals.map((o) => ({
+      command: 'CHANGE_NAME',
+      entityId: o.entityId,
+      date: o.date,
+      values: { name: o.name, slug: sluggify(o.name) },
+      userId: o.userId,
+    }))), params);
+    return this.executeUpdate(commands);
+  }
 
   /**
    *

@@ -37,14 +37,6 @@ services:
       - "7913:7913"
     hostname: sso.dev.parameter1.com
 
-  change-manager:
-    <<: *node
-    working_dir: /sso/services/change-manager
-    entrypoint: ["yarn"]
-    command: ["dev"]
-    environment:
-      <<: [*env, *env-core]
-
   cli:
     <<: *node
     working_dir: /sso/cli
@@ -76,7 +68,6 @@ services:
       - "7912:80"
     hostname: sso.dev.parameter1.com
     depends_on:
-      - change-manager
       - materializer
 
   graphql-materialized:

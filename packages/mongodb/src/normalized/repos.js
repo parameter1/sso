@@ -47,6 +47,10 @@ export class NormalizedRepos {
     return repo;
   }
 
+  keys() {
+    return [...this.repos.keys()];
+  }
+
   /**
    * Materializes data from a normalized collection based on the provided entity type and
    * match criteria.

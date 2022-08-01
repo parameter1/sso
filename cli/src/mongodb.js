@@ -1,4 +1,4 @@
-import { MongoDBClient, filterMongoURL } from '@parameter1/sso-mongodb';
+import { MongoDBClient, filterMongoURL, EntityManager } from '@parameter1/sso-mongodb';
 import { MONGO_URL } from './env.js';
 import pkg from '../package.js';
 
@@ -10,6 +10,8 @@ const mongodb = new MongoDBClient({
 });
 
 export default mongodb;
+
+export const entityManager = new EntityManager({ client: mongodb });
 
 export const connect = async () => {
   log('> Conecting to MongoDB...');

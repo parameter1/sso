@@ -31,14 +31,12 @@ export default async () => {
       validate: async (input) => {
         const { error } = applicationCommandProps.key.required().validate(input);
         if (error) return error;
+        const doc = await entityManager.getMaterializedRepo('application').findByKey({
+          key: input,
+          options: { projection: { _id: 1 } },
+        });
+        if (doc) return new Error('An application already exists with this key');
         return true;
-
-        // const doc = await repos.$('application').findByKey({
-        //   key: input,
-        //   options: { projection: { _id: 1 } },
-        // });
-        // if (doc) return new Error('An application already exists with this key');
-        // return true;
       },
     },
     {

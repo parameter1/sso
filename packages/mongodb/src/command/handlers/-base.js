@@ -251,22 +251,22 @@ export class BaseCommandHandler {
 
   /**
    *
-   * @param {UpdateCommand|UpdateCommand[]} events
+   * @param {UpdateCommand|UpdateCommand[]} commands
    */
-  async executeUpdate(events) {
+  async executeUpdate(commands) {
     const prepared = await validateAsync(
       oneOrMany(updateSchema).label('update command').required(),
-      events,
+      commands,
     );
 
-    const { entityIds, toPush } = prepared.reduce((o, event) => {
-      o.entityIds.push(event.entityId);
-      o.toPush.push({ ...event, entityType: this.entityType });
+    const { entityIds, events } = prepared.reduce((o, command) => {
+      o.entityIds.push(command.entityId);
+      o.events.push({ ...command, entityType: this.entityType });
       return o;
-    }, { entityIds: [], toPush: [] });
+    }, { entityIds: [], events: [] });
 
     await this.canPushUpdate(entityIds);
-    return this.eventStore.push(toPush);
+    return this.store.push(events);
   }
 
   /**

@@ -29,6 +29,13 @@ const run = async () => {
         },
 
         {
+          key: 'user',
+          choices: [
+            { name: 'Create new user', fnName: 'create' },
+          ],
+        },
+
+        {
           key: 'general',
           choices: [
             { name: 'Create database indexes', fnName: 'createIndexes' },

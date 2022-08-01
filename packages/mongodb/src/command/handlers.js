@@ -3,6 +3,7 @@ import { mongoDBClientProp } from '../props.js';
 import { EventStore } from './event-store.js';
 
 import { ApplicationCommandHandler } from './handlers/application.js';
+import { UserCommandHandler } from './handlers/user.js';
 
 const { object } = PropTypes;
 
@@ -19,6 +20,7 @@ export class CommandHandlers {
     this.store = new EventStore({ client });
     this.handlers = [
       ApplicationCommandHandler,
+      UserCommandHandler,
     ].reduce((map, Handler) => {
       const handler = new Handler({ store: this.store });
       map.set(handler.entityType, handler);

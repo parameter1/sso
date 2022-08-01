@@ -58,3 +58,31 @@ export function partialApplication() {
     ...commonApplication(),
   });
 }
+
+export function commonUser() {
+  return prepareProjection({
+    domain: 1,
+    email: 1,
+    familyName: 1,
+    givenName: 1,
+    lastLoggedInAt: { $ifNull: ['$lastLoggedInAt', null] },
+    lastSeenAt: { $ifNull: ['$lastSeenAt', null] },
+    loginCount: { $ifNull: ['$loginCount', 0] },
+    slug: 1,
+    verified: 1,
+  });
+}
+
+export function fullUser() {
+  return prepareProjection({
+    ...commonFullProjection(),
+    ...commonUser(),
+  });
+}
+
+export function partialUser() {
+  return prepareProjection({
+    ...commonPartialProjection(),
+    ...commonUser(),
+  });
+}

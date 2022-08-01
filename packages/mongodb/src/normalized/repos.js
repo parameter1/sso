@@ -2,8 +2,10 @@ import { PropTypes, attempt } from '@parameter1/prop-types';
 import { mongoDBClientProp } from '../props.js';
 
 import { eventProps } from '../command/event-store.js';
-import { NormalizedApplicationRepo } from './repos/application.js';
 import { MaterializedBuilders } from '../materialized/builders.js';
+
+import { NormalizedApplicationRepo } from './repos/application.js';
+import { NormalizedUserRepo } from './repos/user.js';
 
 const { boolean, object } = PropTypes;
 
@@ -19,6 +21,7 @@ export class NormalizedRepos {
 
     this.repos = [
       NormalizedApplicationRepo,
+      NormalizedUserRepo,
     ].reduce((map, Repo) => {
       const repo = new Repo({ client });
       map.set(repo.entityType, repo);

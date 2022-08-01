@@ -2,7 +2,7 @@ import { PropTypes, attempt } from '@parameter1/prop-types';
 import { mongoDBClientProp } from '../props.js';
 import { EventStore } from './event-store.js';
 
-import { ApplicationCommandHandler } from './application.js';
+import { ApplicationCommandHandler } from './handlers/application.js';
 
 const { object } = PropTypes;
 

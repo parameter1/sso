@@ -3,7 +3,7 @@ import { sluggify } from '@parameter1/slug';
 
 import { BaseCommandHandler } from './-base.js';
 import { eventProps } from '../event-store.js';
-import applicationProps from './props/application.js';
+import applicationProps from '../props/application.js';
 
 const { object, oneOrMany } = PropTypes;
 

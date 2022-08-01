@@ -72,7 +72,10 @@ export class BaseCommandHandler {
     }).required());
 
     const pipeline = [{
-      $match: { entityId: { $in: entityIds }, entityType: this.entityType },
+      $match: {
+        ...(entityIds.length && { entityId: { $in: entityIds } }),
+        entityType: this.entityType,
+      },
     }, {
       $sort: BaseCommandHandler.getEventSort(),
     }, {

@@ -16,4 +16,6 @@ export { CommandHandlers } from './command/handlers.js';
 export { MaterializedRepos } from './materialized/repos.js';
 export { NormalizedRepos } from './normalized/repos.js';
 
+export { EntityManager } from './entity-manager.js';
+
 export { default as applicationCommandProps } from './command/props/application.js';

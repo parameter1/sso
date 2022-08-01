@@ -1,5 +1,7 @@
 import { ObjectId } from '@parameter1/mongodb';
 import { PropTypes, attempt, validateAsync } from '@parameter1/prop-types';
+
+import { DB_NAME } from '../../constants.js';
 import { EventStore, eventProps } from '../event-store.js';
 
 const {
@@ -56,9 +58,17 @@ export class BaseCommandHandler {
     this.entityType = entityType;
   }
 
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId|ObjectId[]} params.entityIds
+   * @param {boolean} [params.withMergeStage=true]
+   * @returns {Promise<object[]>}
+   */
   buildNormalizationPipeline(params) {
-    const { entityIds } = attempt(params, object({
+    const { entityIds, withMergeStage } = attempt(params, object({
       entityIds: oneOrMany(eventProps.entityId).required(),
+      withMergeStage: boolean().default(true),
     }).required());
 
     const pipeline = [{
@@ -156,6 +166,16 @@ export class BaseCommandHandler {
     }, {
       $unset: ['__.history.entityId', '__.history.omitFromModified'],
     }];
+    if (withMergeStage) {
+      pipeline.push({
+        $merge: {
+          into: { db: DB_NAME, coll: `${this.entityType}/normalized` },
+          on: '_id',
+          whenMatched: 'replace',
+          whenNotMatched: 'insert',
+        },
+      });
+    }
     return pipeline;
   }
 
@@ -277,6 +297,27 @@ export class BaseCommandHandler {
       map.set(`${doc._id}`, doc.state);
       return map;
     }, new Map());
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId|ObjectId[]} params.entityIds
+   * @param {boolean} [params.withMergeStage=true]
+   * @returns {Promise<object[]>}
+   */
+  async normalize(params) {
+    const {
+      entityIds,
+      withMergeStage,
+    } = await validateAsync(object({
+      entityIds: oneOrMany(eventProps.entityId).required(),
+      withMergeStage: boolean().default(true),
+    }).required(), params);
+
+    const pipeline = this.buildNormalizationPipeline({ entityIds, withMergeStage });
+    const cursor = await this.store.aggregate({ pipeline });
+    return cursor.toArray();
   }
 
   static getEventSort() {

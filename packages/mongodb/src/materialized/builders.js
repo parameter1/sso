@@ -1,4 +1,9 @@
+import { PropTypes, attempt } from '@parameter1/prop-types';
+
+import { eventProps } from '../command/event-store.js';
 import { ApplicationBuilder } from './builders/application.js';
+
+const { boolean, object } = PropTypes;
 
 export class MaterializedBuilders {
   /**
@@ -14,6 +19,27 @@ export class MaterializedBuilders {
       map.set(builder.entityType, builder);
       return map;
     }, new Map());
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {string} params.entityType
+   * @param {object} [params.$match={}]
+   * @param {booleam} [params.withMergeStage=true]
+   * @return {object[]}
+   */
+  buildPipelineFor(params) {
+    const { entityType, $match, withMergeStage } = attempt(params, object({
+      entityType: eventProps.entityType.required(),
+      $match: object().default({}),
+      withMergeStage: boolean().default(true),
+    }).required());
+    return this.get(entityType).buildPipeline({
+      $match,
+      stages: this.classes.get(entityType).buildPipelineStages(),
+      withMergeStage,
+    });
   }
 
   /**

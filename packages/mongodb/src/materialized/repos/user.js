@@ -21,8 +21,8 @@ export class MaterializedUserRepo extends BaseMaterializedRepo {
    * @param {string} params.email
    * @param {object} [params.options]
    */
-  findByEmail(params) {
-    const { email, options } = validateAsync(object({
+  async findByEmail(params) {
+    const { email, options } = await validateAsync(object({
       email: userProps.email.required(),
       options: object(),
     }).required(), params);

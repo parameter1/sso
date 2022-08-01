@@ -1,9 +1,8 @@
-import { filterMongoURL } from '@parameter1/sso-mongodb';
+import { filterMongoURL, DB_NAME } from '@parameter1/sso-mongodb';
 import { immediatelyThrow } from '@parameter1/utils';
 
-import { runHandlerFor } from './handlers.js';
 import pkg from '../package.js';
-import mongodb from './mongodb.js';
+import { mongodb, entityManager } from './mongodb.js';
 
 process.on('unhandledRejection', immediatelyThrow);
 
@@ -24,12 +23,27 @@ const { log } = console;
   const changeStream = client.watch([
     {
       $match: {
-        'ns.db': 'sso',
-        'ns.coll': /^[a-z0-9-]+$/,
+        'ns.db': DB_NAME,
+        'ns.coll': 'event-store',
       },
     },
   ], { fullDocument: 'updateLookup' });
   changeStream.on('change', async (change) => {
-    await runHandlerFor(change);
+    if (change.operationType !== 'insert') return;
+    const { _id: eventId } = change.documentKey;
+    const { entityId, entityType } = change.fullDocument;
+
+    const key = `${entityType}.${entityId} (event: ${eventId})`;
+    log('START', key);
+
+    // @todo add pub/sub; catch errors and send error events (+ log)
+
+    // normalize
+    await entityManager.normalize({ entityType, entityIds: entityId });
+
+    // materialize
+    await entityManager.materialize({ entityType, $match: { _id: entityId } });
+    // @todo add cross-materialization handlers
+    log('END', key);
   });
 })().catch(immediatelyThrow);

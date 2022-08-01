@@ -52,6 +52,8 @@ services:
     command: ["src/index.js"]
     environment:
       <<: [*env, *env-core]
+    depends_on:
+      - materializer
 
   commands:
     <<: *node

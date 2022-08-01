@@ -12,6 +12,8 @@ export { filterObjects, findWithObjects } from '@parameter1/mongodb/pagination';
 // export * from './schema/index.js';
 // export * from './repo/materializer.js';
 
+export * from './constants.js';
+
 export { CommandHandlers } from './command/handlers.js';
 export { MaterializedRepos } from './materialized/repos.js';
 export { NormalizedRepos } from './normalized/repos.js';

@@ -1,8 +1,19 @@
+export function asArray(pathOrExpr) {
+  return { $cond: [{ $isArray: pathOrExpr }, pathOrExpr, []] };
+}
+
+export function withDefaultValue(pathOrExpr, def = null) {
+  return { $ifNull: [pathOrExpr, def] };
+}
+
 export function prepareProjection(projection, defaults = {}) {
   return Object
     .keys(projection).sort().reduce((o, key) => {
       const v = projection[key];
-      return { ...o, [key]: v === 1 ? `$${key}` : v };
+      let value = v;
+      if (v === 1) value = withDefaultValue(`$${key}`);
+      if (typeof v === 'string') value = withDefaultValue(value);
+      return { ...o, [key]: value };
     }, { ...defaults });
 }
 
@@ -24,7 +35,7 @@ function metaProjection() {
 function commonFullProjection() {
   return prepareProjection({
     _deleted: '$__.isDeleted',
-    _history: '$__.history',
+    _history: asArray('$__.history'),
     ...metaProjection(),
   });
 }
@@ -40,7 +51,7 @@ export function commonApplication() {
   return prepareProjection({
     key: 1,
     name: 1,
-    roles: 1,
+    roles: asArray('$roles'),
     slug: 1,
   });
 }
@@ -65,9 +76,9 @@ export function commonUser() {
     email: 1,
     familyName: 1,
     givenName: 1,
-    lastLoggedInAt: { $ifNull: ['$lastLoggedInAt', null] },
-    lastSeenAt: { $ifNull: ['$lastSeenAt', null] },
-    loginCount: { $ifNull: ['$loginCount', 0] },
+    lastLoggedInAt: 1,
+    lastSeenAt: 1,
+    loginCount: withDefaultValue('$loginCount', 0),
     slug: 1,
     verified: 1,
   });

@@ -47,9 +47,10 @@ services:
     entrypoint: ["node"]
     command: ["src/index.js"]
     environment:
-      <<: [*env, *env-core]
+      <<: [*env, *env-core, *env-redis-pubsub]
     depends_on:
       - materializer
+      - redis-pubsub
 
   commands:
     <<: *node

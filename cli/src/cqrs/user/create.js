@@ -1,6 +1,7 @@
 import inquirer from 'inquirer';
 import { userCommandProps } from '@parameter1/sso-mongodb';
 import { entityManager } from '../../mongodb.js';
+import { waitUntilProcessed } from '../utils/index.js';
 
 export default async () => {
   const questions = [
@@ -57,7 +58,10 @@ export default async () => {
     givenName,
     familyName,
   } = await inquirer.prompt(questions);
+  if (!confirm) return null;
+
   const handler = entityManager.getCommandHandler('user');
-  const values = { email, givenName, familyName };
-  return confirm ? handler.create({ values }) : null;
+  return waitUntilProcessed(() => handler.create({
+    values: { email, givenName, familyName },
+  }));
 };

@@ -2,6 +2,7 @@ import inquirer from 'inquirer';
 import { sluggify } from '@parameter1/slug';
 import { applicationCommandProps } from '@parameter1/sso-mongodb';
 import { entityManager } from '../../mongodb.js';
+import { waitUntilProcessed } from '../utils/index.js';
 
 export default async () => {
   const questions = [
@@ -65,7 +66,10 @@ export default async () => {
     key,
     roles,
   } = await inquirer.prompt(questions);
+  if (!confirm) return null;
+
   const handler = entityManager.getCommandHandler('application');
-  const values = { name, key, roles };
-  return confirm ? handler.create({ values }) : null;
+  return waitUntilProcessed(() => handler.create({
+    values: { name, key, roles },
+  }));
 };

@@ -2,6 +2,7 @@ import inquirer from 'inquirer';
 import { immediatelyThrow } from '@parameter1/utils';
 import { get } from '@parameter1/object-path';
 import { connect, close, entityManager } from './mongodb.js';
+import { pubSubManager } from './pubsub.js';
 
 import actions from './actions.js';
 
@@ -93,8 +94,24 @@ const run = async () => {
 };
 
 (async () => {
-  await connect();
+  await Promise.all([
+    connect(),
+    (async () => {
+      log('> Connecting to Redis pub/sub...');
+      await pubSubManager.connect();
+      log('> Redis pub/sub connected.');
+    })(),
+  ]);
+
   await run();
-  await close();
+
+  await Promise.all([
+    close(),
+    (async () => {
+      log('> Closing Redis pub/sub...');
+      await pubSubManager.quit();
+      log('> Redis pub/sub closed.');
+    })(),
+  ]);
   log('> DONE');
 })().catch(immediatelyThrow);

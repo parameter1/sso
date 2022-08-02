@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import { applicationCommandProps } from '@parameter1/sso-mongodb';
-import { getAppList } from '../utils/index.js';
+import { getAppList, waitUntilProcessed } from '../utils/index.js';
 import { entityManager } from '../../mongodb.js';
 
 export default async () => {
@@ -39,10 +39,11 @@ export default async () => {
     app,
     name,
   } = await inquirer.prompt(questions);
+  if (!confirm) return null;
 
   const handler = entityManager.getCommandHandler('application');
-  return confirm ? handler.changeName({
+  return waitUntilProcessed(() => handler.changeName({
     entityId: app._id,
     name,
-  }) : null;
+  }));
 };

@@ -16,6 +16,7 @@ export default async () => {
   } = await inquirer.prompt(questions);
   return confirm ? Promise.all([
     entityManager.commandHandlers.createIndexes(),
+    entityManager.materializedRepos.createAllIndexes(),
     entityManager.normalizedRepos.createAllIndexes(),
   ]) : null;
 };

@@ -3,7 +3,7 @@ import { PropTypes, attempt, validateAsync } from '@parameter1/prop-types';
 
 import { DB_NAME } from '../../constants.js';
 import { EventStore, eventProps } from '../event-store.js';
-import { ReservationsRepo } from '../reservations.js';
+import { ReservationsRepo, reservationProps } from '../reservations.js';
 
 const {
   boolean,
@@ -27,6 +27,17 @@ const createSchema = object({
 });
 
 /**
+ * @typedef ReserveValueCommand
+ * @property {string} key
+ * @property {*} value
+ */
+const reserveValueSchema = object({
+  entityId: reservationProps.entityId.required(),
+  key: reservationProps.key.required(),
+  value: reservationProps.value.required(),
+});
+
+/**
  * @typedef UpdateCommand
  * @property {string} command
  * @property {ObjectId} entityId
@@ -45,6 +56,7 @@ export class BaseCommandHandler {
   /**
    * @param {object} params
    * @param {string} params.entityType
+   * @param {ReservationsRepo} params.reservations
    * @param {EventStore} params.store
    */
   constructor(params) {
@@ -57,6 +69,7 @@ export class BaseCommandHandler {
       reservations: object().instance(ReservationsRepo).required(),
       store: object().instance(EventStore).required(),
     }).required());
+    this.client = store.client;
     this.reservations = reservations;
     this.store = store;
     this.entityType = entityType;
@@ -240,8 +253,10 @@ export class BaseCommandHandler {
   /**
    *
    * @param {CreateCommand|CreateCommand[]} events
+   * @param {object} options
+   * @param {ClientSession} [options.session]
    */
-  async executeCreate(events) {
+  async executeCreate(events, { session } = {}) {
     const prepared = await validateAsync(
       oneOrMany(createSchema).label('create command').required(),
       events,
@@ -250,7 +265,7 @@ export class BaseCommandHandler {
       ...event,
       entityType: this.entityType,
       command: 'CREATE',
-    })));
+    })), { session });
   }
 
   /**
@@ -325,6 +340,34 @@ export class BaseCommandHandler {
     const pipeline = this.buildNormalizationPipeline({ entityIds, withMergeStage });
     const cursor = await this.store.aggregate({ pipeline });
     return cursor.toArray();
+  }
+
+  /**
+   * Releases one or more reserved values for this entity type.
+   *
+   * @param {ReserveValueCommand|ReserveValueCommand[]} reservations
+   */
+  async release(reservations) {
+    const prepared = await validateAsync(oneOrMany(reserveValueSchema).required(), reservations);
+    return this.reservations.release(prepared.map((reservation) => ({
+      ...reservation,
+      entityType: this.entityType,
+    })));
+  }
+
+  /**
+   * Reserves one or more values for this entity type.
+   *
+   * @param {ReserveValueCommand|ReserveValueCommand[]} reservations
+   * @param {object} options
+   * @param {ClientSession} [options.session]
+   */
+  async reserve(reservations, { session } = {}) {
+    const prepared = await validateAsync(oneOrMany(reserveValueSchema).required(), reservations);
+    return this.reservations.reserve(prepared.map((reservation) => ({
+      ...reservation,
+      entityType: this.entityType,
+    })), { session });
   }
 
   static getEventSort() {

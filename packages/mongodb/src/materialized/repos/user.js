@@ -11,7 +11,15 @@ export class MaterializedUserRepo extends BaseMaterializedRepo {
    * @param {MongoDBClient} params.client
    */
   constructor({ client }) {
-    super({ client, entityType: 'user' });
+    super({
+      client,
+      entityType: 'user',
+      indexes: [
+        { key: { email: 1, _id: 1 } },
+        { key: { 'slug.default': 1, _id: 1 } },
+        { key: { 'slug.reverse': 1, _id: 1 } },
+      ],
+    });
   }
 
   /**

@@ -7,7 +7,14 @@ export class MaterializedApplicationRepo extends BaseMaterializedRepo {
    * @param {MongoDBClient} params.client
    */
   constructor({ client }) {
-    super({ client, entityType: 'application' });
+    super({
+      client,
+      entityType: 'application',
+      indexes: [
+        { key: { key: 1, _id: 1 } },
+        { key: { slug: 1, _id: 1 } },
+      ],
+    });
   }
 
   /**

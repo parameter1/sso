@@ -29,10 +29,10 @@ export default async () => {
         return value;
       },
       validate: async (input) => {
-        const { error } = applicationCommandProps.key.required().validate(input);
+        const { error, value } = applicationCommandProps.key.required().validate(input);
         if (error) return error;
         const doc = await entityManager.getMaterializedRepo('application').findByKey({
-          key: input,
+          key: value,
           options: { projection: { _id: 1 } },
         });
         if (doc) return new Error('An application already exists with this key');

@@ -47,6 +47,11 @@ const run = async () => {
           key: 'user',
           choices: [
             { name: 'Create new user', fnName: 'create' },
+            {
+              name: 'Change user first/last name',
+              fnName: 'changeName',
+              disabled: !documents.has('user'),
+            },
           ],
         },
 

@@ -39,6 +39,34 @@ export class UserCommandHandler extends BaseCommandHandler {
     super({ ...params, entityType: 'user' });
   }
 
+  async changeName(params) {
+    const commands = await validateAsync(oneOrMany(object({
+      entityId: eventProps.entityId.required(),
+      date: eventProps.date,
+      givenName: userProps.givenName.required(),
+      familyName: userProps.familyName.required(),
+      userId: eventProps.userId,
+    })).required().custom((vals) => vals.map((o) => {
+      const { givenName, familyName } = o;
+      const names = [givenName, familyName];
+      return {
+        command: 'CHANGE_NAME',
+        entityId: o.entityId,
+        date: o.date,
+        values: {
+          givenName,
+          familyName,
+          slug: {
+            default: sluggifyUserNames(names),
+            reverse: sluggifyUserNames(names, true),
+          },
+        },
+        userId: o.userId,
+      };
+    })), params);
+    return this.executeUpdate(commands);
+  }
+
   /**
    *
    * @param {object} params

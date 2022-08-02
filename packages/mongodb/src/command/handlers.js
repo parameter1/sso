@@ -1,6 +1,7 @@
 import { PropTypes, attempt } from '@parameter1/prop-types';
 import { mongoDBClientProp } from '../props.js';
 import { EventStore } from './event-store.js';
+import { ReservationsRepo } from './reservations.js';
 
 import { ApplicationCommandHandler } from './handlers/application.js';
 import { UserCommandHandler } from './handlers/user.js';
@@ -18,18 +19,22 @@ export class CommandHandlers {
     }).required());
 
     this.store = new EventStore({ client });
+    this.reservations = new ReservationsRepo({ client });
     this.handlers = [
       ApplicationCommandHandler,
       UserCommandHandler,
     ].reduce((map, Handler) => {
-      const handler = new Handler({ store: this.store });
+      const handler = new Handler({ reservations: this.reservations, store: this.store });
       map.set(handler.entityType, handler);
       return map;
     }, new Map());
   }
 
   createIndexes() {
-    return this.store.createIndexes();
+    return Promise.all([
+      this.store.createIndexes(),
+      this.reservations.createIndexes(),
+    ]);
   }
 
   /**

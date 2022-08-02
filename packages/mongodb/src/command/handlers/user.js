@@ -33,10 +33,9 @@ export class UserCommandHandler extends BaseCommandHandler {
   /**
    *
    * @param {object} params
-   * @param {EventStore} params.store
    */
-  constructor({ store }) {
-    super({ store, entityType: 'user' });
+  constructor(params) {
+    super({ ...params, entityType: 'user' });
   }
 
   /**

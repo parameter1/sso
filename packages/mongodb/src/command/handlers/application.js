@@ -20,10 +20,9 @@ export class ApplicationCommandHandler extends BaseCommandHandler {
   /**
    *
    * @param {object} params
-   * @param {EventStore} params.store
    */
-  constructor({ store }) {
-    super({ store, entityType: 'application' });
+  constructor(params) {
+    super({ ...params, entityType: 'application' });
   }
 
   async changeName(params) {

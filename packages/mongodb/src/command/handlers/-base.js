@@ -3,6 +3,7 @@ import { PropTypes, attempt, validateAsync } from '@parameter1/prop-types';
 
 import { DB_NAME } from '../../constants.js';
 import { EventStore, eventProps } from '../event-store.js';
+import { ReservationsRepo } from '../reservations.js';
 
 const {
   boolean,
@@ -49,11 +50,14 @@ export class BaseCommandHandler {
   constructor(params) {
     const {
       entityType,
+      reservations,
       store,
     } = attempt(params, object({
       entityType: eventProps.entityType.required(),
+      reservations: object().instance(ReservationsRepo).required(),
       store: object().instance(EventStore).required(),
     }).required());
+    this.reservations = reservations;
     this.store = store;
     this.entityType = entityType;
   }

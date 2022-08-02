@@ -1,3 +1,4 @@
+import { runTransaction } from '@parameter1/mongodb';
 import { PropTypes, validateAsync } from '@parameter1/prop-types';
 import { sluggify } from '@parameter1/slug';
 
@@ -43,16 +44,27 @@ export class ApplicationCommandHandler extends BaseCommandHandler {
 
   /**
    *
-   * @todo Handle application key reservation?
    * @param {object} params
+   * @param {object} options
+   * @param {ClientSession} [options.session]
    */
-  async create(params) {
+  async create(params, { session: currentSession } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: eventProps.entityId,
       date: eventProps.date,
       values: createValuesSchema,
       userId: eventProps.userId,
     })).required(), params);
-    return this.executeCreate(commands);
+
+    return runTransaction(async ({ session }) => {
+      const results = await this.executeCreate(commands, { session });
+      const reservations = results.map((result) => ({
+        entityId: result._id,
+        key: 'key',
+        value: result.values.key,
+      }));
+      await this.reserve(reservations, { session });
+      return results;
+    }, { currentSession, client: this.client });
   }
 }

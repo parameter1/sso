@@ -8,6 +8,10 @@ x-env-core: &env-core
   MONGO_URL: ${MONGO_URL-}
   TOKEN_SECRET: ${TOKEN_SECRET-thisisnotsecretdonotuse}
 
+x-env-redis-pubsub: &env-redis-pubsub
+  REDIS_PUBSUB_HOST: ${REDIS_PUBSUB_HOST-redis-pubsub}
+  REDIS_PUBSUB_PORT: ${REDIS_PUBSUB_PORT-6379}
+
 x-node-defaults: &node
   tty: true
   init: true
@@ -103,8 +107,15 @@ services:
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
-      <<: [*env, *env-core]
+      <<: [*env, *env-core, *env-redis-pubsub]
+    depends_on:
+      - redis-pubsub
 
+  redis-pubsub:
+    tty: true
+    image: redis:7.0-alpine
+    ports:
+      - "7910:6379"
 
 volumes:
   yarn-cache: {}

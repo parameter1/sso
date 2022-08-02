@@ -3,6 +3,7 @@ import { immediatelyThrow } from '@parameter1/utils';
 
 import pkg from '../package.js';
 import { mongodb, entityManager } from './mongodb.js';
+import { pubSubManager, COMMAND_PROCESSED } from './pubsub.js';
 
 process.on('unhandledRejection', immediatelyThrow);
 
@@ -16,11 +17,21 @@ const { log } = console;
 (async () => {
   log(`Booting ${pkg.name} v${pkg.version}...`);
   // start services here
-  log('Connecting to MongoDB...');
-  const client = await mongodb.connect();
-  log(`MongoDB connected on ${filterMongoURL(client)}`);
+  const [mongo] = await Promise.all([
+    (async () => {
+      log('Connecting to MongoDB...');
+      const client = await mongodb.connect();
+      log(`MongoDB connected on ${filterMongoURL(client)}`);
+      return client;
+    })(),
+    (async () => {
+      log('Connecting to Redis pub/sub...');
+      await pubSubManager.connect();
+      log('Redis connected.');
+    })(),
+  ]);
 
-  const changeStream = client.watch([
+  const changeStream = mongo.watch([
     {
       $match: {
         'ns.db': DB_NAME,
@@ -44,6 +55,8 @@ const { log } = console;
     // materialize
     await entityManager.materialize({ entityType, $match: { _id: entityId } });
     // @todo add cross-materialization handlers
+
+    pubSubManager.publish(COMMAND_PROCESSED, change.fullDocument);
     log('END', key);
   });
 })().catch(immediatelyThrow);

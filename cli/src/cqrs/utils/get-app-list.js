@@ -10,7 +10,7 @@ export default async ({
   const repo = entityManager.getMaterializedRepo('application');
   const cursor = await repo.find({
     query: { ...query },
-    options: { projection: { ...projection, name: 1, key: 1 }, sort: { name: 1 } },
+    options: { projection: { ...projection, name: 1, key: 1 }, sort: { slug: 1, _id: 1 } },
   });
 
   const apps = await cursor.toArray();

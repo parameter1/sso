@@ -1,0 +1,27 @@
+{
+  "name": "@parameter1/sso-graphql-redis-pubsub",
+  "version": "0.4.0",
+  "type": "module",
+  "description": "PubSub management for GraphQL+Redis.",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/sso/tree/main/packages/graphql-redis-pubsub#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/sso.git",
+    "directory": "packages/graphql-redis-pubsub"
+  },
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.js",
+  "scripts": {
+    "lint": "eslint --ext .js ./",
+    "test": "yarn lint"
+  },
+  "dependencies": {
+    "@parameter1/prop-types": "^2.3.0",
+    "graphql": "^16.5.0",
+    "graphql-redis-subscriptions": "^2.5.0",
+    "graphql-subscriptions": "^2.0.0",
+    "ioredis": "^5.2.2"
+  }
+}

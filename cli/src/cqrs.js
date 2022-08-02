@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { immediatelyThrow } from '@parameter1/utils';
 import { get } from '@parameter1/object-path';
-import { connect, close } from './mongodb.js';
+import { connect, close, entityManager } from './mongodb.js';
 
 import actions from './actions.js';
 
@@ -9,7 +9,20 @@ process.on('unhandledRejection', immediatelyThrow);
 
 const { log } = console;
 
+const hasDocuments = async () => {
+  const r = await Promise.all(['application', 'user'].map(async (entityType) => {
+    const repo = entityManager.getMaterializedRepo(entityType);
+    const doc = await repo.findOne({ query: {}, options: { projection: { _id: 1 } } });
+    return { entityType, hasDocs: Boolean(doc) };
+  }));
+  return r.reduce((set, { entityType, hasDocs }) => {
+    if (hasDocs) set.add(entityType);
+    return set;
+  }, new Set());
+};
+
 const run = async () => {
+  const documents = await hasDocuments();
   const questions = [
     {
       type: 'list',
@@ -24,6 +37,7 @@ const run = async () => {
             {
               name: 'Change application name',
               fnName: 'changeName',
+              disabled: !documents.has('application'),
             },
           ],
         },

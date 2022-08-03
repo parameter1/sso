@@ -8,7 +8,6 @@ export default async ({
   projection,
 } = {}) => {
   const repo = entityManager.getMaterializedRepo('organization');
-
   const pipeline = [
     { $match: { ...query } },
     {

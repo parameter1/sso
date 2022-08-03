@@ -11,9 +11,12 @@ process.on('unhandledRejection', immediatelyThrow);
 const { log } = console;
 
 const hasDocuments = async () => {
-  const r = await Promise.all(['application', 'organization', 'user'].map(async (entityType) => {
-    const repo = entityManager.getMaterializedRepo(entityType);
-    const doc = await repo.findOne({ query: {}, options: { projection: { _id: 1 } } });
+  const r = await Promise.all(['application', 'manager', 'organization', 'user'].map(async (entityType) => {
+    const repo = entityManager.getNormalizedRepo(entityType);
+    const doc = await repo.findOne({
+      query: { '__.isDeleted': false },
+      options: { projection: { _id: 1 } },
+    });
     return { entityType, hasDocs: Boolean(doc) };
   }));
   return r.reduce((set, { entityType, hasDocs }) => {
@@ -76,9 +79,14 @@ const run = async () => {
               disabled: !documents.has('organization') || !documents.has('user'),
             },
             {
+              name: 'Change manager role',
+              fnName: 'changeRole',
+              disabled: !documents.has('manager'),
+            },
+            {
               name: 'Delete organization manager',
               fnName: 'delete',
-              disabled: !documents.has('organization') || !documents.has('user'),
+              disabled: !documents.has('manager'),
             },
           ],
         },

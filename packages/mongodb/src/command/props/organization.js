@@ -15,6 +15,5 @@ export default {
   emailDomains: array().items(emailDomain),
   id: objectId(),
   key: slug().min(2),
-  managerRole: string().valid('Owner', 'Administrator', 'Manager'),
   name: string().min(2),
 };

@@ -4,6 +4,7 @@ import { EventStore } from './event-store.js';
 import { ReservationsRepo } from './reservations.js';
 
 import { ApplicationCommandHandler } from './handlers/application.js';
+import { ManagerCommandHandler } from './handlers/manager.js';
 import { OrganizationCommandHandler } from './handlers/organization.js';
 import { UserCommandHandler } from './handlers/user.js';
 
@@ -23,6 +24,7 @@ export class CommandHandlers {
     this.reservations = new ReservationsRepo({ client });
     this.handlers = [
       ApplicationCommandHandler,
+      ManagerCommandHandler,
       OrganizationCommandHandler,
       UserCommandHandler,
     ].reduce((map, Handler) => {

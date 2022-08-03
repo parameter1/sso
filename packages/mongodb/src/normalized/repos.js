@@ -5,6 +5,7 @@ import { eventProps } from '../command/event-store.js';
 import { MaterializedBuilders } from '../materialized/builders.js';
 
 import { NormalizedApplicationRepo } from './repos/application.js';
+import { NormalizedManagerRepo } from './repos/manager.js';
 import { NormalizedOrganizationRepo } from './repos/organization.js';
 import { NormalizedUserRepo } from './repos/user.js';
 
@@ -22,6 +23,7 @@ export class NormalizedRepos {
 
     this.repos = [
       NormalizedApplicationRepo,
+      NormalizedManagerRepo,
       NormalizedOrganizationRepo,
       NormalizedUserRepo,
     ].reduce((map, Repo) => {
@@ -60,6 +62,8 @@ export class NormalizedRepos {
    * Materializes data from a normalized collection based on the provided entity type and
    * match criteria.
    *
+   * This method will bail if no materialization builder is found for the entity type.
+   *
    * @param {object} params
    * @param {string} params.entityType
    * @param {object} [params.$match={}]
@@ -72,6 +76,7 @@ export class NormalizedRepos {
       withMergeStage: boolean().default(true),
     }).required());
 
+    if (!this.materializedBuilders.has(entityType)) return null;
     const normalizedRepo = this.get(entityType);
     const pipeline = this.materializedBuilders
       .buildPipelineFor({ entityType, $match, withMergeStage });

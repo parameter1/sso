@@ -103,15 +103,23 @@ export class ReservationsRepo extends Repo {
       insertOne: { document: event },
     }));
     const useSession = currentSession || prepared.length > 1;
-    let result;
-    if (useSession) {
-      result = await runTransaction(
-        ({ session }) => this.bulkWrite({ operations, options: { session } }),
-        { currentSession, client: this.client },
-      );
-    } else {
-      result = await this.bulkWrite({ operations });
+
+    try {
+      let result;
+      if (useSession) {
+        result = await runTransaction(
+          ({ session }) => this.bulkWrite({ operations, options: { session } }),
+          { currentSession, client: this.client },
+        );
+      } else {
+        result = await this.bulkWrite({ operations });
+      }
+      return result;
+    } catch (e) {
+      if (e.code !== 11000 || !e.writeErrors) throw e;
+      const [writeError] = e.writeErrors;
+      const { op } = writeError.err;
+      throw new Error(`The ${op.entityType} ${op.key} '${op.value}' is already in use.'`);
     }
-    return result;
   }
 }

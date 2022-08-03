@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { organizationCommandProps } from '@parameter1/sso-mongodb';
+import { managerCommandProps } from '@parameter1/sso-mongodb';
 import { getOrgList, getUserList, waitUntilProcessed } from '../utils/index.js';
 import { entityManager } from '../../mongodb.js';
 
@@ -17,7 +17,7 @@ export default async () => {
       name: 'user',
       message: 'Select the user',
       choices: async ({ org }) => getUserList({
-        // query: { '_connection.organization.edges._id': { $ne: org._id } },
+        query: { 'organizationConnection.edges.node._id': { $ne: org._id } },
       }),
     },
 
@@ -27,11 +27,11 @@ export default async () => {
       message: 'Select the manager role',
       choices: () => ['Owner', 'Administrator', 'Manager'],
       filter: (input) => {
-        const { value } = organizationCommandProps.managerRole.required().validate(input);
+        const { value } = managerCommandProps.role.required().validate(input);
         return value;
       },
       validate: (input) => {
-        const { error } = organizationCommandProps.managerRole.required().validate(input);
+        const { error } = managerCommandProps.role.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -54,7 +54,7 @@ export default async () => {
   if (!confirm) return null;
 
   const handler = entityManager.getCommandHandler('manager');
-  return waitUntilProcessed(() => handler.create({
+  return waitUntilProcessed(() => handler.createOrRestore({
     entityId: {
       org: org._id,
       user: user._id,

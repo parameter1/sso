@@ -8,7 +8,7 @@ const { object, oneOrMany } = PropTypes;
 
 const createValuesSchema = object({
   role: managerProps.role.required(),
-}).required();
+});
 
 export class ManagerCommandHandler extends BaseCommandHandler {
   /**
@@ -49,10 +49,62 @@ export class ManagerCommandHandler extends BaseCommandHandler {
     const commands = await validateAsync(oneOrMany(object({
       entityId: managerProps.id.required(),
       date: eventProps.date,
+      values: createValuesSchema.required(),
+      userId: eventProps.userId,
+    })).required(), params);
+    return this.executeCreate(commands, { session });
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {object} options
+   * @param {ClientSession} [options.session]
+   */
+  async createOrRestore(params, { session } = {}) {
+    const commands = await validateAsync(oneOrMany(object({
+      entityId: managerProps.id.required(),
+      date: eventProps.date,
       values: createValuesSchema,
       userId: eventProps.userId,
     })).required(), params);
+    try {
+      const result = await this.create(commands, { session });
+      return result;
+    } catch (e) {
+      if (e.code !== 11000) throw e;
+      return this.restore(commands, { session });
+    }
+  }
 
-    return this.executeCreate(commands, { session });
+  /**
+   *
+   * @param {object} params
+   * @param {object} options
+   * @param {ClientSession} [options.session]
+   */
+  async delete(params, { session } = {}) {
+    const commands = await validateAsync(oneOrMany(object({
+      entityId: managerProps.id.required(),
+      date: eventProps.date,
+      userId: eventProps.userId,
+    })).required(), params);
+    return this.executeDelete(commands, { session });
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {object} options
+   * @param {ClientSession} [options.session]
+   */
+  async restore(params, { session } = {}) {
+    const commands = await validateAsync(oneOrMany(object({
+      entityId: managerProps.id.required(),
+      date: eventProps.date,
+      values: createValuesSchema,
+      userId: eventProps.userId,
+    })).required(), params);
+    return this.executeRestore(commands, { session });
   }
 }

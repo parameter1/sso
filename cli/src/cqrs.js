@@ -71,8 +71,13 @@ const run = async () => {
           key: 'manager',
           choices: [
             {
-              name: 'Add organization manager',
+              name: 'Create organization manager',
               fnName: 'create',
+              disabled: !documents.has('organization') || !documents.has('user'),
+            },
+            {
+              name: 'Delete organization manager',
+              fnName: 'delete',
               disabled: !documents.has('organization') || !documents.has('user'),
             },
           ],

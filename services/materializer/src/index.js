@@ -42,7 +42,8 @@ const { log } = console;
   changeStream.on('change', async (change) => {
     if (change.operationType !== 'insert') return;
     const { _id: eventId } = change.documentKey;
-    const { entityId, entityType } = change.fullDocument;
+    const { fullDocument } = change;
+    const { entityId, entityType } = fullDocument;
 
     const key = `${entityType}.${JSON.stringify(entityId)} (event: ${eventId})`;
     log('START', key);
@@ -53,10 +54,53 @@ const { log } = console;
     await entityManager.normalize({ entityType, entityIds: entityId });
 
     // materialize
-    await entityManager.materialize({ entityType, $match: { _id: entityId } });
-    // @todo add cross-materialization handlers
+    const materialize = entityManager.materialize.bind(entityManager);
+    const handlers = {
+      /**
+       *
+       */
+      manager: () => Promise.all([
+        materialize({ entityType: 'organization', $match: { _id: entityId.org } }),
+        materialize({ entityType: 'user', $match: { _id: entityId.user } }),
+      ]),
 
-    pubSubManager.publish(COMMAND_PROCESSED, change.fullDocument);
+      /**
+       *
+       */
+      organization: async () => {
+        const userIds = await entityManager.normalizedRepos.get('manager').distinct({
+          key: '_id.user',
+          query: { '_id.org': entityId },
+        });
+        return Promise.all([
+          materialize({ entityType: 'organization', $match: { _id: entityId } }),
+          materialize({ entityType: 'user', $match: { _id: { $in: userIds } } }),
+        ]);
+      },
+
+      /**
+       *
+       */
+      user: async () => {
+        const orgIds = await entityManager.normalizedRepos.get('manager').distinct({
+          key: '_id.org',
+          query: { '_id.user': entityId },
+        });
+        return Promise.all([
+          materialize({ entityType: 'user', $match: { _id: entityId } }),
+          materialize({ entityType: 'organization', $match: { _id: { $in: orgIds } } }),
+        ]);
+      },
+    };
+
+    const handler = handlers[entityType];
+    if (handler) {
+      await handler();
+    } else {
+      await materialize({ entityType, $match: { _id: entityId } });
+    }
+
+    pubSubManager.publish(COMMAND_PROCESSED, fullDocument);
     log('END', key);
   });
 })().catch(immediatelyThrow);

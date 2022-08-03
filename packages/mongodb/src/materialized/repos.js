@@ -2,6 +2,7 @@ import { PropTypes, attempt } from '@parameter1/prop-types';
 import { mongoDBClientProp } from '../props.js';
 
 import { MaterializedApplicationRepo } from './repos/application.js';
+import { MaterializedOrganizationRepo } from './repos/organization.js';
 import { MaterializedUserRepo } from './repos/user.js';
 
 const { object } = PropTypes;
@@ -18,6 +19,7 @@ export class MaterializedRepos {
 
     this.repos = [
       MaterializedApplicationRepo,
+      MaterializedOrganizationRepo,
       MaterializedUserRepo,
     ].reduce((map, Repo) => {
       const repo = new Repo({ client });

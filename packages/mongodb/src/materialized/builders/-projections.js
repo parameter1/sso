@@ -70,6 +70,29 @@ export function partialApplication() {
   });
 }
 
+export function commonOrganization() {
+  return prepareProjection({
+    emailDomains: asArray('$emailDomains'),
+    key: 1,
+    name: 1,
+    slug: 1,
+  });
+}
+
+export function fullOrganization() {
+  return prepareProjection({
+    ...commonFullProjection(),
+    ...commonOrganization(),
+  });
+}
+
+export function partialOrganization() {
+  return prepareProjection({
+    ...commonPartialProjection(),
+    ...commonOrganization(),
+  });
+}
+
 export function commonUser() {
   return prepareProjection({
     domain: 1,

@@ -4,6 +4,7 @@ import { EventStore } from './event-store.js';
 import { ReservationsRepo } from './reservations.js';
 
 import { ApplicationCommandHandler } from './handlers/application.js';
+import { OrganizationCommandHandler } from './handlers/organization.js';
 import { UserCommandHandler } from './handlers/user.js';
 
 const { object } = PropTypes;
@@ -22,6 +23,7 @@ export class CommandHandlers {
     this.reservations = new ReservationsRepo({ client });
     this.handlers = [
       ApplicationCommandHandler,
+      OrganizationCommandHandler,
       UserCommandHandler,
     ].reduce((map, Handler) => {
       const handler = new Handler({ reservations: this.reservations, store: this.store });

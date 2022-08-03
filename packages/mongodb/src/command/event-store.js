@@ -15,7 +15,7 @@ const {
 export const eventProps = {
   command: string().uppercase().pattern(/^[A-Z_]+$/),
   entityId: objectId(),
-  entityType: string().valid('application', 'user'),
+  entityType: string().valid('application', 'organization', 'user'),
   date: date().allow('$$NOW'),
   omitFromModified: boolean(),
   values: object(),

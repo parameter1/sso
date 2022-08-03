@@ -22,7 +22,7 @@ export function projectAsNode(projection) {
   return { _id: 0, node };
 }
 
-function metaProjection() {
+export function metaProjection() {
   return prepareProjection({
     _meta: {
       created: '$__.created',
@@ -42,7 +42,6 @@ function commonFullProjection() {
 
 function commonPartialProjection() {
   return prepareProjection({
-    _deleted: '$__.isDeleted',
     ...metaProjection(),
   });
 }
@@ -83,6 +82,7 @@ export function fullOrganization() {
   return prepareProjection({
     ...commonFullProjection(),
     ...commonOrganization(),
+    managerConnection: 1,
   });
 }
 
@@ -111,6 +111,7 @@ export function fullUser() {
   return prepareProjection({
     ...commonFullProjection(),
     ...commonUser(),
+    organizationConnection: 1,
   });
 }
 

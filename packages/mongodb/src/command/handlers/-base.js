@@ -29,6 +29,32 @@ const createSchema = object({
 });
 
 /**
+ * @typedef DeleteCommand
+ * @property {*} entityId
+ * @property {Date|string} [date]
+ * @property {ObjectId|null} [userId]
+ */
+const deleteSchema = object({
+  entityId: eventProps.entityId.required(),
+  date: eventProps.date,
+  userId: eventProps.userId,
+});
+
+/**
+ * @typedef RestoreCommand
+ * @property {ObjectId} entityId
+ * @property {Date|string} [date]
+ * @property {object} [values={}]
+ * @property {ObjectId|null} [userId]
+ */
+const restoreSchema = object({
+  entityId: eventProps.entityId.required(),
+  date: eventProps.date,
+  values: eventProps.values.default({}),
+  userId: eventProps.userId,
+});
+
+/**
  * @typedef ReserveValueCommand
  * @property {string} key
  * @property {*} value
@@ -165,7 +191,7 @@ export class BaseCommandHandler {
                   '$$value.values',
                   {
                     $cond: [
-                      { $in: ['$$this.command', ['DELETED', 'RESTORED']] },
+                      { $eq: ['$$this.command', 'DELETED'] },
                       {},
                       valueBranches.length ? {
                         $switch: {
@@ -267,6 +293,34 @@ export class BaseCommandHandler {
    *
    * @param {*|*[]} entityIds
    * @param {object} options
+   * @param {boolean} options.throwWhenFalse
+   */
+  async canPushDelete(entityIds, { throwWhenFalse } = {}) {
+    return this.canPush({
+      entityIds,
+      throwWhenFalse,
+      eligibleWhenFn: ({ state }) => ['CREATED', 'DELETED'].includes(state),
+    });
+  }
+
+  /**
+   *
+   * @param {*|*[]} entityIds
+   * @param {object} options
+   * @param {boolean} options.throwWhenFalse
+   */
+  async canPushRestore(entityIds, { throwWhenFalse } = {}) {
+    return this.canPush({
+      entityIds,
+      throwWhenFalse,
+      eligibleWhenFn: ({ state }) => state === 'DELETED',
+    });
+  }
+
+  /**
+   *
+   * @param {*|*[]} entityIds
+   * @param {object} options
    * @param {boolean} [options.throwWhenFalse]
    */
   async canPushUpdate(entityIds, { throwWhenFalse } = {}) {
@@ -293,6 +347,49 @@ export class BaseCommandHandler {
       entityType: this.entityType,
       command: 'CREATE',
     })), { session });
+  }
+
+  /**
+   *
+   * @param {DeleteCommand|DeleteCommand[]} commands
+   * @param {object} options
+   * @param {ClientSession} [options.session]
+   */
+  async executeDelete(commands, { session } = {}) {
+    const prepared = await validateAsync(
+      oneOrMany(deleteSchema).label('delete command').required(),
+      commands,
+    );
+    const { entityIds, events } = prepared.reduce((o, command) => {
+      o.entityIds.push(command.entityId);
+      o.events.push({ ...command, entityType: this.entityType, command: 'DELETE' });
+      return o;
+    }, { entityIds: [], events: [] });
+
+    await this.canPushDelete(entityIds);
+    return this.store.push(events, { session });
+  }
+
+  /**
+   *
+   * @param {RestoreCommand|RestoreCommand[]} commands
+   * @param {object} options
+   * @param {ClientSession} [options.session]
+   */
+  async executeRestore(commands, { session } = {}) {
+    const prepared = await validateAsync(
+      oneOrMany(restoreSchema).label('restore command').required(),
+      commands,
+    );
+
+    const { entityIds, events } = prepared.reduce((o, command) => {
+      o.entityIds.push(command.entityId);
+      o.events.push({ ...command, entityType: this.entityType, command: 'RESTORE' });
+      return o;
+    }, { entityIds: [], events: [] });
+
+    await this.canPushRestore(entityIds);
+    return this.store.push(events, { session });
   }
 
   /**

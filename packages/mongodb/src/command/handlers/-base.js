@@ -6,10 +6,12 @@ import { EventStore, eventProps } from '../event-store.js';
 import { ReservationsRepo, reservationProps } from '../reservations.js';
 
 const {
+  array,
   boolean,
   func,
   object,
   oneOrMany,
+  string,
 } = PropTypes;
 
 /**
@@ -83,8 +85,17 @@ export class BaseCommandHandler {
    * @returns {Promise<object[]>}
    */
   buildNormalizationPipeline(params) {
-    const { entityIds, withMergeStage } = attempt(params, object({
+    const {
+      entityIds,
+      newRootMergeObjects,
+      unsetFields,
+      valueBranches,
+      withMergeStage,
+    } = attempt(params, object({
       entityIds: oneOrMany(eventProps.entityId).required(),
+      newRootMergeObjects: array().items(object()).default([]),
+      unsetFields: array().items(string()).default([]),
+      valueBranches: array().items(object()).default([]),
       withMergeStage: boolean().default(true),
     }).required());
 
@@ -156,7 +167,12 @@ export class BaseCommandHandler {
                     $cond: [
                       { $in: ['$$this.command', ['DELETED', 'RESTORED']] },
                       {},
-                      '$$this.values',
+                      valueBranches.length ? {
+                        $switch: {
+                          branches: valueBranches,
+                          default: '$$this.values',
+                        },
+                      } : '$$this.values',
                     ],
                   },
                 ],
@@ -173,18 +189,29 @@ export class BaseCommandHandler {
             {
               __: {
                 created: '$_.created',
-                history: '$stream',
+                history: {
+                  $filter: {
+                    input: '$stream',
+                    cond: { $ne: ['$$this.omitFromHistory', true] },
+                  },
+                },
                 isDeleted: '$_.isDeleted',
                 modified: '$_.modified',
                 touched: '$_.touched',
               },
             },
             '$_.values',
+            ...newRootMergeObjects,
           ],
         },
       },
     }, {
-      $unset: ['__.history.entityId', '__.history.omitFromModified'],
+      $unset: [
+        '__.history.entityId',
+        '__.history.omitFromHistory',
+        '__.history.omitFromModified',
+        ...unsetFields,
+      ],
     }];
     if (withMergeStage) {
       pipeline.push({

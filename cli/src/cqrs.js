@@ -11,7 +11,7 @@ process.on('unhandledRejection', immediatelyThrow);
 const { log } = console;
 
 const hasDocuments = async () => {
-  const r = await Promise.all(['application', 'manager', 'organization', 'user'].map(async (entityType) => {
+  const r = await Promise.all(['application', 'manager', 'organization', 'user', 'workspace'].map(async (entityType) => {
     const repo = entityManager.getNormalizedRepo(entityType);
     const doc = await repo.findOne({
       query: { _deleted: false },
@@ -87,6 +87,17 @@ const run = async () => {
               name: 'Delete organization manager',
               fnName: 'delete',
               disabled: !documents.has('manager'),
+            },
+          ],
+        },
+
+        {
+          key: 'workspace',
+          choices: [
+            {
+              name: 'Create new workspace',
+              fnName: 'create',
+              disabled: !documents.has('application') || !documents.has('organization'),
             },
           ],
         },

@@ -59,6 +59,14 @@ const { log } = console;
       /**
        *
        */
+      application: () => Promise.all([
+        materialize({ entityType: 'application', $match: { _id: entityId } }),
+        materialize({ entityType: 'workspace', $match: { 'applicationEdge.node._id': entityId } }),
+      ]),
+
+      /**
+       *
+       */
       manager: () => Promise.all([
         materialize({ entityType: 'organization', $match: { _id: entityId.org } }),
         materialize({ entityType: 'user', $match: { _id: entityId.user } }),
@@ -75,6 +83,7 @@ const { log } = console;
         return Promise.all([
           materialize({ entityType: 'organization', $match: { _id: entityId } }),
           materialize({ entityType: 'user', $match: { _id: { $in: userIds } } }),
+          materialize({ entityType: 'workspace', $match: { 'organizationEdge.node._id': entityId } }),
         ]);
       },
 

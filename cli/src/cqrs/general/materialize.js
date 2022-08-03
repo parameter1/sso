@@ -7,7 +7,7 @@ export default async () => {
       type: 'checkbox',
       name: 'entityTypes',
       message: 'Select the entity types to materialize',
-      choices: () => entityManager.normalizedRepos.keys(),
+      choices: () => entityManager.normalizedRepos.materializerKeys(),
     },
     {
       type: 'confirm',

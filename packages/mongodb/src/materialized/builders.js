@@ -66,4 +66,8 @@ export class MaterializedBuilders {
   has(entityType) {
     return this.builders.has(entityType);
   }
+
+  keys() {
+    return [...this.builders.keys()];
+  }
 }

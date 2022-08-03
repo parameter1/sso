@@ -83,4 +83,8 @@ export class NormalizedRepos {
     const cursor = await normalizedRepo.aggregate({ pipeline });
     return cursor.toArray();
   }
+
+  materializerKeys() {
+    return this.materializedBuilders.keys();
+  }
 }

@@ -59,6 +59,11 @@ const run = async () => {
           key: 'organization',
           choices: [
             { name: 'Create new organization', fnName: 'create' },
+            {
+              name: 'Change organization name',
+              fnName: 'changeName',
+              disabled: !documents.has('organization'),
+            },
           ],
         },
 

@@ -11,7 +11,7 @@ process.on('unhandledRejection', immediatelyThrow);
 const { log } = console;
 
 const hasDocuments = async () => {
-  const r = await Promise.all(['application', 'user'].map(async (entityType) => {
+  const r = await Promise.all(['application', 'organization', 'user'].map(async (entityType) => {
     const repo = entityManager.getMaterializedRepo(entityType);
     const doc = await repo.findOne({ query: {}, options: { projection: { _id: 1 } } });
     return { entityType, hasDocs: Boolean(doc) };
@@ -52,6 +52,13 @@ const run = async () => {
               fnName: 'changeName',
               disabled: !documents.has('user'),
             },
+          ],
+        },
+
+        {
+          key: 'organization',
+          choices: [
+            { name: 'Create new organization', fnName: 'create' },
           ],
         },
 

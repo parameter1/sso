@@ -5,6 +5,7 @@ import { eventProps } from '../command/event-store.js';
 import { ApplicationBuilder } from './builders/application.js';
 import { OrganizationBuilder } from './builders/organization.js';
 import { UserBuilder } from './builders/user.js';
+import { WorkspaceBuilder } from './builders/workspace.js';
 
 const { boolean, object } = PropTypes;
 
@@ -18,6 +19,7 @@ export class MaterializedBuilders {
       ApplicationBuilder,
       OrganizationBuilder,
       UserBuilder,
+      WorkspaceBuilder,
     ].reduce((map, Builder) => {
       const builder = new Builder();
       this.classes.set(builder.entityType, Builder);

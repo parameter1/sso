@@ -8,6 +8,7 @@ import { NormalizedApplicationRepo } from './repos/application.js';
 import { NormalizedManagerRepo } from './repos/manager.js';
 import { NormalizedOrganizationRepo } from './repos/organization.js';
 import { NormalizedUserRepo } from './repos/user.js';
+import { NormalizedWorkspaceRepo } from './repos/workspace.js';
 
 const { boolean, object } = PropTypes;
 
@@ -26,6 +27,7 @@ export class NormalizedRepos {
       NormalizedManagerRepo,
       NormalizedOrganizationRepo,
       NormalizedUserRepo,
+      NormalizedWorkspaceRepo,
     ].reduce((map, Repo) => {
       const repo = new Repo({ client });
       map.set(repo.entityType, repo);

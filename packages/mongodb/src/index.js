@@ -8,10 +8,6 @@ export {
 
 export { filterObjects, findWithObjects } from '@parameter1/mongodb/pagination';
 
-// export * from './repo/index.js';
-// export * from './schema/index.js';
-// export * from './repo/materializer.js';
-
 export * from './constants.js';
 
 export { CommandHandlers } from './command/handlers.js';
@@ -24,3 +20,4 @@ export { default as applicationCommandProps } from './command/props/application.
 export { default as managerCommandProps } from './command/props/manager.js';
 export { default as organizationCommandProps } from './command/props/organization.js';
 export { default as userCommandProps } from './command/props/user.js';
+export { default as workspaceCommandProps } from './command/props/workspace.js';

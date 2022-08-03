@@ -7,6 +7,7 @@ import { ApplicationCommandHandler } from './handlers/application.js';
 import { ManagerCommandHandler } from './handlers/manager.js';
 import { OrganizationCommandHandler } from './handlers/organization.js';
 import { UserCommandHandler } from './handlers/user.js';
+import { WorkspaceCommandHandler } from './handlers/workspace.js';
 
 const { object } = PropTypes;
 
@@ -27,6 +28,7 @@ export class CommandHandlers {
       ManagerCommandHandler,
       OrganizationCommandHandler,
       UserCommandHandler,
+      WorkspaceCommandHandler,
     ].reduce((map, Handler) => {
       const handler = new Handler({ reservations: this.reservations, store: this.store });
       map.set(handler.entityType, handler);

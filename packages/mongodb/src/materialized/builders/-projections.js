@@ -121,3 +121,25 @@ export function partialUser() {
     ...commonUser(),
   });
 }
+
+export function commonWorkspace() {
+  return prepareProjection({
+    key: 1,
+    name: 1,
+    slug: 1,
+  });
+}
+
+export function fullWorkspace() {
+  return prepareProjection({
+    ...commonFullProjection(),
+    ...commonWorkspace(),
+  });
+}
+
+export function partialWorkspace() {
+  return prepareProjection({
+    ...commonPartialProjection(),
+    ...commonWorkspace(),
+  });
+}

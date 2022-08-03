@@ -4,6 +4,7 @@ import { mongoDBClientProp } from '../props.js';
 import { MaterializedApplicationRepo } from './repos/application.js';
 import { MaterializedOrganizationRepo } from './repos/organization.js';
 import { MaterializedUserRepo } from './repos/user.js';
+import { MaterializedWorkspaceRepo } from './repos/workspace.js';
 
 const { object } = PropTypes;
 
@@ -21,6 +22,7 @@ export class MaterializedRepos {
       MaterializedApplicationRepo,
       MaterializedOrganizationRepo,
       MaterializedUserRepo,
+      MaterializedWorkspaceRepo,
     ].reduce((map, Repo) => {
       const repo = new Repo({ client });
       map.set(repo.entityType, repo);

@@ -68,6 +68,17 @@ const run = async () => {
         },
 
         {
+          key: 'manager',
+          choices: [
+            {
+              name: 'Add organization manager',
+              fnName: 'create',
+              disabled: !documents.has('organization') || !documents.has('user'),
+            },
+          ],
+        },
+
+        {
           key: 'general',
           choices: [
             { name: 'Create database indexes', fnName: 'createIndexes' },

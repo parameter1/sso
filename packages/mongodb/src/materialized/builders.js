@@ -57,4 +57,13 @@ export class MaterializedBuilders {
     if (!builder) throw new Error(`No builder exists for entity type '${entityType}'`);
     return builder;
   }
+
+  /**
+   * Determines if a builder exists for the provided entity type.
+   *
+   * @param {string} entityType
+   */
+  has(entityType) {
+    return this.builders.has(entityType);
+  }
 }

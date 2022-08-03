@@ -14,7 +14,7 @@ const {
 
 /**
  * @typedef CreateCommand
- * @property {ObjectId} [entityId]
+ * @property {*} [entityId]
  * @property {Date|string} [date]
  * @property {object} [values]
  * @property {ObjectId|null} [userId]
@@ -40,7 +40,7 @@ const reserveValueSchema = object({
 /**
  * @typedef UpdateCommand
  * @property {string} command
- * @property {ObjectId} entityId
+ * @property {*} entityId
  * @property {Date|string} [date]
  * @property {ObjectId|null} [userId]
  */
@@ -78,7 +78,7 @@ export class BaseCommandHandler {
   /**
    *
    * @param {object} params
-   * @param {ObjectId|ObjectId[]} params.entityIds
+   * @param {*|*[]} params.entityIds
    * @param {boolean} [params.withMergeStage=true]
    * @returns {Promise<object[]>}
    */
@@ -202,7 +202,7 @@ export class BaseCommandHandler {
   /**
    *
    * @param {object} params
-   * @param {ObjectId|ObjectId[]} params.entityIds
+   * @param {*|*[]} params.entityIds
    * @param {function} params.eligibleWhenFn
    * @param {boolean} [options.throwWhenFalse=true]
    */
@@ -238,7 +238,7 @@ export class BaseCommandHandler {
 
   /**
    *
-   * @param {ObjectId|ObjectId[]} entityIds
+   * @param {*|*[]} entityIds
    * @param {object} options
    * @param {boolean} [options.throwWhenFalse]
    */
@@ -291,7 +291,7 @@ export class BaseCommandHandler {
   /**
    * Gets the state of a multiple entities by the provided IDs.
    *
-   * @param {ObjectId[]} entityIds
+   * @param {*[]} entityIds
    * @returns {Promise<Map<string, string>>}
    */
   async getEntityStatesFor(entityIds) {
@@ -324,7 +324,7 @@ export class BaseCommandHandler {
   /**
    *
    * @param {object} params
-   * @param {ObjectId|ObjectId[]} params.entityIds
+   * @param {*|*[]} params.entityIds
    * @param {boolean} [params.withMergeStage=true]
    * @returns {Promise<object[]>}
    */

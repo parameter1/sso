@@ -4,6 +4,7 @@ import { mongoDBClientProp } from '../props.js';
 import { DB_NAME } from '../constants.js';
 
 const {
+  any,
   boolean,
   date,
   object,
@@ -14,8 +15,8 @@ const {
 
 export const eventProps = {
   command: string().uppercase().pattern(/^[A-Z_]+$/),
-  entityId: objectId(),
-  entityType: string().valid('application', 'organization', 'user'),
+  entityId: any().disallow(null, ''),
+  entityType: string().valid('application', 'manager', 'organization', 'user'),
   date: date().allow('$$NOW'),
   omitFromModified: boolean(),
   values: object(),
@@ -25,7 +26,7 @@ export const eventProps = {
 /**
  * @typedef EventStoreDocument
  * @property {string} command The command name
- * @property {ObjectId} entityId The entity/document ID to assign to the values to
+ * @property {*} entityId The entity/document ID to assign to the values to
  * @property {string} entityType The entity type to assign to the values to
  * @property {Date|string} date The date of the event
  * @property {boolean} omitFromModified Whether to omit the date and user from the modified into

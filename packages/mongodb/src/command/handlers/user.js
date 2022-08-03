@@ -41,7 +41,7 @@ export class UserCommandHandler extends BaseCommandHandler {
 
   async changeName(params) {
     const commands = await validateAsync(oneOrMany(object({
-      entityId: eventProps.entityId.required(),
+      entityId: userProps.id.required(),
       date: eventProps.date,
       givenName: userProps.givenName.required(),
       familyName: userProps.familyName.required(),
@@ -75,7 +75,7 @@ export class UserCommandHandler extends BaseCommandHandler {
    */
   async create(params, { session: currentSession } = {}) {
     const commands = await validateAsync(oneOrMany(object({
-      entityId: eventProps.entityId,
+      entityId: userProps.id,
       date: eventProps.date,
       values: createValuesSchema,
       userId: eventProps.userId,

@@ -20,7 +20,7 @@ export const reservationProps = {
 
 /**
  * @typedef ReservationDocument
- * @property {string} entityId The entity ID that owns the reservation
+ * @property {*} entityId The entity ID that owns the reservation
  * @property {string} entityType The entity type to assign to reserve the value for
  * @property {string} key The field key to reserve the value for
  * @property {*} value The value to reserve

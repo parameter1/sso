@@ -44,7 +44,7 @@ const { log } = console;
     const { _id: eventId } = change.documentKey;
     const { entityId, entityType } = change.fullDocument;
 
-    const key = `${entityType}.${entityId} (event: ${eventId})`;
+    const key = `${entityType}.${JSON.stringify(entityId)} (event: ${eventId})`;
     log('START', key);
 
     // @todo add pub/sub; catch errors and send error events (+ log)

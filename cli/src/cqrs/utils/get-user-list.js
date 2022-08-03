@@ -9,7 +9,7 @@ export default async ({
 } = {}) => {
   const repo = entityManager.getMaterializedRepo('user');
   const pipeline = [
-    { $match: { ...query } },
+    { $match: { _deleted: false, ...query } },
     {
       $project: {
         ...projection,

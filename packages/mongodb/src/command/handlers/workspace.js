@@ -64,7 +64,7 @@ export class WorkspaceCommandHandler extends BaseCommandHandler {
       const reservations = results.map((result) => ({
         entityId: result._id,
         key: 'app_org_key',
-        value: `${results.values.appId}_${results.values.orgId}_${result.values.key}`,
+        value: `${result.values.appId}_${result.values.orgId}_${result.values.key}`,
       }));
       await this.reserve(reservations, { session });
       return results;

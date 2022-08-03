@@ -125,6 +125,8 @@ export function fullWorkspace() {
   return prepareProjection({
     ...commonFullProjection(),
     ...commonWorkspace(),
+    applicationEdge: 1,
+    organizationEdge: 1,
   });
 }
 

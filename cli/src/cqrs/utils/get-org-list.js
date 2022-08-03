@@ -8,11 +8,19 @@ export default async ({
   projection,
 } = {}) => {
   const repo = entityManager.getMaterializedRepo('organization');
-  const cursor = await repo.find({
-    query: { ...query },
-    options: { projection: { ...projection, name: 1, key: 1 }, sort: { slug: 1, _id: 1 } },
-  });
 
+  const pipeline = [
+    { $match: { ...query } },
+    {
+      $project: {
+        ...projection,
+        name: 1,
+        key: 1,
+      },
+    },
+    { $sort: { slug: 1, _id: 1 } },
+  ];
+  const cursor = await repo.aggregate({ pipeline });
   const orgs = await cursor.toArray();
   return orgs.filter((doc) => {
     if (isFn(filter)) return filter(doc);

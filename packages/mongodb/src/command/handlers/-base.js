@@ -213,18 +213,9 @@ export class BaseCommandHandler {
           $mergeObjects: [
             { _id: '$_id' },
             {
-              __: {
-                created: '$_.created',
-                history: {
-                  $filter: {
-                    input: '$stream',
-                    cond: { $ne: ['$$this.omitFromHistory', true] },
-                  },
-                },
-                isDeleted: '$_.isDeleted',
-                modified: '$_.modified',
-                touched: '$_.touched',
-              },
+              _deleted: '$_.isDeleted',
+              _history: { $filter: { input: '$stream', cond: { $ne: ['$$this.omitFromHistory', true] } } },
+              _meta: { created: '$_.created', modified: '$_.modified', touched: '$_.touched' },
             },
             '$_.values',
             ...newRootMergeObjects,
@@ -233,9 +224,9 @@ export class BaseCommandHandler {
       },
     }, {
       $unset: [
-        '__.history.entityId',
-        '__.history.omitFromHistory',
-        '__.history.omitFromModified',
+        '_history.entityId',
+        '_history.omitFromHistory',
+        '_history.omitFromModified',
         ...unsetFields,
       ],
     }];

@@ -14,7 +14,7 @@ const hasDocuments = async () => {
   const r = await Promise.all(['application', 'manager', 'organization', 'user'].map(async (entityType) => {
     const repo = entityManager.getNormalizedRepo(entityType);
     const doc = await repo.findOne({
-      query: { '__.isDeleted': false },
+      query: { _deleted: false },
       options: { projection: { _id: 1 } },
     });
     return { entityType, hasDocs: Boolean(doc) };

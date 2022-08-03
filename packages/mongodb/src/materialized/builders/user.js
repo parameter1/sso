@@ -21,7 +21,9 @@ export class UserBuilder extends BaseBuilder {
         as: 'organizationConnection.edges',
         pipeline: [
           // do not include deleted managers
-          { $match: { $expr: { $eq: ['$__.isDeleted', false] } } },
+          { $match: { $expr: { $eq: ['$_deleted', false] } } },
+          // drop history
+          { $project: { _history: 0 } },
           // lookup the organization
           {
             $lookup: {
@@ -31,7 +33,7 @@ export class UserBuilder extends BaseBuilder {
               as: 'node',
               pipeline: [
                 // do not include deleted orgs
-                { $match: { $expr: { $eq: ['$__.isDeleted', false] } } },
+                { $match: { $expr: { $eq: ['$_deleted', false] } } },
                 { $project: partialOrganization() },
               ],
             },
@@ -46,13 +48,7 @@ export class UserBuilder extends BaseBuilder {
           $map: {
             // filter any missing/empty org nodes
             input: { $filter: { input: '$organizationConnection.edges', cond: '$$this.node' } },
-            in: {
-              _meta: {
-                ...['created', 'modified', 'touched'].reduce((o, key) => ({ ...o, [key]: `$$this.__.${key}` }), {}),
-              },
-              node: '$$this.node',
-              role: '$$this.role',
-            },
+            in: ['_meta', 'node', 'role'].reduce((o, key) => ({ ...o, [key]: `$$this.${key}` }), {}),
           },
         },
       },

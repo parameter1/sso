@@ -22,27 +22,18 @@ export function projectAsNode(projection) {
   return { _id: 0, node };
 }
 
-export function metaProjection() {
-  return prepareProjection({
-    _meta: {
-      created: '$__.created',
-      modified: '$__.modified',
-      touched: '$__.touched',
-    },
-  });
-}
-
 function commonFullProjection() {
   return prepareProjection({
-    _deleted: '$__.isDeleted',
-    _history: asArray('$__.history'),
-    ...metaProjection(),
+    _deleted: 1,
+    _history: asArray('$_history'),
+    _meta: 1,
   });
 }
 
 function commonPartialProjection() {
   return prepareProjection({
-    ...metaProjection(),
+    _deleted: 1,
+    _meta: 1,
   });
 }
 

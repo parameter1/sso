@@ -116,6 +116,11 @@ const run = async () => {
               disabled: !documents.has('workspace') || !documents.has('user'),
             },
             {
+              name: 'Change member role',
+              fnName: 'changeRole',
+              disabled: !documents.has('member'),
+            },
+            {
               name: 'Delete workspace member',
               fnName: 'delete',
               disabled: !documents.has('member'),

@@ -6,6 +6,7 @@ import { MaterializedBuilders } from '../materialized/builders.js';
 
 import { NormalizedApplicationRepo } from './repos/application.js';
 import { NormalizedManagerRepo } from './repos/manager.js';
+import { NormalizedMemberRepo } from './repos/member.js';
 import { NormalizedOrganizationRepo } from './repos/organization.js';
 import { NormalizedUserRepo } from './repos/user.js';
 import { NormalizedWorkspaceRepo } from './repos/workspace.js';
@@ -25,6 +26,7 @@ export class NormalizedRepos {
     this.repos = [
       NormalizedApplicationRepo,
       NormalizedManagerRepo,
+      NormalizedMemberRepo,
       NormalizedOrganizationRepo,
       NormalizedUserRepo,
       NormalizedWorkspaceRepo,

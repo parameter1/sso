@@ -16,7 +16,7 @@ const {
 export const eventProps = {
   command: string().uppercase().pattern(/^[A-Z_]+$/),
   entityId: any().disallow(null, ''),
-  entityType: string().valid('application', 'manager', 'organization', 'user', 'workspace'),
+  entityType: string().valid('application', 'manager', 'member', 'organization', 'user', 'workspace'),
   date: date().allow('$$NOW'),
   omitFromModified: boolean(),
   values: object(),

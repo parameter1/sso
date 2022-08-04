@@ -5,6 +5,7 @@ import { ReservationsRepo } from './reservations.js';
 
 import { ApplicationCommandHandler } from './handlers/application.js';
 import { ManagerCommandHandler } from './handlers/manager.js';
+import { MemberCommandHandler } from './handlers/member.js';
 import { OrganizationCommandHandler } from './handlers/organization.js';
 import { UserCommandHandler } from './handlers/user.js';
 import { WorkspaceCommandHandler } from './handlers/workspace.js';
@@ -26,6 +27,7 @@ export class CommandHandlers {
     this.handlers = [
       ApplicationCommandHandler,
       ManagerCommandHandler,
+      MemberCommandHandler,
       OrganizationCommandHandler,
       UserCommandHandler,
       WorkspaceCommandHandler,

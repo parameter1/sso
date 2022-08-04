@@ -99,6 +99,11 @@ const run = async () => {
               fnName: 'create',
               disabled: !documents.has('application') || !documents.has('organization'),
             },
+            {
+              name: 'Change workspace name',
+              fnName: 'changeName',
+              disabled: !documents.has('workspace'),
+            },
           ],
         },
 

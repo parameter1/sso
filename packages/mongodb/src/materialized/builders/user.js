@@ -1,5 +1,5 @@
 import { BaseBuilder } from './-base.js';
-import { fullUser, fullWorkspace, partialOrganization } from './-projections.js';
+import { fullUser, partialOrganization, partialWorkspaceForUser } from './-projections.js';
 import { WorkspaceBuilder } from './workspace.js';
 
 export class UserBuilder extends BaseBuilder {
@@ -81,9 +81,7 @@ export class UserBuilder extends BaseBuilder {
               pipeline: [
                 ...WorkspaceBuilder.applicationStages(),
                 ...WorkspaceBuilder.organizationStages(),
-                { $project: fullWorkspace() },
-                // drop history
-                { $unset: ['_history'] },
+                { $project: partialWorkspaceForUser() },
                 // do not include deleted workspaces
                 // (run after app and org deletions are accounted for)
                 { $match: { $expr: { $eq: ['$_deleted', false] } } },

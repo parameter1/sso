@@ -123,10 +123,8 @@ export function commonWorkspace() {
   });
 }
 
-export function fullWorkspace() {
+export function workspaceAppAndOrg() {
   return prepareProjection({
-    ...commonFullProjection(),
-    ...commonWorkspace(),
     '_edge.application': 1,
     '_edge.organization': 1,
     fullName: {
@@ -166,9 +164,25 @@ export function fullWorkspace() {
   });
 }
 
+export function fullWorkspace() {
+  return prepareProjection({
+    ...commonFullProjection(),
+    ...commonWorkspace(),
+    ...workspaceAppAndOrg(),
+    '_connection.member': 1,
+  });
+}
+
 export function partialWorkspace() {
   return prepareProjection({
     ...commonPartialProjection(),
     ...commonWorkspace(),
+  });
+}
+
+export function partialWorkspaceForUser() {
+  return prepareProjection({
+    ...partialWorkspace(),
+    ...workspaceAppAndOrg(),
   });
 }

@@ -1,5 +1,10 @@
 import { BaseBuilder } from './-base.js';
-import { fullWorkspace, partialApplication, partialOrganization } from './-projections.js';
+import {
+  fullWorkspace,
+  partialApplication,
+  partialOrganization,
+  partialUser,
+} from './-projections.js';
 
 export class WorkspaceBuilder extends BaseBuilder {
   /**
@@ -17,6 +22,49 @@ export class WorkspaceBuilder extends BaseBuilder {
     stages.push(...WorkspaceBuilder.applicationStages());
     // organization
     stages.push(...WorkspaceBuilder.organizationStages());
+    // members
+    stages.push({
+      $lookup: {
+        from: 'member/normalized',
+        localField: '_id',
+        foreignField: '_id.workspace',
+        as: '_connection.member.edges',
+        pipeline: [
+          // do not include deleted members
+          { $match: { $expr: { $eq: ['$_deleted', false] } } },
+          // drop history
+          { $project: { _history: 0 } },
+          // lookup the user
+          {
+            $lookup: {
+              from: 'user/normalized',
+              localField: '_id.user',
+              foreignField: '_id',
+              as: 'node',
+              pipeline: [
+                // do not include deleted users
+                { $match: { $expr: { $eq: ['$_deleted', false] } } },
+                { $project: partialUser() },
+              ],
+            },
+          },
+          // flatten the user into a single object
+          { $unwind: { path: '$node', preserveNullAndEmptyArrays: true } },
+          // discard any missing users
+          { $match: { $expr: { $ne: ['$node', null] } } },
+        ],
+      },
+    }, {
+      $set: {
+        '_connection.member.edges': {
+          $map: {
+            // set edge fields
+            input: '$_connection.member.edges',
+            in: ['_meta', 'node', 'role'].reduce((o, key) => ({ ...o, [key]: `$$this.${key}` }), {}),
+          },
+        },
+      },
+    });
     stages.push({ $project: fullWorkspace() });
     return stages;
   }

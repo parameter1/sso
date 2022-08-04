@@ -104,6 +104,7 @@ export function fullUser() {
     ...commonFullProjection(),
     ...commonUser(),
     '_connection.organization': 1,
+    '_connection.workspace': 1,
   });
 }
 
@@ -128,7 +129,43 @@ export function fullWorkspace() {
     ...commonWorkspace(),
     '_edge.application': 1,
     '_edge.organization': 1,
-    namespace: 1,
+    name: {
+      default: '$name',
+      full: {
+        $concat: [
+          '$_edge.application.node.name', ' > ',
+          '$_edge.organization.node.name', ' > ',
+          '$name',
+        ],
+      },
+      parts: [
+        '$_edge.application.node.name',
+        '$_edge.organization.node.name',
+        '$name',
+      ],
+      path: {
+        $concat: [
+          '$_edge.application.node.slug', '/',
+          '$_edge.organization.node.slug', '/',
+          '$slug',
+        ],
+      },
+    },
+    namespace: {
+      default: {
+        $concat: [
+          '$_edge.application.node.key', '/',
+          '$_edge.organization.node.key', '/',
+          '$key',
+        ],
+      },
+      application: {
+        $concat: [
+          '$_edge.organization.node.key', '/',
+          '$key',
+        ],
+      },
+    },
   });
 }
 

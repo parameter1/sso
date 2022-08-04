@@ -58,6 +58,49 @@ export class WorkspaceBuilder extends BaseBuilder {
         },
       },
     });
+
+    stages.push({
+      $set: {
+        name: {
+          default: '$name',
+          full: {
+            $concat: [
+              '$_edge.application.node.name', ' > ',
+              '$_edge.organization.node.name', ' > ',
+              '$name',
+            ],
+          },
+          parts: [
+            '$_edge.application.node.name',
+            '$_edge.organization.node.name',
+            '$name',
+          ],
+        },
+        namespace: {
+          default: {
+            $concat: [
+              '$_edge.application.node.key', '/',
+              '$_edge.organization.node.key', '/',
+              '$key',
+            ],
+          },
+          application: {
+            $concat: [
+              '$_edge.organization.node.key', '/',
+              '$key',
+            ],
+          },
+        },
+
+        path: {
+          $concat: [
+            '$_edge.application.node.slug', '/',
+            '$_edge.organization.node.slug', '/',
+            '$slug',
+          ],
+        },
+      },
+    });
     stages.push({ $project: fullWorkspace() });
     return stages;
   }

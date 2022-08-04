@@ -128,6 +128,8 @@ export function fullWorkspace() {
     ...commonWorkspace(),
     '_edge.application': 1,
     '_edge.organization': 1,
+    namespace: 1,
+    path: 1,
   });
 }
 

@@ -11,7 +11,7 @@ process.on('unhandledRejection', immediatelyThrow);
 const { log } = console;
 
 const hasDocuments = async () => {
-  const r = await Promise.all(['application', 'manager', 'organization', 'user', 'workspace'].map(async (entityType) => {
+  const r = await Promise.all(['application', 'manager', 'member', 'organization', 'user', 'workspace'].map(async (entityType) => {
     const repo = entityManager.getNormalizedRepo(entityType);
     const doc = await repo.findOne({
       query: { _deleted: false },
@@ -103,6 +103,17 @@ const run = async () => {
               name: 'Change workspace name',
               fnName: 'changeName',
               disabled: !documents.has('workspace'),
+            },
+          ],
+        },
+
+        {
+          key: 'member',
+          choices: [
+            {
+              name: 'Create workspace member',
+              fnName: 'create',
+              disabled: !documents.has('workspace') || !documents.has('user'),
             },
           ],
         },

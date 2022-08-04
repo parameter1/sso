@@ -18,6 +18,7 @@ export { EntityManager } from './entity-manager.js';
 
 export { default as applicationCommandProps } from './command/props/application.js';
 export { default as managerCommandProps } from './command/props/manager.js';
+export { default as memberCommandProps } from './command/props/member.js';
 export { default as organizationCommandProps } from './command/props/organization.js';
 export { default as userCommandProps } from './command/props/user.js';
 export { default as workspaceCommandProps } from './command/props/workspace.js';

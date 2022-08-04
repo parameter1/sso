@@ -19,7 +19,7 @@
   "dependencies": {
     "@parameter1/graphql": "^2.7.0",
     "@parameter1/prop-types": "^2.3.0",
-    "node-fetch": "^3.2.9"
+    "node-fetch": "^3.2.10"
   },
   "publishConfig": {
     "access": "public"

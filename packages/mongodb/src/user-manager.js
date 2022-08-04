@@ -1,6 +1,7 @@
 import { Repo, runTransaction } from '@parameter1/mongodb';
 import { PropTypes, attempt, validateAsync } from '@parameter1/prop-types';
 import { isFunction as isFn } from '@parameter1/utils';
+import { get } from '@parameter1/object-path';
 
 import { EntityManager } from './entity-manager.js';
 import { TokenRepo } from './token/repo.js';
@@ -119,6 +120,38 @@ export class UserManager {
   }
 
   /**
+   * @param {object} params
+   * @param {string|ObjectId} params.userId
+   * @param {boolean} [params.impersonated=false]
+   * @param {ClientSession} [params.session]
+   */
+  async getOrCreateAuthToken(params = {}) {
+    const {
+      userId,
+      impersonated,
+      session,
+    } = await validateAsync(object({
+      userId: userCommandProps.id.required(),
+      impersonated: boolean().default(false),
+      session: object(),
+    }).required(), params);
+    const query = {
+      subject: 'auth',
+      audience: userId,
+      'data.impersonated': impersonated ? true : { $ne: true },
+      expiresAt: { $gt: new Date() },
+    };
+    const doc = await this.token.findOne({ query, options: { session } });
+    if (doc) return { doc, signed: this.token.signDocument(doc) };
+    return this.token.createAndSign({
+      subject: 'auth',
+      audience: userId,
+      data: { ...(impersonated && { impersonated: true }) },
+      ttl: impersonated ? 60 * 60 : 60 * 60 * 24,
+    }, { session });
+  }
+
+  /**
    *
    * @param {object} params
    * @param {ObjectId} params.userId
@@ -148,5 +181,61 @@ export class UserManager {
       }],
       options: { upsert: true, session },
     });
+  }
+
+  /**
+   * Magically logs a user in using the provided login token.
+   *
+   * @param {object} params
+   * @param {string} params.loginToken
+   * @param {string} [params.ip]
+   * @param {string} [params.ua]
+   */
+  async magicLogin(params = {}) {
+    const {
+      loginLinkToken: token,
+      ip,
+      ua,
+    } = await validateAsync(object({
+      loginLinkToken: string().required(),
+      ip: userLogProps.ip,
+      ua: userLogProps.ua,
+    }).required(), params);
+
+    const loginLinkToken = await this.token.verify({ token, subject: 'login-link' });
+    const impersonated = get(loginLinkToken, 'doc.data.impersonated');
+
+    const user = await this.entityManager.getMaterializedRepo('user').findOne({
+      query: { _id: get(loginLinkToken, 'doc.audience'), _deleted: false },
+      options: { projection: { email: 1 }, strict: true },
+    });
+
+    return runTransaction(async ({ session }) => {
+      const authToken = await this.getOrCreateAuthToken({
+        userId: user._id,
+        impersonated,
+        session,
+      });
+
+      await this.logAction({
+        userId: user._id,
+        action: 'magic-login',
+        ip,
+        ua,
+        data: { loginLinkToken, authToken, impersonated },
+      }, { session });
+
+      if (!impersonated) {
+        await this.entityManager.getCommandHandler('user').magicLogin({
+          entityId: user._id,
+        }, { session });
+      }
+
+      return {
+        authToken: authToken.signed,
+        userId: user._id,
+        authDoc: authToken.doc,
+      };
+    }, { client: this.client });
   }
 }

@@ -99,41 +99,6 @@ export class TokenRepo extends Repo {
   }
 
   /**
-   * @param {object} params
-   * @param {string|ObjectId} params.userId
-   * @param {boolean} [params.impersonated=false]
-   * @param {object} [params.session]
-   */
-  // async getOrCreateAuthToken(params = {}) {
-  //   const {
-  //     userId,
-  //     impersonated,
-  //     session,
-  //   } = await validateAsync(object({
-  //     userId: userProps.id.required(),
-  //     impersonated: boolean().default(false),
-  //     session: object(),
-  //   }).required(), params);
-  //   const query = {
-  //     subject: 'auth',
-  //     audience: userId,
-  //     'data.impersonated': impersonated ? true : { $ne: true },
-  //     expiresAt: { $gt: new Date() },
-  //   };
-  //   const doc = await this.findOne({ query, options: { session } });
-  //   if (doc) return { doc, signed: this.signDocument(doc) };
-  //   return this.createAndSign({
-  //     doc: {
-  //       subject: 'auth',
-  //       audience: userId,
-  //       data: { ...(impersonated && { impersonated: true }) },
-  //       ttl: impersonated ? 60 * 60 : 60 * 60 * 24,
-  //     },
-  //     session,
-  //   });
-  // }
-
-  /**
    * Invalidates/deletes a token by ID (jti) from the database.
    *
    * @param {object} params

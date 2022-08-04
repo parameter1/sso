@@ -92,4 +92,22 @@ export class UserCommandHandler extends BaseCommandHandler {
       return results;
     }, { currentSession, client: this.client });
   }
+
+  async magicLogin(params) {
+    const commands = await validateAsync(oneOrMany(object({
+      entityId: userProps.id.required(),
+    })).required().custom((vals) => vals.map((o) => ({
+      command: 'MAGIC_LOGIN',
+      entityId: o.entityId,
+      values: {
+        lastLoggedInAt: '$$NOW',
+        // @todo need to determine how to source all logins! increment won't work
+        // loginCount: $inc('loginCount', 1),
+        verified: true,
+      },
+      omitFromHistory: true,
+      omitFromModified: true,
+    }))), params);
+    return this.executeUpdate(commands);
+  }
 }

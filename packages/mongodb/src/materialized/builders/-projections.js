@@ -129,28 +129,18 @@ export function fullWorkspace() {
     ...commonWorkspace(),
     '_edge.application': 1,
     '_edge.organization': 1,
-    name: {
-      default: '$name',
-      full: {
-        $concat: [
-          '$_edge.application.node.name', ' > ',
-          '$_edge.organization.node.name', ' > ',
-          '$name',
-        ],
-      },
-      parts: [
-        '$_edge.application.node.name',
-        '$_edge.organization.node.name',
+    fullName: {
+      $concat: [
+        '$_edge.application.node.name', ' > ',
+        '$_edge.organization.node.name', ' > ',
         '$name',
       ],
-      path: {
-        $concat: [
-          '$_edge.application.node.slug', '/',
-          '$_edge.organization.node.slug', '/',
-          '$slug',
-        ],
-      },
     },
+    nameParts: [
+      '$_edge.application.node.name',
+      '$_edge.organization.node.name',
+      '$name',
+    ],
     namespace: {
       default: {
         $concat: [
@@ -165,6 +155,13 @@ export function fullWorkspace() {
           '$key',
         ],
       },
+    },
+    path: {
+      $concat: [
+        '$_edge.application.node.slug', '/',
+        '$_edge.organization.node.slug', '/',
+        '$slug',
+      ],
     },
   });
 }

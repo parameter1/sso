@@ -17,7 +17,7 @@ export default async ({
         namespace: 1,
       },
     },
-    { $sort: { 'name.path': 1, _id: 1 } },
+    { $sort: { path: 1, _id: 1 } },
   ];
   const cursor = await repo.aggregate({ pipeline });
   const apps = await cursor.toArray();

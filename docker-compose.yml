@@ -36,7 +36,7 @@ services:
       PORT: 7913
       VITE_GRAPHQL_URL: ${VITE_GRAPHQL_URL-http://sso.dev.parameter1.com:7912/graphql/managed}
     depends_on:
-      - graphql-managed
+      - graphql-command
     ports:
       - "7913:7913"
     hostname: sso.dev.parameter1.com
@@ -57,23 +57,41 @@ services:
     entrypoint: ["tail"]
     command: ["-f", "/dev/null"]
 
-  graphql-managed:
+  graphql-command:
     <<: *node
-    working_dir: /sso/graphql/managed
+    working_dir: /sso/graphql/command
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
       <<: [*env, *env-core]
-      APP_URL: ${APP_URL-http://sso.dev.parameter1.com:7913/app}
-      EXPOSED_HOST: sso.dev.parameter1.com
+      APP_URL: ${APP_URL-http://sso.dev.parameter1.com:7913}
+      EXPOSED_HOST: graphql.sso.dev.parameter1.com
       EXPOSED_PORT: 7912
-      HOST: sso.dev.parameter1.com
+      HOST: graphql.sso.dev.parameter1.com
       SENDGRID_API_KEY: ${SENDGRID_API_KEY-}
     ports:
       - "7912:80"
-    hostname: sso.dev.parameter1.com
+    hostname: graphql.sso.dev.parameter1.com
     depends_on:
       - materializer
+
+  # graphql-managed:
+  #   <<: *node
+  #   working_dir: /sso/graphql/managed
+  #   entrypoint: ["yarn"]
+  #   command: ["dev"]
+  #   environment:
+  #     <<: [*env, *env-core]
+  #     APP_URL: ${APP_URL-http://sso.dev.parameter1.com:7913/app}
+  #     EXPOSED_HOST: sso.dev.parameter1.com
+  #     EXPOSED_PORT: 7912
+  #     HOST: sso.dev.parameter1.com
+  #     SENDGRID_API_KEY: ${SENDGRID_API_KEY-}
+  #   ports:
+  #     - "7912:80"
+  #   hostname: sso.dev.parameter1.com
+  #   depends_on:
+  #     - materializer
 
   graphql-materialized:
     <<: *node

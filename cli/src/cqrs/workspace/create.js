@@ -47,8 +47,8 @@ export default async () => {
         if (error) return error;
         const doc = await entityManager.getMaterializedRepo('workspace').findOne({
           query: {
-            'organizationEdge.node._id': org._id,
-            'applicationEdge.node._id': app._id,
+            '_edge.organization.node._id': org._id,
+            '_edge.application.node._id': app._id,
             key: input,
           },
           options: { projection: { _id: 1 } },

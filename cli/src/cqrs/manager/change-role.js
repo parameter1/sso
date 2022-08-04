@@ -11,11 +11,11 @@ export default async () => {
       message: 'Select the organization',
       // only return orgs with managers
       choices: () => getOrgList({
-        query: { 'managerConnection.edges.node._id': { $exists: true } },
+        query: { '_connection.manager.edges.node._id': { $exists: true } },
         projection: {
-          'managerConnection.edges': {
+          '_connection.manager.edges': {
             $sortArray: {
-              input: '$managerConnection.edges',
+              input: '$_connection.manager.edges',
               sortBy: { 'node.slug.reverse': 1, 'node._id': 1 },
             },
           },
@@ -27,7 +27,7 @@ export default async () => {
       type: 'list',
       name: 'user',
       message: 'Select the user',
-      choices: ({ org }) => org.managerConnection.edges.map(({ node, role }) => ({
+      choices: ({ org }) => org._connection.manager.edges.map(({ node, role }) => ({
         name: `${node.familyName}, ${node.givenName} [${node.email}]`,
         value: { node, role },
       })),

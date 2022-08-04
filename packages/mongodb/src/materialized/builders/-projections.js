@@ -11,6 +11,7 @@ export function prepareProjection(projection, defaults = {}) {
     .keys(projection).sort().reduce((o, key) => {
       const v = projection[key];
       let value = v;
+      // @todo handle edge and connection fields
       if (v === 1) value = withDefaultValue(`$${key}`);
       if (typeof v === 'string') value = withDefaultValue(value);
       return { ...o, [key]: value };
@@ -73,7 +74,7 @@ export function fullOrganization() {
   return prepareProjection({
     ...commonFullProjection(),
     ...commonOrganization(),
-    managerConnection: 1,
+    '_connection.manager': 1,
   });
 }
 
@@ -102,7 +103,7 @@ export function fullUser() {
   return prepareProjection({
     ...commonFullProjection(),
     ...commonUser(),
-    organizationConnection: 1,
+    '_connection.organization': 1,
   });
 }
 
@@ -125,8 +126,8 @@ export function fullWorkspace() {
   return prepareProjection({
     ...commonFullProjection(),
     ...commonWorkspace(),
-    applicationEdge: 1,
-    organizationEdge: 1,
+    '_edge.application': 1,
+    '_edge.organization': 1,
   });
 }
 

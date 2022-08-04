@@ -18,7 +18,7 @@ export class UserBuilder extends BaseBuilder {
         from: 'manager/normalized',
         localField: '_id',
         foreignField: '_id.user',
-        as: 'organizationConnection.edges',
+        as: '_connection.organization.edges',
         pipeline: [
           // do not include deleted managers
           { $match: { $expr: { $eq: ['$_deleted', false] } } },
@@ -44,10 +44,10 @@ export class UserBuilder extends BaseBuilder {
       },
     }, {
       $set: {
-        'organizationConnection.edges': {
+        '_connection.organization.edges': {
           $map: {
             // filter any missing/empty org nodes
-            input: { $filter: { input: '$organizationConnection.edges', cond: '$$this.node' } },
+            input: { $filter: { input: '$_connection.organization.edges', cond: '$$this.node' } },
             in: ['_meta', 'node', 'role'].reduce((o, key) => ({ ...o, [key]: `$$this.${key}` }), {}),
           },
         },

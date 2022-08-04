@@ -15,7 +15,7 @@ export class MaterializedUserRepo extends BaseMaterializedRepo {
       client,
       entityType: 'user',
       indexes: [
-        { key: { 'organizationConnection.edges.node._id': 1 } },
+        { key: { '_connection.organization.edges.node._id': 1 } },
 
         { key: { email: 1, _id: 1 } },
         { key: { 'slug.default': 1, _id: 1 } },

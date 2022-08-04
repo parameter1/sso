@@ -11,8 +11,8 @@ export class MaterializedWorkspaceRepo extends BaseMaterializedRepo {
       client,
       entityType: 'workspace',
       indexes: [
-        { key: { 'organizationEdge.node._id': 1, 'applicationEdge.node._id': 1, key: 1 } },
-        { key: { 'applicationEdge.node._id': 1 } },
+        { key: { '_edge.organization.node._id': 1, '_edge.application.node._id': 1, key: 1 } },
+        { key: { '_edge.application.node._id': 1 } },
       ],
     });
   }

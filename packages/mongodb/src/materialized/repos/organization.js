@@ -11,7 +11,7 @@ export class MaterializedOrganizationRepo extends BaseMaterializedRepo {
       client,
       entityType: 'organization',
       indexes: [
-        { key: { 'managerConnection.edges.node._id': 1 } },
+        { key: { '_connection.manager.edges.node._id': 1 } },
 
         { key: { key: 1, _id: 1 } },
         { key: { slug: 1, _id: 1 } },

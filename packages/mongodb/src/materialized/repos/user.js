@@ -2,7 +2,7 @@ import { PropTypes, validateAsync } from '@parameter1/prop-types';
 import userProps from '../../command/props/user.js';
 import { BaseMaterializedRepo } from './-base.js';
 
-const { object } = PropTypes;
+const { boolean, object } = PropTypes;
 
 export class MaterializedUserRepo extends BaseMaterializedRepo {
   /**
@@ -29,13 +29,21 @@ export class MaterializedUserRepo extends BaseMaterializedRepo {
    *
    * @param {object} params
    * @param {string} params.email
+   * @param {boolean} [params.suppressDeleted=true]
    * @param {object} [params.options]
    */
   async findByEmail(params) {
-    const { email, options } = await validateAsync(object({
+    const { suppressDeleted, email, options } = await validateAsync(object({
+      suppressDeleted: boolean().default(true),
       email: userProps.email.required(),
       options: object(),
     }).required(), params);
-    return this.findOne({ query: { email }, options });
+    return this.findOne({
+      query: {
+        email,
+        ...(suppressDeleted && { _deleted: false }),
+      },
+      options,
+    });
   }
 }

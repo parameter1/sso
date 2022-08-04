@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { entityManager } from '../../mongodb.js';
+import { entityManager, userManager } from '../../mongodb.js';
 
 export default async () => {
   const questions = [
@@ -18,5 +18,6 @@ export default async () => {
     entityManager.commandHandlers.createIndexes(),
     entityManager.materializedRepos.createAllIndexes(),
     entityManager.normalizedRepos.createAllIndexes(),
+    userManager.createIndexes(),
   ]) : null;
 };

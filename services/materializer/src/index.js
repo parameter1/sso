@@ -96,7 +96,7 @@ const { log } = console;
        *
        */
       manager: () => Promise.all([
-        materialize({ entityType: 'workspace', $match: { _id: entityId.workspace } }),
+        materialize({ entityType: 'organization', $match: { _id: entityId.org } }),
         materialize({ entityType: 'user', $match: { _id: entityId.user } }),
       ]),
 
@@ -104,7 +104,7 @@ const { log } = console;
        *
        */
       member: () => Promise.all([
-        materialize({ entityType: 'organization', $match: { _id: entityId.org } }),
+        materialize({ entityType: 'workspace', $match: { _id: entityId.workspace } }),
         materialize({ entityType: 'user', $match: { _id: entityId.user } }),
       ]),
 

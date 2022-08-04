@@ -27,6 +27,10 @@ const codes = {
 export default async (options = {}) => {
   const app = fastify(options.fastify);
   const apollo = new ApolloServer({
+    context: ({ request }) => ({
+      ip: request.ip,
+      ua: request.headers['user-agent'],
+    }),
     schema,
     introspection: true,
     debug: !isProduction,

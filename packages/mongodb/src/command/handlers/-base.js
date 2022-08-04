@@ -76,6 +76,8 @@ const updateSchema = object({
   command: eventProps.command.required(),
   entityId: eventProps.entityId.required(),
   date: eventProps.date,
+  omitFromHistory: eventProps.omitFromHistory,
+  omitFromModified: eventProps.omitFromModified,
   userId: eventProps.userId,
   values: eventProps.values.required(),
 });

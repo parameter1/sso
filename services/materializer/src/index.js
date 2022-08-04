@@ -61,7 +61,7 @@ const { log } = console;
        */
       application: () => Promise.all([
         materialize({ entityType: 'application', $match: { _id: entityId } }),
-        materialize({ entityType: 'workspace', $match: { 'applicationEdge.node._id': entityId } }),
+        materialize({ entityType: 'workspace', $match: { appId: entityId } }),
       ]),
 
       /**
@@ -83,7 +83,7 @@ const { log } = console;
         return Promise.all([
           materialize({ entityType: 'organization', $match: { _id: entityId } }),
           materialize({ entityType: 'user', $match: { _id: { $in: userIds } } }),
-          materialize({ entityType: 'workspace', $match: { 'organizationEdge.node._id': entityId } }),
+          materialize({ entityType: 'workspace', $match: { orgId: entityId } }),
         ]);
       },
 

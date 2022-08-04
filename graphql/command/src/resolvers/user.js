@@ -10,6 +10,19 @@ export default {
     /**
      *
      */
+    async loginUserFromLink(_, { input }, { ip, ua }) {
+      const { loginLinkToken } = input;
+      const {
+        authToken,
+        userId,
+        authDoc,
+      } = await userManager.magicLogin({ loginLinkToken, ip, ua });
+      return { value: authToken, expiresAt: authDoc.expiresAt, userId };
+    },
+
+    /**
+     *
+     */
     async sendUserLoginLink(_, { input }, { ip, ua }) {
       const { email, redirectTo } = input;
       await userManager.createLoginLinkToken({

@@ -75,6 +75,13 @@ export class WorkspaceBuilder extends BaseBuilder {
             '$_edge.organization.node.name',
             '$name',
           ],
+          path: {
+            $concat: [
+              '$_edge.application.node.slug', '/',
+              '$_edge.organization.node.slug', '/',
+              '$slug',
+            ],
+          },
         },
         namespace: {
           default: {
@@ -90,14 +97,6 @@ export class WorkspaceBuilder extends BaseBuilder {
               '$key',
             ],
           },
-        },
-
-        path: {
-          $concat: [
-            '$_edge.application.node.slug', '/',
-            '$_edge.organization.node.slug', '/',
-            '$slug',
-          ],
         },
       },
     });

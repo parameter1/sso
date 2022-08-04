@@ -7,6 +7,13 @@ export class NormalizedWorkspaceRepo extends BaseNormalizedRepo {
    * @param {MongoDBClient} params.client
    */
   constructor({ client }) {
-    super({ client, entityType: 'workspace' });
+    super({
+      client,
+      entityType: 'workspace',
+      indexes: [
+        { key: { appId: 1 } },
+        { key: { orgId: 1 } },
+      ],
+    });
   }
 }

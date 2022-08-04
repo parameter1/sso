@@ -13,7 +13,7 @@ export default async ({
     {
       $project: {
         ...projection,
-        name: 1,
+        fullName: 1,
         namespace: 1,
       },
     },
@@ -25,7 +25,7 @@ export default async ({
     if (isFn(filter)) return filter(doc);
     return true;
   }).map((doc) => ({
-    name: `${doc.name.full} [${doc.namespace.default}]`,
+    name: `${doc.fullName} [${doc.namespace.default}]`,
     value: doc,
     disabled: isFn(disabledWhen) ? disabledWhen(doc) : false,
   }));

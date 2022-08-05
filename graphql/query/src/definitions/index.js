@@ -9,6 +9,7 @@ directive @auth on FIELD_DEFINITION
 directive @array(field: String) on FIELD_DEFINITION
 directive @connectionProject(type: String!) on OBJECT
 directive @interfaceFields on OBJECT
+directive @object(field: String) on FIELD_DEFINITION
 directive @project(
   field: String
   needs: [String!]! = []

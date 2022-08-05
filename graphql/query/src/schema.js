@@ -3,6 +3,7 @@ import { enumDefaultValuesTransformer } from '@parameter1/graphql/transformers';
 import {
   arrayDirectiveTransformer,
   interfaceFieldsDirectiveTransformer,
+  objectDirectiveTransformer,
 } from '@parameter1/graphql/directives';
 import {
   authDirectiveTransformer,
@@ -24,8 +25,9 @@ const withProject = projectDirectiveTransformer(withInterfaceFields);
 const withConnectionProject = connectionProjectDirectiveTransformer(withProject);
 const withAuth = authDirectiveTransformer(withConnectionProject);
 const withArray = arrayDirectiveTransformer(withAuth);
+const withObject = objectDirectiveTransformer(withArray);
 
 // handle enum default values
-const withEnumDefaults = enumDefaultValuesTransformer(withArray, enums);
+const withEnumDefaults = enumDefaultValuesTransformer(withObject, enums);
 
 export default withEnumDefaults;

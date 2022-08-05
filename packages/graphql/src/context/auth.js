@@ -26,7 +26,7 @@ export function AuthContext({ header, userManager } = {}) {
         if (type !== 'Bearer') throw new AuthenticationError(`The auth type '${type}' is not supported.`);
         if (!value) return;
         authToken = value;
-        user = await userManager.verifyAuthToken({
+        user = await userManager.verifyMagicAuthToken({
           authToken,
           projection: { email: 1 },
         });

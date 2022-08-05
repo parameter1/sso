@@ -71,7 +71,7 @@ export class UserManager {
    * @param {boolean} [params.impersonated=false]
    * @param {function} [params.inTransaction]
    */
-  async createLoginLinkToken(params = {}) {
+  async createLoginLinkToken(params) {
     const {
       email,
       ip,
@@ -154,7 +154,7 @@ export class UserManager {
    * @param {boolean} [params.impersonated=false]
    * @param {ClientSession} [params.session]
    */
-  async getOrCreateAuthToken(params = {}) {
+  async getOrCreateAuthToken(params) {
     const {
       userId,
       impersonated,
@@ -220,7 +220,7 @@ export class UserManager {
    * @param {string} [params.ip]
    * @param {string} [params.ua]
    */
-  async magicLogin(params = {}) {
+  async magicLogin(params) {
     const {
       loginLinkToken: token,
       ip,

@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 import { mapSchema, MapperKind } from '@parameter1/graphql/utils';
 import { getDirectiveArgs } from '@parameter1/graphql/directives';
-import { getProjectionForType } from '@parameter1/sso-graphql';
+import { getProjectionForType } from '@parameter1/sso-graphql-common';
 
 export default function loadOwnerDirectiveTransformer(schema, directiveName = 'loadOwner') {
   return mapSchema(schema, {

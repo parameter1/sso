@@ -8,7 +8,7 @@ import {
   authDirectiveTransformer,
   connectionProjectDirectiveTransformer,
   projectDirectiveTransformer,
-} from '@parameter1/sso-graphql';
+} from '@parameter1/sso-graphql-common';
 
 import enums from './enums.js';
 import resolvers from './resolvers/index.js';

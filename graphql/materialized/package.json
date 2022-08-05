@@ -22,7 +22,7 @@
     "@parameter1/graphql": "^2.7.0",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/prop-types": "^2.3.0",
-    "@parameter1/sso-graphql": "^0.4.0",
+    "@parameter1/sso-graphql-common": "^0.4.0",
     "@parameter1/sso-mongodb": "^0.4.0",
     "@parameter1/utils": "^2.0.0",
     "apollo-server-core": "^3.10.0",

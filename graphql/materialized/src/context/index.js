@@ -1,4 +1,4 @@
-import { AuthContext } from '@parameter1/sso-graphql';
+import { AuthContext } from '@parameter1/sso-graphql-common';
 import { managedRepos, materializedRepos } from '../repos/index.js';
 
 export default async ({ request } = {}) => {

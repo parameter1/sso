@@ -1,4 +1,4 @@
-import { getProjectionForType } from '@parameter1/sso-graphql';
+import { getProjectionForType } from '@parameter1/sso-graphql-common';
 
 export default {
   /**

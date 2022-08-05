@@ -1,5 +1,5 @@
 import { get, getAsArray } from '@parameter1/object-path';
-import { addArrayFilter, getProjectionForType } from '@parameter1/sso-graphql';
+import { addArrayFilter, getProjectionForType } from '@parameter1/sso-graphql-common';
 import { filterObjects, findWithObjects } from '@parameter1/sso-mongodb';
 import enums from '../enums.js';
 

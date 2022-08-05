@@ -1,4 +1,4 @@
-import { getProjectionForType } from '@parameter1/sso-graphql';
+import { getProjectionForType } from '@parameter1/sso-graphql-common';
 import createLoginLinkTemplate from '../email-templates/login-link.js';
 import { send } from '../sendgrid.js';
 

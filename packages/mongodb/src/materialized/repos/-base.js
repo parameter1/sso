@@ -1,4 +1,4 @@
-import { Repo } from '@parameter1/mongodb';
+import { Repo, MongoDBDataLoader } from '@parameter1/mongodb';
 import { PropTypes, attempt } from '@parameter1/prop-types';
 
 import { DB_NAME } from '../../constants.js';
@@ -34,5 +34,22 @@ export class BaseMaterializedRepo extends Repo {
       name: entityType,
     });
     this.entityType = entityType;
+  }
+
+  /**
+   * Creates and returns a new dataloader instance for this repo.
+   *
+   * Multiple calls will create separate instances and cache will not be shared
+   * between them.
+   */
+  async createDataloader(params = {}) {
+    const collection = await this.collection();
+    return new MongoDBDataLoader({
+      ...params,
+      name: this.name,
+      collection,
+      logger: this.logger,
+      criteria: { _deleted: false },
+    });
   }
 }

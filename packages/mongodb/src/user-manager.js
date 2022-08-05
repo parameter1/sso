@@ -266,4 +266,25 @@ export class UserManager {
       };
     }, { client: this.client });
   }
+
+  /**
+   * @param {object} params
+   * @param {string} params.authToken
+   * @param {object} [params.projection={ _id: 1 }]
+   */
+  async verifyMagicAuthToken(params) {
+    const { authToken, projection } = await validateAsync(object({
+      authToken: string().required(),
+      projection: object().default({ _id: 1 }),
+    }).required(), params);
+
+    try {
+      const { doc } = await this.token.verify({ token: authToken, subject: 'magic-auth' });
+      const { audience: userId } = doc;
+      const user = await this.findUserById(userId, { projection });
+      return user;
+    } catch (e) {
+      throw Repo.createError(401, `Authentication failed: ${e.message}`);
+    }
+  }
 }

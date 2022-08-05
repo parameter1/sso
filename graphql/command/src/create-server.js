@@ -11,8 +11,10 @@ import {
   CloseFastifyPlugin,
   OnShutdownPlugin,
 } from '@parameter1/graphql/plugins';
+import { AuthContext } from '@parameter1/sso-graphql';
 
 import schema from './schema.js';
+import { userManager } from './mongodb.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -28,8 +30,10 @@ export default async (options = {}) => {
   const app = fastify(options.fastify);
   const apollo = new ApolloServer({
     context: ({ request }) => ({
+      auth: AuthContext({ header: request.headers.authorization, userManager }),
       ip: request.ip,
       ua: request.headers['user-agent'],
+      userManager,
     }),
     schema,
     introspection: true,

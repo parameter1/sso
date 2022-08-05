@@ -7,6 +7,8 @@ export default gql`
 scalar DateTime
 scalar ObjectID
 
+directive @auth on FIELD_DEFINITION
+
 type Query {
   "A simple ping/pong query."
   ping: String!

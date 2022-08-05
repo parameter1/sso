@@ -93,10 +93,7 @@ export class UserManager {
     }).required(), params);
 
     return runTransaction(async ({ session }) => {
-      const user = await this.entityManager.getMaterializedRepo('user').findByEmail({
-        email,
-        options: { strict: true, projection: { email: 1 } },
-      });
+      const user = await this.findUserByEmail(email, { projection: { email: 1 } });
       const data = { ...(scope && { scope }), ...(impersonated && { impersonated }) };
 
       const token = await this.token.createAndSign({
@@ -117,6 +114,38 @@ export class UserManager {
       if (isFn(inTransaction)) await inTransaction({ user, token });
       return token.signed;
     }, { currentSession, client: this.client });
+  }
+
+  /**
+   *
+   * @param {ObjectId} userId
+   * @param {object} options
+   * @param {object} [options.projection]
+   * @param {ClientSession} [options.session]
+   * @param {boolean} [options.strict=true]
+   */
+  async findUserById(userId, { projection, session, strict = true } = {}) {
+    const _id = attempt(userId, userCommandProps.id.required());
+    return this.entityManager.getMaterializedRepo('user').findOne({
+      query: { _id, _deleted: false },
+      options: { projection, session, strict },
+    });
+  }
+
+  /**
+   *
+   * @param {string} email
+   * @param {object} options
+   * @param {object} [options.projection]
+   * @param {ClientSession} [options.session]
+   * @param {boolean} [options.strict=true]
+   */
+  async findUserByEmail(email, { projection, session, strict = true } = {}) {
+    const value = attempt(email, userCommandProps.email.required());
+    return this.entityManager.getMaterializedRepo('user').findOne({
+      query: { email: value, _deleted: false },
+      options: { projection, session, strict },
+    });
   }
 
   /**
@@ -204,11 +233,7 @@ export class UserManager {
 
     const loginLinkToken = await this.token.verify({ token, subject: 'login-link' });
     const impersonated = get(loginLinkToken, 'doc.data.impersonated');
-
-    const user = await this.entityManager.getMaterializedRepo('user').findOne({
-      query: { _id: get(loginLinkToken, 'doc.audience'), _deleted: false },
-      options: { projection: { email: 1 }, strict: true },
-    });
+    const user = await this.findUserById(get(loginLinkToken, 'doc.audience'), { projection: { email: 1 } });
 
     return runTransaction(async ({ session }) => {
       const authToken = await this.getOrCreateAuthToken({

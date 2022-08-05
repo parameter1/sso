@@ -92,7 +92,6 @@ export function commonUser() {
     familyName: 1,
     givenName: 1,
     lastLoggedInAt: 1,
-    lastSeenAt: 1,
     loginCount: withDefaultValue('$loginCount', 0),
     slug: 1,
     verified: 1,

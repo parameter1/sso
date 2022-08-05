@@ -96,15 +96,9 @@ export class UserCommandHandler extends BaseCommandHandler {
   async magicLogin(params) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: userProps.id.required(),
-    })).required().custom((vals) => vals.map((o) => ({
+    })).required().custom((vals) => vals.map(({ entityId }) => ({
       command: 'MAGIC_LOGIN',
-      entityId: o.entityId,
-      values: {
-        lastLoggedInAt: '$$NOW',
-        // @todo need to determine how to source all logins! increment won't work
-        // loginCount: $inc('loginCount', 1),
-        verified: true,
-      },
+      entityId,
       omitFromHistory: true,
       omitFromModified: true,
     }))), params);

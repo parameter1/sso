@@ -216,6 +216,37 @@ export class UserManager {
   }
 
   /**
+   * @param {object} params
+   * @param {string} params.authToken
+   * @param {string} [params.ip]
+   * @param {string} [params.ua]
+   */
+  async logoutMagicUser(params) {
+    const { authToken: token, ip, ua } = await validateAsync(object({
+      authToken: string().required(),
+      ip: userLogProps.ip,
+      ua: userLogProps.ua,
+    }).required(), params);
+
+    const authToken = await this.token.verify({ token, subject: 'magic-auth' });
+    const userId = get(authToken, 'doc.audience');
+    const impersonated = get(authToken, 'doc.data.impersonated');
+    const user = await this.findUserById(userId);
+
+    return runTransaction(async ({ session }) => {
+      await this.token.invalidate({ id: get(authToken, 'doc._id'), options: { session } });
+      await this.logAction({
+        userId: user._id,
+        action: 'logout-magic-user',
+        ip,
+        ua,
+        data: { authToken, impersonated },
+      }, { session });
+      return 'ok';
+    }, { client: this.client });
+  }
+
+  /**
    * Magically logs a user in using the provided login token.
    *
    * @param {object} params

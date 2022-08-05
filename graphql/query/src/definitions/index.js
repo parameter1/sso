@@ -1,6 +1,8 @@
 import { gql } from '@parameter1/graphql/tag';
+import { paginationDefinitions, sortOrderDefinitions } from '@parameter1/graphql/features';
 
 import user from './user.js';
+import workspace from './workspace.js';
 
 export default gql`
 
@@ -64,6 +66,10 @@ type DocumentMetaTouched {
     @project
 }
 
+${paginationDefinitions}
+${sortOrderDefinitions}
+
 ${user}
+${workspace}
 
 `;

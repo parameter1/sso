@@ -1,5 +1,10 @@
+import { getAsArray } from '@parameter1/object-path';
 import { getProjectionForType } from '@parameter1/sso-graphql';
-import { filterObjects } from '@parameter1/sso-mongodb';
+import { findWithObjects, filterObjects } from '@parameter1/sso-mongodb';
+import enums from '../enums.js';
+import { addArrayFilter } from '../utils.js';
+
+const { UserWorkspaceConnectionSortFieldEnum } = enums;
 
 export default {
   /**
@@ -20,6 +25,39 @@ export default {
    *
    */
   User: {
+    /**
+     *
+     */
+    workspaceConnection({ _connection }, { input }) {
+      const edges = getAsArray(_connection, 'workspace.edges');
+      const {
+        applicationIds,
+        applicationKeys,
+        keys,
+        organizationIds,
+        organizationKeys,
+        namespaces,
+        pagination,
+        sort,
+      } = input;
+      return findWithObjects(edges, {
+        query: {
+          ...addArrayFilter('node._edge.application.node._id', applicationIds),
+          ...addArrayFilter('node._edge.application.node.key', applicationKeys),
+          ...addArrayFilter('node.key', keys),
+          ...addArrayFilter('node.namespace.default', namespaces),
+          ...addArrayFilter('node._edge.organization.node._id', organizationIds),
+          ...addArrayFilter('node._edge.organization.node.key', organizationKeys),
+        },
+        limit: pagination.limit,
+        cursor: pagination.cursor.value,
+        direction: pagination.cursor.direction,
+        sort: sort.length
+          ? sort
+          : [{ field: UserWorkspaceConnectionSortFieldEnum.NODE_PATH, order: 1 }],
+      });
+    },
+
     /**
      *
      */

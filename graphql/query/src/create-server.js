@@ -14,7 +14,7 @@ import {
 import { AuthContext } from '@parameter1/sso-graphql';
 
 import schema from './schema.js';
-import { userManager } from './mongodb.js';
+import { entityManager, userManager } from './mongodb.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -29,8 +29,9 @@ const codes = {
 export default async (options = {}) => {
   const app = fastify(options.fastify);
   const apollo = new ApolloServer({
-    context: ({ request }) => ({
+    context: async ({ request }) => ({
       auth: AuthContext({ header: request.headers.authorization, userManager }),
+      dataloaders: await entityManager.materializedRepos.createDataloaders(),
       ip: request.ip,
       ua: request.headers['user-agent'],
     }),

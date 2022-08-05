@@ -17,13 +17,18 @@ interface UserInterface {
     @project(deep: true)
   "The user's current email address, domain, and any previously used addresses."
   email: UserInterfaceEmail!
-    @project(field: "", deep: true) @object
+    @project(field: "", deep: true)
+    @object
+  "The ISO date when the user last logged in."
+  lastLoggedInAt: DateTime
+    @project
   "The number of times the user has logged in."
   loginCount: Int!
     @project
   "The user's given, family and full names."
   name: UserInterfaceName!
-    @project(field: "", deep: true) @object
+    @project(field: "", deep: true)
+    @object
   "The user slugs."
   slug: UserInterfaceSlug!
     @project(deep: true)

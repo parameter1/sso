@@ -100,7 +100,7 @@ export class UserManager {
       const data = { ...(scope && { scope }), ...(impersonated && { impersonated }) };
 
       const token = await this.token.createAndSign({
-        subject: 'login-link',
+        subject: 'magic-login-link',
         audience: user._id,
         ttl: impersonated ? 60 : ttl,
         data,
@@ -108,7 +108,7 @@ export class UserManager {
 
       await this.logAction({
         userId: user._id,
-        action: 'send-login-link',
+        action: 'send-magic-login-link',
         ip,
         ua,
         data: { scope, loginToken: token, impersonated },
@@ -265,7 +265,7 @@ export class UserManager {
       ua: userLogProps.ua,
     }).required(), params);
 
-    const loginLinkToken = await this.token.verify({ token, subject: 'login-link' });
+    const loginLinkToken = await this.token.verify({ token, subject: 'magic-login-link' });
     const impersonated = get(loginLinkToken, 'doc.data.impersonated');
     const user = await this.findUserById(get(loginLinkToken, 'doc.audience'), { projection: { email: 1 } });
 

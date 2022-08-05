@@ -31,6 +31,21 @@ export class MaterializedRepos {
   }
 
   /**
+   * Creates dataloader instances for all registered repositories.
+   *
+   * Multiple calls will create separate instances and cache will not be shared
+   * between them.
+   */
+  async createDataloaders() {
+    const dataloaders = new Map();
+    await Promise.all([...this.repos].map(async ([key, repo]) => {
+      const loader = await repo.createDataloader();
+      dataloaders.set(key, loader);
+    }));
+    return dataloaders;
+  }
+
+  /**
    * Creates indexes for all registered repos.
    */
   createAllIndexes() {

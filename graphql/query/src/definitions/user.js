@@ -46,7 +46,8 @@ type UserInterfaceEmail {
     @project(field: "domain")
   "Any previously used email addresses."
   previous: [String!]!
-    @project(field: "previousEmails") @array
+    @project(field: "previousEmails")
+    @array
 }
 
 type UserInterfaceName {
@@ -77,7 +78,20 @@ type UserInterfaceSlug {
 }
 
 type User implements UserInterface @interfaceFields {
-  _id: ObjectID! @project
+  "Gets the user membership role for the provided workspace ID. Will return null if the user is not a member of the workspace."
+  workspaceRoleFromId(input: UserWorkspaceRoleFromIdInput!): String
+    @project(
+      field: "_connection.workspace.edges.node._id"
+      prefixNeedsWith: "_connection.workspace.edges"
+      needs: [
+        "role"
+      ]
+    )
+}
+
+input UserWorkspaceRoleFromIdInput {
+  "The workspace ID to return the role from."
+  _id: ObjectID!
 }
 
 `;

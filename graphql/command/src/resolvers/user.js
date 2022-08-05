@@ -23,6 +23,14 @@ export default {
     /**
      *
      */
+    async logoutMagicUser(_, __, { auth, ip, ua }) {
+      const authToken = await auth.getMagicAuthToken();
+      return userManager.logoutMagicUser({ authToken, ip, ua });
+    },
+
+    /**
+     *
+     */
     async sendUserLoginLink(_, { input }, { ip, ua }) {
       const { email, redirectTo } = input;
       await userManager.createLoginLinkToken({

@@ -13,7 +13,7 @@ const parseHeader = (header) => {
  * @param {UserManager} params.userManager
  */
 export function AuthContext({ header, userManager } = {}) {
-  let authToken;
+  let magicAuthToken;
   let error;
   let promise;
   let user;
@@ -25,9 +25,9 @@ export function AuthContext({ header, userManager } = {}) {
         const { type, value } = parseHeader(header);
         if (type !== 'Bearer') throw new AuthenticationError(`The auth type '${type}' is not supported.`);
         if (!value) return;
-        authToken = value;
+        magicAuthToken = value;
         user = await userManager.verifyMagicAuthToken({
-          authToken,
+          authToken: magicAuthToken,
           projection: { email: 1 },
         });
       })();
@@ -46,9 +46,9 @@ export function AuthContext({ header, userManager } = {}) {
     return true;
   };
 
-  const getAuthToken = async () => {
+  const getMagicAuthToken = async () => {
     await check();
-    return authToken;
+    return magicAuthToken;
   };
 
   const getUser = async () => {
@@ -80,7 +80,7 @@ export function AuthContext({ header, userManager } = {}) {
   return {
     check,
     checkIsCurrentUser,
-    getAuthToken,
+    getMagicAuthToken,
     getUser,
     getUserId,
     isAuthenticated,

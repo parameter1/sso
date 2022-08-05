@@ -5,6 +5,9 @@ export default gql`
 extend type Mutation {
   "Logs a user in via a magic login link token."
   loginUserFromLink(input: LoginUserFromLinkInput!): MagicLoginAuthToken!
+  "Logs out the currently logged-in user."
+  logoutMagicUser: String!
+    @auth
   "Sends a magic login link to a user's email address. The user must already exist."
   sendUserLoginLink(input: SendUserLoginLinkInput!): String!
 }

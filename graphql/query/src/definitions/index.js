@@ -40,15 +40,15 @@ type DocumentMeta {
 }
 
 type DocumentMetaCreated {
-  date: DateTime!
-    @project
+  at: DateTime!
+    @project(field: "date")
   userId: ObjectID
     @project
 }
 
 type DocumentMetaModified {
-  date: DateTime!
-    @project
+  at: DateTime!
+    @project(field: "date")
   n: Int!
     @project
   userId: ObjectID
@@ -56,8 +56,8 @@ type DocumentMetaModified {
 }
 
 type DocumentMetaTouched {
-  date: DateTime!
-    @project
+  at: DateTime!
+    @project(field: "date")
   n: Int!
     @project
   userId: ObjectID

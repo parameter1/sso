@@ -165,7 +165,7 @@ export class UserManager {
       session: object(),
     }).required(), params);
     const query = {
-      subject: 'auth',
+      subject: 'magic-auth',
       audience: userId,
       'data.impersonated': impersonated ? true : { $ne: true },
       expiresAt: { $gt: new Date() },
@@ -173,7 +173,7 @@ export class UserManager {
     const doc = await this.token.findOne({ query, options: { session } });
     if (doc) return { doc, signed: this.token.signDocument(doc) };
     return this.token.createAndSign({
-      subject: 'auth',
+      subject: 'magic-auth',
       audience: userId,
       data: { ...(impersonated && { impersonated: true }) },
       ttl: impersonated ? 60 * 60 : 60 * 60 * 24,

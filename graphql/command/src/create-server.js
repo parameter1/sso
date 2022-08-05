@@ -33,7 +33,6 @@ export default async (options = {}) => {
       auth: AuthContext({ header: request.headers.authorization, userManager }),
       ip: request.ip,
       ua: request.headers['user-agent'],
-      userManager,
     }),
     schema,
     introspection: true,

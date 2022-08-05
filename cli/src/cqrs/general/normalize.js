@@ -7,7 +7,7 @@ export default async () => {
       type: 'checkbox',
       name: 'entityTypes',
       message: 'Select the entity types to normalize',
-      choices: () => entityManager.commandHandlers.keys(),
+      choices: () => entityManager.commandHandlers.normalizerKeys(),
     },
     {
       type: 'confirm',

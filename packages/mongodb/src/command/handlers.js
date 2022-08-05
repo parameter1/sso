@@ -1,7 +1,8 @@
 import { PropTypes, attempt } from '@parameter1/prop-types';
 import { mongoDBClientProp } from '../props.js';
-import { EventStore } from './event-store.js';
+import { EventStore, eventProps } from './event-store.js';
 import { ReservationsRepo } from './reservations.js';
+import { NormalizedBuilders } from '../normalized/builders.js';
 
 import { ApplicationCommandHandler } from './handlers/application.js';
 import { ManagerCommandHandler } from './handlers/manager.js';
@@ -10,7 +11,7 @@ import { OrganizationCommandHandler } from './handlers/organization.js';
 import { UserCommandHandler } from './handlers/user.js';
 import { WorkspaceCommandHandler } from './handlers/workspace.js';
 
-const { object } = PropTypes;
+const { boolean, object, oneOrMany } = PropTypes;
 
 export class CommandHandlers {
   /**
@@ -36,6 +37,8 @@ export class CommandHandlers {
       map.set(handler.entityType, handler);
       return map;
     }, new Map());
+
+    this.normalizedBuilders = new NormalizedBuilders();
   }
 
   createIndexes() {
@@ -59,5 +62,30 @@ export class CommandHandlers {
 
   keys() {
     return [...this.handlers.keys()];
+  }
+
+  /**
+   * Normalizes data from the event store collection based on the provided entity type and IDs
+   *
+   * @param {object} params
+   * @param {string} params.entityType
+   * @param {*|*[]} [params.entityIds=[]]
+   * @param {booleam} [params.withMergeStage=true]
+   */
+  async normalize(params) {
+    const { entityType, entityIds, withMergeStage } = attempt(params, object({
+      entityType: eventProps.entityType.required(),
+      entityIds: oneOrMany(eventProps.entityId).required(),
+      withMergeStage: boolean().default(true),
+    }).required());
+
+    const builder = this.normalizedBuilders.get(entityType);
+    const pipeline = builder.buildPipeline({ entityIds, withMergeStage });
+    const cursor = await this.store.aggregate({ pipeline });
+    return cursor.toArray();
+  }
+
+  normalizerKeys() {
+    return this.normalizedBuilders.keys();
   }
 }

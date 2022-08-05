@@ -24,6 +24,10 @@ export const eventProps = {
   userId: objectId().allow(null),
 };
 
+export function getEventSort() {
+  return { entityId: 1, date: 1, _id: 1 };
+}
+
 /**
  * @typedef EventStoreDocument
  * @property {string} command The command name
@@ -104,5 +108,9 @@ export class EventStore extends Repo {
       ({ result } = await this.bulkWrite({ operations }));
     }
     return result.upserted.map((o) => ({ ...o, ...prepared[o.index] }));
+  }
+
+  static getEventSort() {
+    return getEventSort();
   }
 }

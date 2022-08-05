@@ -1,17 +1,14 @@
 import { ObjectId } from '@parameter1/mongodb';
 import { PropTypes, attempt, validateAsync } from '@parameter1/prop-types';
 
-import { DB_NAME } from '../../constants.js';
 import { EventStore, eventProps } from '../event-store.js';
 import { ReservationsRepo, reservationProps } from '../reservations.js';
 
 const {
-  array,
   boolean,
   func,
   object,
   oneOrMany,
-  string,
 } = PropTypes;
 
 /**
@@ -103,146 +100,6 @@ export class BaseCommandHandler {
     this.reservations = reservations;
     this.store = store;
     this.entityType = entityType;
-  }
-
-  /**
-   *
-   * @param {object} params
-   * @param {*|*[]} params.entityIds
-   * @param {boolean} [params.withMergeStage=true]
-   * @returns {Promise<object[]>}
-   */
-  buildNormalizationPipeline(params) {
-    const {
-      entityIds,
-      newRootMergeObjects,
-      unsetFields,
-      valueBranches,
-      withMergeStage,
-    } = attempt(params, object({
-      entityIds: oneOrMany(eventProps.entityId).required(),
-      newRootMergeObjects: array().items(object()).default([]),
-      unsetFields: array().items(string()).default([]),
-      valueBranches: array().items(object()).default([]),
-      withMergeStage: boolean().default(true),
-    }).required());
-
-    const pipeline = [{
-      $match: {
-        ...(entityIds.length && { entityId: { $in: entityIds } }),
-        entityType: this.entityType,
-      },
-    }, {
-      $sort: BaseCommandHandler.getEventSort(),
-    }, {
-      $group: { _id: '$entityId', stream: { $push: '$$ROOT' } },
-    }, {
-      $set: {
-        _: {
-          $reduce: {
-            input: '$stream',
-            initialValue: {},
-            in: {
-              isDeleted: {
-                $cond: [
-                  { $eq: ['$$this.command', 'DELETE'] },
-                  true,
-                  {
-                    $cond: [
-                      { $eq: ['$$this.command', 'RESTORE'] },
-                      false,
-                      { $ifNull: ['$$value.isDeleted', false] },
-                    ],
-                  },
-                ],
-              },
-
-              created: {
-                $ifNull: [
-                  {
-                    $cond: [
-                      { $eq: ['$$this.command', 'CREATE'] },
-                      { date: '$$this.date', userId: '$$this.userId' },
-                      null,
-                    ],
-                  },
-                  '$$value.created',
-                ],
-              },
-
-              modified: {
-                $cond: [
-                  { $eq: ['$$this.omitFromModified', true] },
-                  '$$value.modified',
-                  {
-                    date: '$$this.date',
-                    n: { $add: [{ $ifNull: ['$$value.modified.n', 0] }, 1] },
-                    userId: '$$this.userId',
-                  },
-                ],
-              },
-
-              touched: {
-                date: '$$this.date',
-                n: { $add: [{ $ifNull: ['$$value.touched.n', 0] }, 1] },
-                userId: '$$this.userId',
-              },
-
-              values: {
-                $mergeObjects: [
-                  '$$value.values',
-                  {
-                    $cond: [
-                      { $eq: ['$$this.command', 'DELETED'] },
-                      {},
-                      valueBranches.length ? {
-                        $switch: {
-                          branches: valueBranches,
-                          default: '$$this.values',
-                        },
-                      } : '$$this.values',
-                    ],
-                  },
-                ],
-              },
-            },
-          },
-        },
-      },
-    }, {
-      $replaceRoot: {
-        newRoot: {
-          $mergeObjects: [
-            { _id: '$_id' },
-            {
-              _deleted: '$_.isDeleted',
-              _history: { $filter: { input: '$stream', cond: { $ne: ['$$this.omitFromHistory', true] } } },
-              _meta: { created: '$_.created', modified: '$_.modified', touched: '$_.touched' },
-            },
-            '$_.values',
-            ...newRootMergeObjects,
-          ],
-        },
-      },
-    }, {
-      $unset: [
-        '_history.entityId',
-        '_history.omitFromHistory',
-        '_history.omitFromModified',
-        ...unsetFields,
-      ],
-    }];
-    if (withMergeStage) {
-      pipeline.push({
-        $merge: {
-          into: { db: DB_NAME, coll: `${this.entityType}/normalized` },
-          on: '_id',
-          whenMatched: 'replace',
-          whenNotMatched: 'insert',
-        },
-      });
-    }
-    return pipeline;
   }
 
   /**
@@ -419,7 +276,7 @@ export class BaseCommandHandler {
         command: { $in: ['CREATE', 'DELETE', 'RESTORE'] },
       },
     }, {
-      $sort: BaseCommandHandler.getEventSort(),
+      $sort: EventStore.getEventSort(),
     }, {
       $group: { _id: '$entityId', first: { $first: '$command' }, last: { $last: '$command' } },
     }, {
@@ -436,27 +293,6 @@ export class BaseCommandHandler {
       map.set(`${doc._id}`, doc.state);
       return map;
     }, new Map());
-  }
-
-  /**
-   *
-   * @param {object} params
-   * @param {*|*[]} params.entityIds
-   * @param {boolean} [params.withMergeStage=true]
-   * @returns {Promise<object[]>}
-   */
-  async normalize(params) {
-    const {
-      entityIds,
-      withMergeStage,
-    } = await validateAsync(object({
-      entityIds: oneOrMany(eventProps.entityId).required(),
-      withMergeStage: boolean().default(true),
-    }).required(), params);
-
-    const pipeline = this.buildNormalizationPipeline({ entityIds, withMergeStage });
-    const cursor = await this.store.aggregate({ pipeline });
-    return cursor.toArray();
   }
 
   /**
@@ -485,9 +321,5 @@ export class BaseCommandHandler {
       ...reservation,
       entityType: this.entityType,
     })), { session });
-  }
-
-  static getEventSort() {
-    return { entityId: 1, date: 1, _id: 1 };
   }
 }

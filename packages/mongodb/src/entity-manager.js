@@ -66,9 +66,11 @@ export class EntityManager {
       withMergeStage: boolean().default(true),
     }).required(), params);
 
-    return this
-      .getCommandHandler(entityType)
-      .normalize({ entityIds, withMergeStage });
+    return this.commandHandlers.normalize({
+      entityType,
+      entityIds,
+      withMergeStage,
+    });
   }
 
   /**

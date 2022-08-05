@@ -52,6 +52,9 @@ export class UserManager {
     });
   }
 
+  /**
+   * Creates token and user log database indexes.
+   */
   createIndexes() {
     return Promise.all([
       this.token.createIndexes(),

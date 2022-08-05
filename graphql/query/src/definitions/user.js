@@ -12,6 +12,9 @@ interface UserInterface {
   "The unique user identifier"
   _id: ObjectID!
     @project
+  "Metadata containing the created, modified, and touched info."
+  _meta: DocumentMeta!
+    @project(deep: true)
   "The user's current email address, domain, and any previously used addresses."
   email: UserInterfaceEmail!
     @project(field: "", deep: true) @object

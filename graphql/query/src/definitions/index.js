@@ -30,6 +30,40 @@ type Mutation {
   ping: String!
 }
 
+type DocumentMeta {
+  created: DocumentMetaCreated!
+    @project(deep: true)
+  modified: DocumentMetaModified!
+    @project(deep: true)
+  touched: DocumentMetaTouched!
+    @project(deep: true)
+}
+
+type DocumentMetaCreated {
+  date: DateTime!
+    @project
+  userId: ObjectID
+    @project
+}
+
+type DocumentMetaModified {
+  date: DateTime!
+    @project
+  n: Int!
+    @project
+  userId: ObjectID
+    @project
+}
+
+type DocumentMetaTouched {
+  date: DateTime!
+    @project
+  n: Int!
+    @project
+  userId: ObjectID
+    @project
+}
+
 ${user}
 
 `;

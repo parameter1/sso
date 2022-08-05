@@ -76,7 +76,7 @@ const updateSchema = object({
   omitFromHistory: eventProps.omitFromHistory,
   omitFromModified: eventProps.omitFromModified,
   userId: eventProps.userId,
-  values: eventProps.values.required(),
+  values: eventProps.values.default({}),
 });
 
 export class BaseCommandHandler {

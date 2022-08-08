@@ -8,6 +8,15 @@ export function authDirectiveTransformer(schema, directiveName = 'auth') {
       const args = getDirectiveArgs(schema, fieldConfig, directiveName);
       if (!args) return;
 
+      const { subscribe: defaultSubscriber } = fieldConfig;
+      if (defaultSubscriber) {
+        fieldConfig.subscribe = async (...subscriberArgs) => {
+          const [, , { auth }] = subscriberArgs;
+          await auth.check();
+          return defaultSubscriber(...subscriberArgs);
+        };
+      }
+
       const { resolve: defaultFieldResolver } = fieldConfig;
       fieldConfig.resolve = async (...resolverArgs) => {
         const [root, , { auth }] = resolverArgs;

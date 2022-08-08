@@ -8,6 +8,9 @@ extend type Mutation {
   "Logs out the currently logged-in user."
   logoutMagicUser: String!
     @auth
+  "Changes the currently logged-in user's given and family names"
+  ownUserNames(input: OwnUserNamesInput!): UserCommandEvent!
+    @auth
   "Sends a magic login link to a user's email address. The user must already exist."
   sendUserLoginLink(input: SendUserLoginLinkInput!): String!
 }
@@ -24,6 +27,13 @@ type MagicLoginAuthToken {
 input LoginUserFromLinkInput {
   "The JWT token provided from the user login link."
   loginLinkToken: String!
+}
+
+input OwnUserNamesInput {
+  "The current user's family/last name."
+  family: String!
+  "The current user's given/first name."
+  given: String!
 }
 
 input SendUserLoginLinkInput {

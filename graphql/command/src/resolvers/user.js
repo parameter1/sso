@@ -1,4 +1,4 @@
-import { userManager } from '../mongodb.js';
+import { entityManager, userManager } from '../mongodb.js';
 import createLoginLinkTemplate from '../email-templates/login-link.js';
 import { send } from '../sendgrid.js';
 
@@ -26,6 +26,21 @@ export default {
     async logoutMagicUser(_, __, { auth, ip, ua }) {
       const authToken = await auth.getMagicAuthToken();
       return userManager.logoutMagicUser({ authToken, ip, ua });
+    },
+
+    /**
+     * @todo pass ip and ua context values to command
+     */
+    async ownUserNames(_, { input }, { auth }) {
+      const entityId = await auth.getUserId();
+      const handler = entityManager.getCommandHandler('user');
+      const [event] = await handler.changeName({
+        entityId,
+        familyName: input.family,
+        givenName: input.given,
+        userId: entityId,
+      });
+      return event;
     },
 
     /**

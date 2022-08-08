@@ -12,6 +12,8 @@ import {
   OnShutdownPlugin,
 } from '@parameter1/graphql/plugins';
 import { AuthContext } from '@parameter1/sso-graphql';
+import { WebSocketServer } from 'ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
 
 import schema from './schema.js';
 import { userManager } from './mongodb.js';
@@ -28,6 +30,18 @@ const codes = {
 
 export default async (options = {}) => {
   const app = fastify(options.fastify);
+
+  const wsServer = new WebSocketServer({
+    server: app.server,
+    path: '/subscriptions',
+  });
+  const serverCleanup = useServer({
+    schema,
+    context: ({ connectionParams }) => ({
+      auth: AuthContext({ header: connectionParams.authorization, userManager }),
+    }),
+  }, wsServer);
+
   const apollo = new ApolloServer({
     context: ({ request }) => ({
       auth: AuthContext({ header: request.headers.authorization, userManager }),
@@ -47,6 +61,15 @@ export default async (options = {}) => {
         stopGracePeriodMillis: process.env.SHUTDOWN_GRACE_PERIOD,
       }),
       OnShutdownPlugin({ fn: options.onShutdown }),
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              await serverCleanup.dispose();
+            },
+          };
+        },
+      },
     ],
     formatError: (err) => {
       const statusCode = get(err, 'extensions.exception.statusCode');

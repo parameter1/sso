@@ -23,6 +23,7 @@
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/prop-types": "^2.3.0",
     "@parameter1/sso-graphql": "^0.4.0",
+    "@parameter1/sso-graphql-redis-pubsub": "^0.4.0",
     "@parameter1/sso-mongodb": "^0.4.0",
     "@parameter1/utils": "^2.0.0",
     "@sendgrid/mail": "^7.7.0",
@@ -31,7 +32,9 @@
     "envalid": "^7.3.1",
     "fastify": "^3.29.1",
     "graphql": "^16.5.0",
-    "lodash.merge": "^4.6.2"
+    "graphql-ws": "^5.9.1",
+    "lodash.merge": "^4.6.2",
+    "ws": "^8.8.1"
   },
   "devDependencies": {
     "@parameter1/gulp": "^2.0.0"

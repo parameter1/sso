@@ -9,6 +9,7 @@
   ],
   "plugins": ["vue", "import"],
   "rules": {
+    "no-underscore-dangle": ["error", { "allow": ["_id"] } ],
     "vue/max-attributes-per-line": ["error", {
       "singleline": {
         "max": 3

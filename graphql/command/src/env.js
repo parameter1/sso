@@ -13,6 +13,8 @@ export const {
   HOST,
   MONGO_URL,
   PORT,
+  REDIS_PUBSUB_HOST,
+  REDIS_PUBSUB_PORT,
   SENDGRID_API_KEY,
   TOKEN_SECRET,
 } = cleanEnv(process.env, {
@@ -24,6 +26,8 @@ export const {
   HOST: str({ desc: 'The host that the service will run on.', default: '0.0.0.0' }),
   MONGO_URL: str({ desc: 'The MongoDB URL to connect to.' }),
   PORT: port({ desc: 'The port that the service will run on.', default: 80 }),
+  REDIS_PUBSUB_HOST: str({ desc: 'The Redis PubSub host to connect to.' }),
+  REDIS_PUBSUB_PORT: str({ desc: 'The Redis PubSub port to connect to.' }),
   SENDGRID_API_KEY: str({ desc: 'The Sendgrid API key.' }),
   TOKEN_SECRET: str({ desc: 'The secret to use when signing tokens.' }),
 });

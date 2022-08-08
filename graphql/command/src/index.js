@@ -9,6 +9,7 @@ import {
   PORT,
 } from './env.js';
 import { mongodb } from './mongodb.js';
+import { pubSubManager } from './pubsub.js';
 
 process.on('unhandledRejection', immediatelyThrow);
 
@@ -17,21 +18,36 @@ const { log } = console;
 (async () => {
   log(`Booting ${pkg.name} v${pkg.version}...`);
   // start services here
-  log('Connecting to MongoDB...');
-  const client = await mongodb.connect();
-  log(`MongoDB connected on ${filterMongoURL(client)}`);
+  await Promise.all([
+    (async () => {
+      log('Connecting to MongoDB...');
+      const client = await mongodb.connect();
+      log(`MongoDB connected on ${filterMongoURL(client)}`);
+    })(),
+    (async () => {
+      log('> Connecting to Redis pub/sub...');
+      await pubSubManager.connect();
+      log('> Redis pub/sub connected.');
+    })(),
+  ]);
 
   const server = await createServer({
     fastify: {
       trustProxy: ['loopback', 'linklocal', 'uniquelocal'],
     },
     onHealthCheck: async () => {
-      await mongodb.ping({ id: pkg.name });
+      await Promise.all([
+        mongodb.ping({ id: pkg.name }),
+        pubSubManager.ping(),
+      ]);
       return true;
     },
     onShutdown: async () => {
       // stop services here
-      await mongodb.close();
+      await Promise.all([
+        mongodb.close(),
+        pubSubManager.quit(),
+      ]);
     },
   });
 

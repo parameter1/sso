@@ -65,7 +65,7 @@ services:
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
-      <<: [*env, *env-core]
+      <<: [*env, *env-core, *env-redis-pubsub]
       APP_URL: ${APP_URL-http://sso.dev.parameter1.com:7913}
       EXPOSED_HOST: graphql.sso.dev.parameter1.com
       EXPOSED_PORT: 7912
@@ -76,6 +76,7 @@ services:
     hostname: graphql.sso.dev.parameter1.com
     depends_on:
       - materializer
+      - redis-pubsub
 
   graphql-query:
     <<: *node

@@ -1,31 +1,13 @@
 import inquirer from 'inquirer';
-import repos from '../../repos.js';
-
-const pipelineMap = new Set([
-  'application',
-  'organization',
-  'user',
-  'workspace',
-]);
+import { entityManager } from '../../mongodb.js';
 
 export default async () => {
   const questions = [
     {
       type: 'checkbox',
-      name: 'types',
-      message: 'Select the collection types to materialize',
-      choices: () => [
-        'application',
-        'organization',
-        'user',
-        'workspace',
-      ],
-      validate: (input) => {
-        input.forEach((type) => {
-          if (!pipelineMap.has(type)) throw new Error(`No materializer was found for ${type}`);
-        });
-        return true;
-      },
+      name: 'entityTypes',
+      message: 'Select the entity types to materialize',
+      choices: () => entityManager.normalizedRepos.materializerKeys(),
     },
     {
       type: 'confirm',
@@ -35,10 +17,9 @@ export default async () => {
     },
   ];
 
-  const { types, confirm } = await inquirer.prompt(questions);
-
-  return confirm ? Promise.all(types.map(async (type) => {
-    await repos.$(type).materialize();
-    return { [type]: 'ok' };
+  const { entityTypes, confirm } = await inquirer.prompt(questions);
+  return confirm ? Promise.all(entityTypes.map(async (entityType) => {
+    await entityManager.materialize({ entityType });
+    return { [entityType]: 'ok' };
   })) : [];
 };

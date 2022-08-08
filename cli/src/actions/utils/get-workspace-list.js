@@ -1,5 +1,5 @@
 import { isFunction as isFn } from '@parameter1/utils';
-import repos from '../../repos.js';
+import { entityManager } from '../../mongodb.js';
 
 export default async ({
   filter,
@@ -7,53 +7,25 @@ export default async ({
   query,
   projection,
 } = {}) => {
-  const cursor = await repos.$('workspace').aggregate({
-    pipeline: [
-      { $match: { ...query } },
-      {
-        $lookup: {
-          from: 'applications',
-          foreignField: '_id',
-          localField: '_edge.application._id',
-          as: 'application',
-        },
+  const repo = entityManager.getMaterializedRepo('workspace');
+  const pipeline = [
+    { $match: { _deleted: false, ...query } },
+    {
+      $project: {
+        ...projection,
+        fullName: 1,
+        namespace: 1,
       },
-      {
-        $lookup: {
-          from: 'organizations',
-          foreignField: '_id',
-          localField: '_edge.organization._id',
-          as: 'organization',
-        },
-      },
-      { $unwind: '$application' },
-      { $unwind: '$organization' },
-      {
-        $project: {
-          ...projection,
-          name: 1,
-          key: 1,
-          'application._id': 1,
-          'application.name': 1,
-          'application.key': 1,
-
-          'organization._id': 1,
-          'organization.name': 1,
-          'organization.key': 1,
-          fullName: { $concat: ['$application.name', ' > ', '$organization.name', ' > ', '$name'] },
-          ns: { $concat: ['$application.key', '.', '$organization.key', '.', '$key'] },
-        },
-      },
-      { $sort: { fullName: 1 } },
-    ],
-  });
-
-  const workspaces = await cursor.toArray();
-  return workspaces.filter((doc) => {
+    },
+    { $sort: { path: 1, _id: 1 } },
+  ];
+  const cursor = await repo.aggregate({ pipeline });
+  const apps = await cursor.toArray();
+  return apps.filter((doc) => {
     if (isFn(filter)) return filter(doc);
     return true;
   }).map((doc) => ({
-    name: `${doc.fullName} [${doc.ns}]`,
+    name: `${doc.fullName} [${doc.namespace.default}]`,
     value: doc,
     disabled: isFn(disabledWhen) ? disabledWhen(doc) : false,
   }));

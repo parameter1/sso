@@ -1,28 +1,41 @@
 import inquirer from 'inquirer';
 import { immediatelyThrow } from '@parameter1/utils';
 import { get } from '@parameter1/object-path';
-import { connect, close } from './mongodb.js';
-import repos from './repos.js';
+import { connect, close, entityManager } from './mongodb.js';
+import { pubSubManager } from './pubsub.js';
 
-import actions from './actions/index.js';
+import actions from './actions.js';
+
+process.on('unhandledRejection', immediatelyThrow);
 
 const { log } = console;
 
 const hasDocuments = async () => {
-  const r = await Promise.all(['application', 'organization', 'user', 'workspace'].map(async (name) => {
-    const repo = repos.$(name);
-    const doc = await repo.findOne({ query: {}, options: { projection: { _id: 1 } } });
-    return { name, hasDocs: Boolean(doc) };
+  const r = await Promise.all([
+    { entityType: 'application', deleted: false },
+    { entityType: 'manager', deleted: false },
+    { entityType: 'member', deleted: false },
+    { entityType: 'organization', deleted: false },
+    { entityType: 'user', deleted: false },
+    { entityType: 'user', deleted: true },
+    { entityType: 'workspace', deleted: false },
+  ].map(async ({ entityType, deleted }) => {
+    const key = deleted ? `${entityType}_deleted` : entityType;
+    const repo = entityManager.getNormalizedRepo(entityType);
+    const doc = await repo.findOne({
+      query: { _deleted: deleted },
+      options: { projection: { _id: 1 } },
+    });
+    return { key, hasDocs: Boolean(doc) };
   }));
-  return r.reduce((set, { name, hasDocs }) => {
-    if (hasDocs) set.add(name);
+  return r.reduce((set, { key, hasDocs }) => {
+    if (hasDocs) set.add(key);
     return set;
   }, new Set());
 };
 
 const run = async () => {
   const documents = await hasDocuments();
-
   const questions = [
     {
       type: 'list',
@@ -36,12 +49,7 @@ const run = async () => {
             { name: 'Create new application', fnName: 'create' },
             {
               name: 'Change application name',
-              fnName: 'updateName',
-              disabled: !documents.has('application'),
-            },
-            {
-              name: 'Delete application',
-              fnName: 'delete',
+              fnName: 'changeName',
               disabled: !documents.has('application'),
             },
           ],
@@ -58,13 +66,23 @@ const run = async () => {
             },
             {
               name: 'Change user first/last name',
-              fnName: 'updateNames',
+              fnName: 'changeName',
               disabled: !documents.has('user'),
             },
             {
               name: 'Generate user auth token (impersonate)',
               fnName: 'generateAuthToken',
               disabled: !documents.has('user'),
+            },
+            {
+              name: 'Delete user',
+              fnName: 'delete',
+              disabled: !documents.has('user'),
+            },
+            {
+              name: 'Restore user',
+              fnName: 'restore',
+              disabled: !documents.has('user_deleted'),
             },
           ],
         },
@@ -75,39 +93,30 @@ const run = async () => {
             { name: 'Create new organization', fnName: 'create' },
             {
               name: 'Change organization name',
-              fnName: 'updateName',
+              fnName: 'changeName',
               disabled: !documents.has('organization'),
             },
+          ],
+        },
+
+        {
+          key: 'manager',
+          choices: [
             {
-              name: 'Add organization manager',
-              fnName: 'addManager',
+              name: 'Create organization manager',
+              fnName: 'create',
               disabled: !documents.has('organization') || !documents.has('user'),
             },
             {
               name: 'Change manager role',
-              fnName: 'changeManagerRole',
-              disabled: !documents.has('organization') || !documents.has('user'),
+              fnName: 'changeRole',
+              disabled: !documents.has('manager'),
             },
             {
-              name: 'Remove organization manager',
-              fnName: 'removeManager',
-              disabled: !documents.has('organization') || !documents.has('user'),
-            },
-            {
-              name: 'Delete organization',
+              name: 'Delete organization manager',
               fnName: 'delete',
-              disabled: !documents.has('organization'),
+              disabled: !documents.has('manager'),
             },
-            // {
-            //   name: 'Add organization email domains',
-            //   fnName: 'addEmailDomains',
-            //   disabled: !documents.has('organization'),
-            // },
-            // {
-            //   name: 'Remove organization email domains',
-            //   fnName: 'removeEmailDomains',
-            //   disabled: !documents.has('organization'),
-            // },
           ],
         },
 
@@ -121,23 +130,29 @@ const run = async () => {
             },
             {
               name: 'Change workspace name',
-              fnName: 'updateName',
+              fnName: 'changeName',
               disabled: !documents.has('workspace'),
             },
+          ],
+        },
+
+        {
+          key: 'member',
+          choices: [
             {
-              name: 'Add workspace member',
-              fnName: 'addMember',
+              name: 'Create workspace member',
+              fnName: 'create',
               disabled: !documents.has('workspace') || !documents.has('user'),
             },
             {
-              name: 'Change workspace member role',
-              fnName: 'changeMemberRole',
-              disabled: !documents.has('workspace') || !documents.has('user'),
+              name: 'Change member role',
+              fnName: 'changeRole',
+              disabled: !documents.has('member'),
             },
             {
-              name: 'Remove workspace member',
-              fnName: 'removeMember',
-              disabled: !documents.has('workspace') || !documents.has('user'),
+              name: 'Delete workspace member',
+              fnName: 'delete',
+              disabled: !documents.has('member'),
             },
           ],
         },
@@ -145,8 +160,9 @@ const run = async () => {
         {
           key: 'general',
           choices: [
-            { name: 'Create materialized collections', fnName: 'materialize' },
             { name: 'Create database indexes', fnName: 'createIndexes' },
+            { name: 'Normalize event data', fnName: 'normalize' },
+            { name: 'Materialize objects', fnName: 'materialize' },
           ],
         },
       ].reduce((arr, group) => {
@@ -184,11 +200,25 @@ const run = async () => {
   if (runAnother) await run();
 };
 
-process.on('unhandledRejection', immediatelyThrow);
-
 (async () => {
-  await connect();
+  await Promise.all([
+    connect(),
+    (async () => {
+      log('> Connecting to Redis pub/sub...');
+      await pubSubManager.connect();
+      log('> Redis pub/sub connected.');
+    })(),
+  ]);
+
   await run();
-  await close();
+
+  await Promise.all([
+    close(),
+    (async () => {
+      log('> Closing Redis pub/sub...');
+      await pubSubManager.quit();
+      log('> Redis pub/sub closed.');
+    })(),
+  ]);
   log('> DONE');
 })().catch(immediatelyThrow);

@@ -1,6 +1,7 @@
 import inquirer from 'inquirer';
-import { userProps } from '@parameter1/sso-mongodb';
-import repos from '../../repos.js';
+import { userCommandProps } from '@parameter1/sso-mongodb';
+import { entityManager } from '../../mongodb.js';
+import { waitUntilProcessed } from '../utils/index.js';
 
 export default async () => {
   const questions = [
@@ -9,19 +10,17 @@ export default async () => {
       name: 'email',
       message: 'Enter the new user\'s email address',
       filter: (input) => {
-        const { value } = userProps.email.required().validate(input);
+        const { value } = userCommandProps.email.required().validate(input);
         return value;
       },
       validate: async (input) => {
-        const { error, value } = userProps.email.required().validate(input);
+        const { error, value } = userCommandProps.email.required().validate(input);
         if (error) return error;
-
-        const doc = await repos.$('user').findByEmail({
+        const doc = await entityManager.getMaterializedRepo('user').findByEmail({
           email: value,
           options: { projection: { _id: 1 } },
         });
         if (doc) return new Error('A user already exists with this email address');
-
         return true;
       },
     },
@@ -30,7 +29,7 @@ export default async () => {
       name: 'givenName',
       message: 'Enter the user\'s first/given name',
       validate: (input) => {
-        const { error } = userProps.givenName.required().validate(input);
+        const { error } = userCommandProps.givenName.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -40,7 +39,7 @@ export default async () => {
       name: 'familyName',
       message: 'Enter the user\'s last/family name',
       validate: (input) => {
-        const { error } = userProps.familyName.required().validate(input);
+        const { error } = userCommandProps.familyName.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -59,6 +58,10 @@ export default async () => {
     givenName,
     familyName,
   } = await inquirer.prompt(questions);
-  const doc = { email, givenName, familyName };
-  return confirm ? repos.$('user').create({ doc }) : null;
+  if (!confirm) return null;
+
+  const handler = entityManager.getCommandHandler('user');
+  return waitUntilProcessed(() => handler.create({
+    values: { email, givenName, familyName },
+  }));
 };

@@ -1,7 +1,8 @@
 import inquirer from 'inquirer';
-import { applicationProps } from '@parameter1/sso-mongodb';
 import { sluggify } from '@parameter1/slug';
-import repos from '../../repos.js';
+import { applicationCommandProps } from '@parameter1/sso-mongodb';
+import { entityManager } from '../../mongodb.js';
+import { waitUntilProcessed } from '../utils/index.js';
 
 export default async () => {
   const questions = [
@@ -10,11 +11,11 @@ export default async () => {
       name: 'name',
       message: 'Enter the application name',
       filter: (input) => {
-        const { value } = applicationProps.name.required().validate(input);
+        const { value } = applicationCommandProps.name.required().validate(input);
         return value;
       },
       validate: (input) => {
-        const { error } = applicationProps.name.required().validate(input);
+        const { error } = applicationCommandProps.name.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -25,15 +26,14 @@ export default async () => {
       message: 'Enter the application key',
       default: ({ name }) => sluggify(name),
       filter: (input) => {
-        const { value } = applicationProps.key.required().validate(input);
+        const { value } = applicationCommandProps.key.required().validate(input);
         return value;
       },
       validate: async (input) => {
-        const { error } = applicationProps.key.required().validate(input);
+        const { error, value } = applicationCommandProps.key.required().validate(input);
         if (error) return error;
-
-        const doc = await repos.$('application').findByKey({
-          key: input,
+        const doc = await entityManager.getMaterializedRepo('application').findByKey({
+          key: value,
           options: { projection: { _id: 1 } },
         });
         if (doc) return new Error('An application already exists with this key');
@@ -47,7 +47,7 @@ export default async () => {
       default: 'Administrator, Member',
       filter: (list) => list.split(',').map((v) => v.trim()).filter((v) => v),
       validate: (roles) => {
-        const { error } = applicationProps.roles.validate(roles);
+        const { error } = applicationCommandProps.roles.validate(roles);
         if (error) return error;
         return true;
       },
@@ -66,6 +66,10 @@ export default async () => {
     key,
     roles,
   } = await inquirer.prompt(questions);
-  const doc = { name, key, roles };
-  return confirm ? repos.$('application').create({ doc }) : null;
+  if (!confirm) return null;
+
+  const handler = entityManager.getCommandHandler('application');
+  return waitUntilProcessed(() => handler.create({
+    values: { name, key, roles },
+  }));
 };

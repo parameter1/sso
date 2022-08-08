@@ -1,10 +1,10 @@
-import application from './cqrs/application.js';
-import manager from './cqrs/manager.js';
-import member from './cqrs/member.js';
-import organization from './cqrs/organization.js';
-import general from './cqrs/general.js';
-import user from './cqrs/user.js';
-import workspace from './cqrs/workspace.js';
+import application from './actions/application.js';
+import manager from './actions/manager.js';
+import member from './actions/member.js';
+import organization from './actions/organization.js';
+import general from './actions/general.js';
+import user from './actions/user.js';
+import workspace from './actions/workspace.js';
 
 export default {
   application,

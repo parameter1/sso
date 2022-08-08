@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
-import { userProps } from '@parameter1/sso-mongodb';
-import getUserList from '../utils/get-user-list.js';
-import repos from '../../repos.js';
+import { userCommandProps } from '@parameter1/sso-mongodb';
+import { getUserList, waitUntilProcessed } from '../utils/index.js';
+import { entityManager } from '../../mongodb.js';
 
 export default async () => {
   const questions = [
@@ -16,14 +16,13 @@ export default async () => {
       name: 'email',
       message: 'Enter the new email address',
       filter: (input) => {
-        const { value } = userProps.email.required().validate(input);
+        const { value } = userCommandProps.email.required().validate(input);
         return value;
       },
       validate: async (input) => {
-        const { error, value } = userProps.email.required().validate(input);
+        const { error, value } = userCommandProps.email.required().validate(input);
         if (error) return error;
-
-        const doc = await repos.$('user').findByEmail({
+        const doc = await entityManager.getMaterializedRepo('user').findByEmail({
           email: value,
           options: { projection: { _id: 1 } },
         });
@@ -44,9 +43,11 @@ export default async () => {
     user,
     email,
   } = await inquirer.prompt(questions);
+  if (!confirm) return null;
 
-  return confirm ? repos.$('user').changeEmailAddress({
-    id: user._id,
+  const handler = entityManager.getCommandHandler('user');
+  return waitUntilProcessed(() => handler.changeEmail({
+    entityId: user._id,
     email,
-  }) : null;
+  }));
 };

@@ -1,5 +1,5 @@
 import { isFunction as isFn } from '@parameter1/utils';
-import repos from '../../repos.js';
+import { entityManager } from '../../mongodb.js';
 
 export default async ({
   filter,
@@ -7,11 +7,19 @@ export default async ({
   query,
   projection,
 } = {}) => {
-  const cursor = await repos.$('organization').find({
-    query: { ...query },
-    options: { projection: { ...projection, name: 1, key: 1 }, sort: { name: 1 } },
-  });
-
+  const repo = entityManager.getMaterializedRepo('organization');
+  const pipeline = [
+    { $match: { _deleted: false, ...query } },
+    {
+      $project: {
+        ...projection,
+        name: 1,
+        key: 1,
+      },
+    },
+    { $sort: { slug: 1, _id: 1 } },
+  ];
+  const cursor = await repo.aggregate({ pipeline });
   const orgs = await cursor.toArray();
   return orgs.filter((doc) => {
     if (isFn(filter)) return filter(doc);

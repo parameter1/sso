@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import managedRepos, { materializedRepos } from '../../repos.js';
+import { entityManager, userManager } from '../../mongodb.js';
 
 export default async () => {
   const questions = [
@@ -15,7 +15,9 @@ export default async () => {
     confirm,
   } = await inquirer.prompt(questions);
   return confirm ? Promise.all([
-    managedRepos.createAllIndexes(),
-    materializedRepos.createAllIndexes(),
+    entityManager.commandHandlers.createIndexes(),
+    entityManager.materializedRepos.createAllIndexes(),
+    entityManager.normalizedRepos.createAllIndexes(),
+    userManager.createIndexes(),
   ]) : null;
 };

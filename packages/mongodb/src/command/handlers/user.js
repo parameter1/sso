@@ -157,4 +157,37 @@ export class UserCommandHandler extends BaseCommandHandler {
     }))), params);
     return this.executeUpdate(commands);
   }
+
+  /**
+   *
+   * @param {object} params
+   * @param {object} options
+   * @param {ClientSession} [options.session]
+   */
+  async restore(params, { session: currentSession } = {}) {
+    const commands = await validateAsync(oneOrMany(object({
+      entityId: userProps.id.required(),
+      date: eventProps.date,
+      email: userProps.email.required(),
+      userId: eventProps.userId,
+    })).required().custom((vals) => vals.map((o) => ({
+      entityId: o.entityId,
+      date: o.date,
+      values: {
+        domain: o.email.split('@')[1],
+        email: o.email,
+      },
+      userId: o.userId,
+    }))), params);
+
+    return runTransaction(async ({ session }) => {
+      await this.reserve(commands.map(({ entityId, values }) => ({
+        entityId,
+        key: 'email',
+        value: values.email,
+      })), { session });
+      const results = await this.executeRestore(commands, { session });
+      return results;
+    }, { currentSession, client: this.client });
+  }
 }

@@ -11,16 +11,25 @@ process.on('unhandledRejection', immediatelyThrow);
 const { log } = console;
 
 const hasDocuments = async () => {
-  const r = await Promise.all(['application', 'manager', 'member', 'organization', 'user', 'workspace'].map(async (entityType) => {
+  const r = await Promise.all([
+    { entityType: 'application', deleted: false },
+    { entityType: 'manager', deleted: false },
+    { entityType: 'member', deleted: false },
+    { entityType: 'organization', deleted: false },
+    { entityType: 'user', deleted: false },
+    { entityType: 'user', deleted: true },
+    { entityType: 'workspace', deleted: false },
+  ].map(async ({ entityType, deleted }) => {
+    const key = deleted ? `${entityType}_deleted` : entityType;
     const repo = entityManager.getNormalizedRepo(entityType);
     const doc = await repo.findOne({
-      query: { _deleted: false },
+      query: { _deleted: deleted },
       options: { projection: { _id: 1 } },
     });
-    return { entityType, hasDocs: Boolean(doc) };
+    return { key, hasDocs: Boolean(doc) };
   }));
-  return r.reduce((set, { entityType, hasDocs }) => {
-    if (hasDocs) set.add(entityType);
+  return r.reduce((set, { key, hasDocs }) => {
+    if (hasDocs) set.add(key);
     return set;
   }, new Set());
 };
@@ -69,6 +78,11 @@ const run = async () => {
               name: 'Delete user',
               fnName: 'delete',
               disabled: !documents.has('user'),
+            },
+            {
+              name: 'Restore user',
+              fnName: 'restore',
+              disabled: !documents.has('user_deleted'),
             },
           ],
         },

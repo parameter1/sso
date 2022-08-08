@@ -35,6 +35,7 @@ services:
       HOST: sso.dev.parameter1.com
       PORT: 7913
       VITE_GRAPHQL_COMMAND_URL: ${VITE_GRAPHQL_COMMAND_URL-http://graphql.sso.dev.parameter1.com:7912/command}
+      VITE_GRAPHQL_SUBSCRIPTIONS_URL: ${VITE_GRAPHQL_SUBSCRIPTIONS_URL-ws://graphql.sso.dev.parameter1.com:7912/subscriptions}
       VITE_GRAPHQL_QUERY_URL: ${VITE_GRAPHQL_QUERY_URL-http://graphql.sso.dev.parameter1.com:7911/query}
     depends_on:
       - graphql-command

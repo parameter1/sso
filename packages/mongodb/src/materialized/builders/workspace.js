@@ -49,9 +49,8 @@ export class WorkspaceBuilder extends BaseBuilder {
             },
           },
           // flatten the user into a single object
-          { $unwind: { path: '$node', preserveNullAndEmptyArrays: true } },
-          // discard any missing users
-          { $match: { $expr: { $ne: ['$node', null] } } },
+          // and discard when no active user is found (i.e. do not preserve)
+          { $unwind: { path: '$node', preserveNullAndEmptyArrays: false } },
         ],
       },
     }, {

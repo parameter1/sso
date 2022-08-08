@@ -39,7 +39,8 @@ export class OrganizationBuilder extends BaseBuilder {
             },
           },
           // flatten the user into a single object
-          { $unwind: { path: '$node', preserveNullAndEmptyArrays: true } },
+          // and discard when no active user is found (i.e. do not preserve)
+          { $unwind: { path: '$node', preserveNullAndEmptyArrays: false } },
         ],
       },
     }, {

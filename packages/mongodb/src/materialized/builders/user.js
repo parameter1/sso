@@ -42,9 +42,8 @@ export class UserBuilder extends BaseBuilder {
             },
           },
           // flatten the org into a single object
+          // and discard when no active org is found (i.e. do not preserve)
           { $unwind: { path: '$node', preserveNullAndEmptyArrays: true } },
-          // discard any missing orgs
-          { $match: { $expr: { $ne: ['$node', null] } } },
         ],
       },
     }, {
@@ -89,9 +88,8 @@ export class UserBuilder extends BaseBuilder {
             },
           },
           // flatten the workspace into a single object
+          // and discard when no active workspace is found (i.e. do not preserve)
           { $unwind: { path: '$node', preserveNullAndEmptyArrays: true } },
-          // discard any missing workspaces
-          { $match: { $expr: { $ne: ['$node', null] } } },
         ],
       },
     }, {

@@ -65,6 +65,11 @@ const run = async () => {
               fnName: 'generateAuthToken',
               disabled: !documents.has('user'),
             },
+            {
+              name: 'Delete user',
+              fnName: 'delete',
+              disabled: !documents.has('user'),
+            },
           ],
         },
 

@@ -8,6 +8,7 @@ scalar DateTime
 scalar ObjectID
 
 directive @auth on FIELD_DEFINITION
+directive @interfaceFields on OBJECT
 
 type Query {
   "A simple ping/pong query."

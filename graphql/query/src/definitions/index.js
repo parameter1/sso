@@ -1,6 +1,7 @@
 import { gql } from '@parameter1/graphql/tag';
 import { paginationDefinitions, sortOrderDefinitions } from '@parameter1/graphql/features';
 
+import organization from './organization.js';
 import user from './user.js';
 import workspace from './workspace.js';
 
@@ -13,6 +14,7 @@ directive @auth on FIELD_DEFINITION
 directive @array(field: String) on FIELD_DEFINITION
 directive @connectionProject(type: String!) on OBJECT
 directive @interfaceFields on OBJECT
+directive @loadOwner(type: LoadOwnerDirectiveTypeEnum!) on FIELD_DEFINITION
 directive @object(field: String) on FIELD_DEFINITION
 directive @project(
   field: String
@@ -21,6 +23,13 @@ directive @project(
   resolve: Boolean! = true
   prefixNeedsWith: String
 ) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+enum LoadOwnerDirectiveTypeEnum {
+  APPLICATION
+  ORGANIZATION
+  USER
+  WORKSPACE
+}
 
 type Query {
   "A simple ping/pong query."
@@ -69,6 +78,7 @@ type DocumentMetaTouched {
 ${paginationDefinitions}
 ${sortOrderDefinitions}
 
+${organization}
 ${user}
 ${workspace}
 

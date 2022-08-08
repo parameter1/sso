@@ -51,6 +51,11 @@ const run = async () => {
           choices: [
             { name: 'Create new user', fnName: 'create' },
             {
+              name: 'Change user email address',
+              fnName: 'changeEmail',
+              disabled: !documents.has('user'),
+            },
+            {
               name: 'Change user first/last name',
               fnName: 'changeName',
               disabled: !documents.has('user'),

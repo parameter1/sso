@@ -64,7 +64,8 @@ export class UserCommandHandler extends BaseCommandHandler {
       }, { release: [], reserve: [] });
       await this.release(release, { session });
       await this.reserve(reserve, { session });
-      return this.executeUpdate(commands, { session });
+      const results = await this.executeUpdate(commands, { session });
+      return results;
     }, { client: this.client });
   }
 
@@ -118,6 +119,29 @@ export class UserCommandHandler extends BaseCommandHandler {
         value: result.values.email,
       }));
       await this.reserve(reservations, { session });
+      return results;
+    }, { currentSession, client: this.client });
+  }
+
+  /**
+   *
+   * @param {object} params
+   * @param {object} options
+   * @param {ClientSession} [options.session]
+   */
+  async delete(params, { session: currentSession } = {}) {
+    const commands = await validateAsync(oneOrMany(object({
+      entityId: userProps.id.required(),
+      date: eventProps.date,
+      userId: eventProps.userId,
+    })).required(), params);
+
+    return runTransaction(async ({ session }) => {
+      await this.release(commands.map(({ entityId }) => ({
+        entityId,
+        key: 'email',
+      })), { session });
+      const results = await this.executeDelete(commands, { session });
       return results;
     }, { currentSession, client: this.client });
   }

@@ -1,6 +1,7 @@
 import { PropTypes, attempt } from '@parameter1/prop-types';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import Redis from 'ioredis';
+import { ObjectId } from '@parameter1/mongodb';
 
 import { CHANNEL_PREFIX } from './constants.js';
 
@@ -35,7 +36,7 @@ export class PubSubManager {
 
     this.publisher = publisher;
     this.subscriber = subscriber;
-    this.graphql = new RedisPubSub({ publisher, subscriber });
+    this.graphql = new RedisPubSub({ publisher, subscriber, reviver: PubSubManager.eventReviver });
   }
 
   /**
@@ -46,7 +47,7 @@ export class PubSubManager {
    */
   asyncIterator(eventName) {
     const channelName = PubSubManager.getChannelFor(eventName);
-    this.graphql.asyncIterator(channelName);
+    return this.graphql.asyncIterator(channelName);
   }
 
   /**
@@ -76,7 +77,8 @@ export class PubSubManager {
    */
   onMessage(callback) {
     this.subscriber.on('message', (channelName, json) => {
-      callback({ channelName, body: JSON.parse(json) });
+      const body = JSON.parse(json, PubSubManager.eventReviver);
+      callback({ channelName, body });
     });
   }
 
@@ -132,6 +134,15 @@ export class PubSubManager {
   unsubscribe(eventName) {
     const channelName = PubSubManager.getChannelFor(eventName);
     return this.subscriber.unsubscribe(channelName);
+  }
+
+  static eventReviver(_, value) {
+    if (!value) return value;
+    if (/^[a-f0-9]{24}$/.test(value)) return new ObjectId(value);
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(value)) {
+      return new Date(value);
+    }
+    return value;
   }
 
   /**

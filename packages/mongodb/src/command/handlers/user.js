@@ -114,7 +114,7 @@ export class UserCommandHandler extends BaseCommandHandler {
     return runTransaction(async ({ session }) => {
       const results = await this.executeCreate(commands, { session });
       const reservations = results.map((result) => ({
-        entityId: result._id,
+        entityId: result.entityId,
         key: 'email',
         value: result.values.email,
       }));

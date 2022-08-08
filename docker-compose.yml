@@ -34,9 +34,11 @@ services:
       <<: *env
       HOST: sso.dev.parameter1.com
       PORT: 7913
-      VITE_GRAPHQL_URL: ${VITE_GRAPHQL_URL-http://sso.dev.parameter1.com:7912/graphql/managed}
+      VITE_GRAPHQL_COMMAND_URL: ${VITE_GRAPHQL_COMMAND_URL-http://graphql.sso.dev.parameter1.com:7912/command}
+      VITE_GRAPHQL_QUERY_URL: ${VITE_GRAPHQL_QUERY_URL-http://graphql.sso.dev.parameter1.com:7911/query}
     depends_on:
       - graphql-command
+      - graphql-query
     ports:
       - "7913:7913"
     hostname: sso.dev.parameter1.com

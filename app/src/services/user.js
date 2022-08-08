@@ -3,24 +3,21 @@ import { makeVar } from '@apollo/client/core';
 import apollo from '../apollo';
 import tokenStorage from './token-storage';
 import addTokenListener from './add-token-listener';
-import constants from '../constants';
 import isRedirect from '../utils/is-redirect';
-
-const { BASE } = constants;
 
 const loggedIn = makeVar(tokenStorage.exists());
 
 const SEND_USER_LOGIN_LINK = gql`
-  mutation SendUserLogingLink($input: MutateSendUserLoginLinkInput!) {
+  mutation SendUserLoginLink($input: SendUserLoginLinkInput!) {
     sendUserLoginLink(input: $input)
   }
 `;
 
 const LOGIN_USER_FROM_LINK = gql`
-  mutation LoginUserFromLink($input: MutateLoginUserFromLinkInput!) {
+  mutation LoginUserFromLink($input: LoginUserFromLinkInput!) {
     loginUserFromLink(input: $input) {
-      user { _id }
-      authToken
+      userId
+      authToken: value
       expiresAt
     }
   }
@@ -28,26 +25,22 @@ const LOGIN_USER_FROM_LINK = gql`
 
 const LOGOUT = gql`
   mutation Logout {
-    logoutUser
+    logoutMagicUser
   }
 `;
 
 const redirectOrReload = ({ next }) => {
   const redirect = isRedirect(next);
-  let href = BASE;
-  if (redirect.valid) {
-    href = next;
-    if (redirect.type === 'internal' && !next.startsWith(BASE)) {
-      href = `${BASE.replace(/\/$, ''/)}/${next.replace(/^\//, '')}`;
-    }
-  }
+  let href = '/';
+  if (redirect.valid) href = next;
   window.location.href = href;
 };
 
 const clearTokensAndReload = ({ next } = {}) => {
   tokenStorage.remove();
   loggedIn(false);
-  apollo.clearStore();
+  apollo.command.clearStore();
+  apollo.query.clearStore();
   redirectOrReload({ next });
 };
 
@@ -77,13 +70,13 @@ export default {
 
   loginUserFromLink: async ({ loginLinkToken } = {}) => {
     const input = { loginLinkToken };
-    const { data } = await apollo.mutate({
+    const { data } = await apollo.command.mutate({
       mutation: LOGIN_USER_FROM_LINK,
       variables: { input },
     });
     const { loginUserFromLink } = data;
     tokenStorage.set({
-      uid: loginUserFromLink.user.id,
+      uid: loginUserFromLink.userId,
       value: loginUserFromLink.authToken,
       expiresAt: loginUserFromLink.expiresAt,
     });
@@ -93,17 +86,17 @@ export default {
 
   logout: async ({ next } = {}) => {
     try {
-      await apollo.mutate({ mutation: LOGOUT });
+      await apollo.command.mutate({ mutation: LOGOUT });
     } finally {
       // always clear tokens, even on error
       clearTokensAndReload({ next });
     }
   },
 
-  sendUserLoginLink: async ({ email, next, appKey } = {}) => {
+  sendUserLoginLink: async ({ email, next } = {}) => {
     const redirectTo = isRedirect(next) ? next : null;
-    const input = { email, redirectTo, applicationKey: appKey };
-    await apollo.mutate({
+    const input = { email, redirectTo };
+    await apollo.command.mutate({
       mutation: SEND_USER_LOGIN_LINK,
       variables: { input },
     });

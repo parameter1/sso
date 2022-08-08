@@ -31,7 +31,7 @@ import UserFamilyNameField from '../../components/fields/user/family-name.vue';
 import UserGivenNameField from '../../components/fields/user/given-name.vue';
 
 import { CURRENT_USER } from '../../graphql/queries';
-import { UPDATE_OWN_USER_PROFILE } from '../../graphql/mutations';
+import { UPDATE_OWN_USER_NAMES } from '../../graphql/mutations';
 import GraphQLError from '../../graphql/error';
 
 export default {
@@ -76,9 +76,9 @@ export default {
         this.saveError = null;
         this.isSaving = true;
         const { given, family } = this.currentUser.name;
-        const input = { givenName: given, familyName: family };
-        await this.$apollo.mutate({
-          mutation: UPDATE_OWN_USER_PROFILE,
+        const input = { given, family };
+        await this.$apollo.provider.clients.command.mutate({
+          mutation: UPDATE_OWN_USER_NAMES,
           variables: { input },
         });
       } catch (e) {

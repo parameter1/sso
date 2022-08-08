@@ -19,11 +19,16 @@
       </fieldset>
 
       <error-element :error="saveError" />
+
+      <p v-if="saveMessage">
+        {{ saveMessage }}
+      </p>
     </form>
   </section>
 </template>
 
 <script>
+import gql from 'graphql-tag';
 import clone from 'lodash.clonedeep';
 import ButtonElement from '../../components/button.vue';
 import ErrorElement from '../../components/error.vue';
@@ -57,6 +62,27 @@ export default {
         if (isLoading) this.loadError = null;
       },
     },
+
+    $subscribe: {
+      ownUserEventProcessed: {
+        client: 'command',
+        query: gql`
+          subscription CurrentUserEventProcessed {
+            event: currentUserEventProcessed(input: {
+              commands: [CHANGE_NAME]
+            }) {
+              _id
+            }
+          }
+        `,
+        result({ data }) {
+          if (data.event._id === this.lastEventId) {
+            // @todo silently reload the user data.
+            this.saveMessage = 'Profile update successfully processed.';
+          }
+        },
+      },
+    },
   },
 
   data: () => ({
@@ -66,21 +92,28 @@ export default {
     },
     isLoading: false,
     isSaving: false,
+    lastEventId: null,
     loadError: null,
     saveError: null,
+    saveMessage: null,
   }),
 
   methods: {
     async saveProfile() {
       try {
+        this.saveMessage = null;
         this.saveError = null;
         this.isSaving = true;
         const { given, family } = this.currentUser.name;
         const input = { given, family };
-        await this.$apollo.provider.clients.command.mutate({
+
+        const client = this.$apollo.provider.clients.command;
+        const { data } = await client.mutate({
           mutation: UPDATE_OWN_USER_NAMES,
           variables: { input },
         });
+        this.lastEventId = data.ownUserNames._id;
+        this.saveMessage = 'Profile update command successfully submitted.';
       } catch (e) {
         this.saveError = new GraphQLError(e);
       } finally {

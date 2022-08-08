@@ -42,6 +42,7 @@ export class BaseBuilder {
    *
    * @param {object} params
    * @param {*|*[]} params.entityIds
+   * @param {object[]} [params.mergeValuesStages=[]]
    * @param {object[]} [params.newRootMergeObjects=[]]
    * @param {string[]} [params.unsetFields=[]]
    * @param {object[]} [params.valueBranches=[]]
@@ -51,12 +52,14 @@ export class BaseBuilder {
   build(params) {
     const {
       entityIds,
+      mergeValuesStages,
       newRootMergeObjects,
       unsetFields,
       valueBranches,
       withMergeStage,
     } = attempt(params, object({
       entityIds: oneOrMany(eventProps.entityId).required(),
+      mergeValuesStages: array().items(object()).default([]),
       newRootMergeObjects: array().items(object()).default([]),
       unsetFields: array().items(string()).default([]),
       valueBranches: array().items(object()).default([]),
@@ -139,6 +142,7 @@ export class BaseBuilder {
                       } : '$$this.values',
                     ],
                   },
+                  ...mergeValuesStages,
                 ],
               },
             },

@@ -19,6 +19,18 @@ export const reservationProps = {
 };
 
 /**
+ * @typedef ReleaseDocument
+ * @property {*} entityId The entity ID that owns the reservation
+ * @property {string} entityType The entity type to release the value for
+ * @property {string} key The field key to release
+ */
+export const releaseSchema = object({
+  entityId: reservationProps.entityId.required(),
+  entityType: reservationProps.entityType.required(),
+  key: reservationProps.key.required(),
+}).required();
+
+/**
  * @typedef ReservationDocument
  * @property {*} entityId The entity ID that owns the reservation
  * @property {string} entityType The entity type to assign to reserve the value for
@@ -60,7 +72,7 @@ export class ReservationsRepo extends Repo {
   /**
    * Releases one or more entity field values.
    *
-   * @param {ReservationDocument|ReservationDocument[]} params
+   * @param {ReleaseDocument|ReleaseDocument[]} params
    * @param {object} options
    * @param {ClientSession} [options.session]
    * @returns {Promise<object>}
@@ -68,7 +80,7 @@ export class ReservationsRepo extends Repo {
   async release(params, { session: currentSession } = {}) {
     const prepared = await attempt(
       params,
-      oneOrMany(reservationProps).required().label('reservation'),
+      oneOrMany(releaseSchema).required().label('reservation'),
     );
     const operations = prepared.map((event) => ({
       deleteOne: { filter: event },

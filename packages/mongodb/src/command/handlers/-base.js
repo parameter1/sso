@@ -52,7 +52,18 @@ const restoreSchema = object({
 });
 
 /**
+ * @typedef ReleaseValueCommand
+ * @property {*} entityId
+ * @property {string} key
+ */
+const releaseValueSchema = object({
+  entityId: reservationProps.entityId.required(),
+  key: reservationProps.key.required(),
+});
+
+/**
  * @typedef ReserveValueCommand
+ * @property {*} entityId
  * @property {string} key
  * @property {*} value
  */
@@ -245,8 +256,10 @@ export class BaseCommandHandler {
   /**
    *
    * @param {UpdateCommand|UpdateCommand[]} commands
+   * @param {object} options
+   * @param {ClientSession} [options.session]
    */
-  async executeUpdate(commands) {
+  async executeUpdate(commands, { session } = {}) {
     const prepared = await validateAsync(
       oneOrMany(updateSchema).label('update command').required(),
       commands,
@@ -259,7 +272,7 @@ export class BaseCommandHandler {
     }, { entityIds: [], events: [] });
 
     await this.canPushUpdate(entityIds);
-    return this.store.push(events);
+    return this.store.push(events, { session });
   }
 
   /**
@@ -298,14 +311,16 @@ export class BaseCommandHandler {
   /**
    * Releases one or more reserved values for this entity type.
    *
-   * @param {ReserveValueCommand|ReserveValueCommand[]} reservations
+   * @param {ReleaseValueCommand|ReleaseValueCommand[]} reservations
+   * @param {object} options
+   * @param {ClientSession} [options.session]
    */
-  async release(reservations) {
-    const prepared = await validateAsync(oneOrMany(reserveValueSchema).required(), reservations);
+  async release(reservations, { session } = {}) {
+    const prepared = await validateAsync(oneOrMany(releaseValueSchema).required(), reservations);
     return this.reservations.release(prepared.map((reservation) => ({
       ...reservation,
       entityType: this.entityType,
-    })));
+    })), { session });
   }
 
   /**

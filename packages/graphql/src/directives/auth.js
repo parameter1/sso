@@ -10,10 +10,10 @@ export function authDirectiveTransformer(schema, directiveName = 'auth') {
 
       const { resolve: defaultFieldResolver } = fieldConfig;
       fieldConfig.resolve = async (...resolverArgs) => {
-        const [, , { auth }] = resolverArgs;
+        const [root, , { auth }] = resolverArgs;
         await auth.check();
         if (defaultFieldResolver) return defaultFieldResolver(...resolverArgs);
-        return null;
+        return root;
       };
     },
   });

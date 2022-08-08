@@ -93,6 +93,7 @@ export function commonUser() {
     givenName: 1,
     lastLoggedInAt: 1,
     loginCount: withDefaultValue('$loginCount', 0),
+    previousEmails: 1,
     slug: 1,
     verified: 1,
   });

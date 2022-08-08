@@ -38,6 +38,19 @@ export class UserBuilder extends BaseBuilder {
           verified: true,
         },
       }],
+      mergeValuesStages: [{
+        previousEmails: {
+          $setUnion: [
+            { $cond: [{ $isArray: '$$value.values.previousEmails' }, '$$value.values.previousEmails', []] },
+            { $cond: ['$$this.values.email', ['$$this.values.email'], []] },
+          ],
+        },
+      }],
+      newRootMergeObjects: [{
+        previousEmails: {
+          $filter: { input: '$_.values.previousEmails', cond: { $ne: ['$$this', '$_.values.email'] } },
+        },
+      }],
     });
   }
 }

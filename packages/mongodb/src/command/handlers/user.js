@@ -39,6 +39,35 @@ export class UserCommandHandler extends BaseCommandHandler {
     super({ ...params, entityType: 'user' });
   }
 
+  async changeEmail(params) {
+    const commands = await validateAsync(oneOrMany(object({
+      entityId: userProps.id.required(),
+      date: eventProps.date,
+      email: userProps.email.required(),
+      userId: eventProps.userId,
+    })).required().custom((vals) => vals.map((o) => ({
+      command: 'CHANGE_EMAIL',
+      entityId: o.entityId,
+      date: o.date,
+      values: {
+        domain: o.email.split('@')[1],
+        email: o.email,
+      },
+      userId: o.userId,
+    }))), params);
+
+    return runTransaction(async ({ session }) => {
+      const { release, reserve } = commands.reduce((o, { entityId, values }) => {
+        o.release.push({ entityId, key: 'email' });
+        o.reserve.push({ entityId, key: 'email', value: values.email });
+        return o;
+      }, { release: [], reserve: [] });
+      await this.release(release, { session });
+      await this.reserve(reserve, { session });
+      return this.executeUpdate(commands, { session });
+    }, { client: this.client });
+  }
+
   async changeName(params) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: userProps.id.required(),

@@ -2,7 +2,7 @@ import { gql } from '@parameter1/graphql/tag';
 
 export default gql`
 
-enum UserEventCommandEnum {
+enum UserCommandEventNameEnum {
   CHANGE_NAME
 }
 
@@ -13,7 +13,7 @@ interface CommandEventInterface {
 
 type UserCommandEvent implements CommandEventInterface @interfaceFields {
   entityId: ObjectID!
-  command: UserEventCommandEnum!
+  command: UserCommandEventNameEnum!
 }
 
 `;

@@ -21,6 +21,15 @@ type Mutation {
   ping: String!
 }
 
+type Subscription {
+  currentUserEventProcessed(input: CurrentUserEventProcessedInput! = {}): UserCommandEvent!
+    @auth
+}
+
+input CurrentUserEventProcessedInput {
+  commands: [UserCommandEventNameEnum!]! = []
+}
+
 ${event}
 ${user}
 

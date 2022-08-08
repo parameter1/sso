@@ -2,6 +2,11 @@ import { gql } from '@parameter1/graphql/tag';
 
 export default gql`
 
+extend type Query {
+  "Returns a single workspace by full namespace."
+  workspaceByNamespace(input: QueryWorkspaceByNamespaceInput!): Workspace
+}
+
 interface WorkspaceInterface {
   "The unique workspace identifier"
   _id: ObjectID!
@@ -46,8 +51,19 @@ type WorkspaceInterfaceNamespace {
     @project
 }
 
+type Workspace implements WorkspaceInterface @interfaceFields {
+  _id: ObjectID! @project
+}
+
 type PartialWorkspace implements WorkspaceInterface @interfaceFields {
   _id: ObjectID! @project
+}
+
+input QueryWorkspaceByNamespaceInput {
+  "The default workspace namespace to lookup."
+  namespace: String!
+  "When in strict mode (default), an error will be thrown when the workspace is not found."
+  strict: Boolean! = true
 }
 
 `;

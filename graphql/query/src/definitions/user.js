@@ -24,6 +24,7 @@ interface UserInterface {
   email: UserInterfaceEmail!
     @project(field: "", deep: true)
     @object
+    @auth
   "The ISO date when the user last logged in."
   lastLoggedInAt: DateTime
     @project
@@ -114,6 +115,7 @@ type User implements UserInterface @interfaceFields {
         "role"
       ]
     )
+    @auth
 }
 
 type UserWorkspaceConnection {

@@ -1,1 +1,1 @@
-export const DB_NAME = 'sso_cqrs';
+export const DB_NAME = 'sso';

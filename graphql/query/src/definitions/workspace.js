@@ -25,6 +25,9 @@ interface WorkspaceInterface {
   namespace: WorkspaceInterfaceNamespace!
     @project(deep: true)
     @object
+  "The workspace organization."
+  organizationEdge: WorkspaceInterfaceOrganizationEdge!
+    @project(deep: true, field: "_edge.organization")
   "The workspace path."
   path: String!
     @project
@@ -49,6 +52,12 @@ type WorkspaceInterfaceNamespace {
   "The namespace when used inside an application."
   application: String!
     @project
+}
+
+type WorkspaceInterfaceOrganizationEdge {
+  "The partial organization."
+  node: PartialOrganization!
+    @project(deep: true)
 }
 
 type Workspace implements WorkspaceInterface @interfaceFields {

@@ -7,21 +7,23 @@
   </head>
   <body>
     <h1>Test App Using Lib</h1>
+
     <script type="module">
       import SSO from './src/main.js';
 
+      const origin = 'http://sso.dev.parameter1.com:7913';
       const sso = new SSO({
-        appId: '627e6238d92bdc5068f0c13c',
-        origin: 'http://sso.dev.parameter1.com:7913',
-        graphqlUri: 'http://sso.dev.parameter1.com:7915/graphql/materialized',
+        appKey: 'mindful',
+        origin,
+        graphqlUri: 'http://graphql.sso.dev.parameter1.com:7911/query',
       });
 
       (async () => {
         const user = await sso.getCurrentUser();
+        console.log({ user });
         if (!user) {
           sso.redirectToLoginPage();
         } else {
-          console.log({ user });
           const btn = document.getElementById('logout');
           btn.style.display = 'block';
           btn.onclick = () => sso.logout();

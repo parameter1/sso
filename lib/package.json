@@ -4,6 +4,7 @@
   "description": "The SSO browser library.",
   "author": "Jacob Bare <jacob@parameter1.com>",
   "homepage": "https://github.com/parameter1/sso/tree/main/lib#readme",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/parameter1/sso.git",

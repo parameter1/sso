@@ -4,6 +4,35 @@
     <meta charset="UTF-8" />
   </head>
   <body>
-    <script type="module" src="./ipc.js"></script>
+    <script type="module">
+      import { getStorageAccessStatus, init, sendMessageToParent } from './ipc.js';
+
+      (async () => {
+        const storageStatus = await getStorageAccessStatus();
+        sendMessageToParent('storage-access-status', { value: storageStatus });
+
+        if (storageStatus) {
+          await init();
+        } else {
+          // frame does not yet have access to local storage... must request through an action.
+          // @todo make pretty.
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.textContent = 'Start Sign-In Process';
+          button.onclick = async () => {
+            try {
+              button.disabled = true;
+              await document.requestStorageAccess();
+              window.location.reload();
+            } catch (e) {
+              throw e;
+            } finally {
+              button.disabled = false;
+            }
+          };
+          document.body.appendChild(button);
+        }
+      })();
+    </script>
   </body>
 </html>

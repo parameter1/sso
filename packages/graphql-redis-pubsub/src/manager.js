@@ -103,7 +103,7 @@ export class PubSubManager {
    */
   publish(eventName, payload) {
     const channelName = PubSubManager.getChannelFor(eventName);
-    this.graphql.publish(channelName, payload);
+    return this.graphql.publish(channelName, payload);
   }
 
   /**

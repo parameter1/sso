@@ -100,11 +100,11 @@ services:
     command: ["dev"]
     environment:
       <<: *env
-      HOST: test-sso-app.dev.parameter1.com
+      HOST: test-sso-app.dev.mindfulcms.com
       PORT: 7914
     ports:
       - "7914:7914"
-    hostname: test-sso-app.dev.parameter1.com
+    hostname: test-sso-app.dev.mindfulcms.com
 
   materializer:
     <<: *node

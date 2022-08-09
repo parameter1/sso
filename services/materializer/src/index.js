@@ -1,5 +1,6 @@
 import { filterMongoURL, DB_NAME } from '@parameter1/sso-mongodb';
 import { immediatelyThrow } from '@parameter1/utils';
+import process from 'process';
 
 import pkg from '../package.js';
 import { mongodb, entityManager } from './mongodb.js';
@@ -10,19 +11,16 @@ process.on('unhandledRejection', immediatelyThrow);
 const { log } = console;
 
 /**
- * @todo needs graceful shutdown and restart
- * @todo determine how to cache resume tokens and handle on fail/shutdown
  * @todo partition the change stream services so multiple containers can run
  */
 (async () => {
   log(`Booting ${pkg.name} v${pkg.version}...`);
   // start services here
-  const [mongo] = await Promise.all([
+  await Promise.all([
     (async () => {
       log('Connecting to MongoDB...');
-      const client = await mongodb.connect();
-      log(`MongoDB connected on ${filterMongoURL(client)}`);
-      return client;
+      const c = await mongodb.connect();
+      log(`MongoDB connected on ${filterMongoURL(c)}`);
     })(),
     (async () => {
       log('Connecting to Redis pub/sub...');
@@ -31,14 +29,28 @@ const { log } = console;
     })(),
   ]);
 
-  const changeStream = mongo.watch([
-    {
-      $match: {
-        'ns.db': DB_NAME,
-        'ns.coll': 'event-store',
+  const resumeCollection = await mongodb.collection({
+    dbName: DB_NAME,
+    name: 'event-store/change-stream-tokens',
+  });
+  const token = await resumeCollection.findOne({}, { sort: { _id: -1 } });
+  if (token) log(`Starting after ${JSON.stringify(token)}`);
+
+  const changeStream = await mongodb.watch({
+    pipeline: [
+      {
+        $match: {
+          'ns.db': DB_NAME,
+          'ns.coll': 'event-store',
+        },
       },
+    ],
+    options: {
+      fullDocument: 'updateLookup',
+      ...(token && { startAfter: token._id }),
     },
-  ], { fullDocument: 'updateLookup' });
+  });
+
   changeStream.on('change', async (change) => {
     if (change.operationType !== 'insert') return;
     const { _id: eventId } = change.documentKey;
@@ -48,7 +60,7 @@ const { log } = console;
     const key = `${entityType}.${JSON.stringify(entityId)} (event: ${eventId})`;
     log('START', key);
 
-    // @todo add pub/sub; catch errors and send error events (+ log)
+    // @todo catch errors and send error events (+ log) with pubsub
 
     // normalize
     await entityManager.normalize({ entityType, entityIds: entityId });
@@ -171,7 +183,11 @@ const { log } = console;
       await materialize({ entityType, $match: { _id: entityId } });
     }
 
-    pubSubManager.publish(COMMAND_PROCESSED, fullDocument);
+    await resumeCollection.updateOne({ _id: change._id }, [
+      { $set: { _id: change._id, date: '$$NOW', eventId } },
+    ], { upsert: true });
+
+    await pubSubManager.publish(COMMAND_PROCESSED, fullDocument);
     log('END', key);
   });
 })().catch(immediatelyThrow);

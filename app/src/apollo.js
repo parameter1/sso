@@ -15,7 +15,7 @@ import tokenStorage from './services/token-storage';
 
 const wsLink = new GraphQLWsLink(createClient({
   url: import.meta.env.VITE_GRAPHQL_SUBSCRIPTIONS_URL,
-  connectionParams: async () => {
+  connectionParams: () => {
     const token = get(tokenStorage.get(), 'value');
     return {
       ...(token && { authorization: `Bearer ${token}` }),

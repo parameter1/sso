@@ -289,6 +289,7 @@ export class UserManager {
           entityId: user._id,
         }, { session });
       }
+      await this.token.invalidate({ id: get(loginLinkToken, 'doc._id'), options: { session } });
 
       return {
         authToken: authToken.signed,

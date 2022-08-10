@@ -29,7 +29,7 @@ export class WorkspaceCommandHandler extends BaseCommandHandler {
     super({ ...params, entityType: 'workspace' });
   }
 
-  async changeName(params) {
+  async changeName(params, { returnResults = false } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: workspaceProps.id.required(),
       date: eventProps.date,
@@ -42,7 +42,7 @@ export class WorkspaceCommandHandler extends BaseCommandHandler {
       values: { name: o.name, slug: sluggify(o.name) },
       userId: o.userId,
     }))), params);
-    return this.executeUpdate(commands);
+    return this.executeUpdate(commands, { returnResults });
   }
 
   /**
@@ -51,7 +51,7 @@ export class WorkspaceCommandHandler extends BaseCommandHandler {
    * @param {object} options
    * @param {ClientSession} [options.session]
    */
-  async create(params, { session: currentSession } = {}) {
+  async create(params, { returnResults, session: currentSession } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: workspaceProps.id,
       date: eventProps.date,
@@ -60,7 +60,7 @@ export class WorkspaceCommandHandler extends BaseCommandHandler {
     })).required(), params);
 
     return runTransaction(async ({ session }) => {
-      const results = await this.executeCreate(commands, { session });
+      const results = await this.executeCreate(commands, { returnResults, session });
       const reservations = results.map((result) => ({
         entityId: result._id,
         key: 'app_org_key',

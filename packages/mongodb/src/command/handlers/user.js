@@ -39,7 +39,7 @@ export class UserCommandHandler extends BaseCommandHandler {
     super({ ...params, entityType: 'user' });
   }
 
-  async changeEmail(params) {
+  async changeEmail(params, { returnResults = false } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: userProps.id.required(),
       date: eventProps.date,
@@ -64,12 +64,12 @@ export class UserCommandHandler extends BaseCommandHandler {
       }, { release: [], reserve: [] });
       await this.release(release, { session });
       await this.reserve(reserve, { session });
-      const results = await this.executeUpdate(commands, { session });
+      const results = await this.executeUpdate(commands, { returnResults, session });
       return results;
     }, { client: this.client });
   }
 
-  async changeName(params) {
+  async changeName(params, { returnResults = false } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: userProps.id.required(),
       date: eventProps.date,
@@ -94,7 +94,7 @@ export class UserCommandHandler extends BaseCommandHandler {
         userId: o.userId,
       };
     })), params);
-    return this.executeUpdate(commands);
+    return this.executeUpdate(commands, { returnResults });
   }
 
   /**
@@ -103,7 +103,7 @@ export class UserCommandHandler extends BaseCommandHandler {
    * @param {object} options
    * @param {ClientSession} [options.session]
    */
-  async create(params, { session: currentSession } = {}) {
+  async create(params, { returnResults = false, session: currentSession } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: userProps.id,
       date: eventProps.date,
@@ -112,7 +112,7 @@ export class UserCommandHandler extends BaseCommandHandler {
     })).required(), params);
 
     return runTransaction(async ({ session }) => {
-      const results = await this.executeCreate(commands, { session });
+      const results = await this.executeCreate(commands, { returnResults, session });
       const reservations = results.map((result) => ({
         entityId: result.entityId,
         key: 'email',
@@ -129,7 +129,7 @@ export class UserCommandHandler extends BaseCommandHandler {
    * @param {object} options
    * @param {ClientSession} [options.session]
    */
-  async delete(params, { session: currentSession } = {}) {
+  async delete(params, { returnResults = false, session: currentSession } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: userProps.id.required(),
       date: eventProps.date,
@@ -141,12 +141,12 @@ export class UserCommandHandler extends BaseCommandHandler {
         entityId,
         key: 'email',
       })), { session });
-      const results = await this.executeDelete(commands, { session });
+      const results = await this.executeDelete(commands, { returnResults, session });
       return results;
     }, { currentSession, client: this.client });
   }
 
-  async magicLogin(params) {
+  async magicLogin(params, { returnResults = false } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: userProps.id.required(),
     })).required().custom((vals) => vals.map(({ entityId }) => ({
@@ -155,7 +155,7 @@ export class UserCommandHandler extends BaseCommandHandler {
       omitFromHistory: true,
       omitFromModified: true,
     }))), params);
-    return this.executeUpdate(commands);
+    return this.executeUpdate(commands, { returnResults });
   }
 
   /**
@@ -164,7 +164,7 @@ export class UserCommandHandler extends BaseCommandHandler {
    * @param {object} options
    * @param {ClientSession} [options.session]
    */
-  async restore(params, { session: currentSession } = {}) {
+  async restore(params, { returnResults = false, session: currentSession } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: userProps.id.required(),
       date: eventProps.date,
@@ -186,7 +186,7 @@ export class UserCommandHandler extends BaseCommandHandler {
         key: 'email',
         value: values.email,
       })), { session });
-      const results = await this.executeRestore(commands, { session });
+      const results = await this.executeRestore(commands, { returnResults, session });
       return results;
     }, { currentSession, client: this.client });
   }

@@ -23,7 +23,7 @@ export class MemberCommandHandler extends BaseCommandHandler {
    *
    * @param {object} params
    */
-  async changeRole(params) {
+  async changeRole(params, { returnResults = false } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: memberProps.id.required(),
       date: eventProps.date,
@@ -36,7 +36,7 @@ export class MemberCommandHandler extends BaseCommandHandler {
       values: { role: o.role },
       userId: o.userId,
     }))), params);
-    return this.executeUpdate(commands);
+    return this.executeUpdate(commands, { returnResults });
   }
 
   /**
@@ -45,14 +45,14 @@ export class MemberCommandHandler extends BaseCommandHandler {
    * @param {object} options
    * @param {ClientSession} [options.session]
    */
-  async create(params, { session } = {}) {
+  async create(params, { returnResults = false, session } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: memberProps.id.required(),
       date: eventProps.date,
       values: createValuesSchema.required(),
       userId: eventProps.userId,
     })).required(), params);
-    return this.executeCreate(commands, { session });
+    return this.executeCreate(commands, { returnResults, session });
   }
 
   /**
@@ -61,7 +61,7 @@ export class MemberCommandHandler extends BaseCommandHandler {
    * @param {object} options
    * @param {ClientSession} [options.session]
    */
-  async createOrRestore(params, { session } = {}) {
+  async createOrRestore(params, { returnResults = false, session } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: memberProps.id.required(),
       date: eventProps.date,
@@ -73,7 +73,7 @@ export class MemberCommandHandler extends BaseCommandHandler {
       return result;
     } catch (e) {
       if (e.code !== 11000) throw e;
-      return this.restore(commands, { session });
+      return this.restore(commands, { returnResults, session });
     }
   }
 
@@ -83,13 +83,13 @@ export class MemberCommandHandler extends BaseCommandHandler {
    * @param {object} options
    * @param {ClientSession} [options.session]
    */
-  async delete(params, { session } = {}) {
+  async delete(params, { returnResults = false, session } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: memberProps.id.required(),
       date: eventProps.date,
       userId: eventProps.userId,
     })).required(), params);
-    return this.executeDelete(commands, { session });
+    return this.executeDelete(commands, { returnResults, session });
   }
 
   /**
@@ -98,13 +98,13 @@ export class MemberCommandHandler extends BaseCommandHandler {
    * @param {object} options
    * @param {ClientSession} [options.session]
    */
-  async restore(params, { session } = {}) {
+  async restore(params, { returnResults = false, session } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: memberProps.id.required(),
       date: eventProps.date,
       values: createValuesSchema,
       userId: eventProps.userId,
     })).required(), params);
-    return this.executeRestore(commands, { session });
+    return this.executeRestore(commands, { returnResults, session });
   }
 }

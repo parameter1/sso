@@ -81,10 +81,11 @@ export class EventStore extends Repo {
    *
    * @param {EventStoreDocument|EventStoreDocument[]} events
    * @param {object} options
+   * @param {boolean} [options.returnResults=false]
    * @param {ClientSession} [options.session]
    * @returns {Promise<EventPushResult[]>}
    */
-  async push(events, { session: currentSession } = {}) {
+  async push(events, { returnResults = false, session: currentSession } = {}) {
     const prepared = await attempt(
       events,
       oneOrMany(eventSchema).required().label('event'),
@@ -97,17 +98,32 @@ export class EventStore extends Repo {
       },
     }));
 
-    const useSession = currentSession || prepared.length > 1;
+    const push = async ({ session } = {}) => {
+      const { result } = await this.bulkWrite({ operations, options: { session } });
+      const eventMap = new Map();
+      if (returnResults) {
+        const eventIds = result.upserted.map(({ _id }) => _id);
+        const cursor = await this.find({
+          query: { _id: { $in: eventIds } },
+          options: { projection: { values: 0 }, session },
+        });
+        const docs = await cursor.toArray();
+        docs.forEach((doc) => eventMap.set(`${doc._id}`, doc));
+      }
+      return result.upserted.map((o) => ({ ...o, event: eventMap.get(`${o._id}`) }));
+    };
+
     let result;
+    const useSession = currentSession || prepared.length > 1;
     if (useSession) {
-      ({ result } = await runTransaction(
-        ({ session }) => this.bulkWrite({ operations, options: { session } }),
+      (result = await runTransaction(
+        ({ session }) => push({ session }),
         { currentSession, client: this.client },
       ));
     } else {
-      ({ result } = await this.bulkWrite({ operations }));
+      (result = await push());
     }
-    return result.upserted.map((o) => ({ ...o, ...prepared[o.index] }));
+    return result;
   }
 
   static getEventSort() {

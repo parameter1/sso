@@ -196,9 +196,10 @@ export class BaseCommandHandler {
    *
    * @param {CreateCommand|CreateCommand[]} events
    * @param {object} options
+   * @param {boolean} [options.returnResults=false]
    * @param {ClientSession} [options.session]
    */
-  async executeCreate(events, { session } = {}) {
+  async executeCreate(events, { returnResults = false, session } = {}) {
     const prepared = await validateAsync(
       oneOrMany(createSchema).label('create command').required(),
       events,
@@ -207,16 +208,17 @@ export class BaseCommandHandler {
       ...event,
       entityType: this.entityType,
       command: 'CREATE',
-    })), { session });
+    })), { returnResults, session });
   }
 
   /**
    *
    * @param {DeleteCommand|DeleteCommand[]} commands
    * @param {object} options
+   * @param {boolean} [options.returnResults=false]
    * @param {ClientSession} [options.session]
    */
-  async executeDelete(commands, { session } = {}) {
+  async executeDelete(commands, { returnResults = false, session } = {}) {
     const prepared = await validateAsync(
       oneOrMany(deleteSchema).label('delete command').required(),
       commands,
@@ -228,16 +230,17 @@ export class BaseCommandHandler {
     }, { entityIds: [], events: [] });
 
     await this.canPushDelete(entityIds);
-    return this.store.push(events, { session });
+    return this.store.push(events, { returnResults, session });
   }
 
   /**
    *
    * @param {RestoreCommand|RestoreCommand[]} commands
    * @param {object} options
+   * @param {boolean} [options.returnResults=false]
    * @param {ClientSession} [options.session]
    */
-  async executeRestore(commands, { session } = {}) {
+  async executeRestore(commands, { returnResults = false, session } = {}) {
     const prepared = await validateAsync(
       oneOrMany(restoreSchema).label('restore command').required(),
       commands,
@@ -250,16 +253,17 @@ export class BaseCommandHandler {
     }, { entityIds: [], events: [] });
 
     await this.canPushRestore(entityIds);
-    return this.store.push(events, { session });
+    return this.store.push(events, { returnResults, session });
   }
 
   /**
    *
    * @param {UpdateCommand|UpdateCommand[]} commands
    * @param {object} options
+   * @param {boolean} [options.returnResults=false]
    * @param {ClientSession} [options.session]
    */
-  async executeUpdate(commands, { session } = {}) {
+  async executeUpdate(commands, { returnResults = false, session } = {}) {
     const prepared = await validateAsync(
       oneOrMany(updateSchema).label('update command').required(),
       commands,
@@ -272,7 +276,7 @@ export class BaseCommandHandler {
     }, { entityIds: [], events: [] });
 
     await this.canPushUpdate(entityIds);
-    return this.store.push(events, { session });
+    return this.store.push(events, { returnResults, session });
   }
 
   /**

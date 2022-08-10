@@ -34,12 +34,12 @@ export default {
     async ownUserNames(_, { input }, { auth }) {
       const entityId = await auth.getUserId();
       const handler = entityManager.getCommandHandler('user');
-      const [event] = await handler.changeName({
+      const [{ event }] = await handler.changeName({
         entityId,
         familyName: input.family,
         givenName: input.given,
         userId: entityId,
-      });
+      }, { returnResults: true });
       return event;
     },
 

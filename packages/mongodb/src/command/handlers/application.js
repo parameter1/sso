@@ -26,7 +26,7 @@ export class ApplicationCommandHandler extends BaseCommandHandler {
     super({ ...params, entityType: 'application' });
   }
 
-  async changeName(params) {
+  async changeName(params, { returnResults = false } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: applicationProps.id.required(),
       date: eventProps.date,
@@ -39,7 +39,7 @@ export class ApplicationCommandHandler extends BaseCommandHandler {
       values: { name: o.name, slug: sluggify(o.name) },
       userId: o.userId,
     }))), params);
-    return this.executeUpdate(commands);
+    return this.executeUpdate(commands, { returnResults });
   }
 
   /**
@@ -48,7 +48,7 @@ export class ApplicationCommandHandler extends BaseCommandHandler {
    * @param {object} options
    * @param {ClientSession} [options.session]
    */
-  async create(params, { session: currentSession } = {}) {
+  async create(params, { returnResults = false, session: currentSession } = {}) {
     const commands = await validateAsync(oneOrMany(object({
       entityId: applicationProps.id,
       date: eventProps.date,
@@ -63,7 +63,7 @@ export class ApplicationCommandHandler extends BaseCommandHandler {
         key: 'key',
         value: result.values.key,
       }));
-      await this.reserve(reservations, { session });
+      await this.reserve(reservations, { returnResults, session });
       return results;
     }, { currentSession, client: this.client });
   }

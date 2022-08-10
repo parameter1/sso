@@ -8,6 +8,7 @@ enum UserCommandEventNameEnum {
 
 interface CommandEventInterface {
   _id: ObjectID!
+  date: DateTime!
   userId: ObjectID
 }
 

@@ -18,4 +18,18 @@ export default {
       });
     },
   },
+
+  /**
+   *
+   */
+  WorkspaceInterfaceName: {
+    /**
+     *
+     */
+    application({ nameParts }) {
+      const parts = [...nameParts];
+      parts.shift();
+      return parts.join(' > ');
+    },
+  },
 };

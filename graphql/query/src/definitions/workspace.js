@@ -37,6 +37,8 @@ interface WorkspaceInterface {
 }
 
 type WorkspaceInterfaceName {
+  application: String!
+    @project(field: "nameParts")
   default: String!
     @project(field: "name")
   full: String!

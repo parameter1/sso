@@ -70,7 +70,7 @@ export class CommandHandlers {
    * @param {object} params
    * @param {string} params.entityType
    * @param {*|*[]} [params.entityIds=[]]
-   * @param {booleam} [params.withMergeStage=true]
+   * @param {boolean} [params.withMergeStage=true]
    */
   async normalize(params) {
     const { entityType, entityIds, withMergeStage } = attempt(params, object({

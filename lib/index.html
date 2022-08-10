@@ -11,22 +11,20 @@
     <script type="module">
       import SSO from './src/main.js';
 
-      const origin = 'http://sso.dev.parameter1.com:7913';
       const sso = new SSO({
         appKey: 'mindful',
-        origin,
+        origin: 'http://sso.dev.parameter1.com:7913',
         graphqlUri: 'http://graphql.sso.dev.parameter1.com:7911/query',
       });
 
       (async () => {
-        const user = await sso.getCurrentUser();
-        console.log({ user });
-        if (!user) {
-          sso.redirectToLoginPage();
-        } else {
-          const btn = document.getElementById('logout');
-          btn.style.display = 'block';
-          btn.onclick = () => sso.logout();
+        try {
+          const user = await sso.getCurrentUser({ autoLogout: true });
+          const button = document.getElementById('logout');
+          button.style.display = 'block';
+          button.onclick = () => sso.logout();
+        } catch (e) {
+          console.error('AN ERROR OCURRED LOADING SSO!', e.message);
         }
       })();
     </script>

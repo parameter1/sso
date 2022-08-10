@@ -11,29 +11,52 @@
     <script type="module">
       import SSO from './src/main.js';
 
+      const appKey = 'mindful';
       const sso = new SSO({
-        appKey: 'mindful',
+        appKey,
         origin: 'http://sso.dev.parameter1.com:7913',
         graphqlUri: 'http://graphql.sso.dev.parameter1.com:7911/query',
       });
 
-      (async () => {
-        try {
-          const { data } = await sso.query({
-            query: `
-              query TestAppCurrentUser {
-                user: currentUser {
-                  _id
-                  email { address previous }
-                  name { given family full }
+      const loadUser = async () => {
+        const { data } = await sso.query({
+          variables: { appKey },
+          query: `
+            query TestAppCurrentUser($appKey: String!) {
+              user: currentUser {
+                _id
+                email { address }
+                name { full }
+                workspaceConnection(input: { applicationKeys: [$appKey] }) {
+                  edges {
+                    role { _id name }
+                    node { _id name { application } }
+                  }
                 }
               }
-            `,
-          });
-          console.log({ user: data.user });
+            }
+          `,
+        });
+        return data.user;
+      };
+
+      (async () => {
+        try {
+          const user = await loadUser();
           const button = document.getElementById('logout');
           button.style.display = 'block';
           button.onclick = () => sso.logout();
+
+          const userEl = document.getElementById('user');
+          userEl.textContent = `Current User: ${user.name.full} (${user.email.address})`;
+          userEl.style.display = 'block';
+
+          const workspaces = document.getElementById('workspaces');
+          workspaces.innerHTML = `<li>${user.workspaceConnection.edges.map(({ node }) => {
+            return node.name.application;
+          }).join('</li><li>')}</li>`;
+          workspaces.style.display = 'block';
+
         } catch (e) {
           console.error('AN ERROR OCURRED LOADING SSO!', e.message);
           const error = document.getElementById('error');
@@ -43,6 +66,9 @@
       })();
     </script>
 
+    <div id="error" role="alert" style="display: none;"></div>
+    <p id="user" style="display: none;"></p>
+    <ul id="workspaces" style="display: none;"></ul>
     <button
       id="logout"
       type="button"
@@ -50,8 +76,5 @@
     >
       Logout
     </button>
-    <div id="error" role="alert" style="display: none;">
-
-    </div>
   </body>
 </html>

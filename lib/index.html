@@ -19,12 +19,26 @@
 
       (async () => {
         try {
-          const user = await sso.getCurrentUser({ autoLogout: true });
+          const { data } = await sso.query({
+            query: `
+              query TestAppCurrentUser {
+                user: currentUser {
+                  _id
+                  email { address previous }
+                  name { given family full }
+                }
+              }
+            `,
+          });
+          console.log({ user: data.user });
           const button = document.getElementById('logout');
           button.style.display = 'block';
           button.onclick = () => sso.logout();
         } catch (e) {
           console.error('AN ERROR OCURRED LOADING SSO!', e.message);
+          const error = document.getElementById('error');
+          error.textContent = `ERROR: ${e.message}`;
+          error.style.display = 'block';
         }
       })();
     </script>
@@ -36,5 +50,8 @@
     >
       Logout
     </button>
+    <div id="error" role="alert" style="display: none;">
+
+    </div>
   </body>
 </html>

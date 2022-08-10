@@ -44,6 +44,11 @@ export default async (options = {}) => {
 
   await apollo.start();
   app.register(apollo.createHandler({
+    cors: {
+      origin: true,
+      methods: ['GET', 'POST'],
+      maxAge: 86400,
+    },
     path: '/query',
     onHealthCheck: options.onHealthCheck,
   }));

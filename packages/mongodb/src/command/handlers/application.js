@@ -57,13 +57,13 @@ export class ApplicationCommandHandler extends BaseCommandHandler {
     })).required(), params);
 
     return runTransaction(async ({ session }) => {
-      const results = await this.executeCreate(commands, { session });
+      const results = await this.executeCreate(commands, { returnResults, session });
       const reservations = results.map((result) => ({
         entityId: result._id,
         key: 'key',
         value: result.values.key,
       }));
-      await this.reserve(reservations, { returnResults, session });
+      await this.reserve(reservations, { session });
       return results;
     }, { currentSession, client: this.client });
   }

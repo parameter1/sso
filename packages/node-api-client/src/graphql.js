@@ -46,9 +46,9 @@ export default function GraphQLClient({
           variables,
         }),
       });
-      const json = await res.json();
-      if (!res.ok || json.errors) throw new GraphQLError(res, json);
-      return json;
+      const body = await res.json();
+      if (body.errors && body.errors.length) throw new GraphQLError(body.errors[0]);
+      return body;
     },
   };
 }

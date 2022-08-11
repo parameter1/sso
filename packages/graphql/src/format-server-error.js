@@ -20,10 +20,9 @@ export function formatServerError(err) {
   const code = get(err, 'extensions.code');
 
   if (statusCode) set(err, 'extensions.code', STATUS_CODES[statusCode].replace(/\s/g, '_').toUpperCase());
-  if (codes[code]) set(err, 'extensions.exception.statusCode', codes[code]);
+  if (!statusCode && codes[code]) set(err, 'extensions.exception.statusCode', codes[code]);
 
   if (get(err, 'extensions.exception.statusCode', 500) >= 500) {
-    // this doesn't respect ignored codes, so only send actual errors.
     // @todo send the error to new relic!
   }
   return err;

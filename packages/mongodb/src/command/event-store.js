@@ -110,7 +110,11 @@ export class EventStore extends Repo {
         const docs = await cursor.toArray();
         docs.forEach((doc) => eventMap.set(`${doc._id}`, doc));
       }
-      return result.upserted.map((o) => ({ ...o, event: eventMap.get(`${o._id}`) }));
+      return result.upserted.map((o) => ({
+        ...o,
+        event: eventMap.get(`${o._id}`),
+        values: prepared[o.index].values || {},
+      }));
     };
 
     let result;

@@ -4,7 +4,7 @@ x-env-defaults: &env
   NODE_ENV: development
   YARN_CACHE_FOLDER: /.yarn-cache
 
-x-env-core: &env-core
+x-env-mongodb: &env-mongodb
   MONGO_URL: ${MONGO_URL-}
   TOKEN_SECRET: ${TOKEN_SECRET-thisisnotsecretdonotuse}
 
@@ -35,11 +35,12 @@ services:
       HOST: sso.dev.parameter1.com
       PORT: 7913
       VITE_GRAPHQL_COMMAND_URL: ${VITE_GRAPHQL_COMMAND_URL-http://graphql.sso.dev.parameter1.com:7912/command}
-      VITE_GRAPHQL_SUBSCRIPTIONS_URL: ${VITE_GRAPHQL_SUBSCRIPTIONS_URL-ws://graphql.sso.dev.parameter1.com:7912/subscriptions}
       VITE_GRAPHQL_QUERY_URL: ${VITE_GRAPHQL_QUERY_URL-http://graphql.sso.dev.parameter1.com:7911/query}
+      VITE_GRAPHQL_SUBSCRIPTION_URL: ${VITE_GRAPHQL_SUBSCRIPTIONS_URL-ws://graphql.sso.dev.parameter1.com:7915/subscription}
     depends_on:
       - graphql-command
       - graphql-query
+      - graphql-subscription
     ports:
       - "7913:7913"
     hostname: sso.dev.parameter1.com
@@ -50,7 +51,7 @@ services:
     entrypoint: ["node"]
     command: ["src/index.js"]
     environment:
-      <<: [*env, *env-core, *env-redis-pubsub]
+      <<: [*env, *env-mongodb, *env-redis-pubsub]
     depends_on:
       - materializer
       - redis-pubsub
@@ -66,7 +67,7 @@ services:
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
-      <<: [*env, *env-core, *env-redis-pubsub]
+      <<: [*env, *env-mongodb]
       APP_URL: ${APP_URL-http://sso.dev.parameter1.com:7913}
       EXPOSED_HOST: graphql.sso.dev.parameter1.com
       EXPOSED_PORT: 7912
@@ -77,7 +78,6 @@ services:
     hostname: graphql.sso.dev.parameter1.com
     depends_on:
       - materializer
-      - redis-pubsub
 
   graphql-query:
     <<: *node
@@ -85,12 +85,28 @@ services:
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
-      <<: [*env, *env-core]
+      <<: [*env, *env-mongodb]
       EXPOSED_HOST: graphql.sso.dev.parameter1.com
       EXPOSED_PORT: 7911
       HOST: graphql.sso.dev.parameter1.com
     ports:
       - "7911:80"
+    hostname: graphql.sso.dev.parameter1.com
+
+  graphql-subscription:
+    <<: *node
+    working_dir: /sso/graphql/subscription
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: [*env, *env-mongodb, *env-redis-pubsub]
+      EXPOSED_HOST: graphql.sso.dev.parameter1.com
+      EXPOSED_PORT: 7915
+      HOST: graphql.sso.dev.parameter1.com
+    ports:
+      - "7915:80"
+    depends_on:
+      - redis-pubsub
     hostname: graphql.sso.dev.parameter1.com
 
   lib:
@@ -112,7 +128,7 @@ services:
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
-      <<: [*env, *env-core, *env-redis-pubsub]
+      <<: [*env, *env-mongodb, *env-redis-pubsub]
     depends_on:
       - redis-pubsub
 

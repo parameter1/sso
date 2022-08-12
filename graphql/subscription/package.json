@@ -1,0 +1,43 @@
+{
+  "name": "@parameter1/sso-graphql-subscription-server",
+  "version": "0.5.2",
+  "type": "module",
+  "description": "The SSO GraphQL subscription API server.",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/sso/tree/main/graphql/subscription#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/sso.git",
+    "directory": "graphql/subscription"
+  },
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.js",
+  "scripts": {
+    "dev": "gulp",
+    "lint": "eslint --ext .js ./",
+    "test": "yarn lint"
+  },
+  "dependencies": {
+    "@parameter1/graphql": "^2.7.0",
+    "@parameter1/object-path": "^2.0.0",
+    "@parameter1/prop-types": "^2.3.0",
+    "@parameter1/sso-graphql": "^0.5.2",
+    "@parameter1/sso-graphql-redis-pubsub": "^0.5.2",
+    "@parameter1/sso-mongodb": "^0.5.2",
+    "@parameter1/utils": "^2.0.0",
+    "apollo-server-core": "^3.10.0",
+    "apollo-server-fastify": "^3.10.0",
+    "envalid": "^7.3.1",
+    "fastify": "^3.29.1",
+    "graphql": "^16.5.0",
+    "graphql-subscriptions": "^2.0.0",
+    "graphql-ws": "^5.10.0",
+    "pascal-case": "^3.1.2",
+    "sift": "^16.0.0",
+    "ws": "^8.8.1"
+  },
+  "devDependencies": {
+    "@parameter1/gulp": "^2.0.0"
+  }
+}

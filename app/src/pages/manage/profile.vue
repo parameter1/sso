@@ -65,11 +65,11 @@ export default {
 
     $subscribe: {
       ownUserEventProcessed: {
-        client: 'command',
+        client: 'subscription',
         query: gql`
-          subscription CurrentUserEventProcessed {
-            event: currentUserEventProcessed(input: {
-              commands: [CHANGE_NAME]
+          subscription ManageProfilePage {
+            event: currentUserCommandProcessed(input: {
+              command: "CHANGE_NAME"
             }) {
               _id
             }

@@ -1,4 +1,4 @@
-import { gql } from '@parameter1/graphql/tag';
+import { gql } from '@parameter1/sso-graphql';
 
 export default gql`
 
@@ -9,7 +9,7 @@ extend type Mutation {
   logoutMagicUser: String!
     @auth
   "Changes the currently logged-in user's given and family names"
-  ownUserNames(input: OwnUserNamesInput!): UserCommandEvent!
+  ownUserNames(input: OwnUserNamesInput!): CommandResult!
     @auth
   "Sends a magic login link to a user's email address. The user must already exist."
   sendUserLoginLink(input: SendUserLoginLinkInput!): String!

@@ -6,12 +6,11 @@ import {
 } from 'apollo-server-core';
 import fastify from 'fastify';
 import {
+  formatServerError,
+  AuthContext,
   CloseFastifyPlugin,
   OnShutdownPlugin,
-} from '@parameter1/graphql/plugins';
-import { AuthContext, formatServerError } from '@parameter1/sso-graphql';
-import { WebSocketServer } from 'ws';
-import { useServer } from 'graphql-ws/lib/use/ws';
+} from '@parameter1/sso-graphql';
 
 import schema from './schema.js';
 import { userManager } from './mongodb.js';
@@ -21,18 +20,10 @@ const isProduction = process.env.NODE_ENV === 'production';
 export default async (options = {}) => {
   const app = fastify(options.fastify);
 
-  const wsServer = new WebSocketServer({
-    server: app.server,
-    path: '/subscriptions',
-  });
-  const serverCleanup = useServer({
-    schema,
-    context: ({ connectionParams }) => ({
-      auth: AuthContext({ header: connectionParams.authorization, userManager }),
-    }),
-  }, wsServer);
-
   const apollo = new ApolloServer({
+    cache: 'bounded',
+    csrfPrevention: true,
+    persistedQueries: false,
     context: ({ request }) => ({
       auth: AuthContext({ header: request.headers.authorization, userManager }),
       ip: request.ip,
@@ -51,15 +42,6 @@ export default async (options = {}) => {
         stopGracePeriodMillis: process.env.SHUTDOWN_GRACE_PERIOD,
       }),
       OnShutdownPlugin({ fn: options.onShutdown }),
-      {
-        async serverWillStart() {
-          return {
-            async drainServer() {
-              await serverCleanup.dispose();
-            },
-          };
-        },
-      },
     ],
     formatError: formatServerError,
   });

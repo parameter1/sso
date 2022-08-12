@@ -1,6 +1,5 @@
-import { gql } from '@parameter1/graphql/tag';
+import { gql, commandResultDefinitions } from '@parameter1/sso-graphql';
 
-import event from './event.js';
 import user from './user.js';
 
 export default gql`
@@ -21,16 +20,8 @@ type Mutation {
   ping: String!
 }
 
-type Subscription {
-  currentUserEventProcessed(input: CurrentUserEventProcessedInput! = {}): UserCommandEvent!
-    @auth
-}
+${commandResultDefinitions}
 
-input CurrentUserEventProcessedInput {
-  commands: [UserCommandEventNameEnum!]! = []
-}
-
-${event}
 ${user}
 
 `;

@@ -6,10 +6,11 @@ import {
 } from 'apollo-server-core';
 import fastify from 'fastify';
 import {
+  AuthContext,
   CloseFastifyPlugin,
   OnShutdownPlugin,
-} from '@parameter1/graphql/plugins';
-import { AuthContext, formatServerError } from '@parameter1/sso-graphql';
+  formatServerError,
+} from '@parameter1/sso-graphql';
 
 import schema from './schema.js';
 import { entityManager, userManager } from './mongodb.js';
@@ -19,6 +20,8 @@ const isProduction = process.env.NODE_ENV === 'production';
 export default async (options = {}) => {
   const app = fastify(options.fastify);
   const apollo = new ApolloServer({
+    cache: 'bounded',
+    csrfPrevention: true,
     context: async ({ request }) => ({
       auth: AuthContext({ header: request.headers.authorization, userManager }),
       dataloaders: await entityManager.materializedRepos.createDataloaders(),

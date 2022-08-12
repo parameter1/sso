@@ -1,4 +1,4 @@
-import { paginationEnums, sortOrderEnums } from '@parameter1/graphql/features';
+import { paginationEnums, sortOrderEnums } from '@parameter1/sso-graphql';
 
 export default {
   ...paginationEnums,

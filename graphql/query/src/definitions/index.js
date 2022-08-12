@@ -1,5 +1,4 @@
-import { gql } from '@parameter1/graphql/tag';
-import { paginationDefinitions, sortOrderDefinitions } from '@parameter1/graphql/features';
+import { gql, paginationDefinitions, sortOrderDefinitions } from '@parameter1/sso-graphql';
 
 import organization from './organization.js';
 import user from './user.js';

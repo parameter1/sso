@@ -1,8 +1,7 @@
 import { getAsArray } from '@parameter1/object-path';
-import { getProjectionForType } from '@parameter1/sso-graphql';
+import { addArrayFilter, getProjectionForType } from '@parameter1/sso-graphql';
 import { findWithObjects, filterObjects } from '@parameter1/sso-mongodb';
 import enums from '../enums.js';
-import { addArrayFilter } from '../utils.js';
 
 const { UserWorkspaceConnectionSortFieldEnum } = enums;
 

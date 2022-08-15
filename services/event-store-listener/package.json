@@ -1,14 +1,14 @@
 {
-  "name": "@parameter1/sso-materializer-service",
+  "name": "@parameter1/sso-event-store-listener-service",
   "version": "0.5.2",
   "type": "module",
-  "description": "The SSO materializer service - responsible for materializing/denormalizing MongoDB documents.",
+  "description": "The SSO event store listener service - responsible for executing command processing on event insertion.",
   "author": "Jacob Bare <jacob@parameter1.com>",
-  "homepage": "https://github.com/parameter1/sso/tree/main/services/materializer#readme",
+  "homepage": "https://github.com/parameter1/sso/tree/main/services/event-store-listener#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/parameter1/sso.git",
-    "directory": "services/materializer"
+    "directory": "services/event-store-listener"
   },
   "private": true,
   "license": "MIT",

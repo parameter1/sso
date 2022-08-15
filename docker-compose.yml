@@ -53,7 +53,7 @@ services:
     environment:
       <<: [*env, *env-mongodb, *env-redis-pubsub]
     depends_on:
-      - materializer
+      - event-store-listener
       - redis-pubsub
 
   command-processor:
@@ -75,6 +75,18 @@ services:
     entrypoint: ["tail"]
     command: ["-f", "/dev/null"]
 
+  event-store-listener:
+    <<: *node
+    working_dir: /sso/services/event-store-listener
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: [*env, *env-mongodb, *env-redis-pubsub]
+      COMMAND_PROCESSOR_URL: ${COMMAND_PROCESSOR_URL-http://command-processor}
+    depends_on:
+      - command-processor
+      - redis-pubsub
+
   graphql-command:
     <<: *node
     working_dir: /sso/graphql/command
@@ -91,7 +103,7 @@ services:
       - "7912:80"
     hostname: graphql.sso.dev.parameter1.com
     depends_on:
-      - materializer
+      - event-store-listener
 
   graphql-query:
     <<: *node
@@ -135,18 +147,6 @@ services:
     ports:
       - "7914:7914"
     hostname: test-sso-app.dev.mindfulcms.com
-
-  materializer:
-    <<: *node
-    working_dir: /sso/services/materializer
-    entrypoint: ["yarn"]
-    command: ["dev"]
-    environment:
-      <<: [*env, *env-mongodb, *env-redis-pubsub]
-      COMMAND_PROCESSOR_URL: ${COMMAND_PROCESSOR_URL-http://command-processor}
-    depends_on:
-      - command-processor
-      - redis-pubsub
 
   redis-pubsub:
     tty: true

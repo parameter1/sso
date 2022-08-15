@@ -56,6 +56,20 @@ services:
       - materializer
       - redis-pubsub
 
+  command-processor:
+    <<: *node
+    working_dir: /sso/services/command-processor
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: [*env, *env-mongodb]
+      EXPOSED_HOST: services.sso.dev.parameter1.com
+      EXPOSED_PORT: 7916
+      HOST: services.sso.dev.parameter1.com
+    ports:
+      - "7916:80"
+    hostname: services.sso.dev.parameter1.com
+
   commands:
     <<: *node
     entrypoint: ["tail"]
@@ -130,6 +144,7 @@ services:
     environment:
       <<: [*env, *env-mongodb, *env-redis-pubsub]
     depends_on:
+      - command-processor
       - redis-pubsub
 
   redis-pubsub:

@@ -8,3 +8,5 @@ export const mongodb = new MongoDBClient({
 });
 
 export const entityManager = new EntityManager({ client: mongodb });
+
+export const materialize = entityManager.materialize.bind(entityManager);

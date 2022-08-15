@@ -5,7 +5,7 @@ import process from 'process';
 import pkg from '../package.js';
 import { mongodb } from './mongodb.js';
 import { pubSubManager, COMMAND_PROCESSED } from './pubsub.js';
-import { processCommand } from './process-command.js';
+import commandProcessor from './processor.js';
 
 process.on('unhandledRejection', immediatelyThrow);
 
@@ -61,10 +61,14 @@ const { log } = console;
     const key = `${entityType}.${JSON.stringify(entityId)} (event: ${eventId})`;
     log('START', key);
 
-    const ok = await processCommand({ entityType, entityId });
+    // @todo if the processor service returns a bad response, should this fail the container?
+    const ok = await commandProcessor.request('processOne', {
+      _id: eventId,
+      entityId,
+      entityType,
+    });
 
     await pubSubManager.publish(COMMAND_PROCESSED, { ok, result: fullDocument });
-
     await resumeCollection.updateOne({ _id: change._id }, [{
       $set: {
         _id: change._id,
@@ -72,6 +76,6 @@ const { log } = console;
         event: { _id: eventId, date: fullDocument.date, entityType },
       },
     }], { upsert: true });
-    log('END', key);
+    log('END', key, { ok });
   });
 })().catch(immediatelyThrow);

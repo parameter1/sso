@@ -143,6 +143,7 @@ services:
     command: ["dev"]
     environment:
       <<: [*env, *env-mongodb, *env-redis-pubsub]
+      COMMAND_PROCESSOR_URL: ${COMMAND_PROCESSOR_URL-http://command-processor}
     depends_on:
       - command-processor
       - redis-pubsub

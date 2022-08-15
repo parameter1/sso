@@ -1,6 +1,4 @@
-import { entityManager } from './mongodb.js';
-
-const materialize = entityManager.materialize.bind(entityManager);
+import { entityManager, materialize } from './mongodb.js';
 
 const materializeWorkspaceUsers = async ({ $match }) => {
   const pipeline = [{
@@ -28,7 +26,7 @@ const materializeWorkspaceUsers = async ({ $match }) => {
   return materialize({ entityType: 'user', $match: { _id: { $in: doc.userIds } } });
 };
 
-const handlers = {
+export default {
   /**
    *
    */
@@ -109,19 +107,3 @@ const handlers = {
     })(),
   ]),
 };
-
-export async function processCommand({ entityType, entityId }) {
-  try {
-    await entityManager.normalize({ entityType, entityIds: entityId });
-    const handler = handlers[entityType];
-    if (handler) {
-      await handler({ entityId });
-    } else {
-      await materialize({ entityType, $match: { _id: entityId } });
-    }
-    return true;
-  } catch (e) {
-    // @todo log error and/or fail the container
-    return false;
-  }
-}

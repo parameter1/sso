@@ -82,6 +82,11 @@ export class EntityManager {
     return this.commandHandlers.get(entityType);
   }
 
+  getEntityIdType(entityType) {
+    const builder = this.commandHandlers.normalizedBuilders.get(entityType);
+    return builder.entityIdType;
+  }
+
   /**
    *
    * @param {string} entityType

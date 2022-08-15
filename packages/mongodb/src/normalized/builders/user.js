@@ -1,7 +1,7 @@
 import { PropTypes, attempt } from '@parameter1/prop-types';
 
 import { BaseBuilder } from './-base.js';
-import { eventProps } from '../../command/event-store.js';
+import userCommandProps from '../../command/props/user.js';
 
 const { boolean, object, oneOrMany } = PropTypes;
 
@@ -12,7 +12,7 @@ export class UserBuilder extends BaseBuilder {
    * @param {string} params.entityType
    */
   constructor() {
-    super({ entityType: 'user' });
+    super({ entityType: 'user', entityIdType: userCommandProps.id });
   }
 
   /**
@@ -23,7 +23,7 @@ export class UserBuilder extends BaseBuilder {
    */
   buildPipeline(params) {
     const { entityIds, withMergeStage } = attempt(params, object({
-      entityIds: oneOrMany(eventProps.entityId).required(),
+      entityIds: oneOrMany(this.entityIdType).required(),
       withMergeStage: boolean().default(true),
     }).required());
 

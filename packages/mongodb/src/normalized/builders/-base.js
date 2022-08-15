@@ -8,6 +8,7 @@ const {
   boolean,
   object,
   oneOrMany,
+  propTypeObject,
   string,
 } = PropTypes;
 
@@ -15,14 +16,18 @@ export class BaseBuilder {
   /**
    *
    * @param {object} params
+   * @param {function} params.entityIdType
    * @param {string} params.entityType
    */
   constructor(params) {
     const {
+      entityIdType,
       entityType,
     } = attempt(params, object({
+      entityIdType: propTypeObject().required(),
       entityType: eventProps.entityType.required(),
     }).required());
+    this.entityIdType = entityIdType;
     this.entityType = entityType;
   }
 
@@ -58,7 +63,7 @@ export class BaseBuilder {
       valueBranches,
       withMergeStage,
     } = attempt(params, object({
-      entityIds: oneOrMany(eventProps.entityId).required(),
+      entityIds: oneOrMany(this.entityIdType).required(),
       mergeValuesStages: array().items(object()).default([]),
       newRootMergeObjects: array().items(object()).default([]),
       unsetFields: array().items(string()).default([]),

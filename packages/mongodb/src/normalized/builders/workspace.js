@@ -1,7 +1,7 @@
 import { PropTypes, attempt } from '@parameter1/prop-types';
 
 import { BaseBuilder } from './-base.js';
-import { eventProps } from '../../command/event-store.js';
+import workspaceCommandProps from '../../command/props/workspace.js';
 
 const { boolean, object, oneOrMany } = PropTypes;
 
@@ -12,7 +12,7 @@ export class WorkspaceBuilder extends BaseBuilder {
    * @param {string} params.entityType
    */
   constructor() {
-    super({ entityType: 'workspace' });
+    super({ entityType: 'workspace', entityIdType: workspaceCommandProps.id });
   }
 
   /**
@@ -23,7 +23,7 @@ export class WorkspaceBuilder extends BaseBuilder {
    */
   buildPipeline(params) {
     const { entityIds, withMergeStage } = attempt(params, object({
-      entityIds: oneOrMany(eventProps.entityId).required(),
+      entityIds: oneOrMany(this.entityIdType).required(),
       withMergeStage: boolean().default(true),
     }).required());
     return this.build({ entityIds, withMergeStage });

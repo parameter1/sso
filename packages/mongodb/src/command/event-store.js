@@ -14,6 +14,7 @@ const {
 } = PropTypes;
 
 export const eventProps = {
+  _id: objectId(),
   command: string().uppercase().pattern(/^[A-Z_]+$/),
   entityId: any().disallow(null, ''),
   entityType: string().valid('application', 'manager', 'member', 'organization', 'user', 'workspace'),

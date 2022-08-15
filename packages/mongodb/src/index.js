@@ -10,6 +10,7 @@ export { filterObjects, findWithObjects } from '@parameter1/mongodb/pagination';
 
 export * from './constants.js';
 
+export { eventProps } from './command/event-store.js';
 export { CommandHandlers } from './command/handlers.js';
 export { MaterializedRepos } from './materialized/repos.js';
 export { NormalizedRepos } from './normalized/repos.js';

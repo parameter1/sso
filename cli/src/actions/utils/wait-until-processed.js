@@ -15,7 +15,7 @@ export async function waitUntilProcessed(action) {
   log('> Processing...');
   await new Promise((resolve) => {
     pubSubManager.on(COMMAND_PROCESSED, ({ body }) => {
-      if (`${body._id}` === `${result._id}`) resolve();
+      if (`${body.result._id}` === `${result._id}`) resolve();
     });
   });
   log('> Finalizing...');

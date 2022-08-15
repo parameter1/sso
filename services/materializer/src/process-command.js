@@ -111,12 +111,17 @@ const handlers = {
 };
 
 export async function processCommand({ entityType, entityId }) {
-  await entityManager.normalize({ entityType, entityIds: entityId });
-
-  const handler = handlers[entityType];
-  if (handler) {
-    await handler({ entityId });
-  } else {
-    await materialize({ entityType, $match: { _id: entityId } });
+  try {
+    await entityManager.normalize({ entityType, entityIds: entityId });
+    const handler = handlers[entityType];
+    if (handler) {
+      await handler({ entityId });
+    } else {
+      await materialize({ entityType, $match: { _id: entityId } });
+    }
+    return true;
+  } catch (e) {
+    // @todo log error and/or fail the container
+    return false;
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-graphql",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "type": "module",
   "description": "Common GraphQL server utilities and functions.",
   "author": "Jacob Bare <jacob@parameter1.com>",

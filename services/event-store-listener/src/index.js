@@ -37,12 +37,11 @@ const { log } = console;
   const token = await resumeCollection.findOne({}, { sort: { _id: -1 } });
   if (token) log(`Starting after ${JSON.stringify(token)}`);
 
-  const changeStream = await mongodb.watch({
+  const eventStoreColl = await mongodb.collection({ dbName: DB_NAME, name: 'event-store' });
+  const changeStream = await eventStoreColl.watch({
     pipeline: [
       {
         $match: {
-          'ns.db': DB_NAME,
-          'ns.coll': 'event-store',
           operationType: 'insert',
         },
       },

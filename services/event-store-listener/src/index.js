@@ -38,19 +38,13 @@ const { log } = console;
   if (token) log(`Starting after ${JSON.stringify(token)}`);
 
   const eventStoreColl = await mongodb.collection({ dbName: DB_NAME, name: 'event-store' });
-  const changeStream = await eventStoreColl.watch({
-    pipeline: [
-      {
-        $match: {
-          operationType: 'insert',
-        },
+  const changeStream = await eventStoreColl.watch([
+    {
+      $match: {
+        operationType: 'insert',
       },
-    ],
-    options: {
-      fullDocument: 'updateLookup',
-      ...(token && { startAfter: token._id }),
     },
-  });
+  ], { ...(token && { resumeAfter: token._id }) });
 
   changeStream.on('change', async (change) => {
     const { _id: eventId } = change.documentKey;

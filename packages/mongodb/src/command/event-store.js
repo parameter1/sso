@@ -113,6 +113,7 @@ export class EventStore extends Repo {
       }
       return result.upserted.map((o) => ({
         ...o,
+        entityId: prepared[o.index].entityId,
         event: eventMap.get(`${o._id}`),
         values: prepared[o.index].values || {},
       }));

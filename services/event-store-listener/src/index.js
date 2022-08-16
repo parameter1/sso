@@ -43,6 +43,7 @@ const { log } = console;
         $match: {
           'ns.db': DB_NAME,
           'ns.coll': 'event-store',
+          operationType: 'insert',
         },
       },
     ],
@@ -53,7 +54,6 @@ const { log } = console;
   });
 
   changeStream.on('change', async (change) => {
-    if (change.operationType !== 'insert') return;
     const { _id: eventId } = change.documentKey;
     const { fullDocument } = change;
     const { entityId, entityType } = fullDocument;

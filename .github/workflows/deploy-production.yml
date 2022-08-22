@@ -172,7 +172,7 @@ jobs:
           RANCHER_URL: ${{ secrets.RANCHER_URL }}
 
   deploy-app:
-    needs: [vars, build-app, deploy-graphql-services]
+    needs: [vars, build-app, deploy-graphql-servers]
     runs-on: ubuntu-latest
     strategy:
       matrix:

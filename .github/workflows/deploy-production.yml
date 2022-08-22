@@ -74,14 +74,40 @@ jobs:
         slack-text: Deployment complete.
         slack-optional-thread_ts: ${{ needs.vars.outputs.slack-thread }}
 
+  build-app:
+    needs: [vars]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - { path: app, name: app }
+    steps:
+      - uses: actions/checkout@v2
+      - uses: docker/login-action@v1
+        name: Login to ECR
+        with:
+          registry: ${{ env.ECR_REGISTRY }}
+          username: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Build docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: app/Dockerfile
+          push: true
+          build-args: |
+            COMMAND_URL=${{ secrets.COMMAND_URL }} \
+            QUERY_URL=${{ secrets.QUERY_URL }} \
+            SUBSCRIPTION_URL=${{ secrets.SUBSCRIPTION_URL }} \
+          tags: ${{ env.ECR_REGISTRY }}/sso-${{ matrix.service.name }}:${{ needs.vars.outputs.version }}
+
   build:
     needs: [vars]
     runs-on: ubuntu-latest
     strategy:
       matrix:
         service:
-          # - { path: app, name: app }
-          # - { path: cli, name: cli }
+          - { path: cli, name: cli }
           - { path: graphql/command, name: graphql-command }
           - { path: graphql/query, name: graphql-query }
           - { path: graphql/subscription, name: graphql-subscription }
@@ -109,6 +135,7 @@ jobs:
     strategy:
       matrix:
         service:
+          - { path: cli, name: cli }
           - { path: services/command-processor, name: command-processor }
           - { path: services/event-store-listener, name: event-store-listener }
     steps:
@@ -124,7 +151,7 @@ jobs:
           RANCHER_URL: ${{ secrets.RANCHER_URL }}
 
   deploy-graphql-servers:
-    needs: [vars, build]
+    needs: [vars, build, deploy-services]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -132,6 +159,25 @@ jobs:
           - { path: graphql/command, name: graphql-command }
           - { path: graphql/query, name: graphql-query }
           - { path: graphql/subscription, name: graphql-subscription }
+    steps:
+      - name: Deploy to Kubernetes
+        run: |
+          npx @parameter1/rancher2cli dl \
+            --wait=true --namespace sso \
+            sso-service ${{ matrix.service.name }} \
+            ${{ env.ECR_REGISTRY }}/sso-${{ matrix.service.name }}:${{ needs.vars.outputs.version }}
+        env:
+          RANCHER_CLUSTERID: ${{ secrets.RANCHER_CLUSTERID_MINDFUL }}
+          RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
+          RANCHER_URL: ${{ secrets.RANCHER_URL }}
+
+  deploy-app:
+    needs: [vars, build-app, deploy-graphql-services]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - { path: app, name: app }
     steps:
       - name: Deploy to Kubernetes
         run: |

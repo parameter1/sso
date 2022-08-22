@@ -96,9 +96,9 @@ jobs:
           file: app/Dockerfile
           push: true
           build-args: |
-            COMMAND_URL=${{ secrets.COMMAND_URL }} \
-            QUERY_URL=${{ secrets.QUERY_URL }} \
-            SUBSCRIPTION_URL=${{ secrets.SUBSCRIPTION_URL }} \
+            COMMAND_URL=${{ secrets.COMMAND_URL }}
+            QUERY_URL=${{ secrets.QUERY_URL }}
+            SUBSCRIPTION_URL=${{ secrets.SUBSCRIPTION_URL }}
           tags: ${{ env.ECR_REGISTRY }}/sso-${{ matrix.service.name }}:${{ needs.vars.outputs.version }}
 
   build:

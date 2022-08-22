@@ -142,8 +142,7 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           npx @parameter1/rancher2cli dl \
-            --wait \
-            --namespace sso \
+            --wait --namespace sso \
             sso-service ${{ matrix.service.name }} \
             ${{ env.ECR_REGISTRY }}/sso-${{ matrix.service.name }}:${{ needs.vars.outputs.version }}
         env:
@@ -164,8 +163,7 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           npx @parameter1/rancher2cli dl \
-            --wait \
-            --namespace sso \
+            --wait --namespace sso \
             sso-service ${{ matrix.service.name }} \
             ${{ env.ECR_REGISTRY }}/sso-${{ matrix.service.name }}:${{ needs.vars.outputs.version }}
         env:
@@ -184,8 +182,7 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           npx @parameter1/rancher2cli dl \
-            --wait \
-            --namespace sso \
+            --wait --namespace sso \
             sso-service ${{ matrix.service.name }} \
             ${{ env.ECR_REGISTRY }}/sso-${{ matrix.service.name }}:${{ needs.vars.outputs.version }}
         env:

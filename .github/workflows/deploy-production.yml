@@ -47,7 +47,7 @@ jobs:
 
   post-deploy-failure:
     if: failure()
-    needs: [vars, deploy-services, deploy-graphql-servers]
+    needs: [vars, deploy-services, deploy-graphql-servers, deploy-app]
     runs-on: ubuntu-latest
     steps:
     - name: Notify failure
@@ -62,7 +62,7 @@ jobs:
 
   post-deploy-success:
     if: success()
-    needs: [vars, deploy-services, deploy-graphql-servers]
+    needs: [vars, deploy-services, deploy-graphql-servers, deploy-app]
     runs-on: ubuntu-latest
     steps:
     - name: Notify success

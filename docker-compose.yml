@@ -52,6 +52,7 @@ services:
     command: ["src/index.js"]
     environment:
       <<: [*env, *env-mongodb, *env-redis-pubsub]
+      MONGO_URL: ${MONGO_URL_PROCESSOR}
     depends_on:
       - event-store-listener
       - redis-pubsub
@@ -63,6 +64,7 @@ services:
     command: ["dev"]
     environment:
       <<: [*env, *env-mongodb]
+      MONGO_URL: ${MONGO_URL_PROCESSOR}
       EXPOSED_HOST: services.sso.dev.parameter1.com
       EXPOSED_PORT: 7916
       HOST: services.sso.dev.parameter1.com
@@ -82,6 +84,7 @@ services:
     command: ["dev"]
     environment:
       <<: [*env, *env-mongodb, *env-redis-pubsub]
+      MONGO_URL: ${MONGO_URL_LISTENER}
       COMMAND_PROCESSOR_URL: ${COMMAND_PROCESSOR_URL-http://command-processor}
     depends_on:
       - command-processor
@@ -94,6 +97,7 @@ services:
     command: ["dev"]
     environment:
       <<: [*env, *env-mongodb]
+      MONGO_URL: ${MONGO_URL_COMMAND}
       APP_URL: ${APP_URL-http://sso.dev.parameter1.com:7913}
       EXPOSED_HOST: graphql.sso.dev.parameter1.com
       EXPOSED_PORT: 7912
@@ -112,6 +116,7 @@ services:
     command: ["dev"]
     environment:
       <<: [*env, *env-mongodb]
+      MONGO_URL: ${MONGO_URL_QUERY}
       EXPOSED_HOST: graphql.sso.dev.parameter1.com
       EXPOSED_PORT: 7911
       HOST: graphql.sso.dev.parameter1.com
@@ -126,6 +131,7 @@ services:
     command: ["dev"]
     environment:
       <<: [*env, *env-mongodb, *env-redis-pubsub]
+      MONGO_URL: ${MONGO_URL_SUBSCRIPTION}
       EXPOSED_HOST: graphql.sso.dev.parameter1.com
       EXPOSED_PORT: 7915
       HOST: graphql.sso.dev.parameter1.com

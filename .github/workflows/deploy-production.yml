@@ -47,7 +47,7 @@ jobs:
 
   post-deploy-failure:
     if: failure()
-    needs: [vars, deploy-services]
+    needs: [vars, deploy-services, deploy-graphql-servers]
     runs-on: ubuntu-latest
     steps:
     - name: Notify failure
@@ -62,7 +62,7 @@ jobs:
 
   post-deploy-success:
     if: success()
-    needs: [vars, deploy-services]
+    needs: [vars, deploy-services, deploy-graphql-servers]
     runs-on: ubuntu-latest
     steps:
     - name: Notify success
@@ -82,9 +82,9 @@ jobs:
         service:
           # - { path: app, name: app }
           # - { path: cli, name: cli }
-          # - { path: graphql/command, name: graphql-command }
-          # - { path: graphql/query, name: graphql-query }
-          # - { path: graphql/subscription, name: graphql-subscription }
+          - { path: graphql/command, name: graphql-command }
+          - { path: graphql/query, name: graphql-query }
+          - { path: graphql/subscription, name: graphql-subscription }
           - { path: services/command-processor, name: command-processor }
           - { path: services/event-store-listener, name: event-store-listener }
     steps:
@@ -111,6 +111,27 @@ jobs:
         service:
           - { path: services/command-processor, name: command-processor }
           - { path: services/event-store-listener, name: event-store-listener }
+    steps:
+      - name: Deploy to Kubernetes
+        run: |
+          npx @parameter1/rancher2cli dl \
+            --wait=true --namespace sso \
+            sso-service ${{ matrix.service.name }} \
+            ${{ env.ECR_REGISTRY }}/sso-${{ matrix.service.name }}:${{ needs.vars.outputs.version }}
+        env:
+          RANCHER_CLUSTERID: ${{ secrets.RANCHER_CLUSTERID_MINDFUL }}
+          RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
+          RANCHER_URL: ${{ secrets.RANCHER_URL }}
+
+  deploy-graphql-servers:
+    needs: [vars, build]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - { path: graphql/command, name: graphql-command }
+          - { path: graphql/query, name: graphql-query }
+          - { path: graphql/subscription, name: graphql-subscription }
     steps:
       - name: Deploy to Kubernetes
         run: |

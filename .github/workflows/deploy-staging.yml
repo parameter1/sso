@@ -1,13 +1,13 @@
-name: Deploy suite (Production)
+name: Deploy suite (Staging)
 
 on:
   push:
-    tags: [ 'v[0-9]+.[0-9]+.[0-9]+' ]
+    branches: [ main ]
 
 env:
   ECR_REGISTRY: 598984531759.dkr.ecr.us-east-2.amazonaws.com
   IMG_PREFIX: sso
-  TARGET_NAMESPACE: sso
+  TARGET_NAMESPACE: sso-staging
 
 jobs:
   vars:

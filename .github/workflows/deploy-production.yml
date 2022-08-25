@@ -97,9 +97,9 @@ jobs:
           file: app/Dockerfile
           push: true
           build-args: |
-            COMMAND_URL=${{ secrets.COMMAND_URL }}
-            QUERY_URL=${{ secrets.QUERY_URL }}
-            SUBSCRIPTION_URL=${{ secrets.SUBSCRIPTION_URL }}
+            COMMAND_URL=https://graphql.sso.parameter1.com/command
+            QUERY_URL=https://graphql.sso.parameter1.com/query
+            SUBSCRIPTION_URL=wss://graphql.sso.parameter1.com/subscription
           tags: ${{ env.ECR_REGISTRY }}/${{ env.IMG_PREFIX }}-${{ matrix.service.name }}:${{ needs.vars.outputs.version }}
 
   build:

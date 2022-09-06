@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-graphql-redis-pubsub",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "type": "module",
   "description": "PubSub management for GraphQL+Redis.",
   "author": "Jacob Bare <jacob@parameter1.com>",

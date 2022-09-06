@@ -21,8 +21,8 @@
   },
   "dependencies": {
     "@parameter1/email-utils": "^2.0.0",
-    "@parameter1/joi": "^2.4.0",
-    "@parameter1/mongodb": "^4.6.0",
+    "@parameter1/joi": "^2.5.0",
+    "@parameter1/mongodb": "^4.8.0",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/utils": "^2.0.0",
     "@sindresorhus/is": "^5.3.0",

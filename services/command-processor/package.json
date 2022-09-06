@@ -19,10 +19,10 @@
     "test": "yarn lint"
   },
   "dependencies": {
-    "@parameter1/micro": "^2.2.0",
-    "@parameter1/prop-types": "^2.4.0",
+    "@parameter1/micro": "^2.3.2",
+    "@parameter1/prop-types": "^2.5.0",
     "@parameter1/sso-mongodb": "^0.5.3",
-    "@parameter1/terminus": "^2.2.0",
+    "@parameter1/terminus": "^2.2.1",
     "@parameter1/utils": "^2.0.0",
     "envalid": "^7.3.1"
   },

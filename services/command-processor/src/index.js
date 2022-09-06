@@ -40,7 +40,7 @@ bootService({
   },
 
   onHealthCheck: async () => {
-    await mongodb.ping({ id: pkg.name });
+    await mongodb.ping({ id: pkg.name, withWrite: false });
     return true;
   },
 }).catch(immediatelyThrow);

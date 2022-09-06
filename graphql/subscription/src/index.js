@@ -37,7 +37,7 @@ const { log } = console;
     },
     onHealthCheck: async () => {
       await Promise.all([
-        mongodb.ping({ id: pkg.name }),
+        mongodb.ping({ id: pkg.name, withWrite: false }),
         pubSubManager.ping(),
       ]);
       return true;

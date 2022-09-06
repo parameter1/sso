@@ -26,7 +26,7 @@ const { log } = console;
       trustProxy: ['loopback', 'linklocal', 'uniquelocal'],
     },
     onHealthCheck: async () => {
-      await mongodb.ping({ id: pkg.name });
+      await mongodb.ping({ id: pkg.name, withWrite: false });
       return true;
     },
     onShutdown: async () => {

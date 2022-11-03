@@ -8,8 +8,10 @@ const { object, oneOrMany } = PropTypes;
 /**
  * @typedef {import("@parameter1/sso-mongodb-core").BulkWriteResult} BulkWriteResult
  * @typedef {import("@parameter1/sso-mongodb-core").Collection} Collection
- * @typedef {import("@parameter1/sso-mongodb-core").ClientSession} ClientSession
  * @typedef {import("@parameter1/sso-mongodb-core").MongoClient} MongoClient
+ *
+ * @typedef {import("./index").ReservationsReleaseParams} ReservationsReleaseParams
+ * @typedef {import("./index").ReservationsReserveParams} ReservationsReserveParams
  */
 export class Reservations {
   /**
@@ -44,14 +46,7 @@ export class Reservations {
   }
 
   /**
-   * @typedef ReservationsReleaseParamsInput
-   * @property {*} entityId
-   * @property {string} key
-   *
-   * @typedef ReservationsReleaseParams
-   * @property {ReservationsReleaseParamsInput|ReservationsReleaseParamsInput[]} input
-   * @property {ClientSession} [session]
-   *
+   * Releases one or more entity field values.
    *
    * @param {string} type The entity type
    * @param {ReservationsReleaseParams} params
@@ -78,15 +73,7 @@ export class Reservations {
   }
 
   /**
-   * @typedef ReservationsReserveParamsInput
-   * @property {*} entityId
-   * @property {string} key
-   * @property {*} value
-   *
-   * @typedef ReservationsReserveParams
-   * @property {ReservationsReserveParamsInput|ReservationsReserveParamsInput[]} input
-   * @property {ClientSession} [session]
-   *
+   * Reserves one or more entity field values.
    *
    * @param {string} type The entity type
    * @param {ReservationsReserveParams} params

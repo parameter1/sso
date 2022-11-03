@@ -6,21 +6,14 @@ import { UserNormalizationBuilder } from './normalization-builders/user.js';
 const { array, object, oneOrMany } = PropTypes;
 
 /**
- * @typedef EventStoreDocument
- * @property {string} command The command name
- * @property {Date|string} [date=$$NOW] The date of the event
- * @property {*} entityId The entity/document ID to assign to the values to
- * @property {boolean} [omitFromHistory=false] Whether to omit the entry from the normalized history
- * @property {boolean} [omitFromModified=false] Whether to omit the date and user from modified
- * @property {object} [values={}] The values to push
- * @property {import("mongodb").ObjectId} [userId] The user that pushed the command
- *
  * @typedef EventStoreResult
  * @property {ObjectId} _id
  * @property {string} command
  * @property {*} entityId
  * @property {string} entityType
  * @property {ObjectId} [userId]
+ *
+ * @typedef {import("./index").EventStoreDocument} EventStoreDocument
  *
  * @typedef EventStoreConstructorParams
  * @property {import("mongodb").MongoClient} mongo The MongoDB client

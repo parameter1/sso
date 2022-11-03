@@ -210,7 +210,7 @@ export class EventStore {
     /** @type {EventStoreEntityStateParams} */
     const { entityIds } = await validateAsync(object({
       entityIds: array().items(getEntityIdPropType(entityType).required()).required(),
-    }).required(), params);
+    }).required().label('eventStore.getEntityStatesFor'), params);
 
     const pipeline = [{
       $match: {
@@ -264,7 +264,7 @@ export class EventStore {
         userId: eventProps.userId.default(null),
       })),
       session: object(),
-    }).required(), params);
+    }).required().label('eventStore.push'), params);
 
     const objs = [];
     const operations = [];

@@ -86,7 +86,7 @@ export class BaseCommandHandler {
       entityIds: oneOrMany(this.entityIdPropType.required()).required(),
       eligibleWhenFn: func().required(),
       throwWhenFalse: boolean().default(true),
-    }).required(), params);
+    }).required().label('handler.canPush'), params);
 
     const states = await this.getEntityStatesFor(entityIds);
     const ineligible = entityIds.reduce((set, entityId) => {
@@ -176,7 +176,7 @@ export class BaseCommandHandler {
         userId: eventProps.userId,
       }).required()).required(),
       session: mongoSessionProp,
-    }).required().label('executeCreate'), params);
+    }).required().label('handler.executeCreate'), params);
 
     return this.pushToStore({
       events: input.map((event) => ({
@@ -219,7 +219,7 @@ export class BaseCommandHandler {
         userId: eventProps.userId,
       }).required()).required(),
       session: mongoSessionProp,
-    }).required().label('pushToStore'), params);
+    }).required().label('handler.pushToStore'), params);
 
     const push = async (session) => {
       const results = await this.store.push(this.entityType, { events, session });
@@ -261,7 +261,7 @@ export class BaseCommandHandler {
         key: reservationProps.key.required(),
       }).required()).required(),
       session: mongoSessionProp,
-    }).required(), params);
+    }).required().label('handler.release'), params);
     return this.reservations.release(this.entityType, { input, session });
   }
 
@@ -278,7 +278,7 @@ export class BaseCommandHandler {
         value: reservationProps.value.required(),
       }).required()).required(),
       session: mongoSessionProp,
-    }).required(), params);
+    }).required().label('handler.reserve'), params);
     return this.reservations.reserve(this.entityType, { input, session });
   }
 }

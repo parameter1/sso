@@ -3,6 +3,8 @@ import { eventProps, getEntityIdPropType } from '@parameter1/sso-prop-types-even
 import { EJSON, ObjectId, mongoSessionProp } from '@parameter1/sso-mongodb-core';
 import { EventStore } from '@parameter1/sso-mongodb-event-store';
 import { SQSClient, enqueueMessages } from '@parameter1/sso-sqs';
+import { Reservations } from '../reservations.js';
+import reservationProps from '../props/reservation.js';
 
 const {
   boolean,
@@ -14,6 +16,8 @@ const {
 
 /**
  * @typedef {import("mongodb").ClientSession} ClientSession
+ * @typedef {import("../index").ReservationsReleaseParams} ReservationsReleaseParams
+ * @typedef {import("../index").ReservationsReserveParams} ReservationsReserveParams
  *
  * @typedef BaseCommandHandlerConstructorParamsSQS
  * @property {SQSClient} client
@@ -21,10 +25,12 @@ const {
  *
  * @typedef BaseCommandHandlerConstructorParams
  * @property {string} entityType
+ * @property {Reservations} reservations
  * @property {EventStore} store
  * @property {BaseCommandHandlerConstructorParamsSQS} sqs
  *
  * @typedef CommandHandlerConstructorParams
+ * @property {Reservations} reservations
  * @property {EventStore} store
  * @property {BaseCommandHandlerConstructorParamsSQS} sqs
  *
@@ -38,8 +44,14 @@ export class BaseCommandHandler {
    */
   constructor(params) {
     /** @type {BaseCommandHandlerConstructorParams} */
-    const { entityType, store, sqs } = attempt(params, object({
+    const {
+      entityType,
+      reservations,
+      store,
+      sqs,
+    } = attempt(params, object({
       entityType: eventProps.entityType.required(),
+      reservations: object().instance(Reservations).required(),
       sqs: object({
         client: object().instance(SQSClient).required(),
         url: url().required(),
@@ -49,6 +61,8 @@ export class BaseCommandHandler {
 
     /** @type {string} */
     this.entityType = entityType;
+    /** @type {Reservations} */
+    this.reservations = reservations;
     /** @type {BaseCommandHandlerConstructorParamsSQS} */
     this.sqs = sqs;
     /** @type {EventStore} */
@@ -147,19 +161,21 @@ export class BaseCommandHandler {
    *
    * @typedef CommandHandlerExecuteCreateParams
    * @property {CommandHandlerExecuteCreateInput|CommandHandlerExecuteCreateInput[]} input
+   * @property {ClientSession} [session]
    *
    * @param {CommandHandlerExecuteCreateParams} params
    * @returns {Promise<EventStoreResult[]>}
    */
   async executeCreate(params) {
     /** @type {CommandHandlerExecuteCreateParams} */
-    const { input } = await validateAsync(object({
+    const { input, session } = await validateAsync(object({
       input: oneOrMany(object({
         entityId: this.entityIdPropType.default(() => this.generateId()),
         date: eventProps.date,
         values: eventProps.values.required(),
         userId: eventProps.userId,
       }).required()).required(),
+      session: mongoSessionProp,
     }).required().label('executeCreate'), params);
 
     return this.pushToStore({
@@ -167,6 +183,7 @@ export class BaseCommandHandler {
         ...event,
         command: 'CREATE',
       })),
+      session,
     });
   }
 
@@ -229,5 +246,38 @@ export class BaseCommandHandler {
     } finally {
       await session.endSession();
     }
+  }
+
+  /**
+   * Releases one or more entity field values.
+   *
+   * @param {ReservationsReleaseParams} params
+   */
+  async release(params) {
+    const { input, session } = await validateAsync(object({
+      input: oneOrMany(object({
+        entityId: this.entityIdPropType.required(),
+        key: reservationProps.key.required(),
+      }).required()).required(),
+      session: mongoSessionProp,
+    }).required(), params);
+    return this.reservations.release(this.entityType, { input, session });
+  }
+
+  /**
+   * Reserves one or more entity field values.
+   *
+   * @param {ReservationsReserveParams} params
+   */
+  async reserve(params) {
+    const { input, session } = await validateAsync(object({
+      input: oneOrMany(object({
+        entityId: this.entityIdPropType.required(),
+        key: reservationProps.key.required(),
+        value: reservationProps.value.required(),
+      }).required()).required(),
+      session: mongoSessionProp,
+    }).required(), params);
+    return this.reservations.reserve(this.entityType, { input, session });
   }
 }

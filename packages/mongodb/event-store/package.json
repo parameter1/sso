@@ -18,7 +18,8 @@
     "test": "yarn lint"
   },
   "dependencies": {
-    "@parameter1/prop-types": "^2.6.0",
+    "@parameter1/sso-prop-types-core": "^0.5.4",
+    "@parameter1/sso-prop-types-event": "^0.5.4",
     "@parameter1/sso-mongodb-core": "^0.5.4"
   }
 }

@@ -6,13 +6,7 @@ import { UserNormalizationBuilder } from './normalization-builders/user.js';
 const { array, object, oneOrMany } = PropTypes;
 
 /**
- * @typedef EventStoreResult
- * @property {ObjectId} _id
- * @property {string} command
- * @property {*} entityId
- * @property {string} entityType
- * @property {ObjectId} [userId]
- *
+ * @typedef {import("./index").EventStoreResult} EventStoreResult
  * @typedef {import("./index").EventStoreDocument} EventStoreDocument
  *
  * @typedef EventStoreConstructorParams

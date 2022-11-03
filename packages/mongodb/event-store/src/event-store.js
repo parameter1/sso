@@ -1,6 +1,7 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { eventProps, getEntityIdPropType } from '@parameter1/sso-prop-types-event';
 import { DB_NAME, EJSON, mongoDBClientProp } from '@parameter1/sso-mongodb-core';
+import { UserNormalizationBuilder } from './normalization-builders/user.js';
 
 const { array, object, oneOrMany } = PropTypes;
 
@@ -37,6 +38,156 @@ export class EventStore {
 
     /** @type {import("mongodb").Collection} */
     this.collection = mongo.db(DB_NAME).collection('event-store');
+
+    /**
+     * @type {Map<string, UserNormalizationBuilder>}
+     */
+    this.normalizedBuilders = new Map([
+      ['user', UserNormalizationBuilder],
+    ]);
+  }
+
+  /**
+   * Builds the pipeline for normalizing the event store.
+   *
+   * @typedef EventStoreNormalizationParams
+   * @property {*|*[]} entityIds
+   *
+   * @param {string} type The entity type to push events for
+   * @param {EventStoreNormalizationParams} params
+   * @returns {object[]}
+   */
+  buildNormalizationPipeline(type, params) {
+    /** @type {string} */
+    const entityType = attempt(type, eventProps.entityType.required());
+
+    /** @type {EventStoreNormalizationParams} */
+    const { entityIds } = attempt(params, object({
+      entityIds: oneOrMany(getEntityIdPropType(entityType)).required(),
+    }).required());
+
+    const builder = this.normalizedBuilders.get(entityType);
+    const {
+      mergeValuesStages = [],
+      newRootMergeObjects = [],
+      unsetFields = [],
+      valueBranches = [],
+    } = builder ? builder.get() : {};
+
+    return [{
+      $match: {
+        ...(entityIds.length && { entityId: { $in: entityIds } }),
+        entityType,
+      },
+    }, {
+      $sort: EventStore.getEventSort(),
+    }, {
+      $group: { _id: '$entityId', stream: { $push: '$$ROOT' } },
+    }, {
+      $set: {
+        _: {
+          $reduce: {
+            input: '$stream',
+            initialValue: {},
+            in: {
+              isDeleted: {
+                $cond: [
+                  { $eq: ['$$this.command', 'DELETE'] },
+                  true,
+                  {
+                    $cond: [
+                      { $eq: ['$$this.command', 'RESTORE'] },
+                      false,
+                      { $ifNull: ['$$value.isDeleted', false] },
+                    ],
+                  },
+                ],
+              },
+
+              created: {
+                $ifNull: [
+                  {
+                    $cond: [
+                      { $eq: ['$$this.command', 'CREATE'] },
+                      { date: '$$this.date', userId: '$$this.userId' },
+                      null,
+                    ],
+                  },
+                  '$$value.created',
+                ],
+              },
+
+              modified: {
+                $cond: [
+                  { $eq: ['$$this.omitFromModified', true] },
+                  '$$value.modified',
+                  {
+                    date: '$$this.date',
+                    n: { $add: [{ $ifNull: ['$$value.modified.n', 0] }, 1] },
+                    userId: '$$this.userId',
+                  },
+                ],
+              },
+
+              touched: {
+                date: '$$this.date',
+                n: { $add: [{ $ifNull: ['$$value.touched.n', 0] }, 1] },
+                userId: '$$this.userId',
+              },
+
+              values: {
+                $mergeObjects: [
+                  '$$value.values',
+                  {
+                    $cond: [
+                      { $eq: ['$$this.command', 'DELETED'] },
+                      {},
+                      valueBranches.length ? {
+                        $switch: {
+                          branches: valueBranches,
+                          default: '$$this.values',
+                        },
+                      } : '$$this.values',
+                    ],
+                  },
+                  ...mergeValuesStages,
+                ],
+              },
+            },
+          },
+        },
+      },
+    }, {
+      $replaceRoot: {
+        newRoot: {
+          $mergeObjects: [
+            { _id: '$_id' },
+            {
+              _deleted: '$_.isDeleted',
+              _history: { $filter: { input: '$stream', cond: { $ne: ['$$this.omitFromHistory', true] } } },
+              _meta: { created: '$_.created', modified: '$_.modified', touched: '$_.touched' },
+              _normalized: '$$NOW',
+            },
+            '$_.values',
+            ...newRootMergeObjects,
+          ],
+        },
+      },
+    }, {
+      $unset: [
+        '_history.entityId',
+        '_history.omitFromHistory',
+        '_history.omitFromModified',
+        ...unsetFields,
+      ],
+    }, {
+      $merge: {
+        into: { db: DB_NAME, coll: `${entityType}/normalized` },
+        on: '_id',
+        whenMatched: 'replace',
+        whenNotMatched: 'insert',
+      },
+    }];
   }
 
   /**

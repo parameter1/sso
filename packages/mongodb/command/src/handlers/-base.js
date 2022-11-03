@@ -86,6 +86,51 @@ export class BaseCommandHandler {
   }
 
   /**
+   *
+   * @param {*|*[]} entityIds
+   * @param {object} options
+   * @param {boolean} options.throwWhenFalse
+   * @returns {Promise<boolean>}
+   */
+  async canPushDelete(entityIds, { throwWhenFalse } = {}) {
+    return this.canPush({
+      entityIds,
+      throwWhenFalse,
+      eligibleWhenFn: ({ state }) => state === 'CREATED',
+    });
+  }
+
+  /**
+   *
+   * @param {*|*[]} entityIds
+   * @param {object} options
+   * @param {boolean} options.throwWhenFalse
+   * @returns {Promise<boolean>}
+   */
+  async canPushRestore(entityIds, { throwWhenFalse } = {}) {
+    return this.canPush({
+      entityIds,
+      throwWhenFalse,
+      eligibleWhenFn: ({ state }) => state === 'DELETED',
+    });
+  }
+
+  /**
+   *
+   * @param {*|*[]} entityIds
+   * @param {object} options
+   * @param {boolean} [options.throwWhenFalse]
+   * @returns {Promise<boolean>}
+   */
+  async canPushUpdate(entityIds, { throwWhenFalse } = {}) {
+    return this.canPush({
+      entityIds,
+      throwWhenFalse,
+      eligibleWhenFn: ({ state }) => state === 'CREATED',
+    });
+  }
+
+  /**
    * Gets the entity state for the provided entity IDs.
    *
    * @param {*[]} entityIds

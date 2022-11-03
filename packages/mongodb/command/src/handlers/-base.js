@@ -221,13 +221,19 @@ export class BaseCommandHandler {
       session: mongoSessionProp,
     }).required().label('pushToStore'), params);
 
-    if (currentSession) {
-      const results = await this.store.push(this.entityType, { events, session: currentSession });
+    const push = async (session) => {
+      const results = await this.store.push(this.entityType, { events, session });
       await enqueueMessages({
-        bodies: results,
+        // strip values so they are not sent over the wire (can be large)
+        bodies: results.map(({ values, ...rest }) => rest),
         queueUrl: this.sqs.url,
         sqsClient: this.sqs.client,
       });
+      return results;
+    };
+
+    if (currentSession) {
+      const results = await push(currentSession);
       return results;
     }
 
@@ -235,12 +241,7 @@ export class BaseCommandHandler {
     try {
       let results;
       await session.withTransaction(async (activeSession) => {
-        results = await this.store.push(this.entityType, { events, session: activeSession });
-        await enqueueMessages({
-          bodies: results,
-          queueUrl: this.sqs.url,
-          sqsClient: this.sqs.client,
-        });
+        results = await push(activeSession);
       });
       return results;
     } finally {

@@ -1,4 +1,9 @@
-export { MongoClient } from 'mongodb';
+export {
+  BulkWriteResult,
+  ClientSession,
+  Collection,
+  MongoClient,
+} from 'mongodb';
 export { EJSON, ObjectId } from 'bson';
 export { filterMongoURL } from './filter-url.js';
 export { iterateMongoCursor } from './iterate-cursor.js';

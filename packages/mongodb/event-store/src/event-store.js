@@ -1,5 +1,5 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
-import { eventProps } from '@parameter1/sso-prop-types-event';
+import { eventProps, getEntityIdPropType } from '@parameter1/sso-prop-types-event';
 import { DB_NAME, mongoDBClientProp } from '@parameter1/sso-mongodb-core';
 
 const { object, oneOrMany } = PropTypes;
@@ -9,7 +9,6 @@ const { object, oneOrMany } = PropTypes;
  * @property {string} command The command name
  * @property {Date|string} [date=$$NOW] The date of the event
  * @property {*} entityId The entity/document ID to assign to the values to
- * @property {string} entityType The entity type to assign to the values to
  * @property {boolean} [omitFromHistory=false] Whether to omit the entry from the normalized history
  * @property {boolean} [omitFromModified=false] Whether to omit the date and user from modified
  * @property {object} [values={}] The values to push
@@ -23,13 +22,12 @@ const { object, oneOrMany } = PropTypes;
  * @property {ObjectId} [userId]
  *
  * @typedef EventStoreConstructorParams
- * @property {import("mongodb").MongoClient} params.mongo The MongoDB client
+ * @property {import("mongodb").MongoClient} mongo The MongoDB client
  */
 export class EventStore {
   /**
    *
-   * @param {object} params
-   * @param {import("mongodb").MongoClient} params.mongo The MongoDB client
+   * @param {EventStoreConstructorParams} params
    */
   constructor(params) {
     /** @type {EventStoreConstructorParams} */
@@ -57,17 +55,23 @@ export class EventStore {
   /**
    * Pushes and persists one or more events to the store.
    *
-   * @param {object} params
-   * @param {EventStoreDocument|EventStoreDocument[]} params.events
-   * @param {import("mongodb").ClientSession} [params.session]
+   * @typedef EventStorePushParams
+   * @property {EventStoreDocument|EventStoreDocument[]} events
+   * @property {import("mongodb").ClientSession} [session]
+   *
+   * @param {string} type The entity type to push events for
+   * @param {EventStorePushParams} params The push parameters
    * @returns {Promise<EventStoreResult[]>}
    */
-  async push(params) {
+  async push(type, params) {
+    /** @type {string} */
+    const entityType = attempt(type, eventProps.entityType.required());
+
+    /** @type {EventStorePushParams} */
     const { events, session } = await validateAsync(object({
       events: oneOrMany(object({
         command: eventProps.command.required(),
-        entityId: eventProps.entityId.required(),
-        entityType: eventProps.entityType.required(),
+        entityId: getEntityIdPropType(entityType).required(),
         date: eventProps.date.default('$$NOW'),
         omitFromHistory: eventProps.omitFromHistory.default(false),
         omitFromModified: eventProps.omitFromModified.default(false),
@@ -80,7 +84,7 @@ export class EventStore {
     const objs = [];
     const operations = [];
     events.forEach((event) => {
-      const prepared = { ...event, values: { $literal: event.values } };
+      const prepared = { ...event, entityType, values: { $literal: event.values } };
       objs.push(prepared);
       operations.push({
         updateOne: {

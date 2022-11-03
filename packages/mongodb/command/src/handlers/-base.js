@@ -1,6 +1,6 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { eventProps, getEntityIdPropType } from '@parameter1/sso-prop-types-event';
-import { EJSON } from '@parameter1/sso-mongodb-core';
+import { EJSON, ObjectId } from '@parameter1/sso-mongodb-core';
 import { EventStore } from '@parameter1/sso-mongodb-event-store';
 import { SQSClient, enqueueMessages } from '@parameter1/sso-sqs';
 
@@ -23,6 +23,7 @@ const {
  * @property {CommandHandlerConstructorParamsSQS} sqs
  *
  * @typedef {import("@parameter1/sso-mongodb-event-store").EventStoreDocument} EventStoreDocument
+ * @typedef {import("@parameter1/sso-mongodb-event-store").EventStoreResult} EventStoreResult
  */
 export class BaseCommandHandler {
   /**
@@ -48,6 +49,7 @@ export class BaseCommandHandler {
     this.store = store;
 
     this.entityIdPropType = getEntityIdPropType(this.entityType);
+    this.generateId = () => new ObjectId();
   }
 
   /**
@@ -131,6 +133,38 @@ export class BaseCommandHandler {
   }
 
   /**
+   * @typedef CommandHandlerExecuteCreateInput
+   * @property {*} [entityId]
+   * @property {Date|string} [date]
+   * @property {object} [values]
+   * @property {ObjectId|null} [userId]
+   *
+   * @typedef CommandHandlerExecuteCreateParams
+   * @property {CommandHandlerExecuteCreateInput|CommandHandlerExecuteCreateInput[]} input
+   *
+   * @param {CommandHandlerExecuteCreateParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async executeCreate(params) {
+    /** @type {CommandHandlerExecuteCreateParams} */
+    const { input } = await validateAsync(object({
+      input: oneOrMany(object({
+        entityId: this.entityIdPropType.default(() => this.generateId()),
+        date: eventProps.date,
+        values: eventProps.values.required(),
+        userId: eventProps.userId,
+      }).required()).required(),
+    }).required().label('executeCreate'), params);
+
+    return this.pushToStore({
+      events: input.map((event) => ({
+        ...event,
+        command: 'CREATE',
+      })),
+    });
+  }
+
+  /**
    * Gets the entity state for the provided entity IDs.
    *
    * @param {*[]} entityIds
@@ -146,6 +180,7 @@ export class BaseCommandHandler {
    * @property {EventStoreDocument|EventStoreDocument[]} events
    *
    * @param {CommandHandlerPushToStoreParams} params
+   * @returns {Promise<EventStoreResult[]>}
    */
   async pushToStore(params) {
     /** @type {CommandHandlerPushToStoreParams} */
@@ -164,14 +199,16 @@ export class BaseCommandHandler {
     const session = await this.store.mongo.startSession();
 
     try {
+      let results;
       await session.withTransaction(async (activeSession) => {
-        const results = await this.store.push(this.entityType, { events, session: activeSession });
+        results = await this.store.push(this.entityType, { events, session: activeSession });
         await enqueueMessages({
           bodies: results,
           queueUrl: this.sqs.url,
           sqsClient: this.sqs.client,
         });
       });
+      return results;
     } finally {
       await session.endSession();
     }

@@ -1,6 +1,6 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { eventProps, getEntityIdPropType } from '@parameter1/sso-prop-types-event';
-import { EJSON, ObjectId } from '@parameter1/sso-mongodb-core';
+import { EJSON, ObjectId, mongoSessionProp } from '@parameter1/sso-mongodb-core';
 import { EventStore } from '@parameter1/sso-mongodb-event-store';
 import { SQSClient, enqueueMessages } from '@parameter1/sso-sqs';
 
@@ -13,14 +13,20 @@ const {
 } = PropTypes;
 
 /**
- * @typedef CommandHandlerConstructorParamsSQS
+ * @typedef {import("mongodb").ClientSession} ClientSession
+ *
+ * @typedef BaseCommandHandlerConstructorParamsSQS
  * @property {SQSClient} client
  * @property {string} url
  *
- * @typedef CommandHandlerConstructorParams
+ * @typedef BaseCommandHandlerConstructorParams
  * @property {string} entityType
- * @property {string} queueUrl
- * @property {CommandHandlerConstructorParamsSQS} sqs
+ * @property {EventStore} store
+ * @property {BaseCommandHandlerConstructorParamsSQS} sqs
+ *
+ * @typedef CommandHandlerConstructorParams
+ * @property {EventStore} store
+ * @property {BaseCommandHandlerConstructorParamsSQS} sqs
  *
  * @typedef {import("@parameter1/sso-mongodb-event-store").EventStoreDocument} EventStoreDocument
  * @typedef {import("@parameter1/sso-mongodb-event-store").EventStoreResult} EventStoreResult
@@ -28,10 +34,10 @@ const {
 export class BaseCommandHandler {
   /**
    *
-   * @param {CommandHandlerConstructorParams} params
+   * @param {BaseCommandHandlerConstructorParams} params
    */
   constructor(params) {
-    /** @type {CommandHandlerConstructorParams} */
+    /** @type {BaseCommandHandlerConstructorParams} */
     const { entityType, store, sqs } = attempt(params, object({
       entityType: eventProps.entityType.required(),
       sqs: object({
@@ -43,7 +49,7 @@ export class BaseCommandHandler {
 
     /** @type {string} */
     this.entityType = entityType;
-    /** @type {CommandHandlerConstructorParamsSQS} */
+    /** @type {BaseCommandHandlerConstructorParamsSQS} */
     this.sqs = sqs;
     /** @type {EventStore} */
     this.store = store;
@@ -178,13 +184,14 @@ export class BaseCommandHandler {
   /**
    * @typedef CommandHandlerPushToStoreParams
    * @property {EventStoreDocument|EventStoreDocument[]} events
+   * @property {ClientSession} [session]
    *
    * @param {CommandHandlerPushToStoreParams} params
    * @returns {Promise<EventStoreResult[]>}
    */
   async pushToStore(params) {
     /** @type {CommandHandlerPushToStoreParams} */
-    const { events } = await validateAsync(object({
+    const { events, session: currentSession } = await validateAsync(object({
       events: oneOrMany(object({
         command: eventProps.command.required(),
         entityId: this.entityIdPropType.required(),
@@ -194,10 +201,20 @@ export class BaseCommandHandler {
         values: eventProps.values,
         userId: eventProps.userId,
       }).required()).required(),
+      session: mongoSessionProp,
     }).required().label('pushToStore'), params);
 
-    const session = await this.store.mongo.startSession();
+    if (currentSession) {
+      const results = await this.store.push(this.entityType, { events, session: currentSession });
+      await enqueueMessages({
+        bodies: results,
+        queueUrl: this.sqs.url,
+        sqsClient: this.sqs.client,
+      });
+      return results;
+    }
 
+    const session = await this.store.mongo.startSession();
     try {
       let results;
       await session.withTransaction(async (activeSession) => {

@@ -1,4 +1,4 @@
-FROM node:16.15-alpine as build
+FROM node:18.12-alpine as build
 ADD package.json yarn.lock /sso/
 ADD app /sso/app
 WORKDIR /sso

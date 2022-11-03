@@ -15,7 +15,7 @@ x-env-redis-pubsub: &env-redis-pubsub
 x-node-defaults: &node
   tty: true
   init: true
-  image: node:16.15-alpine
+  image: node:18.12-alpine
   working_dir: /sso
   volumes:
     - .:/sso:cached

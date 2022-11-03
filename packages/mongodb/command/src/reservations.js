@@ -6,7 +6,7 @@ import reservationProps from './props/reservation.js';
 const { object, oneOrMany } = PropTypes;
 
 /**
- * @typedef {import("@parameter1/sso-mongodb-core").BulkWriteResult} BulkWriteResult
+ * @typedef {import("mongodb").BulkWriteResult} BulkWriteResult
  * @typedef {import("@parameter1/sso-mongodb-core").Collection} Collection
  * @typedef {import("@parameter1/sso-mongodb-core").MongoClient} MongoClient
  *

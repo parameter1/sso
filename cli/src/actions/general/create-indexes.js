@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { eventStore } from '../../mongodb.js';
+import { eventStore, reservations } from '../../mongodb.js';
 // import { entityManager, userManager } from '../../mongodb.js';
 
 export default async () => {
@@ -19,6 +19,10 @@ export default async () => {
     (async () => {
       const r = await eventStore.createIndexes();
       return { eventStore: r };
+    })(),
+    (async () => {
+      const r = await reservations.createIndexes();
+      return { reservations: r };
     })(),
     // entityManager.commandHandlers.createIndexes(),
     // entityManager.materializedRepos.createAllIndexes(),

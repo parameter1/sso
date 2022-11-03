@@ -1,5 +1,6 @@
 import inquirer from 'inquirer';
-import { entityManager, userManager } from '../../mongodb.js';
+import { eventStore } from '../../mongodb.js';
+// import { entityManager, userManager } from '../../mongodb.js';
 
 export default async () => {
   const questions = [
@@ -15,9 +16,13 @@ export default async () => {
     confirm,
   } = await inquirer.prompt(questions);
   return confirm ? Promise.all([
-    entityManager.commandHandlers.createIndexes(),
-    entityManager.materializedRepos.createAllIndexes(),
-    entityManager.normalizedRepos.createAllIndexes(),
-    userManager.createIndexes(),
+    (async () => {
+      const r = await eventStore.createIndexes();
+      return { eventStore: r };
+    })(),
+    // entityManager.commandHandlers.createIndexes(),
+    // entityManager.materializedRepos.createAllIndexes(),
+    // entityManager.normalizedRepos.createAllIndexes(),
+    // userManager.createIndexes(),
   ]) : null;
 };

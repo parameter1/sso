@@ -53,9 +53,6 @@ services:
     environment:
       <<: [*env, *env-mongodb, *env-redis-pubsub]
       MONGO_URL: ${MONGO_URL_PROCESSOR}
-    depends_on:
-      - event-store-listener
-      - redis-pubsub
 
   command-processor:
     <<: *node

@@ -1,8 +1,8 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { eventProps, getEntityIdPropType } from '@parameter1/sso-prop-types-event';
-import { DB_NAME, mongoDBClientProp } from '@parameter1/sso-mongodb-core';
+import { DB_NAME, EJSON, mongoDBClientProp } from '@parameter1/sso-mongodb-core';
 
-const { object, oneOrMany } = PropTypes;
+const { array, object, oneOrMany } = PropTypes;
 
 /**
  * @typedef EventStoreDocument
@@ -50,6 +50,50 @@ export class EventStore {
       { key: { entityId: 1, entityType: 1, command: 1 } },
       { key: { entityId: 1, entityType: 1 }, unique: true, partialFilterExpression: { command: 'CREATE' } },
     ]);
+  }
+
+  /**
+   * Gets the entity state for the provided entity IDs.
+   *
+   * @typedef EventStoreEntityStateParams
+   * @property {*[]} entityIds
+   *
+   * @param {string} type The entity type to push events for
+   * @param {EventStoreEntityStateParams} params
+   * @returns {Promise<Map<string, string>>}
+   */
+  async getEntityStatesFor(type, params) {
+    /** @type {string} */
+    const entityType = attempt(type, eventProps.entityType.required());
+
+    /** @type {EventStoreEntityStateParams} */
+    const { entityIds } = await validateAsync(object({
+      entityIds: array().items(getEntityIdPropType(entityType).required()).required(),
+    }).required(), params);
+
+    const pipeline = [{
+      $match: {
+        entityId: { $in: entityIds },
+        entityType,
+        command: { $in: ['CREATE', 'DELETE', 'RESTORE'] },
+      },
+    }, {
+      $sort: EventStore.getEventSort(),
+    }, {
+      $group: { _id: '$entityId', first: { $first: '$command' }, last: { $last: '$command' } },
+    }, {
+      $match: { first: 'CREATE' },
+    }, {
+      $project: {
+        state: { $cond: [{ $eq: ['$last', 'DELETE'] }, 'DELETED', 'CREATED'] },
+      },
+    }];
+
+    const docs = await this.collection.aggregate(pipeline).toArray();
+    return docs.reduce((map, doc) => {
+      map.set(EJSON.stringify(doc._id), doc.state);
+      return map;
+    }, new Map());
   }
 
   /**

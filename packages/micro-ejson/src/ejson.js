@@ -1,5 +1,5 @@
 import { jsonClient, jsonServer } from '@parameter1/micro';
-import { EJSON } from '@mindful-cms/bson';
+import { EJSON } from 'bson';
 
 /**
  * Creates an EJSON client for sending requests to an EJSON server.

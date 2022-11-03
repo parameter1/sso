@@ -15,6 +15,7 @@
     "graphql/*",
     "lib",
     "packages/*",
+    "packages/repo/*",
     "services/*"
   ],
   "devDependencies": {

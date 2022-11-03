@@ -10,6 +10,7 @@
     "url": "git+https://github.com/parameter1/sso.git",
     "directory": "packages/prop-types"
   },
+  "private": true,
   "license": "MIT",
   "main": "./src/index.js",
   "scripts": {
@@ -18,8 +19,5 @@
   },
   "dependencies": {
     "@parameter1/prop-types": "^2.6.0"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

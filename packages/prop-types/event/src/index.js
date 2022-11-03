@@ -1,6 +1,8 @@
 import { PropTypes } from '@parameter1/sso-prop-types-core';
 import { EntityTypes } from '@parameter1/sso-entity-types';
 
+export { getEntityIdPropType } from './get-entity-id-prop-type.js';
+
 const {
   any,
   boolean,

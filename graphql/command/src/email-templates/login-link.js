@@ -1,4 +1,4 @@
-import { PropTypes, validate } from '@parameter1/prop-types';
+import { PropTypes, validate } from '@parameter1/sso-prop-types';
 import { APP_URL } from '../env.js';
 
 const { object, objectId, string } = PropTypes;

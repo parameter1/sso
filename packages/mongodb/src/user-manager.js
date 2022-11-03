@@ -1,5 +1,5 @@
 import { Repo, runTransaction } from '@parameter1/mongodb';
-import { PropTypes, attempt, validateAsync } from '@parameter1/prop-types';
+import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types';
 import { isFunction as isFn } from '@parameter1/utils';
 import { get } from '@parameter1/object-path';
 

@@ -1,4 +1,4 @@
-import { PropTypes, attempt } from '@parameter1/prop-types';
+import { PropTypes, attempt } from '@parameter1/sso-prop-types';
 import { mongoDBClientProp } from '../props.js';
 import { EventStore, eventProps } from './event-store.js';
 import { ReservationsRepo } from './reservations.js';

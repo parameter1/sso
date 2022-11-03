@@ -1,5 +1,5 @@
 import { Repo, MongoDBDataLoader } from '@parameter1/mongodb';
-import { PropTypes, attempt } from '@parameter1/prop-types';
+import { PropTypes, attempt } from '@parameter1/sso-prop-types';
 
 import { DB_NAME } from '../../constants.js';
 import { mongoDBClientProp } from '../../props.js';

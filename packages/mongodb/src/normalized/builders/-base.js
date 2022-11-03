@@ -1,4 +1,4 @@
-import { PropTypes, attempt } from '@parameter1/prop-types';
+import { PropTypes, attempt } from '@parameter1/sso-prop-types';
 
 import { DB_NAME } from '../../constants.js';
 import { eventProps, getEventSort } from '../../command/event-store.js';

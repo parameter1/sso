@@ -21,8 +21,8 @@
     "@parameter1/email-utils": "^2.0.0",
     "@parameter1/mongodb": "^4.9.0",
     "@parameter1/object-path": "^2.0.0",
-    "@parameter1/prop-types": "^2.6.0",
     "@parameter1/slug": "^2.1.0",
+    "@parameter1/sso-prop-types": "^0.5.4",
     "@parameter1/utils": "^2.0.0",
     "jsonwebtoken": "^8.5.1",
     "lodash.clonedeep": "^4.5.0"

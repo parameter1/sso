@@ -1,4 +1,4 @@
-import { PropTypes, attempt, validateAsync } from '@parameter1/prop-types';
+import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types';
 
 import { eventProps } from './command/event-store.js';
 import { CommandHandlers } from './command/handlers.js';

@@ -1,4 +1,4 @@
-import { attempt, PropTypes } from '@parameter1/prop-types';
+import { attempt, PropTypes } from '@parameter1/sso-prop-types';
 import { gql, extractFragmentData } from '@parameter1/sso-graphql';
 
 import GraphQLClient from './graphql.js';

@@ -1,5 +1,5 @@
 import { ObjectId } from '@parameter1/mongodb';
-import { PropTypes, attempt, validateAsync } from '@parameter1/prop-types';
+import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types';
 
 import { EventStore, eventProps } from '../event-store.js';
 import { ReservationsRepo, reservationProps } from '../reservations.js';

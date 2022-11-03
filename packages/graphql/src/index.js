@@ -23,6 +23,7 @@ export { makeExecutableSchema } from '@parameter1/graphql/schema';
 export { enumDefaultValuesTransformer } from '@parameter1/graphql/transformers';
 
 export { mapSchema, MapperKind } from '@parameter1/graphql/utils';
+export { extractFragmentData } from '@parameter1/graphql/fragments';
 
 export { AuthContext } from './context/auth.js';
 

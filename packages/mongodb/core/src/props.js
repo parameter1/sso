@@ -1,5 +1,5 @@
 import { MongoClient } from 'mongodb';
-import { PropTypes } from '@parameter1/prop-types';
+import { PropTypes } from '@parameter1/sso-prop-types-core';
 
 const { object } = PropTypes;
 

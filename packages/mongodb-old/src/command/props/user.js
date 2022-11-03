@@ -1,4 +1,4 @@
-import { PropTypes } from '@parameter1/sso-prop-types';
+import { PropTypes } from '@parameter1/sso-prop-types-core';
 import { isEmailBurner } from '@parameter1/email-utils';
 
 const {

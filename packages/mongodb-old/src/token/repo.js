@@ -1,5 +1,5 @@
 import { Repo } from '@parameter1/mongodb';
-import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types';
+import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { dateToUnix } from '@parameter1/utils';
 import jwt from 'jsonwebtoken';
 

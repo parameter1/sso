@@ -1,4 +1,4 @@
-import { PropTypes, validateAsync } from '@parameter1/sso-prop-types';
+import { PropTypes, validateAsync } from '@parameter1/sso-prop-types-core';
 import userProps from '../../command/props/user.js';
 import { BaseMaterializedRepo } from './-base.js';
 

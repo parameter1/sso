@@ -21,7 +21,7 @@
   "dependencies": {
     "@parameter1/micro": "^2.3.3",
     "@parameter1/sso-mongodb": "^0.5.4",
-    "@parameter1/sso-prop-types": "^0.5.4",
+    "@parameter1/sso-prop-types-core": "^0.5.4",
     "@parameter1/terminus": "^2.2.1",
     "@parameter1/utils": "^2.0.0",
     "envalid": "^7.3.1"

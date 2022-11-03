@@ -1,14 +1,14 @@
 {
-  "name": "@parameter1/sso-prop-types",
+  "name": "@parameter1/sso-prop-types-core",
   "version": "0.5.4",
   "type": "module",
-  "description": "Common SSO prop type handling",
+  "description": "Core SSO prop type handling",
   "author": "Jacob Bare <jacob@parameter1.com>",
-  "homepage": "https://github.com/parameter1/sso/tree/main/packages/prop-types#readme",
+  "homepage": "https://github.com/parameter1/sso/tree/main/packages/prop-types/core#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/parameter1/sso.git",
-    "directory": "packages/prop-types"
+    "directory": "packages/prop-types/core"
   },
   "private": true,
   "license": "MIT",

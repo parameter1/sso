@@ -22,7 +22,7 @@
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/sso-graphql": "^0.5.4",
     "@parameter1/sso-mongodb": "^0.5.4",
-    "@parameter1/sso-prop-types": "^0.5.4",
+    "@parameter1/sso-prop-types-core": "^0.5.4",
     "@parameter1/utils": "^2.0.0",
     "@sendgrid/mail": "^7.7.0",
     "apollo-server-core": "^3.11.1",

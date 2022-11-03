@@ -1,4 +1,4 @@
-import { PropTypes, attempt } from '@parameter1/sso-prop-types';
+import { PropTypes, attempt } from '@parameter1/sso-prop-types-core';
 import { mongoDBClientProp } from '../props.js';
 
 import { eventProps } from '../command/event-store.js';

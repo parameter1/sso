@@ -1,5 +1,5 @@
 import { eventProps } from '@parameter1/sso-mongodb';
-import { PropTypes, validateAsync } from '@parameter1/sso-prop-types';
+import { PropTypes, validateAsync } from '@parameter1/sso-prop-types-core';
 import { entityManager, materialize } from './mongodb.js';
 import handlers from './handlers.js';
 

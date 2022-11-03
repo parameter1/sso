@@ -1,4 +1,4 @@
-import { PropTypes, attempt } from '@parameter1/sso-prop-types';
+import { PropTypes, attempt } from '@parameter1/sso-prop-types-core';
 
 import { BaseBuilder } from './-base.js';
 import managerCommandProps from '../../command/props/manager.js';

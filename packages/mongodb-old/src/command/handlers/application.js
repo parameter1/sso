@@ -1,5 +1,5 @@
 import { runTransaction } from '@parameter1/mongodb';
-import { PropTypes, validateAsync } from '@parameter1/sso-prop-types';
+import { PropTypes, validateAsync } from '@parameter1/sso-prop-types-core';
 import { sluggify } from '@parameter1/slug';
 
 import { BaseCommandHandler } from './-base.js';

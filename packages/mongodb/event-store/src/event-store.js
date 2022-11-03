@@ -36,6 +36,9 @@ export class EventStore {
       mongo: mongoDBClientProp.required(),
     }).required());
 
+    /** @type {import("mongodb").MongoClient} */
+    this.mongo = mongo;
+
     /** @type {import("mongodb").Collection} */
     this.collection = mongo.db(DB_NAME).collection('event-store');
 

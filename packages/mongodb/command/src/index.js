@@ -1,4 +1,4 @@
-export { CommandHandler } from './handler.js';
+export { CommandHandlers } from './handlers.js';
 export { Reservations } from './reservations.js';
 
 /**

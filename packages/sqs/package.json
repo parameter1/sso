@@ -1,0 +1,26 @@
+{
+  "name": "@parameter1/sso-sqs",
+  "version": "0.5.4",
+  "type": "module",
+  "description": "Common functions for handling BSON-based SQS messages.",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/sso/tree/main/packages/sqs#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/sso.git",
+    "directory": "packages/sqs"
+  },
+  "private": true,
+  "license": "MIT",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint --ext .js ./",
+    "test": "yarn lint"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.202.0",
+    "@parameter1/sso-prop-types-core": "^0.5.4",
+    "@parameter1/utils": "^2.0.0",
+    "bson": "^4.7.0"
+  }
+}

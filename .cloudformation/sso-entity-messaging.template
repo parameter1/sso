@@ -1,0 +1,62 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Creates and manages SSO entity messaging services.",
+
+  "Resources": {
+    "MessageQueue": {
+      "Type" : "AWS::SQS::Queue",
+      "Properties" : {
+        "QueueName" : "sso-entity-message",
+        "MessageRetentionPeriod": 1209600,
+        "VisibilityTimeout": 5,
+        "RedrivePolicy": {
+          "maxReceiveCount": 10,
+          "deadLetterTargetArn": {
+            "Fn::GetAtt": ["DeadLetterQueue", "Arn"]
+          }
+        }
+      }
+    },
+    "DeadLetterQueue": {
+      "Type" : "AWS::SQS::Queue",
+      "Properties" : {
+        "QueueName" : "sso-entity-message-dlq",
+        "MessageRetentionPeriod": 1209600
+      }
+    },
+    "User": {
+      "Type": "AWS::IAM::User",
+      "Properties": {
+        "UserName": "sso-entity-message",
+        "Policies" : [ {
+          "PolicyName" : "sqs-rw-sso-entity-message",
+          "PolicyDocument" : {
+            "Version": "2012-10-17",
+            "Statement" : [ {
+              "Effect" : "Allow",
+              "Action" : [ "sqs:DeleteMessage", "sqs:ReceiveMessage", "sqs:SendMessage" ],
+              "Resource" : [ { "Fn::GetAtt" : [ "MessageQueue", "Arn" ] } ]
+            } ]
+          }
+        } ]
+      }
+    },
+    "AccessKey": {
+      "Type": "AWS::IAM::AccessKey",
+      "Properties": {
+        "UserName": { "Ref" : "User" }
+      }
+    }
+  },
+  "Outputs": {
+    "MessageQueueUrl": {
+      "Value": { "Ref": "MessageQueue" }
+    },
+    "UserAccessKey": {
+      "Value" : { "Ref" : "AccessKey" }
+    },
+    "UserSecretAccessKey": {
+      "Value": { "Fn::GetAtt": ["AccessKey", "SecretAccessKey"] }
+    }
+  }
+}

@@ -8,18 +8,7 @@ import { applicationProps } from '../props/application.js';
 const { object, oneOrMany } = PropTypes;
 
 /**
- * @typedef {import("@parameter1/sso-mongodb-core").ObjectId} ObjectId
- *
- * @typedef CreateApplicationSchemaValues
- * @property {string} name
- * @property {string} key
- * @property {string[]} [roles=[Administrator, Member]]
- *
- * @typedef CreateApplicationSchema
- * @property {ObjectId} [entityId]
- * @property {Date|string} [date]
- * @property {CreateApplicationSchemaValues} values
- * @property {ObjectId} [userId]
+ * @typedef {import("../types").CreateApplicationSchema} CreateApplicationSchema
  *
  */
 export class ApplicationCommandHandler extends BaseCommandHandler {

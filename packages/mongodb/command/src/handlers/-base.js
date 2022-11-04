@@ -16,8 +16,8 @@ const {
 
 /**
  * @typedef {import("mongodb").ClientSession} ClientSession
- * @typedef {import("../index").ReservationsReleaseParams} ReservationsReleaseParams
- * @typedef {import("../index").ReservationsReserveParams} ReservationsReserveParams
+ * @typedef {import("../types").ReservationsReleaseParams} ReservationsReleaseParams
+ * @typedef {import("../types").ReservationsReserveParams} ReservationsReserveParams
  *
  * @typedef BaseCommandHandlerConstructorParamsSQS
  * @property {SQSClient} client

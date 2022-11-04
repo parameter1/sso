@@ -9,26 +9,54 @@ const { object, oneOrMany } = PropTypes;
 /**
  * @typedef {import("@parameter1/sso-mongodb-command")
  *    .CreateApplicationSchema} CreateApplicationSchema
+ * @typedef {import("@parameter1/sso-mongodb-command")
+ *    .ChangeApplicationNameSchema} ChangeApplicationNameSchema
+ * @typedef {import("@parameter1/sso-mongodb-command")
+ *    .EventStoreResult} {EventStoreResult}
  */
 export default {
+  /**
+   * @typedef ChangeApplicationNameActionParams
+   * @property {ChangeApplicationNameSchema|ChangeApplicationNameSchema[]} input
+   *
+   * @param {ChangeApplicationNameActionParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async changeName(params) {
+    /** @type {ChangeApplicationNameActionParams}  */
+    const { input } = await validateAsync(object({
+      input: oneOrMany(object({
+        date: eventProps.date,
+        entityId: applicationProps.id.required(),
+        name: applicationProps.name.required(),
+        userId: eventProps.userId,
+      }).required()).required(),
+    }).required().label('application.create'), params);
+
+    return covertActionError(() => commands
+      .get('application')
+      .changeName({ input }));
+  },
+
   /**
    * @typedef CreateApplicationActionParams
    * @property {CreateApplicationSchema|CreateApplicationSchema[]} input
    *
    * @param {CreateApplicationActionParams} params
+   * @returns {Promise<EventStoreResult[]>}
    */
   async create(params) {
     /** @type {CreateApplicationActionParams}  */
     const { input } = await validateAsync(object({
       input: oneOrMany(object({
-        entityId: applicationProps.id,
         date: eventProps.date,
+        entityId: applicationProps.id,
+        userId: eventProps.userId,
         values: object({
           name: applicationProps.name.required(),
           key: applicationProps.key.required(),
           roles: applicationProps.roles,
         }).required(),
-        userId: eventProps.userId,
       }).required()).required(),
     }).required().label('application.create'), params);
 

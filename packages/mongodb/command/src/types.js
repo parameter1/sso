@@ -1,6 +1,7 @@
 /**
  * @typedef {import("@parameter1/sso-mongodb-core").ClientSession} ClientSession
  * @typedef {import("@parameter1/sso-mongodb-core").ObjectId} ObjectId
+ * @typedef {import("@parameter1/sso-mongodb-event-store").EventStoreResult} EventStoreResult
  *
  * @typedef ChangeApplicationNameSchema
  * @property {ObjectId} entityId

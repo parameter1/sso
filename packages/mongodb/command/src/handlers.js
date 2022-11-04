@@ -18,7 +18,7 @@ const handlers = new Map([
 const { object, url } = PropTypes;
 
 /**
- * @typedef {import("./handlers/-base").BaseCommandHandler} BaseCommandHandler
+ * @typedef {import("./handlers/-root").CommandHandler} CommandHandler
  *
  * @typedef CommandHandlersConstructorParams
  * @property {Reservations} reservations
@@ -35,7 +35,7 @@ export class CommandHandlers {
    * @param {CommandHandlersConstructorParams} params
    */
   constructor(params) {
-    /** @type {BaseCommandHandlerConstructorParams} */
+    /** @type {CommandHandlersConstructorParams} */
     const { reservations, store, sqs } = attempt(params, object({
       reservations: object().instance(Reservations).required(),
       sqs: object({
@@ -55,7 +55,7 @@ export class CommandHandlers {
   /**
    *
    * @param {string} entityType
-   * @returns {BaseCommandHandler}
+   * @returns {CommandHandler}
    */
   get(entityType) {
     const handler = this.handlers.get(entityType);

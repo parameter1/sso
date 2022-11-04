@@ -2,7 +2,7 @@ import { PropTypes, validateAsync } from '@parameter1/sso-prop-types-core';
 import { eventProps } from '@parameter1/sso-prop-types-event';
 import { sluggify } from '@parameter1/slug';
 
-import { BaseCommandHandler } from './-base.js';
+import { CommandHandler } from './-root.js';
 import { organizationProps } from '../props/organization.js';
 
 const { object, oneOrMany } = PropTypes;
@@ -12,10 +12,10 @@ const { object, oneOrMany } = PropTypes;
  * @typedef {import("../types").CreateOrganizationSchema} CreateOrganizationSchema
  * @typedef {import("../types").EventStoreResult} EventStoreResult
  */
-export class OrganizationCommandHandler extends BaseCommandHandler {
+export class OrganizationCommandHandler extends CommandHandler {
   /**
    *
-   * @param {import("./-base").CommandHandlerConstructorParams} params
+   * @param {import("./-root").CommandHandlerConstructorParams} params
    */
   constructor(params) {
     super({ ...params, entityType: 'organization' });

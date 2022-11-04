@@ -2,7 +2,7 @@ import { PropTypes, validateAsync } from '@parameter1/sso-prop-types-core';
 import { eventProps } from '@parameter1/sso-prop-types-event';
 import { sluggify } from '@parameter1/slug';
 
-import { BaseCommandHandler } from './-base.js';
+import { CommandHandler } from './-root.js';
 import { userProps } from '../props/user.js';
 
 const { object, oneOrMany } = PropTypes;
@@ -25,10 +25,10 @@ export const emailValues = (email) => ({
  * @typedef {import("../types").EventStoreResult} EventStoreResult
  * @typedef {import("../types").RestoreUserSchema} RestoreUserSchema
  */
-export class UserCommandHandler extends BaseCommandHandler {
+export class UserCommandHandler extends CommandHandler {
   /**
    *
-   * @param {import("./-base").CommandHandlerConstructorParams} params
+   * @param {import("./-root").CommandHandlerConstructorParams} params
    */
   constructor(params) {
     super({ ...params, entityType: 'user' });

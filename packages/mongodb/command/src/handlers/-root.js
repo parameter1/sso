@@ -20,30 +20,31 @@ const {
  * @typedef {import("../types").ReservationsReleaseParams} ReservationsReleaseParams
  * @typedef {import("../types").ReservationsReserveParams} ReservationsReserveParams
  *
- * @typedef BaseCommandHandlerConstructorParamsSQS
- * @property {SQSClient} client
- * @property {string} url
  *
- * @typedef BaseCommandHandlerConstructorParams
+ * @typedef RootCommandHandlerConstructorParams
  * @property {string} entityType
  * @property {Reservations} reservations
  * @property {EventStore} store
- * @property {BaseCommandHandlerConstructorParamsSQS} sqs
+ * @property {CommandHandlerConstructorParamsSQS} sqs
+ *
+ * @typedef CommandHandlerConstructorParamsSQS
+ * @property {SQSClient} client
+ * @property {string} url
  *
  * @typedef CommandHandlerConstructorParams
  * @property {Reservations} reservations
  * @property {EventStore} store
- * @property {BaseCommandHandlerConstructorParamsSQS} sqs
+ * @property {CommandHandlerConstructorParamsSQS} sqs
  *
  * @typedef {import("@parameter1/sso-mongodb-event-store").EventStoreDocument} EventStoreDocument
  */
-export class BaseCommandHandler {
+export class CommandHandler {
   /**
    *
-   * @param {BaseCommandHandlerConstructorParams} params
+   * @param {RootCommandHandlerConstructorParams} params
    */
   constructor(params) {
-    /** @type {BaseCommandHandlerConstructorParams} */
+    /** @type {RootCommandHandlerConstructorParams} */
     const {
       entityType,
       reservations,
@@ -63,7 +64,7 @@ export class BaseCommandHandler {
     this.entityType = entityType;
     /** @type {Reservations} */
     this.reservations = reservations;
-    /** @type {BaseCommandHandlerConstructorParamsSQS} */
+    /** @type {CommandHandlerConstructorParamsSQS} */
     this.sqs = sqs;
     /** @type {EventStore} */
     this.store = store;

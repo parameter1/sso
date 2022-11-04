@@ -34,7 +34,7 @@ export class NormalizedRepo {
     /** @type {MongoClient} */
     this.mongo = mongo;
     /** @type {import("@parameter1/sso-mongodb-core").Collection} */
-    this.collection = mongo.db(DB_NAME).collection('event-store');
+    this.collection = mongo.db(DB_NAME).collection(`${entityType}/normalized`);
   }
 
   /**

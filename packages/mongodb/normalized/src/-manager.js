@@ -3,16 +3,20 @@ import { mongoDBClientProp } from '@parameter1/sso-mongodb-core';
 
 import { NormalizedApplicationRepo } from './application.js';
 import { NormalizedManagerRepo } from './manager.js';
+import { NormalizedMemberRepo } from './member.js';
 import { NormalizedOrganizationRepo } from './organization.js';
 import { NormalizedUserRepo } from './user.js';
+import { NormalizedWorkspaceRepo } from './workspace.js';
 
 const { object } = PropTypes;
 
 const repos = new Map([
   ['application', NormalizedApplicationRepo],
   ['manager', NormalizedManagerRepo],
+  ['member', NormalizedMemberRepo],
   ['organization', NormalizedOrganizationRepo],
   ['user', NormalizedUserRepo],
+  ['workspace', NormalizedWorkspaceRepo],
 ]);
 
 /**

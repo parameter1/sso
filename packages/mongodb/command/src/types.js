@@ -9,6 +9,12 @@
  * @property {string} name
  * @property {ObjectId} [userId]
  *
+ * @typedef ChangeOrganizationNameSchema
+ * @property {ObjectId} entityId
+ * @property {Date|string} [date]
+ * @property {string} name
+ * @property {ObjectId} [userId]
+ *
  * @typedef CreateApplicationSchema
  * @property {ObjectId} [entityId]
  * @property {Date|string} [date]
@@ -19,6 +25,17 @@
  * @property {string} name
  * @property {string} key
  * @property {string[]} [roles=[Administrator, Member]]
+ *
+ * @typedef CreateOrganizationSchema
+ * @property {ObjectId} [entityId]
+ * @property {Date|string} [date]
+ * @property {CreateOrganizationSchemaValues} values
+ * @property {ObjectId} [userId]
+ *
+ * @typedef CreateOrganizationSchemaValues
+ * @property {string} name
+ * @property {string} key
+ * @property {string[]} [emailDomains=[]]
  *
  * @typedef ReservationsReleaseParams
  * @property {ReservationsReleaseParamsInput|ReservationsReleaseParamsInput[]} input

@@ -4,9 +4,11 @@ import { SQSClient } from '@parameter1/sso-sqs';
 import { Reservations } from './reservations.js';
 
 import { ApplicationCommandHandler } from './handlers/application.js';
+import { OrganizationCommandHandler } from './handlers/organization.js';
 
 const handlers = new Map([
   ['application', ApplicationCommandHandler],
+  ['organization', OrganizationCommandHandler],
 ]);
 
 const { object, url } = PropTypes;

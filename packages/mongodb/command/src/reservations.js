@@ -104,7 +104,9 @@ export class Reservations {
       if (e.code !== 11000 || !e.writeErrors) throw e;
       const [writeError] = e.writeErrors;
       const { op } = writeError.err;
-      throw new Error(`The ${op.entityType} ${op.key} '${op.value}' is already in use.'`);
+      const error = new Error(`The ${op.entityType} ${op.key} '${op.value}' is already in use.'`);
+      error.statusCode = 409;
+      throw error;
     }
   }
 }

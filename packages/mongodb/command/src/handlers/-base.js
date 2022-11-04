@@ -188,6 +188,76 @@ export class BaseCommandHandler {
   }
 
   /**
+   * @typedef CommandHandlerExecuteDeleteInput
+   * @property {Date|string} [date]
+   * @property {*} entityId
+   * @property {ObjectId|null} [userId]
+   *
+   * @typedef CommandHandlerExecuteDeleteParams
+   * @property {CommandHandlerExecuteDeleteInput|CommandHandlerExecuteDeleteInput[]} input
+   * @property {ClientSession} [session]
+   *
+   * @param {CommandHandlerExecuteDeleteParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async executeDelete(params) {
+    /** @type {CommandHandlerExecuteDeleteParams} */
+    const { input, session } = await validateAsync(object({
+      input: oneOrMany(object({
+        date: eventProps.date,
+        entityId: this.entityIdPropType.required(),
+        userId: eventProps.userId,
+      }).required()).required(),
+      session: mongoSessionProp,
+    }).required().label('handler.executeDelete'), params);
+
+    const { entityIds, events } = input.reduce((o, command) => {
+      o.entityIds.push(command.entityId);
+      o.events.push({ ...command, command: 'DELETE' });
+      return o;
+    }, { entityIds: [], events: [] });
+
+    await this.canPushDelete(entityIds);
+    return this.pushToStore({ events, session });
+  }
+
+  /**
+   * @typedef CommandHandlerExecuteRestoreInput
+   * @property {Date|string} [date]
+   * @property {*} entityId
+   * @property {ObjectId|null} [userId]
+   * @property {object} [values]
+   *
+   * @typedef CommandHandlerExecuteRestoreParams
+   * @property {CommandHandlerExecuteRestoreInput|CommandHandlerExecuteRestoreInput[]} input
+   * @property {ClientSession} [session]
+   *
+   * @param {CommandHandlerExecuteRestoreParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async executeRestore(params) {
+    /** @type {CommandHandlerExecuteRestoreParams} */
+    const { input, session } = await validateAsync(object({
+      input: oneOrMany(object({
+        date: eventProps.date,
+        entityId: this.entityIdPropType.required(),
+        userId: eventProps.userId,
+        values: eventProps.values.default({}),
+      }).required()).required(),
+      session: mongoSessionProp,
+    }).required().label('handler.executeRestore'), params);
+
+    const { entityIds, events } = input.reduce((o, command) => {
+      o.entityIds.push(command.entityId);
+      o.events.push({ ...command, command: 'RESTORE' });
+      return o;
+    }, { entityIds: [], events: [] });
+
+    await this.canPushRestore(entityIds);
+    return this.pushToStore({ events, session });
+  }
+
+  /**
    * @typedef CommandHandlerExecuteUpdateParams
    * @property {CommandHandlerExecuteUpdateInput|CommandHandlerExecuteUpdateInput[]} input
    * @property {ClientSession} [session]

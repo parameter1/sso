@@ -267,7 +267,15 @@ export class BaseCommandHandler {
       const results = await this.store.push(this.entityType, { events, session });
       await enqueueMessages({
         // strip values so they are not sent over the wire (can be large)
-        bodies: results.map(({ values, ...rest }) => rest),
+        messages: results.map(({ values, ...o }) => ({
+          body: o,
+          attributes: [
+            { name: 'command', value: o.command },
+            { name: 'entityId', value: EJSON.stringify(o.entityId) },
+            { name: 'entityType', value: o.entityType },
+            { name: 'userId', value: `${o.userId}` },
+          ],
+        })),
         queueUrl: this.sqs.url,
         sqsClient: this.sqs.client,
       });

@@ -238,6 +238,29 @@ export class EventStore {
   }
 
   /**
+   * Normalizes data from the event store collection based on the provided entity type and IDs
+   *
+   * @typedef EventStoreNormalizeParams
+   * @property {*[]} entityIds
+   *
+   * @param {string} type The entity type to push events for
+   * @param {EventStoreNormalizeParams} params
+   * @returns {Promise<void>}
+   */
+  async normalize(type, params) {
+    /** @type {string} */
+    const entityType = attempt(type, eventProps.entityType.required());
+
+    /** @type {EventStoreNormalizeParams} */
+    const { entityIds } = await validateAsync(object({
+      entityIds: oneOrMany(getEntityIdPropType(entityType)).required(),
+    }).required().label('eventStore.normalize'), params);
+
+    const pipeline = this.buildNormalizationPipeline(entityType, { entityIds });
+    await this.collection.aggregate(pipeline).toArray();
+  }
+
+  /**
    * Pushes and persists one or more events to the store.
    *
    * @typedef EventStorePushParams

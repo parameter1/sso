@@ -4,6 +4,8 @@ import { covertActionError } from '@parameter1/sso-micro-ejson';
 import { organizationProps } from '@parameter1/sso-mongodb-command';
 import { commands } from '../mongodb.js';
 
+const handler = commands.get('organization');
+
 const { object, oneOrMany } = PropTypes;
 
 /**
@@ -33,9 +35,7 @@ export default {
       }).required()).required(),
     }).required().label('organization.create'), params);
 
-    return covertActionError(() => commands
-      .get('organization')
-      .changeName({ input }));
+    return covertActionError(() => handler.changeName({ input }));
   },
 
   /**
@@ -60,8 +60,20 @@ export default {
       }).required()).required(),
     }).required().label('organization.create'), params);
 
-    return covertActionError(() => commands
-      .get('organization')
-      .create({ input }));
+    return covertActionError(() => handler.create({ input }));
+  },
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId|ObjectId[]} [params.entityIds]
+   * @returns {Promise<string>}
+   */
+  async normalize(params) {
+    const { entityIds } = await validateAsync(object({
+      entityIds: oneOrMany(organizationProps.id).required(),
+    }).required().label('application.create'), params);
+    await covertActionError(() => handler.normalize({ entityIds }));
+    return 'ok';
   },
 };

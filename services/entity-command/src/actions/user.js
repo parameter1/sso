@@ -4,6 +4,8 @@ import { covertActionError } from '@parameter1/sso-micro-ejson';
 import { userProps } from '@parameter1/sso-mongodb-command';
 import { commands } from '../mongodb.js';
 
+const handler = commands.get('user');
+
 const { object, oneOrMany } = PropTypes;
 
 /**
@@ -39,9 +41,7 @@ export default {
       }).required()).required(),
     }).required().label('user.changeEmail'), params);
 
-    return covertActionError(() => commands
-      .get('user')
-      .changeEmail({ input }));
+    return covertActionError(() => handler.changeEmail({ input }));
   },
 
   /**
@@ -63,9 +63,7 @@ export default {
       }).required()).required(),
     }).required().label('user.changeName'), params);
 
-    return covertActionError(() => commands
-      .get('user')
-      .changeName({ input }));
+    return covertActionError(() => handler.changeName({ input }));
   },
 
   /**
@@ -91,9 +89,7 @@ export default {
       }).required()).required(),
     }).required().label('user.create'), params);
 
-    return covertActionError(() => commands
-      .get('user')
-      .create({ input }));
+    return covertActionError(() => handler.create({ input }));
   },
 
   /**
@@ -113,9 +109,21 @@ export default {
       }).required()).required(),
     }).required().label('user.delete'), params);
 
-    return covertActionError(() => commands
-      .get('user')
-      .delete({ input }));
+    return covertActionError(() => handler.delete({ input }));
+  },
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId|ObjectId[]} [params.entityIds]
+   * @returns {Promise<string>}
+   */
+  async normalize(params) {
+    const { entityIds } = await validateAsync(object({
+      entityIds: oneOrMany(userProps.id).required(),
+    }).required().label('application.create'), params);
+    await covertActionError(() => handler.normalize({ entityIds }));
+    return 'ok';
   },
 
   /**
@@ -136,8 +144,6 @@ export default {
       }).required()).required(),
     }).required().label('user.restore'), params);
 
-    return covertActionError(() => commands
-      .get('user')
-      .restore({ input }));
+    return covertActionError(() => handler.restore({ input }));
   },
 };

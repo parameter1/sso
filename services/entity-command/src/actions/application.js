@@ -4,9 +4,12 @@ import { covertActionError } from '@parameter1/sso-micro-ejson';
 import { applicationProps } from '@parameter1/sso-mongodb-command';
 import { commands } from '../mongodb.js';
 
+const handler = commands.get('application');
+
 const { object, oneOrMany } = PropTypes;
 
 /**
+ * @typedef {import("@parameter1/sso-mongodb-core").ObjectId} ObjectId
  * @typedef {import("@parameter1/sso-mongodb-command")
  *    .CreateApplicationSchema} CreateApplicationSchema
  * @typedef {import("@parameter1/sso-mongodb-command")
@@ -33,9 +36,7 @@ export default {
       }).required()).required(),
     }).required().label('application.create'), params);
 
-    return covertActionError(() => commands
-      .get('application')
-      .changeName({ input }));
+    return covertActionError(() => handler.changeName({ input }));
   },
 
   /**
@@ -60,8 +61,20 @@ export default {
       }).required()).required(),
     }).required().label('application.create'), params);
 
-    return covertActionError(() => commands
-      .get('application')
-      .create({ input }));
+    return covertActionError(() => handler.create({ input }));
+  },
+
+  /**
+   *
+   * @param {object} params
+   * @param {ObjectId|ObjectId[]} [params.entityIds]
+   * @returns {Promise<string>}
+   */
+  async normalize(params) {
+    const { entityIds } = await validateAsync(object({
+      entityIds: oneOrMany(applicationProps.id).required(),
+    }).required().label('application.create'), params);
+    await covertActionError(() => handler.normalize({ entityIds }));
+    return 'ok';
   },
 };

@@ -311,6 +311,24 @@ export class BaseCommandHandler {
   }
 
   /**
+   * Normalizes data from the event store based on the provided entity IDs
+   *
+   * @typedef CommandHandlerNormalizeParams
+   * @property {*[]} entityIds
+   *
+   * @param {CommandHandlerNormalizeParams} params
+   * @returns {Promise<void>}
+   */
+  async normalize(params) {
+    /** @type {CommandHandlerNormalizeParams} */
+    const { entityIds } = await validateAsync(object({
+      entityIds: oneOrMany(getEntityIdPropType(this.entityIdPropType)).required(),
+    }).required().label('handler.normalize'), params);
+
+    return this.store.normalize(this.entityType, { entityIds });
+  }
+
+  /**
    * @typedef CommandHandlerPushToStoreParams
    * @property {EventStoreDocument|EventStoreDocument[]} events
    * @property {ClientSession} [session]

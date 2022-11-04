@@ -63,7 +63,7 @@
  * @property {boolean} [verified=false]
  *
  * @typedef DeleteUserSchema
- * @property {ObjectId} [entityId]
+ * @property {ObjectId} entityId
  * @property {Date|string} [date]
  * @property {ObjectId} [userId]
  *
@@ -73,7 +73,7 @@
  *
  * @typedef ReservationsReleaseParamsInput
  * @property {*} entityId
- * @property {string} key
+ * @property {string} key d
  *
  * @typedef ReservationsReserveParams
  * @property {ReservationsReserveParamsInput|ReservationsReserveParamsInput[]} input
@@ -83,6 +83,12 @@
  * @property {*} entityId
  * @property {string} key
  * @property {*} value
+ *
+ * @typedef RestoreUserSchema
+ * @property {Date|string} [date]
+ * @property {string} email
+ * @property {ObjectId} entityId
+ * @property {ObjectId} [userId]
  */
 
 export const _ = {};

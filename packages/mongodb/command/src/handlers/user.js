@@ -12,12 +12,18 @@ export const sluggifyUserNames = (names, reverse = false) => {
   return sluggify(values.join(' '));
 };
 
+export const emailValues = (email) => ({
+  domain: email.split('@')[1],
+  email,
+});
+
 /**
  * @typedef {import("../types").ChangeUserEmailSchema} ChangeUserEmailSchema
  * @typedef {import("../types").ChangeUserNameSchema} ChangeUserNameSchema
  * @typedef {import("../types").CreateUserSchema} CreateUserSchema
  * @typedef {import("../types").DeleteUserSchema} DeleteUserSchema
  * @typedef {import("../types").EventStoreResult} EventStoreResult
+ * @typedef {import("../types").RestoreUserSchema} RestoreUserSchema
  */
 export class UserCommandHandler extends BaseCommandHandler {
   /**
@@ -63,7 +69,7 @@ export class UserCommandHandler extends BaseCommandHandler {
           input: input.map(({ email, ...rest }) => ({
             ...rest,
             command: 'CHANGE_EMAIL',
-            values: { domain: email.split('@')[1], email },
+            values: emailValues(email),
           })),
           session: activeSession,
         });
@@ -156,7 +162,7 @@ export class UserCommandHandler extends BaseCommandHandler {
               ...rest,
               values: {
                 ...values,
-                domain: values.email.split('@')[1],
+                ...emailValues(values.email),
                 slug: {
                   default: sluggifyUserNames(names),
                   reverse: sluggifyUserNames(names, true),
@@ -200,6 +206,47 @@ export class UserCommandHandler extends BaseCommandHandler {
           session: activeSession,
         });
         results = await this.executeDelete({ input, session });
+      });
+      return results;
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  /**
+   * @typedef RestoreUserCommandParams
+   * @property {RestoreUserSchema|RestoreUserSchema[]} input
+   *
+   * @param {RestoreUserCommandParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async restore(params) {
+    /** @type {RestoreUserCommandParams}  */
+    const { input } = await validateAsync(object({
+      input: oneOrMany(object({
+        date: eventProps.date,
+        email: userProps.email.required(),
+        entityId: userProps.id.required(),
+        userId: eventProps.userId,
+      }).required()).required(),
+    }).required().label('user.restore'), params);
+
+    const session = await this.store.mongo.startSession();
+    try {
+      let results;
+      await session.withTransaction(async (activeSession) => {
+        // reserve first so failures will not trigger a push message
+        await this.reserve({
+          input: input.map(({ entityId, email }) => ({ entityId, key: 'email', value: email })),
+          session: activeSession,
+        });
+        results = await this.executeRestore({
+          input: input.map(({ email, ...rest }) => ({
+            ...rest,
+            values: emailValues(email),
+          })),
+          session,
+        });
       });
       return results;
     } finally {

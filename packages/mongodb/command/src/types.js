@@ -15,6 +15,12 @@
  * @property {string} name
  * @property {ObjectId} [userId]
  *
+ * @typedef ChangeUserEmailSchema
+ * @property {ObjectId} entityId
+ * @property {Date|string} [date]
+ * @property {string} email
+ * @property {ObjectId} [userId]
+ *
  * @typedef ChangeUserNameSchema
  * @property {ObjectId} entityId
  * @property {Date|string} [date]

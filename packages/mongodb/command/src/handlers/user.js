@@ -13,6 +13,7 @@ export const sluggifyUserNames = (names, reverse = false) => {
 };
 
 /**
+ * @typedef {import("../types").ChangeUserEmailSchema} ChangeUserEmailSchema
  * @typedef {import("../types").ChangeUserNameSchema} ChangeUserNameSchema
  * @typedef {import("../types").CreateUserSchema} CreateUserSchema
  * @typedef {import("../types").EventStoreResult} EventStoreResult
@@ -24,6 +25,52 @@ export class UserCommandHandler extends BaseCommandHandler {
    */
   constructor(params) {
     super({ ...params, entityType: 'user' });
+  }
+
+  /**
+   * @typedef ChangeUserEmailCommandParams
+   * @property {ChangeUserEmailSchema|ChangeUserEmailSchema[]} input
+   *
+   * @param {ChangeUserEmailCommandParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async changeEmail(params) {
+    /** @type {ChangeUserEmailCommandParams}  */
+    const { input } = await validateAsync(object({
+      input: oneOrMany(object({
+        date: eventProps.date,
+        entityId: userProps.id.required(),
+        email: userProps.email.required(),
+        userId: eventProps.userId,
+      }).required()).required(),
+    }).required().label('user.changeEmail'), params);
+
+    const session = await this.store.mongo.startSession();
+    try {
+      let results;
+      await session.withTransaction(async (activeSession) => {
+        // release and reserve first so failures will not trigger a push message
+        const { release, reserve } = input.reduce((o, { entityId, email }) => {
+          o.release.push({ entityId, key: 'email' });
+          o.reserve.push({ entityId, key: 'email', value: email });
+          return o;
+        }, { release: [], reserve: [] });
+        await this.release({ input: release, session: activeSession });
+        await this.reserve({ input: reserve, session: activeSession });
+
+        results = await this.executeUpdate({
+          input: input.map(({ email, ...rest }) => ({
+            ...rest,
+            command: 'CHANGE_EMAIL',
+            values: { domain: email.split('@')[1], email },
+          })),
+          session: activeSession,
+        });
+      });
+      return results;
+    } finally {
+      await session.endSession();
+    }
   }
 
   /**

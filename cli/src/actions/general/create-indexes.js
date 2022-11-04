@@ -1,6 +1,5 @@
 import inquirer from 'inquirer';
-import { eventStore, reservations } from '../../mongodb.js';
-// import { entityManager, userManager } from '../../mongodb.js';
+import { eventStore, normalizedRepoManager, reservations } from '../../mongodb.js';
 
 export default async () => {
   const questions = [
@@ -24,9 +23,11 @@ export default async () => {
       const r = await reservations.createIndexes();
       return { reservations: r };
     })(),
-    // entityManager.commandHandlers.createIndexes(),
+    (async () => {
+      const r = await normalizedRepoManager.createAllIndexes();
+      return { normalizedRepoManager: r };
+    })(),
     // entityManager.materializedRepos.createAllIndexes(),
-    // entityManager.normalizedRepos.createAllIndexes(),
     // userManager.createIndexes(),
   ]) : null;
 };

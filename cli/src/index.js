@@ -2,6 +2,7 @@ import inquirer from 'inquirer';
 import { immediatelyThrow } from '@parameter1/utils';
 import { get } from '@parameter1/object-path';
 import { filterMongoURL } from '@parameter1/sso-mongodb-core';
+import { inspect } from 'util';
 
 import { mongo } from './mongodb.js';
 // import { connect, close, entityManager } from './mongodb.js';
@@ -188,7 +189,7 @@ const run = async () => {
   if (!action) throw new Error(`No action found for ${path}`);
 
   const r = await action();
-  if (r !== null) log(r);
+  if (r !== null) log(inspect(r, { colors: true, depth: null }));
 
   log(`> Action '${path}' complete`);
 

@@ -37,6 +37,18 @@
  * @property {string} key
  * @property {string[]} [emailDomains=[]]
  *
+ * @typedef CreateUserSchema
+ * @property {ObjectId} [entityId]
+ * @property {Date|string} [date]
+ * @property {CreateUserSchemaValues} values
+ * @property {ObjectId} [userId]
+ *
+ * @typedef CreateUserSchemaValues
+ * @property {string} email
+ * @property {string} familyName
+ * @property {string} givenName
+ * @property {boolean} [verified=false]
+ *
  * @typedef ReservationsReleaseParams
  * @property {ReservationsReleaseParamsInput|ReservationsReleaseParamsInput[]} input
  * @property {ClientSession} [session]

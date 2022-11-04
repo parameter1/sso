@@ -5,10 +5,12 @@ import { Reservations } from './reservations.js';
 
 import { ApplicationCommandHandler } from './handlers/application.js';
 import { OrganizationCommandHandler } from './handlers/organization.js';
+import { UserCommandHandler } from './handlers/user.js';
 
 const handlers = new Map([
   ['application', ApplicationCommandHandler],
   ['organization', OrganizationCommandHandler],
+  ['user', UserCommandHandler],
 ]);
 
 const { object, url } = PropTypes;

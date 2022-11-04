@@ -2,7 +2,7 @@ import { micro } from '@parameter1/micro';
 
 export const { createError } = micro;
 
-export async function covertActionError(fn, allowedCodes = new Set([401, 403, 404])) {
+export async function covertActionError(fn, allowedCodes = new Set([401, 403, 404, 409])) {
   try {
     const result = await fn();
     return result;

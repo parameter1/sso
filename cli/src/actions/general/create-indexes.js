@@ -1,5 +1,10 @@
 import inquirer from 'inquirer';
-import { eventStore, normalizedRepoManager, reservations } from '../../mongodb.js';
+import {
+  eventStore,
+  materializedRepoManager,
+  normalizedRepoManager,
+  reservations,
+} from '../../mongodb.js';
 
 export default async () => {
   const questions = [
@@ -27,7 +32,10 @@ export default async () => {
       const r = await normalizedRepoManager.createAllIndexes();
       return { normalizedRepoManager: r };
     })(),
-    // entityManager.materializedRepos.createAllIndexes(),
+    (async () => {
+      const r = await materializedRepoManager.createAllIndexes();
+      return { materializedRepoManager: r };
+    })(),
     // userManager.createIndexes(),
   ]) : null;
 };

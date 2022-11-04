@@ -1,6 +1,7 @@
 import { MongoClient } from '@parameter1/sso-mongodb-core';
 import { EventStore } from '@parameter1/sso-mongodb-event-store';
 import { Reservations } from '@parameter1/sso-mongodb-command';
+import { MaterializedRepoManager } from '@parameter1/sso-mongodb-materialized';
 import { NormalizedRepoManager } from '@parameter1/sso-mongodb-normalized';
 
 import { MONGO_URL } from './env.js';
@@ -14,6 +15,7 @@ export const eventStore = new EventStore({ mongo });
 export const reservations = new Reservations({ mongo });
 
 export const normalizedRepoManager = new NormalizedRepoManager({ mongo });
+export const materializedRepoManager = new MaterializedRepoManager({ mongo });
 
 // import {
 //   MongoDBClient,

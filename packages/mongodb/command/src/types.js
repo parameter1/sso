@@ -39,6 +39,15 @@
  * @property {string} key
  * @property {string[]} [roles=[Administrator, Member]]
  *
+ * @typedef CreateManagerSchema
+ * @property {ObjectId} entityId
+ * @property {Date|string} [date]
+ * @property {CreateManagerSchemaValues} values
+ * @property {ObjectId} [userId]
+ *
+ * @typedef CreateManagerSchemaValues
+ * @property {string} role
+ *
  * @typedef CreateOrganizationSchema
  * @property {ObjectId} [entityId]
  * @property {Date|string} [date]

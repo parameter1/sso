@@ -4,11 +4,13 @@ import { SQSClient } from '@parameter1/sso-sqs';
 import { Reservations } from './reservations.js';
 
 import { ApplicationCommandHandler } from './handlers/application.js';
+import { ManagerCommandHandler } from './handlers/manager.js';
 import { OrganizationCommandHandler } from './handlers/organization.js';
 import { UserCommandHandler } from './handlers/user.js';
 
 const handlers = new Map([
   ['application', ApplicationCommandHandler],
+  ['manager', ManagerCommandHandler],
   ['organization', OrganizationCommandHandler],
   ['user', UserCommandHandler],
 ]);

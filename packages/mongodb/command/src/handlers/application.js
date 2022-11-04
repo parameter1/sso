@@ -8,8 +8,9 @@ import { applicationProps } from '../props/application.js';
 const { object, oneOrMany } = PropTypes;
 
 /**
+ * @typedef {import("../types").ChangeApplicationNameSchema} ChangeApplicationNameSchema
  * @typedef {import("../types").CreateApplicationSchema} CreateApplicationSchema
- *
+ * @typedef {import("../types").EventStoreResult} EventStoreResult
  */
 export class ApplicationCommandHandler extends BaseCommandHandler {
   /**
@@ -21,23 +22,51 @@ export class ApplicationCommandHandler extends BaseCommandHandler {
   }
 
   /**
+   * @typedef ChangeApplicationNameCommandParams
+   * @property {ChangeApplicationNameSchema|ChangeApplicationNameSchema[]} input
+   *
+   * @param {ChangeApplicationNameCommandParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async changeName(params) {
+    /** @type {ChangeApplicationNameCommandParams}  */
+    const { input } = await validateAsync(object({
+      input: oneOrMany(object({
+        date: eventProps.date,
+        entityId: applicationProps.id.required(),
+        name: applicationProps.name.required(),
+        userId: eventProps.userId,
+      }).required()).required(),
+    }).required().label('application.changeName'), params);
+
+    return this.executeUpdate({
+      input: input.map(({ name, ...rest }) => ({
+        ...rest,
+        command: 'CHANGE_NAME',
+        values: { name, slug: sluggify(name) },
+      })),
+    });
+  }
+
+  /**
    * @typedef CreateApplicationCommandParams
    * @property {CreateApplicationSchema|CreateApplicationSchema[]} input
    *
    * @param {CreateApplicationCommandParams} params
+   * @returns {Promise<EventStoreResult[]>}
    */
   async create(params) {
     /** @type {CreateApplicationCommandParams}  */
     const { input } = await validateAsync(object({
       input: oneOrMany(object({
-        entityId: applicationProps.id.default(() => this.generateId()),
         date: eventProps.date,
+        entityId: applicationProps.id.default(() => this.generateId()),
+        userId: eventProps.userId,
         values: object({
           name: applicationProps.name.required(),
           key: applicationProps.key.required(),
           roles: applicationProps.roles.default(['Administrator', 'Member']),
         }).required(),
-        userId: eventProps.userId,
       }).required()).required(),
     }).required().label('application.create'), params);
 

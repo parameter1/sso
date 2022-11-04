@@ -16,6 +16,7 @@ const {
 
 /**
  * @typedef {import("mongodb").ClientSession} ClientSession
+ * @typedef {import("../types").EventStoreResult} EventStoreResult
  * @typedef {import("../types").ReservationsReleaseParams} ReservationsReleaseParams
  * @typedef {import("../types").ReservationsReserveParams} ReservationsReserveParams
  *
@@ -35,7 +36,6 @@ const {
  * @property {BaseCommandHandlerConstructorParamsSQS} sqs
  *
  * @typedef {import("@parameter1/sso-mongodb-event-store").EventStoreDocument} EventStoreDocument
- * @typedef {import("@parameter1/sso-mongodb-event-store").EventStoreResult} EventStoreResult
  */
 export class BaseCommandHandler {
   /**
@@ -154,10 +154,10 @@ export class BaseCommandHandler {
 
   /**
    * @typedef CommandHandlerExecuteCreateInput
-   * @property {*} entityId
    * @property {Date|string} [date]
-   * @property {object} [values]
+   * @property {*} entityId
    * @property {ObjectId|null} [userId]
+   * @property {object} [values]
    *
    * @typedef CommandHandlerExecuteCreateParams
    * @property {CommandHandlerExecuteCreateInput|CommandHandlerExecuteCreateInput[]} input
@@ -170,10 +170,10 @@ export class BaseCommandHandler {
     /** @type {CommandHandlerExecuteCreateParams} */
     const { input, session } = await validateAsync(object({
       input: oneOrMany(object({
-        entityId: this.entityIdPropType.required(),
         date: eventProps.date,
-        values: eventProps.values.required(),
+        entityId: this.entityIdPropType.required(),
         userId: eventProps.userId,
+        values: eventProps.values.required(),
       }).required()).required(),
       session: mongoSessionProp,
     }).required().label('handler.executeCreate'), params);
@@ -185,6 +185,48 @@ export class BaseCommandHandler {
       })),
       session,
     });
+  }
+
+  /**
+   * @typedef CommandHandlerExecuteUpdateParams
+   * @property {CommandHandlerExecuteUpdateInput|CommandHandlerExecuteUpdateInput[]} input
+   * @property {ClientSession} [session]
+   *
+   * @typedef CommandHandlerExecuteUpdateInput
+   * @property {string} command
+   * @property {Date|string} [date]
+   * @property {*} entityId
+   * @property {boolean} [omitFromHistory]
+   * @property {boolean} [omitFromModified]
+   * @property {ObjectId|null} [userId]
+   * @property {object} [values]
+   *
+   * @param {CommandHandlerExecuteUpdateParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async executeUpdate(params) {
+    /** @type {CommandHandlerExecuteUpdateParams} */
+    const { input, session } = await validateAsync(object({
+      input: oneOrMany(object({
+        command: eventProps.command.required(),
+        date: eventProps.date,
+        entityId: this.entityIdPropType.required(),
+        omitFromHistory: eventProps.omitFromHistory,
+        omitFromModified: eventProps.omitFromModified,
+        userId: eventProps.userId,
+        values: eventProps.values.default({}),
+      }).required()).required(),
+      session: mongoSessionProp,
+    }).required().label('handler.executeUpdate'), params);
+
+    const { entityIds, events } = input.reduce((o, command) => {
+      o.entityIds.push(command.entityId);
+      o.events.push(command);
+      return o;
+    }, { entityIds: [], events: [] });
+
+    await this.canPushUpdate(entityIds);
+    return this.pushToStore({ events, session });
   }
 
   /**

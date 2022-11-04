@@ -16,6 +16,7 @@ export const sluggifyUserNames = (names, reverse = false) => {
  * @typedef {import("../types").ChangeUserEmailSchema} ChangeUserEmailSchema
  * @typedef {import("../types").ChangeUserNameSchema} ChangeUserNameSchema
  * @typedef {import("../types").CreateUserSchema} CreateUserSchema
+ * @typedef {import("../types").DeleteUserSchema} DeleteUserSchema
  * @typedef {import("../types").EventStoreResult} EventStoreResult
  */
 export class UserCommandHandler extends BaseCommandHandler {
@@ -165,6 +166,40 @@ export class UserCommandHandler extends BaseCommandHandler {
           }),
           session: activeSession,
         });
+      });
+      return results;
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  /**
+   * @typedef DeleteUserCommandParams
+   * @property {DeleteUserSchema|DeleteUserSchema[]} input
+   *
+   * @param {DeleteUserCommandParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async delete(params) {
+    /** @type {DeleteUserCommandParams}  */
+    const { input } = await validateAsync(object({
+      input: oneOrMany(object({
+        date: eventProps.date,
+        entityId: userProps.id.required(),
+        userId: eventProps.userId,
+      }).required()).required(),
+    }).required().label('user.delete'), params);
+
+    const session = await this.store.mongo.startSession();
+    try {
+      let results;
+      await session.withTransaction(async (activeSession) => {
+        // release first so failures will not trigger a push message
+        await this.release({
+          input: input.map(({ entityId }) => ({ entityId, key: 'email' })),
+          session: activeSession,
+        });
+        results = await this.executeDelete({ input, session });
       });
       return results;
     } finally {

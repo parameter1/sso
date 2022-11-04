@@ -62,6 +62,11 @@
  * @property {string} givenName
  * @property {boolean} [verified=false]
  *
+ * @typedef DeleteUserSchema
+ * @property {ObjectId} [entityId]
+ * @property {Date|string} [date]
+ * @property {ObjectId} [userId]
+ *
  * @typedef ReservationsReleaseParams
  * @property {ReservationsReleaseParamsInput|ReservationsReleaseParamsInput[]} input
  * @property {ClientSession} [session]

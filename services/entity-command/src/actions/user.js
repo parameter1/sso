@@ -14,6 +14,8 @@ const { object, oneOrMany } = PropTypes;
  * @typedef {import("@parameter1/sso-mongodb-command")
  *    .CreateUserSchema} CreateUserSchema
  * @typedef {import("@parameter1/sso-mongodb-command")
+ *    .DeleteUserSchema} DeleteUserSchema
+ * @typedef {import("@parameter1/sso-mongodb-command")
  *    .EventStoreResult} {EventStoreResult}
  */
 export default {
@@ -90,5 +92,27 @@ export default {
     return covertActionError(() => commands
       .get('user')
       .create({ input }));
+  },
+
+  /**
+   * @typedef DeleteUserActionParams
+   * @property {DeleteUserSchema|DeleteUserSchema[]} input
+   *
+   * @param {DeleteUserActionParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async delete(params) {
+    /** @type {DeleteUserActionParams}  */
+    const { input } = await validateAsync(object({
+      input: oneOrMany(object({
+        date: eventProps.date,
+        entityId: userProps.id.required(),
+        userId: eventProps.userId,
+      }).required()).required(),
+    }).required().label('user.delete'), params);
+
+    return covertActionError(() => commands
+      .get('user')
+      .delete({ input }));
   },
 };

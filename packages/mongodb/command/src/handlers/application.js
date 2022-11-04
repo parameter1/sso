@@ -1,13 +1,26 @@
 import { PropTypes, validateAsync } from '@parameter1/sso-prop-types-core';
+import { eventProps } from '@parameter1/sso-prop-types-event';
 import { sluggify } from '@parameter1/slug';
+
 import { BaseCommandHandler } from './-base.js';
-import { createApplicationSchema } from '../schema/application.js';
+import { applicationProps } from '../props/application.js';
 
 const { object, oneOrMany } = PropTypes;
 
 /**
  * @typedef {import("@parameter1/sso-mongodb-core").ObjectId} ObjectId
- * @typedef {import("../schema/application").CreateApplicationSchema} CreateApplicationSchema
+ *
+ * @typedef CreateApplicationSchemaValues
+ * @property {string} name
+ * @property {string} key
+ * @property {string[]} [roles=[Administrator, Member]]
+ *
+ * @typedef CreateApplicationSchema
+ * @property {ObjectId} [entityId]
+ * @property {Date|string} [date]
+ * @property {CreateApplicationSchemaValues} values
+ * @property {ObjectId} [userId]
+ *
  */
 export class ApplicationCommandHandler extends BaseCommandHandler {
   /**
@@ -27,28 +40,38 @@ export class ApplicationCommandHandler extends BaseCommandHandler {
   async create(params) {
     /** @type {CreateApplicationCommandParams}  */
     const { input } = await validateAsync(object({
-      input: oneOrMany(createApplicationSchema.required()).required(),
+      input: oneOrMany(object({
+        entityId: applicationProps.id.default(() => this.generateId()),
+        date: eventProps.date,
+        values: object({
+          name: applicationProps.name.required(),
+          key: applicationProps.key.required(),
+          roles: applicationProps.roles.default(['Administrator', 'Member']),
+        }).required(),
+        userId: eventProps.userId,
+      }).required()).required(),
     }).required().label('application.create'), params);
 
     const session = await this.store.mongo.startSession();
     try {
       let results;
       await session.withTransaction(async (activeSession) => {
+        // reserve first, so failed reservations will not trigger a push message
+        await this.reserve({
+          input: input.map((o) => ({
+            entityId: o.entityId,
+            key: 'key',
+            value: o.values.key,
+          })),
+          session,
+        });
+
         results = await this.executeCreate({
           input: input.map(({ values, ...rest }) => ({
             ...rest,
             values: { ...values, slug: sluggify(values.name) },
           })),
           session: activeSession,
-        });
-
-        await this.reserve({
-          input: results.map((result) => ({
-            entityId: result._id,
-            key: 'key',
-            value: result.values.key,
-          })),
-          session,
         });
       });
       return results;

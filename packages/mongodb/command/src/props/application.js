@@ -3,7 +3,7 @@ import { getEntityIdPropType } from '@parameter1/sso-prop-types-event';
 
 const { array, string, slug } = PropTypes;
 
-export default {
+export const applicationProps = {
   id: getEntityIdPropType('application'),
   key: slug().pattern(/[a-z0-9]/i).min(2),
   name: string().pattern(/[a-z0-9]/i).min(2),

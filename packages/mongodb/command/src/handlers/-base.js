@@ -154,7 +154,7 @@ export class BaseCommandHandler {
 
   /**
    * @typedef CommandHandlerExecuteCreateInput
-   * @property {*} [entityId]
+   * @property {*} entityId
    * @property {Date|string} [date]
    * @property {object} [values]
    * @property {ObjectId|null} [userId]
@@ -170,7 +170,7 @@ export class BaseCommandHandler {
     /** @type {CommandHandlerExecuteCreateParams} */
     const { input, session } = await validateAsync(object({
       input: oneOrMany(object({
-        entityId: this.entityIdPropType.default(() => this.generateId()),
+        entityId: this.entityIdPropType.required(),
         date: eventProps.date,
         values: eventProps.values.required(),
         userId: eventProps.userId,

@@ -13,6 +13,7 @@ export const sluggifyUserNames = (names, reverse = false) => {
 };
 
 /**
+ * @typedef {import("../types").ChangeUserNameSchema} ChangeUserNameSchema
  * @typedef {import("../types").CreateUserSchema} CreateUserSchema
  * @typedef {import("../types").EventStoreResult} EventStoreResult
  */
@@ -23,6 +24,44 @@ export class UserCommandHandler extends BaseCommandHandler {
    */
   constructor(params) {
     super({ ...params, entityType: 'user' });
+  }
+
+  /**
+   * @typedef ChangeUserNameCommandParams
+   * @property {ChangeUserNameSchema|ChangeUserNameSchema[]} input
+   *
+   * @param {ChangeUserNameCommandParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async changeName(params) {
+    /** @type {ChangeUserNameCommandParams}  */
+    const { input } = await validateAsync(object({
+      input: oneOrMany(object({
+        date: eventProps.date,
+        entityId: userProps.id.required(),
+        familyName: userProps.familyName.required(),
+        givenName: userProps.givenName.required(),
+        userId: eventProps.userId,
+      }).required()).required(),
+    }).required().label('user.changeName'), params);
+
+    return this.executeUpdate({
+      input: input.map(({ familyName, givenName, ...rest }) => {
+        const names = [givenName, familyName];
+        return {
+          ...rest,
+          command: 'CHANGE_NAME',
+          values: {
+            familyName,
+            givenName,
+            slug: {
+              default: sluggifyUserNames(names),
+              reverse: sluggifyUserNames(names, true),
+            },
+          },
+        };
+      }),
+    });
   }
 
   /**

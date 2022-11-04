@@ -8,11 +8,37 @@ const { object, oneOrMany } = PropTypes;
 
 /**
  * @typedef {import("@parameter1/sso-mongodb-command")
+ *    .ChangeUserNameSchema} ChangeUserNameSchema
+ * @typedef {import("@parameter1/sso-mongodb-command")
  *    .CreateUserSchema} CreateUserSchema
  * @typedef {import("@parameter1/sso-mongodb-command")
  *    .EventStoreResult} {EventStoreResult}
  */
 export default {
+  /**
+   * @typedef ChangeUserNameActionParams
+   * @property {ChangeUserNameSchema|ChangeUserNameSchema[]} input
+   *
+   * @param {ChangeUserNameActionParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async changeName(params) {
+    /** @type {ChangeUserNameActionParams}  */
+    const { input } = await validateAsync(object({
+      input: oneOrMany(object({
+        date: eventProps.date,
+        entityId: userProps.id.required(),
+        familyName: userProps.familyName.required(),
+        givenName: userProps.givenName.required(),
+        userId: eventProps.userId,
+      }).required()).required(),
+    }).required().label('user.create'), params);
+
+    return covertActionError(() => commands
+      .get('user')
+      .changeName({ input }));
+  },
+
   /**
    * @typedef CreateUserActionParams
    * @property {CreateUserSchema|CreateUserSchema[]} input

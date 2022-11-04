@@ -15,6 +15,13 @@
  * @property {string} name
  * @property {ObjectId} [userId]
  *
+ * @typedef ChangeUserNameSchema
+ * @property {ObjectId} entityId
+ * @property {Date|string} [date]
+ * @property {string} familyName
+ * @property {string} givenName
+ * @property {ObjectId} [userId]
+ *
  * @typedef CreateApplicationSchema
  * @property {ObjectId} [entityId]
  * @property {Date|string} [date]

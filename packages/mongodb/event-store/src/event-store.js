@@ -289,7 +289,7 @@ export class EventStore {
         entityId: o.entityId,
         entityType: o.entityType,
         userId: o.userId,
-        values: o.values || {},
+        values: o.values.$literal || {},
       };
     });
   }

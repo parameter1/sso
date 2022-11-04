@@ -1,6 +1,8 @@
 export { CommandHandlers } from './handlers.js';
 export { Reservations } from './reservations.js';
 
+export * from './schema/application.js';
+
 /**
  * @typedef {import("@parameter1/sso-mongodb-core").ClientSession} ClientSession
  *

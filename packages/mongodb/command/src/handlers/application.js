@@ -1,13 +1,13 @@
 import { PropTypes, validateAsync } from '@parameter1/sso-prop-types-core';
-import { eventProps } from '@parameter1/sso-prop-types-event';
 import { sluggify } from '@parameter1/slug';
 import { BaseCommandHandler } from './-base.js';
-import applicationProps from '../props/application.js';
+import { createApplicationSchema } from '../schema/application.js';
 
 const { object, oneOrMany } = PropTypes;
 
 /**
  * @typedef {import("@parameter1/sso-mongodb-core").ObjectId} ObjectId
+ * @typedef {import("../schema/application").CreateApplicationSchema} CreateApplicationSchema
  */
 export class ApplicationCommandHandler extends BaseCommandHandler {
   /**
@@ -19,38 +19,15 @@ export class ApplicationCommandHandler extends BaseCommandHandler {
   }
 
   /**
-   * @typedef CreateApplicationCommandInputValues
-   * @property {string} name
-   * @property {string} key
-   * @property {string[]} [roles=[Administrator, Member]]
-   *
-   * @typedef CreateApplicationCommandInput
-   * @property {ObjectId} [entityId]
-   * @property {Date|string} [date]
-   * @property {CreateApplicationCommandInputValues} values
-   * @property {ObjectId} [userId]
-   *
    * @typedef CreateApplicationCommandParams
-   * @property {CreateApplicationCommandInput|CreateApplicationCommandInput[]} input
+   * @property {CreateApplicationSchema|CreateApplicationSchema[]} input
    *
    * @param {CreateApplicationCommandParams} params
    */
   async create(params) {
     /** @type {CreateApplicationCommandParams}  */
     const { input } = await validateAsync(object({
-      input: oneOrMany(object({
-        entityId: this.entityIdPropType,
-        date: eventProps.date,
-        values: object({
-          name: applicationProps.name.required(),
-          key: applicationProps.key.required(),
-          roles: applicationProps.roles.default(['Administrator', 'Member']),
-        }).required().custom((application) => ({
-          ...application,
-          slug: sluggify(application.name),
-        })),
-        userId: eventProps.userId,
-      }).required()).required(),
+      input: oneOrMany(createApplicationSchema.required()).required(),
     }).required().label('application.create'), params);
 
     const session = await this.store.mongo.startSession();
@@ -58,7 +35,10 @@ export class ApplicationCommandHandler extends BaseCommandHandler {
       let results;
       await session.withTransaction(async (activeSession) => {
         results = await this.executeCreate({
-          input,
+          input: input.map(({ values, ...rest }) => ({
+            ...rest,
+            values: { ...values, slug: sluggify(values.name) },
+          })),
           session: activeSession,
         });
 

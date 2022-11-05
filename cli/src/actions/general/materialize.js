@@ -1,5 +1,6 @@
 import inquirer from 'inquirer';
-import { entityMaterializerClient } from '../../clients.js';
+import { EntityTypes } from '@parameter1/sso-entity-types';
+import { materializers } from '../../mongodb.js';
 
 export default async () => {
   const questions = [
@@ -7,7 +8,7 @@ export default async () => {
       type: 'checkbox',
       name: 'entityTypes',
       message: 'Select the entity types to materialize',
-      choices: async () => entityMaterializerClient.getEntityTypes(),
+      choices: () => EntityTypes.getKeys(),
     },
     {
       type: 'confirm',
@@ -19,5 +20,8 @@ export default async () => {
 
   const { entityTypes, confirm } = await inquirer.prompt(questions);
   if (!confirm) return [];
-  return new Map(await entityMaterializerClient.materializeTypes({ entityTypes }));
+  return new Map(await Promise.all(entityTypes.map(async (entityType) => {
+    await materializers.materializeUsingQuery(entityType, {});
+    return [entityType, 'ok'];
+  })));
 };

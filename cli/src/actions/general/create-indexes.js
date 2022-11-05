@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { entityCommandClient, entityMaterializerClient, entityNormalizerClient } from '../../clients.js';
+import { commandHandler, materializedRepoManager, normalizedRepoManager } from '../../mongodb.js';
 
 export default async () => {
   const questions = [
@@ -17,16 +17,16 @@ export default async () => {
   if (!confirm) return null;
   return new Map(await Promise.all([
     (async () => {
-      const r = await entityCommandClient.createIndexes();
+      const r = await commandHandler.createIndexes();
       return ['command', r];
     })(),
     (async () => {
-      const r = await entityNormalizerClient.createIndexes();
-      return ['normalizer', r];
+      const r = await normalizedRepoManager.createAllIndexes();
+      return ['normalized', r];
     })(),
     (async () => {
-      const r = await entityMaterializerClient.createIndexes();
-      return ['materializer', r];
+      const r = await materializedRepoManager.createAllIndexes();
+      return ['materialized', r];
     })(),
     // userManager.createIndexes(),
   ]));

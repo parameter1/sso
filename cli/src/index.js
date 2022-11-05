@@ -1,9 +1,10 @@
 import inquirer from 'inquirer';
 import { immediatelyThrow } from '@parameter1/utils';
 import { get } from '@parameter1/object-path';
+import { filterMongoURL } from '@parameter1/sso-mongodb-core';
 import { inspect } from 'util';
 
-// import { connect, close, entityManager } from './mongodb.js';
+import { mongo } from './mongodb.js';
 // import { pubSubManager } from './pubsub.js';
 
 import actions from './actions.js';
@@ -204,7 +205,11 @@ const run = async () => {
 
 (async () => {
   await Promise.all([
-    // connect(),
+    (async () => {
+      log('> Connecting to MongoDB...');
+      await mongo.connect();
+      log(`> MongoDB connection to ${filterMongoURL(mongo)}`);
+    })(),
     // (async () => {
     //   log('> Connecting to Redis pub/sub...');
     //   await pubSubManager.connect();
@@ -215,7 +220,11 @@ const run = async () => {
   await run();
 
   await Promise.all([
-    // close(),
+    (async () => {
+      log('> Closing to MongoDB...');
+      await mongo.close();
+      log('> MongoDB closed');
+    })(),
     // (async () => {
     //   log('> Closing Redis pub/sub...');
     //   await pubSubManager.quit();

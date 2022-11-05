@@ -27,10 +27,9 @@ const {
  * @property {EventStore} store
  * @property {CommandHandlerConstructorParamsSQS} sqs
  *
- * @typedef CommandHandlerConstructorParams
- * @property {Reservations} reservations
- * @property {EventStore} store
- * @property {CommandHandlerConstructorParamsSQS} sqs
+ * @typedef CommandHandlerConstructorParamsSQS
+ * @property {SQSClient} client
+ * @property {string} url
  *
  * @typedef {import("@parameter1/sso-mongodb-event-store").EventStoreDocument} EventStoreDocument
  */
@@ -150,6 +149,19 @@ export class CommandHandler {
       throwWhenFalse,
       eligibleWhenFn: ({ state }) => state === 'CREATED',
     });
+  }
+
+  async createIndexes() {
+    return new Map(await Promise.all([
+      (async () => {
+        const r = await this.store.createIndexes();
+        return ['store', r];
+      })(),
+      (async () => {
+        const r = await this.reservations.createIndexes();
+        return ['reservations', r];
+      })(),
+    ]));
   }
 
   /**
@@ -340,7 +352,7 @@ export class CommandHandler {
   async normalize(params) {
     /** @type {NormalizeParams} */
     const { entityIds, entityType } = await validateAsync(object({
-      entityIds: array().items(eventProps.entityId.required()).required(),
+      entityIds: array().items(eventProps.entityId).required(),
       entityType: eventProps.entityType.required(),
     }).required().label('handler.normalize'), params);
 

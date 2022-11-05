@@ -4,11 +4,15 @@ import {
 } from 'envalid';
 
 export const {
-  ENTITY_COMMAND_URL,
-  ENTITY_MATERIALIZER_URL,
-  ENTITY_NORMALIZER_URL,
+  AWS_ACCESS_KEY_ID,
+  AWS_REGION,
+  AWS_SECRET_ACCESS_KEY,
+  MONGO_URL,
+  SQS_QUEUE_URL,
 } = cleanEnv(process.env, {
-  ENTITY_COMMAND_URL: str({ desc: 'The entity command client URL' }),
-  ENTITY_MATERIALIZER_URL: str({ desc: 'The entity materializer client URL' }),
-  ENTITY_NORMALIZER_URL: str({ desc: 'The entity normalizer client URL' }),
+  AWS_ACCESS_KEY_ID: str({ desc: 'The AWS access key ID.' }),
+  AWS_REGION: str({ desc: 'The AWS region to connect to.', default: 'us-east-2' }),
+  AWS_SECRET_ACCESS_KEY: str({ desc: 'The AWS secret access key.' }),
+  MONGO_URL: str({ desc: 'The MongoDB URL to connect to.' }),
+  SQS_QUEUE_URL: str({ desc: 'The event store SQS queue to send event messages to.' }),
 });

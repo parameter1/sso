@@ -20,6 +20,7 @@ export class EntityNormalizerServiceClient {
   }
 
   /**
+   * Creates indexes for all associated collections.
    *
    * @returns {Promise<Map<string, string[]>>}
    */
@@ -29,11 +30,22 @@ export class EntityNormalizerServiceClient {
   }
 
   /**
+   * Normalizes all events for all entity types.
+   *
+   * @returns {Promise<Map<string, string>>}
+   */
+  async normalizeAll() {
+    const r = await this.request('all');
+    return new Map(r);
+  }
+
+  /**
    *
    * @param {string} action
    * @param {object} params
+   * @returns {Promise<object|array|string>}
    */
   async request(action, params) {
-    return covertActionError(() => this.client.request('action', params));
+    return covertActionError(() => this.client.request(action, params));
   }
 }

@@ -165,7 +165,7 @@ const run = async () => {
           key: 'general',
           choices: [
             { name: 'Create database indexes', fnName: 'createIndexes' },
-            // { name: 'Normalize event data', fnName: 'normalize' },
+            { name: 'Normalize event data', fnName: 'normalize' },
             { name: 'Materialize objects', fnName: 'materialize' },
           ],
         },

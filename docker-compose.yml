@@ -54,6 +54,8 @@ services:
       <<: [*env]
       ENTITY_COMMAND_URL: ${ENTITY_COMMAND_URL-http://entity-command}
       MONGO_URL: ${MONGO_URL_CLI}
+    depends_on:
+      - entity-command
 
   command-processor:
     <<: *node

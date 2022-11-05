@@ -3,18 +3,6 @@
  * @typedef {import("@parameter1/sso-mongodb-core").ObjectId} ObjectId
  * @typedef {import("@parameter1/sso-mongodb-event-store").EventStoreResult} EventStoreResult
  *
- * @typedef ChangeApplicationNameSchema
- * @property {ObjectId} entityId
- * @property {Date|string} [date]
- * @property {string} name
- * @property {ObjectId} [userId]
- *
- * @typedef ChangeOrganizationNameSchema
- * @property {ObjectId} entityId
- * @property {Date|string} [date]
- * @property {string} name
- * @property {ObjectId} [userId]
- *
  * @typedef ChangeUserEmailSchema
  * @property {ObjectId} entityId
  * @property {Date|string} [date]
@@ -28,17 +16,6 @@
  * @property {string} givenName
  * @property {ObjectId} [userId]
  *
- * @typedef CreateApplicationSchema
- * @property {ObjectId} [entityId]
- * @property {Date|string} [date]
- * @property {CreateApplicationSchemaValues} values
- * @property {ObjectId} [userId]
- *
- * @typedef CreateApplicationSchemaValues
- * @property {string} name
- * @property {string} key
- * @property {string[]} [roles=[Administrator, Member]]
- *
  * @typedef CreateManagerSchema
  * @property {ObjectId} entityId
  * @property {Date|string} [date]
@@ -47,17 +24,6 @@
  *
  * @typedef CreateManagerSchemaValues
  * @property {string} role
- *
- * @typedef CreateOrganizationSchema
- * @property {ObjectId} [entityId]
- * @property {Date|string} [date]
- * @property {CreateOrganizationSchemaValues} values
- * @property {ObjectId} [userId]
- *
- * @typedef CreateOrganizationSchemaValues
- * @property {string} name
- * @property {string} key
- * @property {string[]} [emailDomains=[]]
  *
  * @typedef CreateUserSchema
  * @property {ObjectId} [entityId]

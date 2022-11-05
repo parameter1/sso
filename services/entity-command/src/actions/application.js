@@ -34,7 +34,7 @@ export default {
         name: applicationProps.name.required(),
         userId: eventProps.userId,
       }).required()).required(),
-    }).required().label('application.create'), params);
+    }).required().label('application.changeName'), params);
 
     return covertActionError(() => handler.changeName({ input }));
   },

@@ -62,4 +62,12 @@ export class CommandHandlers {
     if (!handler) throw new Error(`No command handler exists for type '${entityType}'`);
     return handler;
   }
+
+  /**
+   *
+   * @returns {string[]}
+   */
+  getEntityTypes() {
+    return [...this.handlers.keys()].sort();
+  }
 }

@@ -55,7 +55,6 @@ services:
       ENTITY_COMMAND_URL: ${ENTITY_COMMAND_URL-http://entity-command}
       ENTITY_MATERIALIZER_URL: ${ENTITY_MATERIALIZER_URL-http://entity-materializer}
       ENTITY_NORMALIZER_URL: ${ENTITY_NORMALIZER_URL-http:/entity-normalizer}
-      MONGO_URL: ${MONGO_URL_CLI}
     depends_on:
       - entity-command
       - entity-materializer

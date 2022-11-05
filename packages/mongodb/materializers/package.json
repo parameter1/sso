@@ -1,14 +1,14 @@
 {
-  "name": "@parameter1/sso-mongodb-materialized",
+  "name": "@parameter1/sso-mongodb-materializers",
   "version": "0.5.4",
   "type": "module",
-  "description": "The SSO MongoDB materialized repos.",
+  "description": "The SSO MongoDB materializers.",
   "author": "Jacob Bare <jacob@parameter1.com>",
-  "homepage": "https://github.com/parameter1/sso/tree/main/packages/mongodb/materialized#readme",
+  "homepage": "https://github.com/parameter1/sso/tree/main/packages/mongodb/materializers#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/parameter1/sso.git",
-    "directory": "packages/mongodb/materialized"
+    "directory": "packages/mongodb/materializers"
   },
   "private": true,
   "license": "MIT",

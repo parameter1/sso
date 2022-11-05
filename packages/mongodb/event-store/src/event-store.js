@@ -1,9 +1,9 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
-import { eventProps, getEntityIdPropType } from '@parameter1/sso-prop-types-event';
+import { eventProps } from '@parameter1/sso-prop-types-event';
 import { DB_NAME, EJSON, mongoDBClientProp } from '@parameter1/sso-mongodb-core';
 import { UserNormalizationBuilder } from './normalization-builders/user.js';
 
-const { array, object, oneOrMany } = PropTypes;
+const { array, object } = PropTypes;
 
 /**
  * @typedef {import("./index").EventStoreResult} EventStoreResult
@@ -40,20 +40,18 @@ export class EventStore {
   /**
    * Builds the pipeline for normalizing the event store.
    *
-   * @typedef EventStoreNormalizationParams
-   * @property {*|*[]} entityIds
+   * @typedef BuildNormalizationPipelineParams
+   * @property {Array} entityIds
+   * @property {string} entityType
    *
-   * @param {string} type The entity type to push events for
-   * @param {EventStoreNormalizationParams} params
+   * @param {BuildNormalizationPipelineParams} params
    * @returns {object[]}
    */
-  buildNormalizationPipeline(type, params) {
-    /** @type {string} */
-    const entityType = attempt(type, eventProps.entityType.required());
-
-    /** @type {EventStoreNormalizationParams} */
-    const { entityIds } = attempt(params, object({
-      entityIds: oneOrMany(getEntityIdPropType(entityType)).required(),
+  buildNormalizationPipeline(params) {
+    /** @type {BuildNormalizationPipelineParams} */
+    const { entityIds, entityType } = attempt(params, object({
+      entityIds: array().items(eventProps.entityId).required(),
+      entityType: eventProps.entityType.required(),
     }).required());
 
     const builder = this.normalizedBuilders.get(entityType);
@@ -196,20 +194,18 @@ export class EventStore {
   /**
    * Gets the entity state for the provided entity IDs.
    *
-   * @typedef EventStoreEntityStateParams
-   * @property {*[]} entityIds
+   * @typedef GetEntityStatesForParams
+   * @property {Array} entityIds
+   * @property {string} entityType
    *
-   * @param {string} type The entity type to push events for
-   * @param {EventStoreEntityStateParams} params
+   * @param {GetEntityStatesForParams} params
    * @returns {Promise<Map<string, string>>}
    */
-  async getEntityStatesFor(type, params) {
-    /** @type {string} */
-    const entityType = attempt(type, eventProps.entityType.required());
-
-    /** @type {EventStoreEntityStateParams} */
-    const { entityIds } = await validateAsync(object({
-      entityIds: array().items(getEntityIdPropType(entityType).required()).required(),
+  async getEntityStatesFor(params) {
+    /** @type {GetEntityStatesForParams} */
+    const { entityIds, entityType } = await validateAsync(object({
+      entityIds: array().items(eventProps.entityId.required()).required(),
+      entityType: eventProps.entityType.required(),
     }).required().label('eventStore.getEntityStatesFor'), params);
 
     const pipeline = [{
@@ -241,58 +237,54 @@ export class EventStore {
    * Normalizes data from the event store collection based on the provided entity type and IDs
    *
    * @typedef EventStoreNormalizeParams
-   * @property {*[]} entityIds
+   * @property {Array} entityIds
+   * @property {string} entityType
    *
    * @param {string} type The entity type to push events for
    * @param {EventStoreNormalizeParams} params
    * @returns {Promise<void>}
    */
-  async normalize(type, params) {
-    /** @type {string} */
-    const entityType = attempt(type, eventProps.entityType.required());
-
+  async normalize(params) {
     /** @type {EventStoreNormalizeParams} */
-    const { entityIds } = await validateAsync(object({
-      entityIds: oneOrMany(getEntityIdPropType(entityType)).required(),
+    const { entityIds, entityType } = await validateAsync(object({
+      entityIds: array().items(eventProps.entityId).required(),
+      entityType: eventProps.entityType.required(),
     }).required().label('eventStore.normalize'), params);
 
-    const pipeline = this.buildNormalizationPipeline(entityType, { entityIds });
+    const pipeline = this.buildNormalizationPipeline({ entityIds, entityType });
     await this.collection.aggregate(pipeline).toArray();
   }
 
   /**
    * Pushes and persists one or more events to the store.
    *
-   * @typedef EventStorePushParams
-   * @property {EventStoreDocument|EventStoreDocument[]} events
+   * @typedef PushParams
+   * @property {EventStoreDocument[]} events
    * @property {import("mongodb").ClientSession} [session]
    *
-   * @param {string} type The entity type to push events for
-   * @param {EventStorePushParams} params The push parameters
+   * @param {PushParams} params The push parameters
    * @returns {Promise<EventStoreResult[]>}
    */
-  async push(type, params) {
-    /** @type {string} */
-    const entityType = attempt(type, eventProps.entityType.required());
-
-    /** @type {EventStorePushParams} */
+  async push(params) {
+    /** @type {PushParams} */
     const { events, session } = await validateAsync(object({
-      events: oneOrMany(object({
+      events: array().items(object({
         command: eventProps.command.required(),
-        entityId: getEntityIdPropType(entityType).required(),
+        entityId: eventProps.entityId.required(),
+        entityType: eventProps.entityType.required(),
         date: eventProps.date.default('$$NOW'),
         omitFromHistory: eventProps.omitFromHistory.default(false),
         omitFromModified: eventProps.omitFromModified.default(false),
         values: eventProps.values.default({}),
         userId: eventProps.userId.default(null),
-      })),
+      })).required(),
       session: object(),
     }).required().label('eventStore.push'), params);
 
     const objs = [];
     const operations = [];
     events.forEach((event) => {
-      const prepared = { ...event, entityType, values: { $literal: event.values } };
+      const prepared = { ...event, values: { $literal: event.values } };
       objs.push(prepared);
       operations.push({
         updateOne: {

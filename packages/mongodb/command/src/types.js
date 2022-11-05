@@ -77,19 +77,21 @@
  * @property {ObjectId} [userId]
  *
  * @typedef ReservationsReleaseParams
- * @property {ReservationsReleaseParamsInput|ReservationsReleaseParamsInput[]} input
+ * @property {ReservationsReleaseParamsInput[]} input
  * @property {ClientSession} [session]
  *
  * @typedef ReservationsReleaseParamsInput
  * @property {*} entityId
- * @property {string} key d
+ * @property {string} entityType
+ * @property {string} key
  *
  * @typedef ReservationsReserveParams
- * @property {ReservationsReserveParamsInput|ReservationsReserveParamsInput[]} input
+ * @property {ReservationsReserveParamsInput[]} input
  * @property {ClientSession} [session]
  *
  * @typedef ReservationsReserveParamsInput
  * @property {*} entityId
+ * @property {string} entityType
  * @property {string} key
  * @property {*} value
  *

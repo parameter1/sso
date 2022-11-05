@@ -1,9 +1,9 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { DB_NAME, mongoDBClientProp, mongoSessionProp } from '@parameter1/sso-mongodb-core';
-import { eventProps, getEntityIdPropType } from '@parameter1/sso-prop-types-event';
+import { eventProps } from '@parameter1/sso-prop-types-event';
 import reservationProps from './props/reservation.js';
 
-const { object, oneOrMany } = PropTypes;
+const { array, object } = PropTypes;
 
 /**
  * @typedef {import("mongodb").BulkWriteResult} BulkWriteResult
@@ -46,47 +46,41 @@ export class Reservations {
   }
 
   /**
-   * Releases one or more entity field values.
+   * Releases entity field values.
    *
-   * @param {string} type The entity type
    * @param {ReservationsReleaseParams} params
    * @returns {Promise<BulkWriteResult>}
    */
-  async release(type, params) {
-    /** @type {string} */
-    const entityType = attempt(type, eventProps.entityType.required());
-
+  async release(params) {
     /** @type {ReservationsReleaseParams} */
     const { input, session } = await validateAsync(object({
-      input: oneOrMany(object({
-        entityId: getEntityIdPropType(entityType).required(),
+      input: array().items(object({
+        entityId: eventProps.entityId.required(),
+        entityType: eventProps.entityType.required(),
         key: reservationProps.key.required(),
       }).required()).required(),
       session: mongoSessionProp,
     }).required(), params);
 
     const operations = input.map((document) => ({
-      deleteOne: { filter: { ...document, entityType } },
+      deleteOne: { filter: document },
     }));
 
     return this.collection.bulkWrite(operations, { session });
   }
 
   /**
-   * Reserves one or more entity field values.
+   * Reserves entity field values.
    *
-   * @param {string} type The entity type
    * @param {ReservationsReserveParams} params
    * @returns {Promise<BulkWriteResult>}
    */
-  async reserve(type, params) {
-    /** @type {string} */
-    const entityType = attempt(type, eventProps.entityType.required());
-
+  async reserve(params) {
     /** @type {ReservationsReserveParams} */
     const { input, session } = await validateAsync(object({
-      input: oneOrMany(object({
-        entityId: getEntityIdPropType(entityType).required(),
+      input: array().items(object({
+        entityId: eventProps.entityId.required(),
+        entityType: eventProps.entityType.required(),
         key: reservationProps.key.required(),
         value: reservationProps.value.required(),
       }).required()).required(),
@@ -94,7 +88,7 @@ export class Reservations {
     }).required(), params);
 
     const operations = input.map((document) => ({
-      insertOne: { ...document, entityType },
+      insertOne: document,
     }));
 
     try {

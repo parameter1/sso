@@ -1,35 +1,31 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
-import { eventProps, getEntityIdPropType } from '@parameter1/sso-prop-types-event';
-import { EJSON, ObjectId, mongoSessionProp } from '@parameter1/sso-mongodb-core';
+import { eventProps } from '@parameter1/sso-prop-types-event';
+import { EJSON, mongoSessionProp } from '@parameter1/sso-mongodb-core';
 import { EventStore } from '@parameter1/sso-mongodb-event-store';
 import { SQSClient, enqueueMessages } from '@parameter1/sso-sqs';
-import { Reservations } from '../reservations.js';
-import reservationProps from '../props/reservation.js';
+import { Reservations } from './reservations.js';
+import reservationProps from './props/reservation.js';
 
 const {
+  array,
   boolean,
   func,
   object,
-  oneOrMany,
   url,
 } = PropTypes;
 
 /**
  * @typedef {import("mongodb").ClientSession} ClientSession
- * @typedef {import("../types").EventStoreResult} EventStoreResult
- * @typedef {import("../types").ReservationsReleaseParams} ReservationsReleaseParams
- * @typedef {import("../types").ReservationsReserveParams} ReservationsReserveParams
+ * @typedef {import("./types").EventStoreResult} EventStoreResult
+ * @typedef {import("./types").ReservationsReleaseParams} ReservationsReleaseParams
+ * @typedef {import("./types").ReservationsReserveParams} ReservationsReserveParams
  *
  *
- * @typedef RootCommandHandlerConstructorParams
+ * @typedef CommandHandlerConstructorParams
  * @property {string} entityType
  * @property {Reservations} reservations
  * @property {EventStore} store
  * @property {CommandHandlerConstructorParamsSQS} sqs
- *
- * @typedef CommandHandlerConstructorParamsSQS
- * @property {SQSClient} client
- * @property {string} url
  *
  * @typedef CommandHandlerConstructorParams
  * @property {Reservations} reservations
@@ -41,17 +37,12 @@ const {
 export class CommandHandler {
   /**
    *
-   * @param {RootCommandHandlerConstructorParams} params
+   * @param {CommandHandlerConstructorParams} params
    */
   constructor(params) {
-    /** @type {RootCommandHandlerConstructorParams} */
-    const {
-      entityType,
-      reservations,
-      store,
-      sqs,
-    } = attempt(params, object({
-      entityType: eventProps.entityType.required(),
+    /** @type {CommandHandlerConstructorParams} */
+    const { reservations, store, sqs } = attempt(params, object({
+      // entityType: eventProps.entityType.required(),
       reservations: object().instance(Reservations).required(),
       sqs: object({
         client: object().instance(SQSClient).required(),
@@ -60,35 +51,38 @@ export class CommandHandler {
       store: object().instance(EventStore).required(),
     }).required());
 
-    /** @type {string} */
-    this.entityType = entityType;
     /** @type {Reservations} */
     this.reservations = reservations;
     /** @type {CommandHandlerConstructorParamsSQS} */
     this.sqs = sqs;
     /** @type {EventStore} */
     this.store = store;
-
-    this.entityIdPropType = getEntityIdPropType(this.entityType);
   }
 
   /**
-   * @typedef CommandHandlerCanPushParams
-   * @property {*|*[]} entityIds
+   * @typedef CanPushParams
+   * @property {Array} entityIds
+   * @property {string} entityType
    * @property {function} eligibleWhenFn
    * @property {boolean} [throwWhenFalse=true]
    *
-   * @param {CommandHandlerCanPushParams} params
+   * @param {CanPushParams} params
    */
   async canPush(params) {
-    /** @type {CommandHandlerCanPushParams} */
-    const { entityIds, eligibleWhenFn, throwWhenFalse } = await validateAsync(object({
-      entityIds: oneOrMany(this.entityIdPropType.required()).required(),
+    /** @type {CanPushParams} */
+    const {
+      entityIds,
+      entityType,
+      eligibleWhenFn,
+      throwWhenFalse,
+    } = await validateAsync(object({
+      entityIds: array.items(eventProps.entityId.required()).required(),
+      entityType: eventProps.entityType.required(),
       eligibleWhenFn: func().required(),
       throwWhenFalse: boolean().default(true),
     }).required().label('handler.canPush'), params);
 
-    const states = await this.getEntityStatesFor(entityIds);
+    const states = await this.getEntityStatesFor({ entityIds, entityType });
     const ineligible = entityIds.reduce((set, entityId) => {
       const id = EJSON.stringify(entityId);
       const state = states.get(id);
@@ -100,7 +94,7 @@ export class CommandHandler {
     const canPush = !ineligible.size;
     if (!throwWhenFalse) return canPush;
     if (!canPush) {
-      const error = new Error(`Unable to execute command: no eligible ${this.entityType} entities were found for ${[...ineligible].join(', ')}.`);
+      const error = new Error(`Unable to execute command: no eligible ${entityType} entities were found for ${[...ineligible].join(', ')}.`);
       error.statusCode = 404;
       throw error;
     }
@@ -109,14 +103,16 @@ export class CommandHandler {
 
   /**
    *
-   * @param {*|*[]} entityIds
+   * @param {Array} entityIds
+   * @param {string} entityType
    * @param {object} options
    * @param {boolean} options.throwWhenFalse
    * @returns {Promise<boolean>}
    */
-  async canPushDelete(entityIds, { throwWhenFalse } = {}) {
+  async canPushDelete({ entityIds, entityType }, { throwWhenFalse } = {}) {
     return this.canPush({
       entityIds,
+      entityType,
       throwWhenFalse,
       eligibleWhenFn: ({ state }) => state === 'CREATED',
     });
@@ -124,14 +120,16 @@ export class CommandHandler {
 
   /**
    *
-   * @param {*|*[]} entityIds
+   * @param {Array} entityIds
+   * @param {string} entityType
    * @param {object} options
    * @param {boolean} options.throwWhenFalse
    * @returns {Promise<boolean>}
    */
-  async canPushRestore(entityIds, { throwWhenFalse } = {}) {
+  async canPushRestore({ entityIds, entityType }, { throwWhenFalse } = {}) {
     return this.canPush({
       entityIds,
+      entityType,
       throwWhenFalse,
       eligibleWhenFn: ({ state }) => state === 'DELETED',
     });
@@ -139,39 +137,43 @@ export class CommandHandler {
 
   /**
    *
-   * @param {*|*[]} entityIds
+   * @param {Array} entityIds
+   * @param {string} entityType
    * @param {object} options
    * @param {boolean} [options.throwWhenFalse]
    * @returns {Promise<boolean>}
    */
-  async canPushUpdate(entityIds, { throwWhenFalse } = {}) {
+  async canPushUpdate({ entityIds, entityType }, { throwWhenFalse } = {}) {
     return this.canPush({
       entityIds,
+      entityType,
       throwWhenFalse,
       eligibleWhenFn: ({ state }) => state === 'CREATED',
     });
   }
 
   /**
-   * @typedef CommandHandlerExecuteCreateInput
+   * @typedef ExecuteCreateParams
+   * @property {string} entityType
+   * @property {ExecuteCreateParamsInput[]} input
+   * @property {ClientSession} [session]
+   *
+   * @typedef ExecuteCreateParamsInput
    * @property {Date|string} [date]
    * @property {*} entityId
    * @property {ObjectId|null} [userId]
    * @property {object} [values]
    *
-   * @typedef CommandHandlerExecuteCreateParams
-   * @property {CommandHandlerExecuteCreateInput|CommandHandlerExecuteCreateInput[]} input
-   * @property {ClientSession} [session]
-   *
-   * @param {CommandHandlerExecuteCreateParams} params
+   * @param {ExecuteCreateParams} params
    * @returns {Promise<EventStoreResult[]>}
    */
   async executeCreate(params) {
-    /** @type {CommandHandlerExecuteCreateParams} */
-    const { input, session } = await validateAsync(object({
-      input: oneOrMany(object({
+    /** @type {ExecuteCreateParams} */
+    const { entityType, input, session } = await validateAsync(object({
+      entityType: eventProps.entityType.required(),
+      input: array().items(object({
         date: eventProps.date,
-        entityId: this.entityIdPropType.required(),
+        entityId: eventProps.entityId.required(),
         userId: eventProps.userId,
         values: eventProps.values.required(),
       }).required()).required(),
@@ -181,6 +183,7 @@ export class CommandHandler {
     return this.pushToStore({
       events: input.map((event) => ({
         ...event,
+        entityType,
         command: 'CREATE',
       })),
       session,
@@ -188,24 +191,26 @@ export class CommandHandler {
   }
 
   /**
-   * @typedef CommandHandlerExecuteDeleteInput
+   * @typedef ExecuteDeleteParams
+   * @property {string} entityType
+   * @property {ExecuteDeleteParamsInput[]} input
+   * @property {ClientSession} [session]
+   *
+   * @typedef ExecuteDeleteParamsInput
    * @property {Date|string} [date]
    * @property {*} entityId
    * @property {ObjectId|null} [userId]
    *
-   * @typedef CommandHandlerExecuteDeleteParams
-   * @property {CommandHandlerExecuteDeleteInput|CommandHandlerExecuteDeleteInput[]} input
-   * @property {ClientSession} [session]
-   *
-   * @param {CommandHandlerExecuteDeleteParams} params
+   * @param {ExecuteDeleteParams} params
    * @returns {Promise<EventStoreResult[]>}
    */
   async executeDelete(params) {
-    /** @type {CommandHandlerExecuteDeleteParams} */
-    const { input, session } = await validateAsync(object({
-      input: oneOrMany(object({
+    /** @type {ExecuteDeleteParams} */
+    const { entityType, input, session } = await validateAsync(object({
+      entityType: eventProps.entityType.required(),
+      input: array().items(object({
         date: eventProps.date,
-        entityId: this.entityIdPropType.required(),
+        entityId: eventProps.entityId.required(),
         userId: eventProps.userId,
       }).required()).required(),
       session: mongoSessionProp,
@@ -213,34 +218,36 @@ export class CommandHandler {
 
     const { entityIds, events } = input.reduce((o, command) => {
       o.entityIds.push(command.entityId);
-      o.events.push({ ...command, command: 'DELETE' });
+      o.events.push({ ...command, entityType, command: 'DELETE' });
       return o;
     }, { entityIds: [], events: [] });
 
-    await this.canPushDelete(entityIds);
+    await this.canPushDelete({ entityType, entityIds });
     return this.pushToStore({ events, session });
   }
 
   /**
-   * @typedef CommandHandlerExecuteRestoreInput
+   * @typedef ExecuteRestoreParams
+   * @property {string} entityType
+   * @property {ExecuteRestoreParamsInput[]} input
+   * @property {ClientSession} [session]
+   *
+   * @typedef ExecuteRestoreParamsInput
    * @property {Date|string} [date]
    * @property {*} entityId
    * @property {ObjectId|null} [userId]
    * @property {object} [values]
    *
-   * @typedef CommandHandlerExecuteRestoreParams
-   * @property {CommandHandlerExecuteRestoreInput|CommandHandlerExecuteRestoreInput[]} input
-   * @property {ClientSession} [session]
-   *
-   * @param {CommandHandlerExecuteRestoreParams} params
+   * @param {ExecuteRestoreParams} params
    * @returns {Promise<EventStoreResult[]>}
    */
   async executeRestore(params) {
-    /** @type {CommandHandlerExecuteRestoreParams} */
-    const { input, session } = await validateAsync(object({
-      input: oneOrMany(object({
+    /** @type {ExecuteRestoreParams} */
+    const { entityType, input, session } = await validateAsync(object({
+      entityType: eventProps.entityType.required(),
+      input: array().items(object({
         date: eventProps.date,
-        entityId: this.entityIdPropType.required(),
+        entityId: eventProps.entityId.required(),
         userId: eventProps.userId,
         values: eventProps.values.default({}),
       }).required()).required(),
@@ -249,20 +256,21 @@ export class CommandHandler {
 
     const { entityIds, events } = input.reduce((o, command) => {
       o.entityIds.push(command.entityId);
-      o.events.push({ ...command, command: 'RESTORE' });
+      o.events.push({ ...command, entityType, command: 'RESTORE' });
       return o;
     }, { entityIds: [], events: [] });
 
-    await this.canPushRestore(entityIds);
+    await this.canPushRestore({ entityIds, entityType });
     return this.pushToStore({ events, session });
   }
 
   /**
-   * @typedef CommandHandlerExecuteUpdateParams
-   * @property {CommandHandlerExecuteUpdateInput|CommandHandlerExecuteUpdateInput[]} input
+   * @typedef ExecuteUpdateParams
+   * @property {string} entityType
+   * @property {ExecuteUpdateParamsInput[]} input
    * @property {ClientSession} [session]
    *
-   * @typedef CommandHandlerExecuteUpdateInput
+   * @typedef ExecuteUpdateParamsInput
    * @property {string} command
    * @property {Date|string} [date]
    * @property {*} entityId
@@ -271,16 +279,17 @@ export class CommandHandler {
    * @property {ObjectId|null} [userId]
    * @property {object} [values]
    *
-   * @param {CommandHandlerExecuteUpdateParams} params
+   * @param {ExecuteUpdateParams} params
    * @returns {Promise<EventStoreResult[]>}
    */
   async executeUpdate(params) {
-    /** @type {CommandHandlerExecuteUpdateParams} */
-    const { input, session } = await validateAsync(object({
-      input: oneOrMany(object({
+    /** @type {ExecuteUpdateParams} */
+    const { entityType, input, session } = await validateAsync(object({
+      entityType: eventProps.entityType.required(),
+      input: array().items(object({
         command: eventProps.command.required(),
         date: eventProps.date,
-        entityId: this.entityIdPropType.required(),
+        entityId: eventProps.entityId.required(),
         omitFromHistory: eventProps.omitFromHistory,
         omitFromModified: eventProps.omitFromModified,
         userId: eventProps.userId,
@@ -291,57 +300,68 @@ export class CommandHandler {
 
     const { entityIds, events } = input.reduce((o, command) => {
       o.entityIds.push(command.entityId);
-      o.events.push(command);
+      o.events.push({ ...command, entityType });
       return o;
     }, { entityIds: [], events: [] });
 
-    await this.canPushUpdate(entityIds);
+    await this.canPushUpdate({ entityIds, entityType });
     return this.pushToStore({ events, session });
   }
 
   /**
    * Gets the entity state for the provided entity IDs.
    *
-   * @param {*[]} entityIds
+   * @typedef GetEntityStatesForParams
+   * @property {Array} entityIds
+   * @property {string} entityType
+   *
+   * @param {GetEntityStatesForParams} params
    * @returns {Promise<Map<string, string>>}
    */
-  async getEntityStatesFor(entityIds) {
-    const ids = attempt(entityIds, oneOrMany(this.entityIdPropType.required()).required());
-    return this.store.getEntityStatesFor(this.entityType, { entityIds: ids });
+  async getEntityStatesFor(params) {
+    /** @type {GetEntityStatesForParams} */
+    const { entityIds, entityType } = await validateAsync(object({
+      entityIds: array().items(eventProps.entityId.required()).required(),
+      entityType: eventProps.entityType.required(),
+    }).required().label('handler.getEntityStatesFor'), params);
+    return this.store.getEntityStatesFor({ entityType, entityIds });
   }
 
   /**
    * Normalizes data from the event store based on the provided entity IDs
    *
-   * @typedef CommandHandlerNormalizeParams
-   * @property {*[]} entityIds
+   * @typedef NormalizeParams
+   * @property {Array} entityIds
+   * @property {string} entityType
    *
-   * @param {CommandHandlerNormalizeParams} params
+   * @param {NormalizeParams} params
    * @returns {Promise<void>}
    */
   async normalize(params) {
-    /** @type {CommandHandlerNormalizeParams} */
-    const { entityIds } = await validateAsync(object({
-      entityIds: oneOrMany(getEntityIdPropType(this.entityIdPropType)).required(),
+    /** @type {NormalizeParams} */
+    const { entityIds, entityType } = await validateAsync(object({
+      entityIds: array().items(eventProps.entityId.required()).required(),
+      entityType: eventProps.entityType.required(),
     }).required().label('handler.normalize'), params);
 
-    return this.store.normalize(this.entityType, { entityIds });
+    return this.store.normalize({ entityIds, entityType });
   }
 
   /**
-   * @typedef CommandHandlerPushToStoreParams
-   * @property {EventStoreDocument|EventStoreDocument[]} events
+   * @typedef PushToStoreParams
+   * @property {EventStoreDocument[]} events
    * @property {ClientSession} [session]
    *
-   * @param {CommandHandlerPushToStoreParams} params
+   * @param {PushToStoreParams} params
    * @returns {Promise<EventStoreResult[]>}
    */
   async pushToStore(params) {
-    /** @type {CommandHandlerPushToStoreParams} */
+    /** @type {PushToStoreParams} */
     const { events, session: currentSession } = await validateAsync(object({
-      events: oneOrMany(object({
+      events: array().items(object({
         command: eventProps.command.required(),
-        entityId: this.entityIdPropType.required(),
+        entityId: eventProps.entityId.required(),
+        entityType: eventProps.entityType.required(),
         date: eventProps.date,
         omitFromHistory: eventProps.omitFromHistory,
         omitFromModified: eventProps.omitFromModified,
@@ -352,7 +372,7 @@ export class CommandHandler {
     }).required().label('handler.pushToStore'), params);
 
     const push = async (session) => {
-      const results = await this.store.push(this.entityType, { events, session });
+      const results = await this.store.push({ events, session });
       await enqueueMessages({
         // strip values so they are not sent over the wire (can be large)
         messages: results.map(({ values, ...o }) => ({
@@ -375,7 +395,7 @@ export class CommandHandler {
       return results;
     }
 
-    const session = await this.store.mongo.startSession();
+    const session = this.startSession();
     try {
       let results;
       await session.withTransaction(async (activeSession) => {
@@ -393,14 +413,16 @@ export class CommandHandler {
    * @param {ReservationsReleaseParams} params
    */
   async release(params) {
+    /** @type {ReservationsReleaseParams} */
     const { input, session } = await validateAsync(object({
-      input: oneOrMany(object({
-        entityId: this.entityIdPropType.required(),
+      input: array().items(object({
+        entityId: eventProps.entityId.required(),
+        entityType: eventProps.entityType.required(),
         key: reservationProps.key.required(),
       }).required()).required(),
       session: mongoSessionProp,
     }).required().label('handler.release'), params);
-    return this.reservations.release(this.entityType, { input, session });
+    return this.reservations.release({ input, session });
   }
 
   /**
@@ -410,13 +432,22 @@ export class CommandHandler {
    */
   async reserve(params) {
     const { input, session } = await validateAsync(object({
-      input: oneOrMany(object({
-        entityId: this.entityIdPropType.required(),
+      input: array().items(object({
+        entityId: eventProps.entityId.required(),
+        entityType: eventProps.entityType.required(),
         key: reservationProps.key.required(),
         value: reservationProps.value.required(),
       }).required()).required(),
       session: mongoSessionProp,
     }).required().label('handler.reserve'), params);
-    return this.reservations.reserve(this.entityType, { input, session });
+    return this.reservations.reserve({ input, session });
+  }
+
+  /**
+   *
+   * @returns {ClientSession}
+   */
+  startSession() {
+    return this.store.mongo.startSession();
   }
 }

@@ -113,20 +113,6 @@ export default {
   },
 
   /**
-   *
-   * @param {object} params
-   * @param {ObjectId|ObjectId[]} [params.entityIds]
-   * @returns {Promise<string>}
-   */
-  async normalize(params) {
-    const { entityIds } = await validateAsync(object({
-      entityIds: oneOrMany(userProps.id).required(),
-    }).required().label('application.create'), params);
-    await covertActionError(() => handler.normalize({ entityIds }));
-    return 'ok';
-  },
-
-  /**
    * @typedef RestoreUserActionParams
    * @property {RestoreUserSchema|RestoreUserSchema[]} input
    *

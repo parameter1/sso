@@ -62,18 +62,4 @@ export default {
 
     return covertActionError(() => handler.create({ input }));
   },
-
-  /**
-   *
-   * @param {object} params
-   * @param {ObjectId|ObjectId[]} [params.entityIds]
-   * @returns {Promise<string>}
-   */
-  async normalize(params) {
-    const { entityIds } = await validateAsync(object({
-      entityIds: oneOrMany(organizationProps.id).required(),
-    }).required().label('application.create'), params);
-    await covertActionError(() => handler.normalize({ entityIds }));
-    return 'ok';
-  },
 };

@@ -1,9 +1,10 @@
 import { validateAsync } from '@parameter1/sso-prop-types-core';
 import { EJSONClient } from '@parameter1/micro-ejson';
 
-import { normalizeTypesSchema } from './schema.js';
+import { normalizeEntitiesSchema, normalizeTypesSchema } from './schema.js';
 
 /**
+ * @typedef {import("./schema").NormalizeEntitiesSchema} NormalizeEntitiesSchema
  * @typedef {import("./schema").NormalizeTypesSchema} NormalizeTypesSchema
  */
 
@@ -25,6 +26,19 @@ export class EntityNormalizerServiceClient extends EJSONClient {
    */
   async getEntityTypes() {
     return this.request('getEntityTypes');
+  }
+
+  /**
+   * Normalizes entities for the provided type and IDs.
+   *
+   * @param {NormalizeEntitiesSchema} params
+   * @returns {Promise<string>}
+   */
+  async normalizeEntities(params) {
+    /** @type {NormalizeEntitiesSchema} */
+    const { entityIds, entityType } = await validateAsync(normalizeEntitiesSchema, params);
+    const r = await this.request('entities', { entityIds, entityType });
+    return new Map(r);
   }
 
   /**

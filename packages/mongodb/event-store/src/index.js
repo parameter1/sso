@@ -16,6 +16,6 @@ export { EventStore } from './event-store.js';
  * @property {string} command
  * @property {*} entityId
  * @property {string} entityType
- * @property {ObjectId} [userId]
+ * @property {import("mongodb").ObjectId} [userId]
  * @property {object} [values={}] The values to push
  */

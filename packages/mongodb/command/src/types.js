@@ -16,15 +16,6 @@
  * @property {string} givenName
  * @property {ObjectId} [userId]
  *
- * @typedef CreateManagerSchema
- * @property {ObjectId} entityId
- * @property {Date|string} [date]
- * @property {CreateManagerSchemaValues} values
- * @property {ObjectId} [userId]
- *
- * @typedef CreateManagerSchemaValues
- * @property {string} role
- *
  * @typedef CreateUserSchema
  * @property {ObjectId} [entityId]
  * @property {Date|string} [date]

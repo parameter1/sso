@@ -18,6 +18,6 @@ export default async () => {
   ];
 
   const { entityTypes, confirm } = await inquirer.prompt(questions);
-  if (!confirm || !entityTypes.length) return [];
+  if (!confirm) return [];
   return new Map(await entityMaterializerClient.materializeTypes({ entityTypes }));
 };

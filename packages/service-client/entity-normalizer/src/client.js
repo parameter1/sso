@@ -19,17 +19,17 @@ export class EntityNormalizerServiceClient extends EJSONClient {
   }
 
   /**
-   * Normalizes all events for all entity types.
+   * Gets all eligible entity types for normalization.
    *
-   * @returns {Promise<Map<string, string>>}
+   * @returns {Promise<string[]>}
    */
-  async normalizeAll() {
-    const r = await this.request('all');
-    return new Map(r);
+  async getEntityTypes() {
+    return this.request('getEntityTypes');
   }
 
   /**
    * Normalizes all events for the provided entity types.
+   * If empty, all types will be normalized.
    *
    * @param {NormalizeTypesSchema} params
    * @returns {Promise<Map<string, string>>}

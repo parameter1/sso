@@ -43,12 +43,11 @@ export class Materializer {
    * Builds the materialized aggregation pipeline for the provided entity type.
    *
    * @param {string} entityType
-   * @param {object} params
-   * @param {object} params.$match
+   * @param {object} $match
    */
-  buildPipelineFor(entityType, { $match } = {}) {
+  buildPipelineFor(entityType, $match = {}) {
     const builder = this.builders.get(entityType);
-    return builder ? builder.buildPipeline({ $match }) : null;
+    return builder ? builder.buildPipeline($match) : null;
   }
 
   /**
@@ -61,7 +60,7 @@ export class Materializer {
    * @param {object} [$match = {}]
    */
   async materializeUsingQuery(entityType, $match = {}) {
-    const pipeline = this.buildPipelineFor(entityType, { $match });
+    const pipeline = this.buildPipelineFor(entityType, $match);
     if (!pipeline) return null;
     const repo = this.normalizedRepoManager.get(entityType);
     return repo.collection.aggregate(pipeline).toArray();

@@ -53,6 +53,7 @@ services:
     environment:
       <<: [*env]
       ENTITY_COMMAND_URL: ${ENTITY_COMMAND_URL-http://entity-command}
+      ENTITY_NORMALIZER_URL: ${ENTITY_NORMALIZER_URL-http:/entity-normalizer}
       MONGO_URL: ${MONGO_URL_CLI}
     depends_on:
       - entity-command
@@ -106,6 +107,21 @@ services:
       SQS_QUEUE_URL: ${SQS_QUEUE_URL_ENTITY_MESSAGE}
     ports:
       - "7917:80"
+    hostname: services.sso.dev.parameter1.com
+
+  entity-normalizer:
+    <<: *node
+    working_dir: /sso/services/entity-normalizer
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: [*env]
+      EXPOSED_HOST: services.sso.dev.parameter1.com
+      EXPOSED_PORT: 7918
+      HOST: services.sso.dev.parameter1.com
+      MONGO_URL: ${MONGO_URL_ENTITY_NORMALIZER}
+    ports:
+      - "7918:80"
     hostname: services.sso.dev.parameter1.com
 
   graphql-command:

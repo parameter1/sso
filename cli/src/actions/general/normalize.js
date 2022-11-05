@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { entityCommandClient } from '../../clients/entity-command.js';
+import { entityNormalizerClient } from '../../clients/entity-normalizer.js';
 
 export default async () => {
   const questions = [
@@ -7,7 +7,7 @@ export default async () => {
       type: 'checkbox',
       name: 'entityTypes',
       message: 'Select the entity types to normalize',
-      choices: async () => entityCommandClient.request('normalize.getEntityTypes'),
+      choices: async () => entityNormalizerClient.request('getEntityTypes'),
     },
     {
       type: 'confirm',
@@ -19,5 +19,5 @@ export default async () => {
 
   const { entityTypes, confirm } = await inquirer.prompt(questions);
   if (!confirm || !entityTypes.length) return [];
-  return new Map(await entityCommandClient.request('normalize.types', { entityTypes }));
+  return new Map(await entityNormalizerClient.request('types', { entityTypes }));
 };

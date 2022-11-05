@@ -1,0 +1,35 @@
+{
+  "name": "@parameter1/sso-entity-normalizer-service",
+  "version": "0.5.4",
+  "type": "module",
+  "description": "Responsible for running SSO entity normalizers.",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/sso/tree/main/services/entity-normalizer#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/sso.git",
+    "directory": "services/entity-normalizer"
+  },
+  "private": true,
+  "license": "MIT",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "gulp",
+    "lint": "eslint --ext .js ./",
+    "test": "yarn lint"
+  },
+  "dependencies": {
+    "@parameter1/sso-entity-types": "^0.5.4",
+    "@parameter1/sso-micro-ejson": "^0.5.4",
+    "@parameter1/sso-mongodb-core": "^0.5.4",
+    "@parameter1/sso-mongodb-event-store": "^0.5.4",
+    "@parameter1/sso-prop-types-core": "^0.5.4",
+    "@parameter1/sso-prop-types-event": "^0.5.4",
+    "@parameter1/terminus": "^2.2.1",
+    "@parameter1/utils": "^2.0.0",
+    "envalid": "^7.3.1"
+  },
+  "devDependencies": {
+    "@parameter1/gulp": "^2.0.0"
+  }
+}

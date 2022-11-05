@@ -1,24 +1,13 @@
-import { PropTypes, attempt } from '@parameter1/sso-prop-types-core';
-import { ejsonClient, covertActionError } from '@parameter1/sso-micro-ejson';
+import { validateAsync } from '@parameter1/sso-prop-types-core';
+import { EJSONClient } from '@parameter1/micro-ejson';
 
-const { object, string } = PropTypes;
+import { normalizeTypesSchema } from './schema.js';
 
-export class EntityNormalizerServiceClient {
-  /**
-   * @typedef EntityNormalizerServiceClientConstructorParams
-   * @property {string} url
-   *
-   * @param {EntityNormalizerServiceClientConstructorParams} params
-   */
-  constructor(params) {
-    /** @type {EntityNormalizerServiceClientConstructorParams} */
-    const { url } = attempt(params, object({
-      url: string().required(),
-    }).required());
+/**
+ * @typedef {import("./schema").NormalizeTypesSchema} NormalizeTypesSchema
+ */
 
-    this.client = ejsonClient({ url });
-  }
-
+export class EntityNormalizerServiceClient extends EJSONClient {
   /**
    * Creates indexes for all associated collections.
    *
@@ -40,12 +29,15 @@ export class EntityNormalizerServiceClient {
   }
 
   /**
+   * Normalizes all events for the provided entity types.
    *
-   * @param {string} action
-   * @param {object} params
-   * @returns {Promise<object|array|string>}
+   * @param {NormalizeTypesSchema} params
+   * @returns {Promise<Map<string, string>>}
    */
-  async request(action, params) {
-    return covertActionError(() => this.client.request(action, params));
+  async normalizeTypes(params) {
+    /** @type {NormalizeTypesSchema} */
+    const { entityTypes } = await validateAsync(normalizeTypesSchema, params);
+    const r = await this.request('types', { entityTypes });
+    return new Map(r);
   }
 }

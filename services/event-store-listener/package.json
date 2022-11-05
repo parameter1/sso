@@ -19,7 +19,7 @@
     "test": "yarn lint"
   },
   "dependencies": {
-    "@parameter1/micro": "^2.3.3",
+    "@parameter1/micro": "^2.4.0",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/sso-graphql-redis-pubsub": "^0.5.4",
     "@parameter1/sso-mongodb": "^0.5.4",

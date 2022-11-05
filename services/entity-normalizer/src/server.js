@@ -1,4 +1,4 @@
-import { ejsonServer } from '@parameter1/sso-micro-ejson';
+import { ejsonServer } from '@parameter1/micro-ejson';
 
 import actions from './actions.js';
 import pkg from '../package.js';

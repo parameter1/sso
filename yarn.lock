@@ -2083,10 +2083,18 @@
     joi "^17.7.0"
     mongodb "^4.11.0"
 
-"@parameter1/micro@^2.3.3":
-  version "2.3.3"
-  resolved "https://registry.yarnpkg.com/@parameter1/micro/-/micro-2.3.3.tgz#5caa247c2da76c8cf171ed82e6b4a06eb53f82bc"
-  integrity sha512-uBzn59g6hDRmBhTPgIqusUqneVrmxwguVknJqiLrBOybBFQxeS9lurE61cOOiZzKoRrLcNbASTPvMN9+1KkLcQ==
+"@parameter1/micro-ejson@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@parameter1/micro-ejson/-/micro-ejson-1.0.0.tgz#ec598e1af5004574b1503e4a8b3aabc4c3cdb16e"
+  integrity sha512-l2qkvso84uyluL1yJORhTdGpdaFMfZfGwftmpZAoby+E2hyxgvBzb7G9ku6GBZD3kT4bQdRcVDmbs+mWYMLMgA==
+  dependencies:
+    "@parameter1/micro" "^2.4.0"
+    bson "^4.7.0"
+
+"@parameter1/micro@^2.4.0":
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/@parameter1/micro/-/micro-2.4.0.tgz#a1883358c5b50759d34a52ce275730be9f674805"
+  integrity sha512-hVNnWfpfrtJMQ4p9dnxn1dC0wQO258AfJHQatgYuZ26Z8Shm7TGq2AwcAZf2oXmLBMs7EK5nwmMa+OkzP0ZRbA==
   dependencies:
     "@parameter1/object-path" "^2.0.0"
     "@parameter1/utils" "^2.0.0"

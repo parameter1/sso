@@ -1,6 +1,6 @@
 import { PropTypes, validateAsync } from '@parameter1/sso-prop-types-core';
 import { eventProps } from '@parameter1/sso-prop-types-event';
-import { covertActionError } from '@parameter1/sso-micro-ejson';
+import { covertActionError } from '@parameter1/micro-ejson';
 import { userProps } from '@parameter1/sso-mongodb-command';
 import { commands } from '../mongodb.js';
 

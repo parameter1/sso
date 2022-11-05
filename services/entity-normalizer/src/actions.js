@@ -1,5 +1,5 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
-import { covertActionError } from '@parameter1/sso-micro-ejson';
+import { covertActionError } from '@parameter1/micro-ejson';
 import { eventProps, getEntityIdPropType } from '@parameter1/sso-prop-types-event';
 import { EntityTypes } from '@parameter1/sso-entity-types';
 

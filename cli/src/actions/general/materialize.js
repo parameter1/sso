@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { entityMaterializerClient } from '../../clients/entity-materializer.js';
+import { entityMaterializerClient } from '../../clients.js';
 
 export default async () => {
   const questions = [
@@ -7,7 +7,7 @@ export default async () => {
       type: 'checkbox',
       name: 'entityTypes',
       message: 'Select the entity types to materialize',
-      choices: async () => entityMaterializerClient.request('getEntityTypes'),
+      choices: async () => entityMaterializerClient.getEntityTypes(),
     },
     {
       type: 'confirm',
@@ -19,5 +19,5 @@ export default async () => {
 
   const { entityTypes, confirm } = await inquirer.prompt(questions);
   if (!confirm || !entityTypes.length) return [];
-  return new Map(await entityMaterializerClient.request('types', { entityTypes }));
+  return new Map(await entityMaterializerClient.materializeTypes({ entityTypes }));
 };

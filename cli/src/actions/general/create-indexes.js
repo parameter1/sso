@@ -1,7 +1,5 @@
 import inquirer from 'inquirer';
-import { entityCommandClient } from '../../clients/entity-command.js';
-import { entityMaterializerClient } from '../../clients/entity-materializer.js';
-import { entityNormalizerClient } from '../../clients/entity-normalizer.js';
+import { entityCommandClient, entityMaterializerClient, entityNormalizerClient } from '../../clients.js';
 
 export default async () => {
   const questions = [
@@ -19,16 +17,16 @@ export default async () => {
   if (!confirm) return null;
   return new Map(await Promise.all([
     (async () => {
-      const r = await entityCommandClient.request('createIndexes');
-      return ['command', new Map(r)];
+      const r = await entityCommandClient.createIndexes();
+      return ['command', r];
     })(),
     (async () => {
-      const r = await entityNormalizerClient.request('createIndexes');
-      return ['normalizer', new Map(r)];
+      const r = await entityNormalizerClient.createIndexes();
+      return ['normalizer', r];
     })(),
     (async () => {
-      const r = await entityMaterializerClient.request('createIndexes');
-      return ['materializer', new Map(r)];
+      const r = await entityMaterializerClient.createIndexes();
+      return ['materializer', r];
     })(),
     // userManager.createIndexes(),
   ]));

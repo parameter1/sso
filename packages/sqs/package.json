@@ -18,7 +18,7 @@
     "test": "yarn lint"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "^3.202.0",
+    "@aws-sdk/client-sqs": "^3.204.0",
     "@parameter1/sso-prop-types-core": "^0.5.4",
     "@parameter1/utils": "^2.0.0",
     "bson": "^4.7.0"

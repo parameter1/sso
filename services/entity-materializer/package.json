@@ -19,7 +19,7 @@
     "test": "yarn lint"
   },
   "dependencies": {
-    "@parameter1/micro-ejson": "^1.0.0",
+    "@parameter1/micro-ejson": "^1.1.0",
     "@parameter1/sso-mongodb-core": "^0.5.4",
     "@parameter1/sso-mongodb-materialized": "^0.5.4",
     "@parameter1/sso-mongodb-materializers": "^0.5.4",

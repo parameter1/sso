@@ -2,7 +2,7 @@ import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-co
 import { covertActionError } from '@parameter1/sso-micro-ejson';
 import { eventProps, getEntityIdPropType } from '@parameter1/sso-prop-types-event';
 
-import { materializers } from './mongodb.js';
+import { materializedRepoManager, materializers } from './mongodb.js';
 
 const { array, object, string } = PropTypes;
 
@@ -13,6 +13,11 @@ export default {
       await materializers.materializeUsingQuery(entityType, {});
       return [entityType, 'ok'];
     })));
+  },
+
+  createIndexes: async () => {
+    const map = await materializedRepoManager.createAllIndexes();
+    return [...map];
   },
 
   entities: async (params) => {

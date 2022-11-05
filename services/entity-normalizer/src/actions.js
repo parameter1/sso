@@ -3,7 +3,7 @@ import { covertActionError } from '@parameter1/sso-micro-ejson';
 import { eventProps, getEntityIdPropType } from '@parameter1/sso-prop-types-event';
 import { EntityTypes } from '@parameter1/sso-entity-types';
 
-import { store } from './mongodb.js';
+import { normalizedRepoManager, store } from './mongodb.js';
 
 const { array, object } = PropTypes;
 
@@ -14,6 +14,11 @@ export default {
       await store.normalize(entityType, { entityIds: [] });
       return [entityType, 'ok'];
     })));
+  },
+
+  createIndexes: async () => {
+    const map = await normalizedRepoManager.createAllIndexes();
+    return [...map];
   },
 
   entities: async (params) => {

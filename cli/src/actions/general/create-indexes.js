@@ -1,10 +1,7 @@
 import inquirer from 'inquirer';
-import {
-  eventStore,
-  materializedRepoManager,
-  normalizedRepoManager,
-  reservations,
-} from '../../mongodb.js';
+import { entityCommandClient } from '../../clients/entity-command.js';
+import { entityMaterializerClient } from '../../clients/entity-materializer.js';
+import { entityNormalizerClient } from '../../clients/entity-normalizer.js';
 
 export default async () => {
   const questions = [
@@ -19,23 +16,20 @@ export default async () => {
   const {
     confirm,
   } = await inquirer.prompt(questions);
-  return confirm ? Promise.all([
+  if (!confirm) return null;
+  return new Map(await Promise.all([
     (async () => {
-      const r = await eventStore.createIndexes();
-      return { eventStore: r };
+      const r = await entityCommandClient.request('createIndexes');
+      return ['command', new Map(r)];
     })(),
     (async () => {
-      const r = await reservations.createIndexes();
-      return { reservations: r };
+      const r = await entityNormalizerClient.request('createIndexes');
+      return ['normalizer', new Map(r)];
     })(),
     (async () => {
-      const r = await normalizedRepoManager.createAllIndexes();
-      return { normalizedRepoManager: r };
-    })(),
-    (async () => {
-      const r = await materializedRepoManager.createAllIndexes();
-      return { materializedRepoManager: r };
+      const r = await entityMaterializerClient.request('createIndexes');
+      return ['materializer', new Map(r)];
     })(),
     // userManager.createIndexes(),
-  ]) : null;
+  ]));
 };

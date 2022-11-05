@@ -10,8 +10,11 @@ export const mongo = new MongoClient(MONGO_URL, {
   appname: `${pkg.name} v${pkg.version}`,
 });
 
+export const reservations = new Reservations({ mongo });
+export const store = new EventStore({ mongo });
+
 export const commands = new CommandHandlers({
-  reservations: new Reservations({ mongo }),
+  reservations,
   sqs: { client: sqsClient, url: SQS_QUEUE_URL },
-  store: new EventStore({ mongo }),
+  store,
 });

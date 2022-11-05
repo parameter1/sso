@@ -3,36 +3,6 @@
  * @typedef {import("@parameter1/sso-mongodb-core").ObjectId} ObjectId
  * @typedef {import("@parameter1/sso-mongodb-event-store").EventStoreResult} EventStoreResult
  *
- * @typedef ChangeUserEmailSchema
- * @property {ObjectId} entityId
- * @property {Date|string} [date]
- * @property {string} email
- * @property {ObjectId} [userId]
- *
- * @typedef ChangeUserNameSchema
- * @property {ObjectId} entityId
- * @property {Date|string} [date]
- * @property {string} familyName
- * @property {string} givenName
- * @property {ObjectId} [userId]
- *
- * @typedef CreateUserSchema
- * @property {ObjectId} [entityId]
- * @property {Date|string} [date]
- * @property {CreateUserSchemaValues} values
- * @property {ObjectId} [userId]
- *
- * @typedef CreateUserSchemaValues
- * @property {string} email
- * @property {string} familyName
- * @property {string} givenName
- * @property {boolean} [verified=false]
- *
- * @typedef DeleteUserSchema
- * @property {ObjectId} entityId
- * @property {Date|string} [date]
- * @property {ObjectId} [userId]
- *
  * @typedef ReservationsReleaseParams
  * @property {ReservationsReleaseParamsInput[]} input
  * @property {ClientSession} [session]
@@ -51,12 +21,6 @@
  * @property {string} entityType
  * @property {string} key
  * @property {*} value
- *
- * @typedef RestoreUserSchema
- * @property {Date|string} [date]
- * @property {string} email
- * @property {ObjectId} entityId
- * @property {ObjectId} [userId]
  */
 
 export const _ = {};

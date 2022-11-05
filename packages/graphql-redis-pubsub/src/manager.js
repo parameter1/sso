@@ -1,7 +1,7 @@
 import { PropTypes, attempt } from '@parameter1/sso-prop-types-core';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import Redis from 'ioredis';
-import { ObjectId } from '@parameter1/mongodb';
+import { EJSON } from 'bson';
 
 import { CHANNEL_PREFIX } from './constants.js';
 
@@ -36,7 +36,12 @@ export class PubSubManager {
 
     this.publisher = publisher;
     this.subscriber = subscriber;
-    this.graphql = new RedisPubSub({ publisher, subscriber, reviver: PubSubManager.eventReviver });
+    this.graphql = new RedisPubSub({
+      publisher,
+      subscriber,
+      serializer: EJSON.stringify,
+      deserializer: EJSON.parse,
+    });
   }
 
   /**
@@ -134,16 +139,6 @@ export class PubSubManager {
   unsubscribe(eventName) {
     const channelName = PubSubManager.getChannelFor(eventName);
     return this.subscriber.unsubscribe(channelName);
-  }
-
-  static eventReviver(_, value) {
-    if (!value) return value;
-    if (typeof value !== 'string') return value;
-    if (/^[a-f0-9]{24}$/.test(value)) return new ObjectId(value);
-    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(value)) {
-      return new Date(value);
-    }
-    return value;
   }
 
   /**

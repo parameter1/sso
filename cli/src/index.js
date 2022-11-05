@@ -166,7 +166,7 @@ const run = async () => {
           choices: [
             { name: 'Create database indexes', fnName: 'createIndexes' },
             // { name: 'Normalize event data', fnName: 'normalize' },
-            // { name: 'Materialize objects', fnName: 'materialize' },
+            { name: 'Materialize objects', fnName: 'materialize' },
           ],
         },
       ].reduce((arr, group) => {

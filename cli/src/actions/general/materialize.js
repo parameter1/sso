@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { entityManager } from '../../mongodb.js';
+import { materializers } from '../../mongodb.js';
 
 export default async () => {
   const questions = [
@@ -7,7 +7,7 @@ export default async () => {
       type: 'checkbox',
       name: 'entityTypes',
       message: 'Select the entity types to materialize',
-      choices: () => entityManager.normalizedRepos.materializerKeys(),
+      choices: () => [...materializers.builders.keys()],
     },
     {
       type: 'confirm',
@@ -19,7 +19,7 @@ export default async () => {
 
   const { entityTypes, confirm } = await inquirer.prompt(questions);
   return confirm ? Promise.all(entityTypes.map(async (entityType) => {
-    await entityManager.materialize({ entityType });
+    await materializers.materializeUsingQuery(entityType, {});
     return { [entityType]: 'ok' };
   })) : [];
 };

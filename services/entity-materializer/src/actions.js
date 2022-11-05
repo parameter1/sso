@@ -33,6 +33,19 @@ export default {
 
   ping: () => 'pong',
 
+  types: async (params) => {
+    const { entityTypes } = await validateAsync(object({
+      entityTypes: array().items(
+        string().valid(...materializers.getBuilderTypes()).required(),
+      ).required(),
+    }).required(), params);
+
+    return covertActionError(() => Promise.all(entityTypes.map(async (entityType) => {
+      await materializers.materializeUsingQuery(entityType, {});
+      return [entityType, 'ok'];
+    })));
+  },
+
   usingQuery: async (params) => {
     const { entityType, $match } = await validateAsync(object({
       entityType: string().valid(...materializers.getBuilderTypes()).required(),

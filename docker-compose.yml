@@ -51,8 +51,9 @@ services:
     entrypoint: ["node"]
     command: ["src/index.js"]
     environment:
-      <<: [*env, *env-mongodb, *env-redis-pubsub]
-      MONGO_URL: ${MONGO_URL_PROCESSOR}
+      <<: [*env]
+      ENTITY_COMMAND_URL: ${ENTITY_COMMAND_URL-http://entity-command}
+      MONGO_URL: ${MONGO_URL_CLI}
 
   command-processor:
     <<: *node

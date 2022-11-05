@@ -124,6 +124,21 @@ services:
       - "7918:80"
     hostname: services.sso.dev.parameter1.com
 
+  entity-materializer:
+    <<: *node
+    working_dir: /sso/services/entity-materializer
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: [*env]
+      EXPOSED_HOST: services.sso.dev.parameter1.com
+      EXPOSED_PORT: 7919
+      HOST: services.sso.dev.parameter1.com
+      MONGO_URL: ${MONGO_URL_ENTITY_MATERIALIZER}
+    ports:
+      - "7919:80"
+    hostname: services.sso.dev.parameter1.com
+
   graphql-command:
     <<: *node
     working_dir: /sso/graphql/command

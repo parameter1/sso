@@ -51,6 +51,14 @@ export class Materializer {
   }
 
   /**
+   *
+   * @returns {string[]}
+   */
+  getBuilderTypes() {
+    return [...this.builders.keys()].sort();
+  }
+
+  /**
    * Materializes data from a normalized collection based on the provided entity match criteria.
    *
    * This method will bail if no materialization builder is found for the entity type.

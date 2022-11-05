@@ -12,4 +12,5 @@ export * from './organization/schema.js';
 export * from './user/props.js';
 export * from './user/schema.js';
 
+export * from './props.js';
 export * from './types.js';

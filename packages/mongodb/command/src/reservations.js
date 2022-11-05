@@ -1,7 +1,7 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { DB_NAME, mongoDBClientProp, mongoSessionProp } from '@parameter1/sso-mongodb-core';
 import { eventProps } from '@parameter1/sso-prop-types-event';
-import reservationProps from './props/reservation.js';
+import { reservationProps } from './props.js';
 
 const { array, object } = PropTypes;
 

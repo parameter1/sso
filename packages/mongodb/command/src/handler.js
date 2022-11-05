@@ -4,7 +4,7 @@ import { EJSON, mongoSessionProp } from '@parameter1/sso-mongodb-core';
 import { EventStore } from '@parameter1/sso-mongodb-event-store';
 import { SQSClient, enqueueMessages } from '@parameter1/sso-sqs';
 import { Reservations } from './reservations.js';
-import reservationProps from './props/reservation.js';
+import { reservationProps } from './props.js';
 
 const {
   array,

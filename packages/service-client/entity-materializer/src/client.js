@@ -32,8 +32,9 @@ export class EntityMaterializerServiceClient {
    *
    * @param {string} action
    * @param {object} params
+   * @returns {Promise<object|array|string>}
    */
   async request(action, params) {
-    return covertActionError(() => this.client.request('action', params));
+    return covertActionError(() => this.client.request(action, params));
   }
 }

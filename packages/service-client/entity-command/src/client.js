@@ -21,6 +21,15 @@ export class EntityCommandServiceClient {
 
   /**
    *
+   * @returns {Promise<Map<string, string[]>>}
+   */
+  async createIndexes() {
+    const r = await this.request('createIndexes');
+    return new Map(r);
+  }
+
+  /**
+   *
    * @param {string} action
    * @param {object} params
    */

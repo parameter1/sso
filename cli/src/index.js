@@ -21,7 +21,7 @@ const hasDocuments = async () => {
     { entityType: 'organization', deleted: false },
     { entityType: 'user', deleted: false },
     { entityType: 'user', deleted: true },
-    // { entityType: 'workspace', deleted: false },
+    { entityType: 'workspace', deleted: false },
   ].map(async ({ entityType, deleted }) => {
     const key = deleted ? `${entityType}_deleted` : entityType;
     const repo = normalizedRepoManager.get(entityType);
@@ -130,11 +130,11 @@ const run = async () => {
               fnName: 'create',
               disabled: !documents.has('application') || !documents.has('organization'),
             },
-            // {
-            //   name: 'Change workspace name',
-            //   fnName: 'changeName',
-            //   disabled: !documents.has('workspace'),
-            // },
+            {
+              name: 'Change workspace name',
+              fnName: 'changeName',
+              disabled: !documents.has('workspace'),
+            },
           ],
         },
 

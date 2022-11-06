@@ -14,6 +14,7 @@ export default async ({
       $project: {
         ...projection,
         fullName: 1,
+        name: 1,
         namespace: 1,
       },
     },

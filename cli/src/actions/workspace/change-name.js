@@ -1,7 +1,9 @@
 import inquirer from 'inquirer';
-import { workspaceCommandProps } from '@parameter1/sso-mongodb';
-import { getWorkspaceList, waitUntilProcessed } from '../utils/index.js';
-import { entityManager } from '../../mongodb.js';
+import { workspaceProps } from '@parameter1/sso-mongodb-command';
+
+import { getWorkspaceList } from '../utils/index.js';
+import { workspaceCommands } from '../../mongodb.js';
+import { waitUntilProcessed } from '../../pubsub.js';
 
 export default async () => {
   const questions = [
@@ -14,14 +16,14 @@ export default async () => {
     {
       type: 'input',
       name: 'name',
-      default: ({ workspace }) => workspace.name.default,
+      default: ({ workspace }) => workspace.name,
       message: 'Enter the new workspace name',
       filter: (input) => {
-        const { value } = workspaceCommandProps.name.required().validate(input);
+        const { value } = workspaceProps.name.required().validate(input);
         return value;
       },
       validate: async (input) => {
-        const { error } = workspaceCommandProps.name.required().validate(input);
+        const { error } = workspaceProps.name.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -41,9 +43,7 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  const handler = entityManager.getCommandHandler('workspace');
-  return waitUntilProcessed(() => handler.changeName({
-    entityId: workspace._id,
-    name,
+  return waitUntilProcessed(() => workspaceCommands.changeName({
+    input: [{ entityId: workspace._id, name }],
   }));
 };

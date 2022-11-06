@@ -4,7 +4,7 @@ import manager from './actions/manager.js';
 import organization from './actions/organization.js';
 import general from './actions/general.js';
 import user from './actions/user.js';
-// import workspace from './actions/workspace.js';
+import workspace from './actions/workspace.js';
 
 export default {
   application,
@@ -13,5 +13,5 @@ export default {
   organization,
   general,
   user,
-  // workspace,
+  workspace,
 };

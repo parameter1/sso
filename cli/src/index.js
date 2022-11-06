@@ -122,21 +122,21 @@ const run = async () => {
           ],
         },
 
-        // {
-        //   key: 'workspace',
-        //   choices: [
-        //     {
-        //       name: 'Create new workspace',
-        //       fnName: 'create',
-        //       disabled: !documents.has('application') || !documents.has('organization'),
-        //     },
-        //     {
-        //       name: 'Change workspace name',
-        //       fnName: 'changeName',
-        //       disabled: !documents.has('workspace'),
-        //     },
-        //   ],
-        // },
+        {
+          key: 'workspace',
+          choices: [
+            {
+              name: 'Create new workspace',
+              fnName: 'create',
+              disabled: !documents.has('application') || !documents.has('organization'),
+            },
+            // {
+            //   name: 'Change workspace name',
+            //   fnName: 'changeName',
+            //   disabled: !documents.has('workspace'),
+            // },
+          ],
+        },
 
         // {
         //   key: 'member',

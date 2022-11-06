@@ -5,6 +5,7 @@ import {
   OrganizationCommands,
   ManagerCommands,
   UserCommands,
+  WorkspaceCommands,
 
   CommandHandler,
   Reservations,
@@ -35,3 +36,4 @@ export const applicationCommands = new ApplicationCommands({ handler: commandHan
 export const organizationCommands = new OrganizationCommands({ handler: commandHandler });
 export const managerCommands = new ManagerCommands({ handler: commandHandler });
 export const userCommands = new UserCommands({ handler: commandHandler });
+export const workspaceCommands = new WorkspaceCommands({ handler: commandHandler });

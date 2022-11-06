@@ -44,7 +44,7 @@ export class ManagerCommands {
     /** @type {ChangeRoleParams}  */
     const { input } = await validateAsync(object({
       input: array().items(changeManagerRole).required(),
-    }).required().label('organization.changeName'), params);
+    }).required().label('manager.changeName'), params);
 
     return this.handler.executeUpdate({
       entityType: this.entityType,

@@ -2,7 +2,7 @@ import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-co
 import { sluggify } from '@parameter1/slug';
 import { CommandHandler } from '../handler.js';
 
-import { createWorkspace } from './schema.js';
+import { changeWorkspaceName, createWorkspace } from './schema.js';
 
 const { array, object } = PropTypes;
 
@@ -24,6 +24,31 @@ export class WorkspaceCommands {
     this.entityType = 'workspace';
     /** @type {CommandHandler} */
     this.handler = handler;
+  }
+
+  /**
+   * @typedef {import("./schema").ChangeWorkspaceName} ChangeWorkspaceName
+   *
+   * @typedef ChangeNameParams
+   * @property {ChangeWorkspaceName[]} input
+   *
+   * @param {ChangeNameParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async changeName(params) {
+    /** @type {ChangeNameParams}  */
+    const { input } = await validateAsync(object({
+      input: array().items(changeWorkspaceName).required(),
+    }).required().label('workspace.changeName'), params);
+
+    return this.handler.executeUpdate({
+      entityType: this.entityType,
+      input: input.map(({ name, ...rest }) => ({
+        ...rest,
+        command: 'CHANGE_NAME',
+        values: { name, slug: sluggify(name) },
+      })),
+    });
   }
 
   /**

@@ -9,6 +9,20 @@ import { organizationProps } from '../organization/props.js';
 const { object } = PropTypes;
 
 /**
+ * @typedef ChangeWorkspaceName
+ * @property {Date|string} [date]
+ * @property {ObjectId} entityId
+ * @property {string} name
+ * @property {ObjectId} [userId]
+ */
+export const changeWorkspaceName = object({
+  date: eventProps.date,
+  entityId: workspaceProps.id.required(),
+  name: workspaceProps.name.required(),
+  userId: eventProps.userId,
+}).required();
+
+/**
  * @typedef CreateWorkspace
  * @property {Date|string} [date]
  * @property {ObjectId} [entityId]

@@ -109,11 +109,11 @@ const run = async () => {
               fnName: 'create',
               disabled: !documents.has('organization') || !documents.has('user'),
             },
-            // {
-            //   name: 'Change manager role',
-            //   fnName: 'changeRole',
-            //   disabled: !documents.has('manager'),
-            // },
+            {
+              name: 'Change manager role',
+              fnName: 'changeRole',
+              disabled: !documents.has('manager'),
+            },
             {
               name: 'Delete organization manager',
               fnName: 'delete',

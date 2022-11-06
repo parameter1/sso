@@ -1,9 +1,9 @@
-// import changeRole from './member/change-role.js';
+import changeRole from './member/change-role.js';
 import create from './member/create.js';
-// import deleteMember from './member/delete.js';
+import deleteMember from './member/delete.js';
 
 export default {
-  // changeRole,
+  changeRole,
   create,
-  // delete: deleteMember,
+  delete: deleteMember,
 };

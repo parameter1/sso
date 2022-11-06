@@ -1,7 +1,9 @@
 import inquirer from 'inquirer';
-import { memberCommandProps } from '@parameter1/sso-mongodb';
-import { getWorkspaceList, waitUntilProcessed } from '../utils/index.js';
-import { entityManager } from '../../mongodb.js';
+import { memberProps } from '@parameter1/sso-mongodb-command';
+
+import { getWorkspaceList } from '../utils/index.js';
+import { memberCommands } from '../../mongodb.js';
+import { waitUntilProcessed } from '../../pubsub.js';
 
 export default async () => {
   const questions = [
@@ -44,11 +46,11 @@ export default async () => {
         disabled: role === user.role,
       })),
       filter: (input) => {
-        const { value } = memberCommandProps.role.required().validate(input);
+        const { value } = memberProps.role.required().validate(input);
         return value;
       },
       validate: (input) => {
-        const { error } = memberCommandProps.role.required().validate(input);
+        const { error } = memberProps.role.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -70,9 +72,7 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  const handler = entityManager.getCommandHandler('member');
-  return waitUntilProcessed(() => handler.changeRole({
-    entityId: { workspace: workspace._id, user: user.node._id },
-    role,
+  return waitUntilProcessed(() => memberCommands.changeRole({
+    input: [{ entityId: { workspace: workspace._id, user: user.node._id }, role }],
   }));
 };

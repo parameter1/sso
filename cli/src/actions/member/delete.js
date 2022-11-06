@@ -1,6 +1,8 @@
 import inquirer from 'inquirer';
-import { getWorkspaceList, waitUntilProcessed } from '../utils/index.js';
-import { entityManager } from '../../mongodb.js';
+
+import { getWorkspaceList } from '../utils/index.js';
+import { memberCommands } from '../../mongodb.js';
+import { waitUntilProcessed } from '../../pubsub.js';
 
 export default async () => {
   const questions = [
@@ -47,8 +49,7 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  const handler = entityManager.getCommandHandler('member');
-  return waitUntilProcessed(() => handler.delete({
-    entityId: { workspace: workspace._id, user: user._id },
+  return waitUntilProcessed(() => memberCommands.delete({
+    input: [{ entityId: { workspace: workspace._id, user: user._id } }],
   }));
 };

@@ -1,7 +1,9 @@
 import inquirer from 'inquirer';
-import { memberCommandProps } from '@parameter1/sso-mongodb';
-import { getUserList, getWorkspaceList, waitUntilProcessed } from '../utils/index.js';
-import { entityManager } from '../../mongodb.js';
+import { memberProps } from '@parameter1/sso-mongodb-command';
+
+import { getWorkspaceList, getUserList } from '../utils/index.js';
+import { memberCommands, materializedRepoManager } from '../../mongodb.js';
+import { waitUntilProcessed } from '../../pubsub.js';
 
 export default async () => {
   const questions = [
@@ -26,18 +28,18 @@ export default async () => {
       name: 'role',
       message: 'Select the member role',
       choices: async ({ workspace }) => {
-        const doc = await entityManager.getMaterializedRepo('application').findByObjectId({
-          id: workspace._edge.application.node._id,
-          options: { strict: true, projection: { roles: 1 } },
-        });
+        const doc = await materializedRepoManager.get('application').collection.findOne({
+          _id: workspace._edge.application.node._id,
+        }, { projection: { roles: 1 } });
+        if (!doc) return new Error('No application was found for the provided ID.');
         return doc.roles;
       },
       filter: (input) => {
-        const { value } = memberCommandProps.role.required().validate(input);
+        const { value } = memberProps.role.required().validate(input);
         return value;
       },
       validate: (input) => {
-        const { error } = memberCommandProps.role.required().validate(input);
+        const { error } = memberProps.role.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -58,12 +60,7 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  const handler = entityManager.getCommandHandler('member');
-  return waitUntilProcessed(() => handler.createOrRestore({
-    entityId: {
-      user: user._id,
-      workspace: workspace._id,
-    },
-    values: { role },
+  return waitUntilProcessed(() => memberCommands.createOrRestore({
+    input: [{ entityId: { user: user._id, workspace: workspace._id }, values: { role } }],
   }));
 };

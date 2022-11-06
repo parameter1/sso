@@ -4,6 +4,7 @@ import {
   ApplicationCommands,
   OrganizationCommands,
   ManagerCommands,
+  MemberCommands,
   UserCommands,
   WorkspaceCommands,
 
@@ -35,5 +36,6 @@ export const materializers = new Materializer({ normalizedRepoManager });
 export const applicationCommands = new ApplicationCommands({ handler: commandHandler });
 export const organizationCommands = new OrganizationCommands({ handler: commandHandler });
 export const managerCommands = new ManagerCommands({ handler: commandHandler });
+export const memberCommands = new MemberCommands({ handler: commandHandler });
 export const userCommands = new UserCommands({ handler: commandHandler });
 export const workspaceCommands = new WorkspaceCommands({ handler: commandHandler });

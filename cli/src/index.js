@@ -17,7 +17,7 @@ const hasDocuments = async () => {
   const r = await Promise.all([
     { entityType: 'application', deleted: false },
     { entityType: 'manager', deleted: false },
-    // { entityType: 'member', deleted: false },
+    { entityType: 'member', deleted: false },
     { entityType: 'organization', deleted: false },
     { entityType: 'user', deleted: false },
     { entityType: 'user', deleted: true },
@@ -138,26 +138,26 @@ const run = async () => {
           ],
         },
 
-        // {
-        //   key: 'member',
-        //   choices: [
-        //     {
-        //       name: 'Create workspace member',
-        //       fnName: 'create',
-        //       disabled: !documents.has('workspace') || !documents.has('user'),
-        //     },
-        //     {
-        //       name: 'Change member role',
-        //       fnName: 'changeRole',
-        //       disabled: !documents.has('member'),
-        //     },
-        //     {
-        //       name: 'Delete workspace member',
-        //       fnName: 'delete',
-        //       disabled: !documents.has('member'),
-        //     },
-        //   ],
-        // },
+        {
+          key: 'member',
+          choices: [
+            {
+              name: 'Create workspace member',
+              fnName: 'create',
+              disabled: !documents.has('workspace') || !documents.has('user'),
+            },
+            // {
+            //   name: 'Change member role',
+            //   fnName: 'changeRole',
+            //   disabled: !documents.has('member'),
+            // },
+            // {
+            //   name: 'Delete workspace member',
+            //   fnName: 'delete',
+            //   disabled: !documents.has('member'),
+            // },
+          ],
+        },
 
         {
           key: 'general',

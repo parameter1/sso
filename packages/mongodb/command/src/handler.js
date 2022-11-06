@@ -75,7 +75,7 @@ export class CommandHandler {
       eligibleWhenFn,
       throwWhenFalse,
     } = await validateAsync(object({
-      entityIds: array.items(eventProps.entityId.required()).required(),
+      entityIds: array().items(eventProps.entityId.required()).required(),
       entityType: eventProps.entityType.required(),
       eligibleWhenFn: func().required(),
       throwWhenFalse: boolean().default(true),

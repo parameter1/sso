@@ -6,11 +6,18 @@ x-env-defaults: &env
 
 x-env-mongodb: &env-mongodb
   MONGO_URL: ${MONGO_URL-}
+
+x-env-token: &env-token
   TOKEN_SECRET: ${TOKEN_SECRET-thisisnotsecretdonotuse}
 
 x-env-redis-pubsub: &env-redis-pubsub
   REDIS_PUBSUB_HOST: ${REDIS_PUBSUB_HOST-redis-pubsub}
   REDIS_PUBSUB_PORT: ${REDIS_PUBSUB_PORT-6379}
+
+x-env-entity-message: &env-entity-message
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_ENTITY_MESSAGE}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_ENTITY_MESSAGE}
+  SQS_QUEUE_URL: ${SQS_QUEUE_URL_ENTITY_MESSAGE}
 
 x-node-defaults: &node
   tty: true
@@ -51,92 +58,39 @@ services:
     entrypoint: ["node"]
     command: ["src/index.js"]
     environment:
-      <<: [*env]
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_ENTITY_MESSAGE}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_ENTITY_MESSAGE}
-      MONGO_URL: ${MONGO_URL}
-      SQS_QUEUE_URL: ${SQS_QUEUE_URL_ENTITY_MESSAGE}
-
-  command-processor:
-    <<: *node
-    working_dir: /sso/services/command-processor
-    entrypoint: ["yarn"]
-    command: ["dev"]
-    environment:
-      <<: [*env, *env-mongodb]
-      MONGO_URL: ${MONGO_URL_PROCESSOR}
-      EXPOSED_HOST: services.sso.dev.parameter1.com
-      EXPOSED_PORT: 7916
-      HOST: services.sso.dev.parameter1.com
-    ports:
-      - "7916:80"
-    hostname: services.sso.dev.parameter1.com
+      <<: [*env, *env-redis-pubsub, *env-entity-message, *env-mongodb]
 
   commands:
     <<: *node
     entrypoint: ["tail"]
     command: ["-f", "/dev/null"]
 
-  event-store-listener:
+  entity-message-poll:
     <<: *node
-    working_dir: /sso/services/event-store-listener
+    working_dir: /sso/services/entity-message-poll
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
-      <<: [*env, *env-mongodb, *env-redis-pubsub]
-      MONGO_URL: ${MONGO_URL_LISTENER}
-      COMMAND_PROCESSOR_URL: ${COMMAND_PROCESSOR_URL-http://command-processor}
+      <<: [*env, *env-entity-message]
+      ENTITY_PROCESSOR_URL: ${ENTITY_PROCESSOR_URL-http://entity-message-processor}
     depends_on:
-      - command-processor
-      - redis-pubsub
+      - entity-message-processor
 
-  entity-command:
+  entity-message-processor:
     <<: *node
-    working_dir: /sso/services/entity-command
+    working_dir: /sso/services/entity-message-processor
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
-      <<: [*env]
-      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_ENTITY_MESSAGE}
-      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_ENTITY_MESSAGE}
-      EXPOSED_HOST: services.sso.dev.parameter1.com
-      EXPOSED_PORT: 7917
-      HOST: services.sso.dev.parameter1.com
-      MONGO_URL: ${MONGO_URL_ENTITY_COMMAND}
-      SQS_QUEUE_URL: ${SQS_QUEUE_URL_ENTITY_MESSAGE}
-    ports:
-      - "7917:80"
-    hostname: services.sso.dev.parameter1.com
-
-  entity-normalizer:
-    <<: *node
-    working_dir: /sso/services/entity-normalizer
-    entrypoint: ["yarn"]
-    command: ["dev"]
-    environment:
-      <<: [*env]
+      <<: [*env, *env-redis-pubsub, *env-mongodb]
       EXPOSED_HOST: services.sso.dev.parameter1.com
       EXPOSED_PORT: 7918
       HOST: services.sso.dev.parameter1.com
-      MONGO_URL: ${MONGO_URL_ENTITY_NORMALIZER}
     ports:
       - "7918:80"
     hostname: services.sso.dev.parameter1.com
-
-  entity-materializer:
-    <<: *node
-    working_dir: /sso/services/entity-materializer
-    entrypoint: ["yarn"]
-    command: ["dev"]
-    environment:
-      <<: [*env]
-      EXPOSED_HOST: services.sso.dev.parameter1.com
-      EXPOSED_PORT: 7919
-      HOST: services.sso.dev.parameter1.com
-      MONGO_URL: ${MONGO_URL_ENTITY_MATERIALIZER}
-    ports:
-      - "7919:80"
-    hostname: services.sso.dev.parameter1.com
+    depends_on:
+      - redis-pubsub
 
   graphql-command:
     <<: *node
@@ -154,8 +108,6 @@ services:
     ports:
       - "7912:80"
     hostname: graphql.sso.dev.parameter1.com
-    depends_on:
-      - event-store-listener
 
   graphql-query:
     <<: *node

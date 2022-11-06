@@ -17,5 +17,9 @@ export * from './user/commands.js';
 export * from './user/props.js';
 export * from './user/schema.js';
 
+export * from './workspace/commands.js';
+export * from './workspace/props.js';
+export * from './workspace/schema.js';
+
 export * from './props.js';
 export * from './types.js';

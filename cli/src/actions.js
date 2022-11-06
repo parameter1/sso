@@ -3,7 +3,7 @@ import application from './actions/application.js';
 // import member from './actions/member.js';
 import organization from './actions/organization.js';
 import general from './actions/general.js';
-// import user from './actions/user.js';
+import user from './actions/user.js';
 // import workspace from './actions/workspace.js';
 
 export default {
@@ -12,6 +12,6 @@ export default {
   // member,
   organization,
   general,
-  // user,
+  user,
   // workspace,
 };

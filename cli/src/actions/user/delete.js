@@ -1,6 +1,8 @@
 import inquirer from 'inquirer';
-import { getUserList, waitUntilProcessed } from '../utils/index.js';
-import { entityManager } from '../../mongodb.js';
+
+import getUserList from '../utils/get-user-list.js';
+import { userCommands } from '../../mongodb.js';
+import { waitUntilProcessed } from '../../pubsub.js';
 
 export default async () => {
   const questions = [
@@ -24,8 +26,7 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  const handler = entityManager.getCommandHandler('user');
-  return waitUntilProcessed(() => handler.delete({
-    entityId: user._id,
+  return waitUntilProcessed(() => userCommands.delete({
+    input: [{ entityId: user._id }],
   }));
 };

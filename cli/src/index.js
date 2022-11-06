@@ -19,8 +19,8 @@ const hasDocuments = async () => {
     // { entityType: 'manager', deleted: false },
     // { entityType: 'member', deleted: false },
     { entityType: 'organization', deleted: false },
-    // { entityType: 'user', deleted: false },
-    // { entityType: 'user', deleted: true },
+    { entityType: 'user', deleted: false },
+    { entityType: 'user', deleted: true },
     // { entityType: 'workspace', deleted: false },
   ].map(async ({ entityType, deleted }) => {
     const key = deleted ? `${entityType}_deleted` : entityType;
@@ -57,37 +57,37 @@ const run = async () => {
           ],
         },
 
-        // {
-        //   key: 'user',
-        //   choices: [
-        //     { name: 'Create new user', fnName: 'create' },
-        //     {
-        //       name: 'Change user email address',
-        //       fnName: 'changeEmail',
-        //       disabled: !documents.has('user'),
-        //     },
-        //     {
-        //       name: 'Change user first/last name',
-        //       fnName: 'changeName',
-        //       disabled: !documents.has('user'),
-        //     },
-        //     {
-        //       name: 'Generate user auth token (impersonate)',
-        //       fnName: 'generateAuthToken',
-        //       disabled: !documents.has('user'),
-        //     },
-        //     {
-        //       name: 'Delete user',
-        //       fnName: 'delete',
-        //       disabled: !documents.has('user'),
-        //     },
-        //     {
-        //       name: 'Restore user',
-        //       fnName: 'restore',
-        //       disabled: !documents.has('user_deleted'),
-        //     },
-        //   ],
-        // },
+        {
+          key: 'user',
+          choices: [
+            { name: 'Create new user', fnName: 'create' },
+            {
+              name: 'Change user email address',
+              fnName: 'changeEmail',
+              disabled: !documents.has('user'),
+            },
+            {
+              name: 'Change user first/last name',
+              fnName: 'changeName',
+              disabled: !documents.has('user'),
+            },
+            // {
+            //   name: 'Generate user auth token (impersonate)',
+            //   fnName: 'generateAuthToken',
+            //   disabled: !documents.has('user'),
+            // },
+            {
+              name: 'Delete user',
+              fnName: 'delete',
+              disabled: !documents.has('user'),
+            },
+            {
+              name: 'Restore user',
+              fnName: 'restore',
+              disabled: !documents.has('user_deleted'),
+            },
+          ],
+        },
 
         {
           key: 'organization',

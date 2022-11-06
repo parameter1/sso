@@ -7,6 +7,11 @@ const entityIdPropTypes = new Map([
     org: objectId().required(),
     user: objectId().required(),
   }).custom(({ org, user }) => ({ org, user }))],
+
+  ['member', object({
+    user: objectId().required(),
+    workspace: objectId().required(),
+  }).custom(({ user, workspace }) => ({ user, workspace }))],
 ]);
 
 export function getEntityIdPropType(entityType) {

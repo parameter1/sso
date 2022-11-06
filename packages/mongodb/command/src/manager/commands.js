@@ -1,7 +1,7 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { CommandHandler } from '../handler.js';
 
-import { createManager } from './schema.js';
+import { createManager, createOrRestoreManager, restoreManager } from './schema.js';
 
 const { array, object } = PropTypes;
 
@@ -41,6 +41,51 @@ export class ManagerCommands {
     }).required().label('manager.create'), params);
 
     return this.handler.executeCreate({
+      entityType: this.entityType,
+      input,
+    });
+  }
+
+  /**
+   * @typedef {import("./schema").CreateOrRestoreManager} CreateOrRestoreManager
+   *
+   * @typedef CreateOrRestoreParams
+   * @property {CreateOrRestoreManager[]} input
+   *
+   * @param {CreateOrRestoreParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async createOrRestore(params) {
+    /** @type {CreateOrRestoreParams}  */
+    const { input } = await validateAsync(object({
+      input: array().items(createOrRestoreManager).required(),
+    }).required().label('manager.createOrRestore'), params);
+
+    try {
+      const result = await this.create({ input });
+      return result;
+    } catch (e) {
+      if (e.code !== 11000) throw e;
+      return this.restore({ input });
+    }
+  }
+
+  /**
+   * @typedef {import("./schema").RestoreManager} RestoreManager
+   *
+   * @typedef RestoreParams
+   * @property {RestoreManager[]} input
+   *
+   * @param {RestoreParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async restore(params) {
+    /** @type {RestoreParams}  */
+    const { input } = await validateAsync(object({
+      input: array().items(restoreManager).required(),
+    }).required().label('manager.restore'), params);
+
+    return this.handler.executeRestore({
       entityType: this.entityType,
       input,
     });

@@ -6,6 +6,20 @@ import { managerProps } from './props.js';
 const { object } = PropTypes;
 
 /**
+ * @typedef ChangeManagerRole
+ * @property {Date|string} [date]
+ * @property {ObjectId} entityId
+ * @property {string} role
+ * @property {ObjectId} [userId]
+ */
+export const changeManagerRole = object({
+  date: eventProps.date,
+  entityId: managerProps.id.required(),
+  role: managerProps.role.required(),
+  userId: eventProps.userId,
+}).required();
+
+/**
  * @typedef CreateManager
  * @property {Date|string} [date]
  * @property {ObjectId} entityId

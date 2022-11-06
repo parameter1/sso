@@ -2,6 +2,7 @@ import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-co
 import { CommandHandler } from '../handler.js';
 
 import {
+  changeManagerRole,
   createManager,
   createOrRestoreManager,
   deleteManager,
@@ -28,6 +29,31 @@ export class ManagerCommands {
     this.entityType = 'manager';
     /** @type {CommandHandler} */
     this.handler = handler;
+  }
+
+  /**
+   * @typedef {import("./schema").ChangeManagerRole} ChangeManagerRole
+   *
+   * @typedef ChangeRoleParams
+   * @property {ChangeManagerRole[]} input
+   *
+   * @param {ChangeRoleParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async changeRole(params) {
+    /** @type {ChangeRoleParams}  */
+    const { input } = await validateAsync(object({
+      input: array().items(changeManagerRole).required(),
+    }).required().label('organization.changeName'), params);
+
+    return this.handler.executeUpdate({
+      entityType: this.entityType,
+      input: input.map(({ role, ...rest }) => ({
+        ...rest,
+        command: 'CHANGE_ROLE',
+        values: { role },
+      })),
+    });
   }
 
   /**

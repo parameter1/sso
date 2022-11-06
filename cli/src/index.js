@@ -18,7 +18,7 @@ const hasDocuments = async () => {
     { entityType: 'application', deleted: false },
     // { entityType: 'manager', deleted: false },
     // { entityType: 'member', deleted: false },
-    // { entityType: 'organization', deleted: false },
+    { entityType: 'organization', deleted: false },
     // { entityType: 'user', deleted: false },
     // { entityType: 'user', deleted: true },
     // { entityType: 'workspace', deleted: false },
@@ -38,7 +38,6 @@ const hasDocuments = async () => {
 
 const run = async () => {
   const documents = await hasDocuments();
-  console.log(documents);
   const questions = [
     {
       type: 'list',
@@ -90,17 +89,17 @@ const run = async () => {
         //   ],
         // },
 
-        // {
-        //   key: 'organization',
-        //   choices: [
-        //     { name: 'Create new organization', fnName: 'create' },
-        //     {
-        //       name: 'Change organization name',
-        //       fnName: 'changeName',
-        //       disabled: !documents.has('organization'),
-        //     },
-        //   ],
-        // },
+        {
+          key: 'organization',
+          choices: [
+            { name: 'Create new organization', fnName: 'create' },
+            {
+              name: 'Change organization name',
+              fnName: 'changeName',
+              disabled: !documents.has('organization'),
+            },
+          ],
+        },
 
         // {
         //   key: 'manager',

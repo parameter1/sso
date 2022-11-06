@@ -2,6 +2,7 @@ import { MongoClient } from '@parameter1/sso-mongodb-core';
 import { EventStore } from '@parameter1/sso-mongodb-event-store';
 import {
   ApplicationCommands,
+  OrganizationCommands,
 
   CommandHandler,
   Reservations,
@@ -29,3 +30,4 @@ export const materializedRepoManager = new MaterializedRepoManager({ mongo });
 export const materializers = new Materializer({ normalizedRepoManager });
 
 export const applicationCommands = new ApplicationCommands({ handler: commandHandler });
+export const organizationCommands = new OrganizationCommands({ handler: commandHandler });

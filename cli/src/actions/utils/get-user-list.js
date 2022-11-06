@@ -1,5 +1,5 @@
 import { isFunction as isFn } from '@parameter1/utils';
-import { entityManager } from '../../mongodb.js';
+import { materializedRepoManager } from '../../mongodb.js';
 
 export default async ({
   filter,
@@ -7,7 +7,7 @@ export default async ({
   query,
   projection,
 } = {}) => {
-  const repo = entityManager.getMaterializedRepo('user');
+  const repo = materializedRepoManager.get('user');
   const pipeline = [
     { $match: { _deleted: false, ...query } },
     {
@@ -20,8 +20,7 @@ export default async ({
     },
     { $sort: { 'slug.reverse': 1, _id: 1 } },
   ];
-  const cursor = await repo.aggregate({ pipeline });
-  const users = await cursor.toArray();
+  const users = await repo.collection.aggregate(pipeline).toArray();
   return users.filter((doc) => {
     if (isFn(filter)) return filter(doc);
     return true;

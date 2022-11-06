@@ -1,6 +1,11 @@
 import { MongoClient } from '@parameter1/sso-mongodb-core';
 import { EventStore } from '@parameter1/sso-mongodb-event-store';
-import { CommandHandler, Reservations } from '@parameter1/sso-mongodb-command';
+import {
+  ApplicationCommands,
+
+  CommandHandler,
+  Reservations,
+} from '@parameter1/sso-mongodb-command';
 import { MaterializedRepoManager } from '@parameter1/sso-mongodb-materialized';
 import { NormalizedRepoManager } from '@parameter1/sso-mongodb-normalized';
 import { Materializer } from '@parameter1/sso-mongodb-materializers';
@@ -22,3 +27,5 @@ export const commandHandler = new CommandHandler({
 export const normalizedRepoManager = new NormalizedRepoManager({ mongo });
 export const materializedRepoManager = new MaterializedRepoManager({ mongo });
 export const materializers = new Materializer({ normalizedRepoManager });
+
+export const applicationCommands = new ApplicationCommands({ handler: commandHandler });

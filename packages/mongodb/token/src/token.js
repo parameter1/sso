@@ -17,6 +17,9 @@ const { object, string } = PropTypes;
  * @typedef {import("@parameter1/sso-mongodb-core").MongoClient} MongoClient
  * @typedef {import("@parameter1/sso-mongodb-core").ObjectId} ObjectId
  *
+ * @typedef {import("./types").TokenDocument} TokenDocument
+ * @typedef {import("./types").CreateAndSignTokenResult} CreateAndSignTokenResult
+ *
  * @typedef CreateTokenParams
  * @property {string} subject
  * @property {string} audience
@@ -27,15 +30,6 @@ const { object, string } = PropTypes;
  * @typedef CreateTokenOptions
  * @property {object} [projection]
  * @property {import("@parameter1/sso-mongodb-core").ClientSession} [session]
- *
- * @typedef TokenDocument
- * @property {ObjectId} _id
- * @property {string} subject
- * @property {string} audience
- * @property {Date} issuedAt
- * @property {Date} [expiresAt]
- * @property {number} [ttl=0]
- * @property {object} [data={}]
  */
 export class TokenRepo {
   /**
@@ -103,7 +97,7 @@ export class TokenRepo {
    *
    * @param {CreateTokenParams} params
    * @param {CreateTokenOptions} options
-   * @returns {Promise<CreateAndSignResult>}
+   * @returns {Promise<CreateAndSignTokenResult>}
    */
   async createAndSign(params, { projection, session } = {}) {
     const doc = await this.createAndReturn(params, { projection, session });
@@ -154,7 +148,7 @@ export class TokenRepo {
   /**
    * Signs a MongoDB token document.
    *
-   * @param {object} doc
+   * @param {TokenDocument} doc
    */
   signDocument(doc) {
     const payload = TokenRepo.toJWT(doc);

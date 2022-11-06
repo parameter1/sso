@@ -16,7 +16,7 @@ const { log } = console;
 const hasDocuments = async () => {
   const r = await Promise.all([
     { entityType: 'application', deleted: false },
-    // { entityType: 'manager', deleted: false },
+    { entityType: 'manager', deleted: false },
     // { entityType: 'member', deleted: false },
     { entityType: 'organization', deleted: false },
     { entityType: 'user', deleted: false },
@@ -101,26 +101,26 @@ const run = async () => {
           ],
         },
 
-        // {
-        //   key: 'manager',
-        //   choices: [
-        //     {
-        //       name: 'Create organization manager',
-        //       fnName: 'create',
-        //       disabled: !documents.has('organization') || !documents.has('user'),
-        //     },
-        //     {
-        //       name: 'Change manager role',
-        //       fnName: 'changeRole',
-        //       disabled: !documents.has('manager'),
-        //     },
-        //     {
-        //       name: 'Delete organization manager',
-        //       fnName: 'delete',
-        //       disabled: !documents.has('manager'),
-        //     },
-        //   ],
-        // },
+        {
+          key: 'manager',
+          choices: [
+            {
+              name: 'Create organization manager',
+              fnName: 'create',
+              disabled: !documents.has('organization') || !documents.has('user'),
+            },
+            // {
+            //   name: 'Change manager role',
+            //   fnName: 'changeRole',
+            //   disabled: !documents.has('manager'),
+            // },
+            {
+              name: 'Delete organization manager',
+              fnName: 'delete',
+              disabled: !documents.has('manager'),
+            },
+          ],
+        },
 
         // {
         //   key: 'workspace',

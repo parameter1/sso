@@ -3,6 +3,7 @@ import { EventStore } from '@parameter1/sso-mongodb-event-store';
 import {
   ApplicationCommands,
   OrganizationCommands,
+  ManagerCommands,
   UserCommands,
 
   CommandHandler,
@@ -32,4 +33,5 @@ export const materializers = new Materializer({ normalizedRepoManager });
 
 export const applicationCommands = new ApplicationCommands({ handler: commandHandler });
 export const organizationCommands = new OrganizationCommands({ handler: commandHandler });
+export const managerCommands = new ManagerCommands({ handler: commandHandler });
 export const userCommands = new UserCommands({ handler: commandHandler });

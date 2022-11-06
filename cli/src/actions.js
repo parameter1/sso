@@ -1,5 +1,5 @@
 import application from './actions/application.js';
-// import manager from './actions/manager.js';
+import manager from './actions/manager.js';
 // import member from './actions/member.js';
 import organization from './actions/organization.js';
 import general from './actions/general.js';
@@ -8,7 +8,7 @@ import user from './actions/user.js';
 
 export default {
   application,
-  // manager,
+  manager,
   // member,
   organization,
   general,

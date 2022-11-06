@@ -1,7 +1,12 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { CommandHandler } from '../handler.js';
 
-import { createManager, createOrRestoreManager, restoreManager } from './schema.js';
+import {
+  createManager,
+  createOrRestoreManager,
+  deleteManager,
+  restoreManager,
+} from './schema.js';
 
 const { array, object } = PropTypes;
 
@@ -68,6 +73,27 @@ export class ManagerCommands {
       if (e.code !== 11000) throw e;
       return this.restore({ input });
     }
+  }
+
+  /**
+   * @typedef {import("./schema").DeleteManager} DeleteManager
+   *
+   * @typedef RestoreParams
+   * @property {DeleteManager[]} input
+   *
+   * @param {RestoreParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async delete(params) {
+    /** @type {RestoreParams}  */
+    const { input } = await validateAsync(object({
+      input: array().items(deleteManager).required(),
+    }).required().label('manager.delete'), params);
+
+    return this.handler.executeDelete({
+      entityType: this.entityType,
+      input,
+    });
   }
 
   /**

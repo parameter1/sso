@@ -44,6 +44,18 @@ export const createOrRestoreManager = object({
 }).required();
 
 /**
+ * @typedef DeleteManager
+ * @property {ObjectId} entityId
+ * @property {Date|string} [date]
+ * @property {ObjectId} [userId]
+ */
+export const deleteManager = object({
+  date: eventProps.date,
+  entityId: managerProps.id.required(),
+  userId: eventProps.userId,
+}).required();
+
+/**
  * @typedef RestoreManager
  * @property {Date|string} [date]
  * @property {ObjectId} entityId

@@ -4,7 +4,7 @@ import { get } from '@parameter1/object-path';
 import { filterMongoURL } from '@parameter1/sso-mongodb-core';
 import { inspect } from 'util';
 
-import { mongo } from './mongodb.js';
+import { mongo, normalizedRepoManager } from './mongodb.js';
 import { pubSubManager } from './pubsub.js';
 
 import actions from './actions.js';
@@ -13,32 +13,32 @@ process.on('unhandledRejection', immediatelyThrow);
 
 const { log } = console;
 
-// const hasDocuments = async () => {
-//   const r = await Promise.all([
-//     { entityType: 'application', deleted: false },
-//     { entityType: 'manager', deleted: false },
-//     { entityType: 'member', deleted: false },
-//     { entityType: 'organization', deleted: false },
-//     { entityType: 'user', deleted: false },
-//     { entityType: 'user', deleted: true },
-//     { entityType: 'workspace', deleted: false },
-//   ].map(async ({ entityType, deleted }) => {
-//     const key = deleted ? `${entityType}_deleted` : entityType;
-//     const repo = entityManager.getNormalizedRepo(entityType);
-//     const doc = await repo.findOne({
-//       query: { _deleted: deleted },
-//       options: { projection: { _id: 1 } },
-//     });
-//     return { key, hasDocs: Boolean(doc) };
-//   }));
-//   return r.reduce((set, { key, hasDocs }) => {
-//     if (hasDocs) set.add(key);
-//     return set;
-//   }, new Set());
-// };
+const hasDocuments = async () => {
+  const r = await Promise.all([
+    { entityType: 'application', deleted: false },
+    // { entityType: 'manager', deleted: false },
+    // { entityType: 'member', deleted: false },
+    // { entityType: 'organization', deleted: false },
+    // { entityType: 'user', deleted: false },
+    // { entityType: 'user', deleted: true },
+    // { entityType: 'workspace', deleted: false },
+  ].map(async ({ entityType, deleted }) => {
+    const key = deleted ? `${entityType}_deleted` : entityType;
+    const repo = normalizedRepoManager.get(entityType);
+    const doc = await repo.collection.findOne({ _deleted: deleted }, {
+      projection: { _id: 1 },
+    });
+    return { key, hasDocs: Boolean(doc) };
+  }));
+  return r.reduce((set, { key, hasDocs }) => {
+    if (hasDocs) set.add(key);
+    return set;
+  }, new Set());
+};
 
 const run = async () => {
-  // const documents = await hasDocuments();
+  const documents = await hasDocuments();
+  console.log(documents);
   const questions = [
     {
       type: 'list',
@@ -50,11 +50,11 @@ const run = async () => {
           key: 'application',
           choices: [
             { name: 'Create new application', fnName: 'create' },
-            // {
-            //   name: 'Change application name',
-            //   fnName: 'changeName',
-            //   disabled: !documents.has('application'),
-            // },
+            {
+              name: 'Change application name',
+              fnName: 'changeName',
+              disabled: !documents.has('application'),
+            },
           ],
         },
 

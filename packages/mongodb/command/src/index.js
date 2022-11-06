@@ -9,6 +9,10 @@ export * from './manager/commands.js';
 export * from './manager/props.js';
 export * from './manager/schema.js';
 
+export * from './member/commands.js';
+export * from './member/props.js';
+export * from './member/schema.js';
+
 export * from './organization/commands.js';
 export * from './organization/props.js';
 export * from './organization/schema.js';

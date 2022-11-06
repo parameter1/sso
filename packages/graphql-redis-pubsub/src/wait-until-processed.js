@@ -1,7 +1,6 @@
 import { PropTypes, validateAsync } from '@parameter1/sso-prop-types-core';
 import { COMMAND_PROCESSED } from './events.js';
 import { PubSubManager } from './manager.js';
-import { CommandProcessingError } from './errors/command-processing.js';
 import { CommandProcessingTimeoutError } from './errors/command-processing-timeout.js';
 
 const {
@@ -45,14 +44,10 @@ export async function waitUntilProcessed(params) {
     (async () => {
       log('> Processing...');
       await Promise.all(results.map(async (result) => {
-        await new Promise((resolve, reject) => {
+        await new Promise((resolve) => {
           pubSubManager.on(COMMAND_PROCESSED, ({ body }) => {
-            if (`${body.result._id}` !== `${result._id}`) return;
-            if (body.ok === true) {
-              resolve();
-            } else {
-              reject(new CommandProcessingError(body.error.message, result));
-            }
+            if (`${body._id}` !== `${result._id}`) return;
+            resolve();
           });
         });
       }));

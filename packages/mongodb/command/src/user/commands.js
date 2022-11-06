@@ -1,4 +1,5 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
+import { mongoSessionProp } from '@parameter1/sso-mongodb-core';
 import { sluggify } from '@parameter1/slug';
 import { CommandHandler } from '../handler.js';
 
@@ -7,6 +8,7 @@ import {
   changeUserName,
   createUser,
   deleteUser,
+  magicUserLogin,
   restoreUser,
 } from './schema.js';
 
@@ -213,6 +215,35 @@ export class UserCommands {
     } finally {
       await session.endSession();
     }
+  }
+
+  /**
+   * @typedef {import("./schema").MagicUserLogin} MagicUserLogin
+   *
+   * @typedef MagicLoginParams
+   * @prop {MagicUserLogin[]} input
+   * @prop {import("@parameter1/sso-mongodb-core").ClientSession} session
+   *
+   * @param {MagicLoginParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async magicLogin(params) {
+    /** @type {MagicLoginParams}  */
+    const { input, session } = await validateAsync(object({
+      input: array().items(magicUserLogin).required(),
+      session: mongoSessionProp,
+    }).required().label('user.magicLogin'), params);
+
+    return this.handler.executeUpdate({
+      entityType: this.entityType,
+      input: input.map(({ entityId }) => ({
+        command: 'MAGIC_LOGIN',
+        entityId,
+        omitFromHistory: true,
+        omitFromModified: true,
+      })),
+      session,
+    });
   }
 
   /**

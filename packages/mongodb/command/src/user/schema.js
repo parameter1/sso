@@ -74,6 +74,14 @@ export const deleteUser = object({
 }).required();
 
 /**
+ * @typedef MagicUserLogin
+ * @property {ObjectId} entityId
+ */
+export const magicUserLogin = object({
+  entityId: userProps.id.required(),
+}).required();
+
+/**
  * @typedef RestoreUser
  * @property {Date|string} [date]
  * @property {string} email

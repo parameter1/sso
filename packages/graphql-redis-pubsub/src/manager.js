@@ -82,7 +82,7 @@ export class PubSubManager {
    */
   onMessage(callback) {
     this.subscriber.on('message', (channelName, json) => {
-      const body = JSON.parse(json, PubSubManager.eventReviver);
+      const body = EJSON.parse(json);
       callback({ channelName, body });
     });
   }

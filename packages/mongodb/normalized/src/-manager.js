@@ -1,5 +1,5 @@
 import { PropTypes, attempt } from '@parameter1/sso-prop-types-core';
-import { mongoDBClientProp } from '@parameter1/sso-mongodb-core';
+import { mongoClientProp } from '@parameter1/mongodb-prop-types';
 
 import { NormalizedApplicationRepo } from './application.js';
 import { NormalizedManagerRepo } from './manager.js';
@@ -25,14 +25,14 @@ const repos = new Map([
 export class NormalizedRepoManager {
   /**
    * @typedef NormalizedRepoManagerConstructorParams
-   * @property {MongoClient} mongo
+   * @property {import("@parameter1/mongodb-core").MongoClient} mongo
    *
    * @param {NormalizedRepoManagerConstructorParams} params
    */
   constructor(params) {
     /** @type {NormalizedRepoManagerConstructorParams} */
     const { mongo } = attempt(params, object({
-      mongo: mongoDBClientProp.required(),
+      mongo: mongoClientProp.required(),
     }).required());
 
     this.repos = [...repos.keys()].reduce((map, entityType) => {

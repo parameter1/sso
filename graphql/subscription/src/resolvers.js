@@ -1,12 +1,12 @@
-import { ObjectId } from '@parameter1/sso-mongodb';
-import { addArrayFilter, GraphQLDateTime, GraphQLObjectId } from '@parameter1/sso-graphql';
+import { GraphQLObjectId } from '@parameter1/mongodb-graphql-types';
+import { addArrayFilter, GraphQLDateTime } from '@parameter1/sso-graphql';
 import { withFilter } from 'graphql-subscriptions';
 import sift from 'sift';
 import { pubSubManager, COMMAND_PROCESSED } from './pubsub.js';
 
 export default {
   DateTime: GraphQLDateTime,
-  ObjectID: GraphQLObjectId(ObjectId),
+  ObjectID: GraphQLObjectId,
 
   /**
    *

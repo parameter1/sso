@@ -1,11 +1,11 @@
 import { PropTypes, attempt } from '@parameter1/sso-prop-types-core';
 import { eventProps } from '@parameter1/sso-prop-types-event';
-import { DB_NAME, mongoDBClientProp } from '@parameter1/sso-mongodb-core';
+import { mongoClientProp } from '@parameter1/mongodb-prop-types';
 
 const { array, object } = PropTypes;
 
 /**
- * @typedef {import("@parameter1/sso-mongodb-core").MongoClient} MongoClient
+ * @typedef {import("@parameter1/mongodb-core").MongoClient} MongoClient
  *
  * @typedef NormalizedRepoConstructorParams
  * @property {MongoClient} mongo
@@ -24,7 +24,7 @@ export class NormalizedRepo {
     const { entityType, indexes, mongo } = attempt(params, object({
       entityType: eventProps.entityType.required(),
       indexes: array().items(object()).default([]),
-      mongo: mongoDBClientProp.required(),
+      mongo: mongoClientProp.required(),
     }).required());
 
     /** @type {string} */
@@ -33,8 +33,8 @@ export class NormalizedRepo {
     this.indexes = indexes;
     /** @type {MongoClient} */
     this.mongo = mongo;
-    /** @type {import("@parameter1/sso-mongodb-core").Collection} */
-    this.collection = mongo.db(DB_NAME).collection(`${entityType}/normalized`);
+    /** @type {import("mongodb").Collection} */
+    this.collection = mongo.db('sso').collection(`${entityType}/normalized`);
   }
 
   /**

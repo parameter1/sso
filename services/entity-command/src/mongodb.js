@@ -1,4 +1,4 @@
-import { MongoClient } from '@parameter1/sso-mongodb-core';
+import { MongoClient } from '@parameter1/mongodb-core';
 import { EventStore } from '@parameter1/sso-mongodb-event-store';
 import {
   ApplicationCommands,

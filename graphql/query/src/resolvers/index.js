@@ -1,13 +1,13 @@
 import merge from 'lodash.merge';
-import { ObjectId } from '@parameter1/sso-mongodb';
-import { GraphQLDateTime, GraphQLObjectId } from '@parameter1/sso-graphql';
+import { GraphQLObjectId } from '@parameter1/mongodb-graphql-types';
+import { GraphQLDateTime } from '@parameter1/sso-graphql';
 
 import user from './user.js';
 import workspace from './workspace.js';
 
 export default merge({
   DateTime: GraphQLDateTime,
-  ObjectID: GraphQLObjectId(ObjectId),
+  ObjectID: GraphQLObjectId,
 
   /**
    *

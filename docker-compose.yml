@@ -152,11 +152,12 @@ services:
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
-      <<: [*env, *env-mongodb]
-      MONGO_URL: ${MONGO_URL_QUERY}
+      <<: [*env]
       EXPOSED_HOST: graphql.sso.dev.parameter1.com
       EXPOSED_PORT: 7911
       HOST: graphql.sso.dev.parameter1.com
+      MONGO_URL: ${MONGO_URL_GRAPHQL_QUERY}
+      USER_URL: ${USER_URL-http://user}
     ports:
       - "7911:80"
     hostname: graphql.sso.dev.parameter1.com

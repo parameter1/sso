@@ -1,4 +1,4 @@
-import { filterMongoURL } from '@parameter1/sso-mongodb-core';
+import { filterMongoURL } from '@parameter1/mongodb-core';
 import { bootService } from '@parameter1/terminus';
 import { immediatelyThrow } from '@parameter1/utils';
 import process from 'process';

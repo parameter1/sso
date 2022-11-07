@@ -1,7 +1,7 @@
 import { PropTypes, attempt } from '@parameter1/sso-prop-types-core';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import Redis from 'ioredis';
-import { EJSON } from 'bson';
+import { EJSON } from '@parameter1/mongodb-bson';
 
 import { CHANNEL_PREFIX } from './constants.js';
 

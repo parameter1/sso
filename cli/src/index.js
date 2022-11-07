@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { immediatelyThrow } from '@parameter1/utils';
 import { get } from '@parameter1/object-path';
-import { filterMongoURL } from '@parameter1/sso-mongodb-core';
+import { filterMongoURL } from '@parameter1/mongodb-core';
 import { inspect } from 'util';
 
 import { mongo, normalizedRepoManager } from './mongodb.js';

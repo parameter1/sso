@@ -1,6 +1,5 @@
 import { PropTypes, attempt } from '@parameter1/sso-prop-types-core';
 import { eventProps } from '@parameter1/sso-prop-types-event';
-import { DB_NAME } from '@parameter1/sso-mongodb-core';
 
 const { array, object } = PropTypes;
 
@@ -36,7 +35,7 @@ export class PipelineBuilder {
     pipeline.push(...stages);
     pipeline.push({
       $merge: {
-        into: { db: DB_NAME, coll: `${this.entityType}/materialized` },
+        into: { db: 'sso', coll: `${this.entityType}/materialized` },
         on: '_id',
         whenMatched: 'replace',
         whenNotMatched: 'insert',

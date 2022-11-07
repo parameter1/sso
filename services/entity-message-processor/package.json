@@ -20,8 +20,8 @@
   },
   "dependencies": {
     "@parameter1/micro-ejson": "^1.1.0",
+    "@parameter1/mongodb-core": "^1.0.0",
     "@parameter1/sso-graphql-redis-pubsub": "^0.5.4",
-    "@parameter1/sso-mongodb-core": "^0.5.4",
     "@parameter1/sso-mongodb-materializers": "^0.5.4",
     "@parameter1/sso-mongodb-normalized": "^0.5.4",
     "@parameter1/sso-mongodb-normalizers": "^0.5.4",

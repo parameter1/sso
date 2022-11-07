@@ -1,4 +1,4 @@
-import { MongoClient } from '@parameter1/sso-mongodb-core';
+import { MongoClient } from '@parameter1/mongodb-core';
 import { MaterializedRepoManager } from '@parameter1/sso-mongodb-materialized';
 import { NormalizedRepoManager } from '@parameter1/sso-mongodb-normalized';
 import { Materializer } from '@parameter1/sso-mongodb-materializers';

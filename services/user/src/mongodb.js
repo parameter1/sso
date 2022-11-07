@@ -1,4 +1,4 @@
-import { MongoClient } from '@parameter1/sso-mongodb-core';
+import { MongoClient } from '@parameter1/mongodb-core';
 import { EventStore } from '@parameter1/sso-mongodb-event-store';
 import { UserCommands } from '@parameter1/sso-mongodb-command';
 import { TokenRepo } from '@parameter1/sso-mongodb-token';

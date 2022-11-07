@@ -1,6 +1,6 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { eventProps } from '@parameter1/sso-prop-types-event';
-import { DB_NAME, mongoDBClientProp } from '@parameter1/sso-mongodb-core';
+import { mongoClientProp } from '@parameter1/mongodb-prop-types';
 
 import { UserNormalizationBuilder } from './builders/user.js';
 
@@ -11,8 +11,8 @@ const builders = new Map([
 ]);
 
 /**
- * @typedef {import("@parameter1/sso-mongodb-core").Collection} Collection
- * @typedef {import("@parameter1/sso-mongodb-core").MongoClient} MongoClient
+ * @typedef {import("@parameter1/mongodb-core").Collection} Collection
+ * @typedef {import("@parameter1/mongodb-core").MongoClient} MongoClient
  */
 export class Normalizer {
   /**
@@ -22,13 +22,13 @@ export class Normalizer {
    */
   constructor(params) {
     const { mongo } = attempt(params, object({
-      mongo: mongoDBClientProp.required(),
+      mongo: mongoClientProp.required(),
     }).required());
 
     /** @type {MongoClient} */
     this.mongo = mongo;
     /** @type {Collection} */
-    this.collection = mongo.db(DB_NAME).collection('event-store');
+    this.collection = mongo.db('sso').collection('event-store');
   }
 
   /**
@@ -186,7 +186,7 @@ export class Normalizer {
       ],
     }, {
       $merge: {
-        into: { db: DB_NAME, coll: `${entityType}/normalized` },
+        into: { db: 'sso', coll: `${entityType}/normalized` },
         on: '_id',
         whenMatched: 'replace',
         whenNotMatched: 'insert',

@@ -1,6 +1,6 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { EventStore } from '@parameter1/sso-mongodb-event-store';
-import { mongoSessionProp } from '@parameter1/sso-mongodb-core';
+import { mongoSessionProp } from '@parameter1/mongodb-prop-types';
 import { sluggify } from '@parameter1/slug';
 
 import {
@@ -222,7 +222,7 @@ export class UserCommands {
    *
    * @typedef MagicLoginParams
    * @prop {MagicUserLogin[]} input
-   * @prop {import("@parameter1/sso-mongodb-core").ClientSession} session
+   * @prop {import("@parameter1/sso-mongodb").ClientSession} session
    *
    * @param {MagicLoginParams} params
    * @returns {Promise<EventStoreResult[]>}

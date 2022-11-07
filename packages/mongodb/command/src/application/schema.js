@@ -1,6 +1,6 @@
 import { PropTypes } from '@parameter1/sso-prop-types-core';
 import { eventProps } from '@parameter1/sso-prop-types-event';
-import { ObjectId } from '@parameter1/sso-mongodb-core';
+import { ObjectId } from '@parameter1/mongodb-bson';
 
 import { applicationProps } from './props.js';
 

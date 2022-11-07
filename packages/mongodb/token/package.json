@@ -18,9 +18,11 @@
     "test": "yarn lint"
   },
   "dependencies": {
+    "@parameter1/mongodb-bson": "^1.0.0",
+    "@parameter1/mongodb-core": "^1.0.0",
+    "@parameter1/mongodb-prop-types": "^1.0.0",
     "@parameter1/sso-prop-types-core": "^0.5.4",
     "@parameter1/sso-prop-types-event": "^0.5.4",
-    "@parameter1/sso-mongodb-core": "^0.5.4",
     "@parameter1/utils": "^2.0.0",
     "jsonwebtoken": "^8.5.1"
   }

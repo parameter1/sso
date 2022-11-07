@@ -1,11 +1,7 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { eventProps } from '@parameter1/sso-prop-types-event';
-import {
-  DB_NAME,
-  EJSON,
-  mongoDBClientProp,
-  mongoSessionProp,
-} from '@parameter1/sso-mongodb-core';
+import { EJSON } from '@parameter1/mongodb-bson';
+import { mongoClientProp, mongoSessionProp } from '@parameter1/mongodb-prop-types';
 import { SQSClient, enqueueMessages } from '@parameter1/sso-sqs';
 
 const {
@@ -27,9 +23,9 @@ export const reservationProps = {
  * @typedef {import("./index").EventStoreResult} EventStoreResult
  * @typedef {import("./index").EventStoreDocument} EventStoreDocument
  * @typedef {import("mongodb").BulkWriteResult} BulkWriteResult
- * @typedef {import("@parameter1/sso-mongodb-core").Collection} Collection
- * @typedef {import("@parameter1/sso-mongodb-core").ClientSession} ClientSession
- * @typedef {import("@parameter1/sso-mongodb-core").MongoClient} MongoClient
+ * @typedef {import("@parameter1/mongodb-core").Collection} Collection
+ * @typedef {import("@parameter1/mongodb-core").ClientSession} ClientSession
+ * @typedef {import("@parameter1/mongodb-core").MongoClient} MongoClient
  *
  * @typedef ReservationsReleaseParams
  * @property {ReservationsReleaseParamsInput[]} input
@@ -66,7 +62,7 @@ export class EventStore {
   constructor(params) {
     /** @type {EventStoreConstructorParams} */
     const { mongo, sqs } = attempt(params, object({
-      mongo: mongoDBClientProp.required(),
+      mongo: mongoClientProp.required(),
       sqs: object({
         client: object().instance(SQSClient).required(),
         url: url().required(),
@@ -77,10 +73,10 @@ export class EventStore {
     this.mongo = mongo;
 
     /** @type {Collection} */
-    this.collection = mongo.db(DB_NAME).collection('event-store');
+    this.collection = mongo.db('sso').collection('event-store');
 
     /** @type {Collection} */
-    this.reservations = mongo.db(DB_NAME).collection('reservations');
+    this.reservations = mongo.db('sso').collection('reservations');
 
     /** @type {CommandHandlerConstructorParamsSQS} */
     this.sqs = sqs;

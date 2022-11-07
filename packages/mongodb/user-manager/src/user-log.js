@@ -1,5 +1,5 @@
 import { PropTypes, attempt } from '@parameter1/sso-prop-types-core';
-import { DB_NAME, mongoDBClientProp } from '@parameter1/sso-mongodb-core';
+import { mongoClientProp } from '@parameter1/mongodb-prop-types';
 
 const { object, string } = PropTypes;
 
@@ -10,7 +10,7 @@ export const userLogProps = {
 
 export class UserLogRepo {
   /**
-   * @typedef {import("@parameter1/sso-mongodb-core").MongoClient} MongoClient
+   * @typedef {import("@parameter1/sso-mongodb").MongoClient} MongoClient
    *
    * @typedef ConstructorParams
    * @property {MongoClient} mongo
@@ -20,11 +20,11 @@ export class UserLogRepo {
   constructor(params) {
     /** @type {ConstructorParams} */
     const { mongo } = attempt(params, object({
-      mongo: mongoDBClientProp.required(),
+      mongo: mongoClientProp.required(),
     }).required());
 
-    /** @type {import("@parameter1/sso-mongodb-core").Collection} */
-    this.collection = mongo.db(DB_NAME).collection('user-log');
+    /** @type {import("@parameter1/sso-mongodb").Collection} */
+    this.collection = mongo.db('sso').collection('user-log');
   }
 
   async createIndexes() {

@@ -1,5 +1,6 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
-import { DB_NAME, mongoDBClientProp, ObjectId } from '@parameter1/sso-mongodb-core';
+import { ObjectId } from '@parameter1/mongodb-bson';
+import { mongoClientProp } from '@parameter1/mongodb-prop-types';
 import { dateToUnix } from '@parameter1/utils';
 import jwt from 'jsonwebtoken';
 
@@ -14,8 +15,8 @@ const createError = (statusCode, message) => {
 const { object, string } = PropTypes;
 
 /**
- * @typedef {import("@parameter1/sso-mongodb-core").MongoClient} MongoClient
- * @typedef {import("@parameter1/sso-mongodb-core").ObjectId} ObjectId
+ * @typedef {import("@parameter1/mongodb-core").MongoClient} MongoClient
+ * @typedef {import("@parameter1/mongodb-bson").ObjectId} ObjectId
  *
  * @typedef {import("./types").TokenDocument} TokenDocument
  * @typedef {import("./types").CreateAndSignTokenResult} CreateAndSignTokenResult
@@ -29,7 +30,7 @@ const { object, string } = PropTypes;
  *
  * @typedef CreateTokenOptions
  * @property {object} [projection]
- * @property {import("@parameter1/sso-mongodb-core").ClientSession} [session]
+ * @property {import("@parameter1/mongodb-core").ClientSession} [session]
  */
 export class TokenRepo {
   /**
@@ -42,12 +43,12 @@ export class TokenRepo {
   constructor(params) {
     /** @type {ConstructorParams} */
     const { mongo, tokenSecret } = attempt(params, object({
-      mongo: mongoDBClientProp.required(),
+      mongo: mongoClientProp.required(),
       tokenSecret: string().required(),
     }).required());
 
-    /** @type {import("@parameter1/sso-mongodb-core").Collection} */
-    this.collection = mongo.db(DB_NAME).collection('tokens');
+    /** @type {import("@parameter1/mongodb-core").Collection} */
+    this.collection = mongo.db('sso').collection('tokens');
 
     /** @type {string} */
     this.tokenSecret = tokenSecret;
@@ -97,7 +98,7 @@ export class TokenRepo {
    *
    * @param {CreateTokenParams} params
    * @param {CreateTokenOptions} options
-   * @returns {Promise<CreateAndSignTokenResult>}
+   * @returns {Promise<CreateAndSignResult>}
    */
   async createAndSign(params, { projection, session } = {}) {
     const doc = await this.createAndReturn(params, { projection, session });

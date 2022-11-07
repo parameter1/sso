@@ -1,5 +1,5 @@
 import { UserCommands, userProps } from '@parameter1/sso-mongodb-command';
-import { mongoDBClientProp, mongoSessionProp } from '@parameter1/sso-mongodb-core';
+import { mongoClientProp, mongoSessionProp } from '@parameter1/mongodb-prop-types';
 import { MaterializedUserRepo } from '@parameter1/sso-mongodb-materialized';
 import { TokenRepo, tokenProps } from '@parameter1/sso-mongodb-token';
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
@@ -22,8 +22,8 @@ const {
 } = PropTypes;
 
 /**
- * @typedef {import("@parameter1/sso-mongodb-core").ClientSession} ClientSession
- * @typedef {import("@parameter1/sso-mongodb-core").ObjectId} ObjectId
+ * @typedef {import("@parameter1/mongodb-core").ClientSession} ClientSession
+ * @typedef {import("@parameter1/mongodb-bson").ObjectId} ObjectId
  * @typedef {import("mongodb").FindOptions} FindOptions
  * @typedef {import("@parameter1/sso-mongodb-token")
  *  .CreateAndSignTokenResult} CreateAndSignTokenResult
@@ -33,7 +33,7 @@ const {
  */
 export class UserManager {
   /**
-   * @typedef {import("@parameter1/sso-mongodb-core").MongoClient} MongoClient
+   * @typedef {import("@parameter1/mongodb-core").MongoClient} MongoClient
    *
    * @typedef ConstructorParams
    * @property {MongoClient} mongo
@@ -53,7 +53,7 @@ export class UserManager {
       materialized,
       userLog,
     } = attempt(params, object({
-      mongo: mongoDBClientProp.required(),
+      mongo: mongoClientProp.required(),
       commands: object().instance(UserCommands).required(),
       token: object().instance(TokenRepo).required(),
       materialized: object().instance(MaterializedUserRepo).required(),

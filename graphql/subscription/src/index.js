@@ -1,4 +1,3 @@
-import { filterMongoURL } from '@parameter1/sso-mongodb';
 import { immediatelyThrow } from '@parameter1/utils';
 import pkg from '../package.js';
 import createServer from './create-server.js';

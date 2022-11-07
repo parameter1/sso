@@ -1,11 +1,11 @@
 import inquirer from 'inquirer';
 import {
-  commandHandler,
   materializedRepoManager,
   normalizedRepoManager,
   tokenRepo,
   userLogRepo,
 } from '../../mongodb.js';
+import { commands } from '../../service-clients.js';
 
 export default async () => {
   const questions = [
@@ -23,8 +23,8 @@ export default async () => {
   if (!confirm) return null;
   return new Map(await Promise.all([
     (async () => {
-      const r = await commandHandler.createIndexes();
-      return ['command', r];
+      const r = await commands.request('createIndexes');
+      return ['command', new Map(r)];
     })(),
     (async () => {
       const r = await normalizedRepoManager.createAllIndexes();

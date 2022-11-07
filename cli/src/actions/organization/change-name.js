@@ -2,8 +2,7 @@ import inquirer from 'inquirer';
 import { organizationProps } from '@parameter1/sso-mongodb-command';
 
 import getOrgList from '../utils/get-org-list.js';
-import { organizationCommands } from '../../mongodb.js';
-import { waitUntilProcessed } from '../../pubsub.js';
+import { commands } from '../../service-clients.js';
 
 export default async () => {
   const questions = [
@@ -43,7 +42,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  return waitUntilProcessed(() => organizationCommands.changeName({
+  return commands.request('organization.changeName', {
     input: [{ entityId: org._id, name }],
-  }));
+    awaitProcessing: true,
+  });
 };

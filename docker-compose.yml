@@ -59,6 +59,9 @@ services:
     command: ["src/index.js"]
     environment:
       <<: [*env, *env-redis-pubsub, *env-entity-message, *env-mongodb, *env-token]
+      ENTITY_COMMAND_URL: ${ENTITY_COMMAND_URL-http://entity-command}
+    depends_on:
+      - entity-command
 
   commands:
     <<: *node

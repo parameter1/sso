@@ -2,8 +2,7 @@ import inquirer from 'inquirer';
 import { managerProps } from '@parameter1/sso-mongodb-command';
 
 import { getOrgList, getUserList } from '../utils/index.js';
-import { managerCommands } from '../../mongodb.js';
-import { waitUntilProcessed } from '../../pubsub.js';
+import { commands } from '../../service-clients.js';
 
 export default async () => {
   const questions = [
@@ -55,7 +54,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  return waitUntilProcessed(() => managerCommands.createOrRestore({
+  return commands.request('manager.create', {
     input: [{ entityId: { org: org._id, user: user._id }, values: { role } }],
-  }));
+    awaitProcessing: true,
+  });
 };

@@ -2,8 +2,7 @@ import inquirer from 'inquirer';
 import { applicationProps } from '@parameter1/sso-mongodb-command';
 
 import getAppList from '../utils/get-app-list.js';
-import { applicationCommands } from '../../mongodb.js';
-import { waitUntilProcessed } from '../../pubsub.js';
+import { commands } from '../../service-clients.js';
 
 export default async () => {
   const questions = [
@@ -43,7 +42,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  return waitUntilProcessed(() => applicationCommands.changeName({
+  return commands.request('application.changeName', {
     input: [{ entityId: app._id, name }],
-  }));
+    awaitProcessing: true,
+  });
 };

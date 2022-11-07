@@ -2,8 +2,7 @@ import inquirer from 'inquirer';
 import { managerProps } from '@parameter1/sso-mongodb-command';
 
 import { getOrgList } from '../utils/index.js';
-import { managerCommands } from '../../mongodb.js';
-import { waitUntilProcessed } from '../../pubsub.js';
+import { commands } from '../../service-clients.js';
 
 export default async () => {
   const questions = [
@@ -71,7 +70,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  return waitUntilProcessed(() => managerCommands.changeRole({
+  return commands.request('manager.changeRole', {
     input: [{ entityId: { org: org._id, user: user.node._id }, role }],
-  }));
+    awaitProcessing: true,
+  });
 };

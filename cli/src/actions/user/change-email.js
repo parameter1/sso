@@ -2,8 +2,8 @@ import inquirer from 'inquirer';
 import { userProps } from '@parameter1/sso-mongodb-command';
 
 import getUserList from '../utils/get-user-list.js';
-import { userCommands, materializedRepoManager } from '../../mongodb.js';
-import { waitUntilProcessed } from '../../pubsub.js';
+import { materializedRepoManager } from '../../mongodb.js';
+import { commands } from '../../service-clients.js';
 
 const repo = materializedRepoManager.get('user');
 
@@ -49,7 +49,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  return waitUntilProcessed(() => userCommands.changeEmail({
+  return commands.request('user.changeEmail', {
     input: [{ entityId: user._id, email }],
-  }));
+    awaitProcessing: true,
+  });
 };

@@ -2,8 +2,8 @@ import inquirer from 'inquirer';
 import { memberProps } from '@parameter1/sso-mongodb-command';
 
 import { getWorkspaceList, getUserList } from '../utils/index.js';
-import { memberCommands, materializedRepoManager } from '../../mongodb.js';
-import { waitUntilProcessed } from '../../pubsub.js';
+import { materializedRepoManager } from '../../mongodb.js';
+import { commands } from '../../service-clients.js';
 
 export default async () => {
   const questions = [
@@ -60,7 +60,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  return waitUntilProcessed(() => memberCommands.createOrRestore({
+  return commands.request('member.createOrRestore', {
     input: [{ entityId: { user: user._id, workspace: workspace._id }, values: { role } }],
-  }));
+    awaitProcessing: true,
+  });
 };

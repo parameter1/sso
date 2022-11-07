@@ -3,8 +3,8 @@ import { workspaceProps } from '@parameter1/sso-mongodb-command';
 import { sluggify } from '@parameter1/slug';
 
 import { getAppList, getOrgList } from '../utils/index.js';
-import { workspaceCommands, materializedRepoManager } from '../../mongodb.js';
-import { waitUntilProcessed } from '../../pubsub.js';
+import { materializedRepoManager } from '../../mongodb.js';
+import { commands } from '../../service-clients.js';
 
 const repo = materializedRepoManager.get('workspace');
 
@@ -75,7 +75,7 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  return waitUntilProcessed(() => workspaceCommands.create({
+  return commands.request('workspace.create', {
     input: [{
       values: {
         appId: app._id,
@@ -84,5 +84,6 @@ export default async () => {
         key,
       },
     }],
-  }));
+    awaitProcessing: true,
+  });
 };

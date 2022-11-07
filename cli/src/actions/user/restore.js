@@ -1,8 +1,7 @@
 import inquirer from 'inquirer';
 
 import getUserList from '../utils/get-user-list.js';
-import { userCommands } from '../../mongodb.js';
-import { waitUntilProcessed } from '../../pubsub.js';
+import { commands } from '../../service-clients.js';
 
 export default async () => {
   const questions = [
@@ -28,7 +27,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  return waitUntilProcessed(() => userCommands.restore({
+  return commands.request('user.restore', {
     input: [{ entityId: user._id, email: user.email }],
-  }));
+    awaitProcessing: true,
+  });
 };

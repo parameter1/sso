@@ -2,8 +2,8 @@ import inquirer from 'inquirer';
 import { sluggify } from '@parameter1/slug';
 import { organizationProps } from '@parameter1/sso-mongodb-command';
 
-import { organizationCommands, materializedRepoManager } from '../../mongodb.js';
-import { waitUntilProcessed } from '../../pubsub.js';
+import { materializedRepoManager } from '../../mongodb.js';
+import { commands } from '../../service-clients.js';
 
 const repo = materializedRepoManager.get('organization');
 
@@ -73,7 +73,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  return waitUntilProcessed(() => organizationCommands.create({
+  return commands.request('organization.create', {
     input: [{ values: { name, key, emailDomains } }],
-  }));
+    awaitProcessing: true,
+  });
 };

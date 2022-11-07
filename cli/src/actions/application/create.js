@@ -2,8 +2,8 @@ import inquirer from 'inquirer';
 import { sluggify } from '@parameter1/slug';
 import { applicationProps } from '@parameter1/sso-mongodb-command';
 
-import { applicationCommands, materializedRepoManager } from '../../mongodb.js';
-import { waitUntilProcessed } from '../../pubsub.js';
+import { materializedRepoManager } from '../../mongodb.js';
+import { commands } from '../../service-clients.js';
 
 const repo = materializedRepoManager.get('application');
 
@@ -70,7 +70,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  return waitUntilProcessed(() => applicationCommands.create({
+  return commands.request('application.create', {
     input: [{ values: { name, key, roles } }],
-  }));
+    awaitProcessing: true,
+  });
 };

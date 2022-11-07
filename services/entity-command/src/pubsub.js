@@ -10,9 +10,4 @@ export const pubSubManager = new PubSubManager({
   },
 });
 
-const { log } = console;
-
-export const waitUntilProcessed = createWaitUntilProcessed({
-  pubSubManager,
-  log,
-});
+export const waitUntilProcessed = createWaitUntilProcessed({ pubSubManager });

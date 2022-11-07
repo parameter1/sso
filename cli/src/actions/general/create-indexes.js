@@ -1,11 +1,6 @@
 import inquirer from 'inquirer';
-import {
-  materializedRepoManager,
-  normalizedRepoManager,
-  tokenRepo,
-  userLogRepo,
-} from '../../mongodb.js';
-import { commands } from '../../service-clients.js';
+import { materializedRepoManager, normalizedRepoManager } from '../../mongodb.js';
+import { commands, userManager } from '../../service-clients.js';
 
 export default async () => {
   const questions = [
@@ -35,12 +30,8 @@ export default async () => {
       return ['materialized', r];
     })(),
     (async () => {
-      const r = await tokenRepo.createIndexes();
-      return ['token', r];
-    })(),
-    (async () => {
-      const r = await userLogRepo.createIndexes();
-      return ['userlog', r];
+      const r = await userManager.request('createIndexes');
+      return ['user', new Map(r)];
     })(),
   ]));
 };

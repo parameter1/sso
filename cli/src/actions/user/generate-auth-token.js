@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import { getUserList } from '../utils/index.js';
-import { userManager } from '../../mongodb.js';
+import { userManager } from '../../service-clients.js';
 
 export default async () => {
   const questions = [
@@ -24,12 +24,12 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  const loginLinkToken = await userManager.createLoginLinkToken({
+  const loginLinkToken = await userManager.request('createLoginLinkToken', {
     email: user.email,
     impersonated: true,
   });
 
-  const { authToken } = await userManager.magicLogin({
+  const { authToken } = await userManager.request('magicLogin', {
     loginLinkToken,
   });
   return authToken;

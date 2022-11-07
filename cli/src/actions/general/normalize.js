@@ -1,6 +1,6 @@
 import inquirer from 'inquirer';
 import { EntityTypes } from '@parameter1/sso-entity-types';
-import { commandHandler } from '../../mongodb.js';
+import { normalizer } from '../../mongodb.js';
 
 export default async () => {
   const questions = [
@@ -21,7 +21,7 @@ export default async () => {
   const { entityTypes, confirm } = await inquirer.prompt(questions);
   if (!confirm) return [];
   return new Map(await Promise.all(entityTypes.map(async (entityType) => {
-    await commandHandler.normalize({ entityIds: [], entityType });
+    await normalizer.normalize({ entityIds: [], entityType });
     return [entityType, 'ok'];
   })));
 };

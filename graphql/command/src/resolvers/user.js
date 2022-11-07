@@ -1,4 +1,4 @@
-import { commands, userManager } from '../service-clients.js';
+import { userManager } from '../service-clients.js';
 
 export default {
   /**
@@ -31,15 +31,15 @@ export default {
      */
     async ownUserNames(_, { input }, { auth }) {
       const entityId = await auth.getUserId();
-      const [event] = await commands.request('user.changeName', {
+      return {
+        action: 'user.changeName',
         input: [{
           entityId,
           familyName: input.family,
           givenName: input.given,
           userId: entityId,
         }],
-      });
-      return event;
+      };
     },
 
     /**

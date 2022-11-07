@@ -27,6 +27,7 @@ export default async (options = {}) => {
     context: ({ request }) => ({
       auth: AuthContext({ header: request.headers.authorization, userManager }),
       ip: request.ip,
+      origin: request.headers.origin,
       ua: request.headers['user-agent'],
     }),
     schema,

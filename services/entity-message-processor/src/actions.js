@@ -1,5 +1,5 @@
 import { covertActionError } from '@parameter1/micro-ejson';
-import { materializers, store } from './mongodb.js';
+import { materializers, normalizer } from './mongodb.js';
 import { pubSubManager, COMMAND_PROCESSED } from './pubsub.js';
 
 export default {
@@ -12,7 +12,8 @@ export default {
     userId,
   }) => {
     await covertActionError(async () => {
-      await store.normalize({ entityIds: [entityId], entityType });
+      await normalizer.normalize({ entityIds: [entityId], entityType });
+      // await store.normalize({ entityIds: [entityId], entityType });
       await materializers.materialize(entityType, { entityIds: [entityId] });
       await pubSubManager.publish(COMMAND_PROCESSED, {
         _id,

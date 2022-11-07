@@ -1,6 +1,6 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
+import { EventStore } from '@parameter1/sso-mongodb-event-store';
 import { sluggify } from '@parameter1/slug';
-import { CommandHandler } from '../handler.js';
 
 import { changeOrganizationName, createOrganization } from './schema.js';
 
@@ -12,18 +12,18 @@ const { array, object } = PropTypes;
 export class OrganizationCommands {
   /**
    * @typedef ConstructorParams
-   * @property {CommandHandler} handler
+   * @property {EventStore} store
    *
    * @param {ConstructorParams} params
    */
   constructor(params) {
     /** @type {ConstructorParams} */
-    const { handler } = attempt(params, object({
-      handler: object().instance(CommandHandler).required(),
+    const { store } = attempt(params, object({
+      store: object().instance(EventStore).required(),
     }).required());
     this.entityType = 'organization';
-    /** @type {CommandHandler} */
-    this.handler = handler;
+    /** @type {EventStore} */
+    this.store = store;
   }
 
   /**
@@ -41,7 +41,7 @@ export class OrganizationCommands {
       input: array().items(changeOrganizationName).required(),
     }).required().label('organization.changeName'), params);
 
-    return this.handler.executeUpdate({
+    return this.store.executeUpdate({
       entityType: this.entityType,
       input: input.map(({ name, ...rest }) => ({
         ...rest,
@@ -66,22 +66,22 @@ export class OrganizationCommands {
       input: array().items(createOrganization).required(),
     }).required().label('organization.create'), params);
 
-    const session = this.handler.startSession();
+    const session = this.store.startSession();
     try {
       let results;
       await session.withTransaction(async (activeSession) => {
         // reserve first, so failed reservations will not trigger a push message
-        await this.handler.reserve({
+        await this.store.reserve({
           input: input.map((o) => ({
             entityId: o.entityId,
             entityType: this.entityType,
             key: 'key',
             value: o.values.key,
           })),
-          session,
+          session: activeSession,
         });
 
-        results = await this.handler.executeCreate({
+        results = await this.store.executeCreate({
           entityType: this.entityType,
           input: input.map(({ values, ...rest }) => ({
             ...rest,

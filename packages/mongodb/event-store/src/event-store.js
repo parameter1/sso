@@ -1,16 +1,62 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { eventProps } from '@parameter1/sso-prop-types-event';
-import { DB_NAME, EJSON, mongoDBClientProp } from '@parameter1/sso-mongodb-core';
-import { UserNormalizationBuilder } from './normalization-builders/user.js';
+import {
+  DB_NAME,
+  EJSON,
+  mongoDBClientProp,
+  mongoSessionProp,
+} from '@parameter1/sso-mongodb-core';
+import { SQSClient, enqueueMessages } from '@parameter1/sso-sqs';
 
-const { array, object } = PropTypes;
+const {
+  any,
+  array,
+  boolean,
+  func,
+  object,
+  string,
+  url,
+} = PropTypes;
+
+export const reservationProps = {
+  key: string(),
+  value: any().disallow(null, ''),
+};
 
 /**
  * @typedef {import("./index").EventStoreResult} EventStoreResult
  * @typedef {import("./index").EventStoreDocument} EventStoreDocument
+ * @typedef {import("mongodb").BulkWriteResult} BulkWriteResult
+ * @typedef {import("@parameter1/sso-mongodb-core").Collection} Collection
+ * @typedef {import("@parameter1/sso-mongodb-core").ClientSession} ClientSession
+ * @typedef {import("@parameter1/sso-mongodb-core").MongoClient} MongoClient
+ *
+ * @typedef ReservationsReleaseParams
+ * @property {ReservationsReleaseParamsInput[]} input
+ * @property {ClientSession} [session]
+ *
+ * @typedef ReservationsReleaseParamsInput
+ * @property {*} entityId
+ * @property {string} entityType
+ * @property {string} key
+ *
+ * @typedef ReservationsReserveParams
+ * @property {ReservationsReserveParamsInput[]} input
+ * @property {ClientSession} [session]
+ *
+ * @typedef ReservationsReserveParamsInput
+ * @property {*} entityId
+ * @property {string} entityType
+ * @property {string} key
+ * @property {*} value
  *
  * @typedef EventStoreConstructorParams
- * @property {import("mongodb").MongoClient} mongo The MongoDB client
+ * @property {MongoClient} mongo The MongoDB client
+ * @property {EventStoreConstructorParamsSQS} sqs
+ *
+ * @typedef EventStoreConstructorParamsSQS
+ * @property {SQSClient} client
+ * @property {string} url
  */
 export class EventStore {
   /**
@@ -19,176 +65,299 @@ export class EventStore {
    */
   constructor(params) {
     /** @type {EventStoreConstructorParams} */
-    const { mongo } = attempt(params, object({
+    const { mongo, sqs } = attempt(params, object({
       mongo: mongoDBClientProp.required(),
+      sqs: object({
+        client: object().instance(SQSClient).required(),
+        url: url().required(),
+      }).required(),
     }).required());
 
-    /** @type {import("mongodb").MongoClient} */
+    /** @type {MongoClient} */
     this.mongo = mongo;
 
-    /** @type {import("mongodb").Collection} */
+    /** @type {Collection} */
     this.collection = mongo.db(DB_NAME).collection('event-store');
 
-    /**
-     * @type {Map<string, UserNormalizationBuilder>}
-     */
-    this.normalizedBuilders = new Map([
-      ['user', UserNormalizationBuilder],
-    ]);
+    /** @type {Collection} */
+    this.reservations = mongo.db(DB_NAME).collection('reservations');
+
+    /** @type {CommandHandlerConstructorParamsSQS} */
+    this.sqs = sqs;
   }
 
   /**
-   * Builds the pipeline for normalizing the event store.
-   *
-   * @typedef BuildNormalizationPipelineParams
+   * @typedef CanPushParams
    * @property {Array} entityIds
    * @property {string} entityType
+   * @property {function} eligibleWhenFn
+   * @property {boolean} [throwWhenFalse=true]
    *
-   * @param {BuildNormalizationPipelineParams} params
-   * @returns {object[]}
+   * @param {CanPushParams} params
    */
-  buildNormalizationPipeline(params) {
-    /** @type {BuildNormalizationPipelineParams} */
-    const { entityIds, entityType } = attempt(params, object({
-      entityIds: array().items(eventProps.entityId).required(),
-      entityType: eventProps.entityType.required(),
-    }).required());
-
-    const builder = this.normalizedBuilders.get(entityType);
+  async canPush(params) {
+    /** @type {CanPushParams} */
     const {
-      mergeValuesStages = [],
-      newRootMergeObjects = [],
-      unsetFields = [],
-      valueBranches = [],
-    } = builder ? builder.get() : {};
+      entityIds,
+      entityType,
+      eligibleWhenFn,
+      throwWhenFalse,
+    } = await validateAsync(object({
+      entityIds: array().items(eventProps.entityId.required()).required(),
+      entityType: eventProps.entityType.required(),
+      eligibleWhenFn: func().required(),
+      throwWhenFalse: boolean().default(true),
+    }).required().label('handler.canPush'), params);
 
-    return [{
-      $match: {
-        ...(entityIds.length && { entityId: { $in: entityIds } }),
-        entityType,
-      },
-    }, {
-      $sort: EventStore.getEventSort(),
-    }, {
-      $group: { _id: '$entityId', stream: { $push: '$$ROOT' } },
-    }, {
-      $set: {
-        _: {
-          $reduce: {
-            input: '$stream',
-            initialValue: {},
-            in: {
-              isDeleted: {
-                $cond: [
-                  { $eq: ['$$this.command', 'DELETE'] },
-                  true,
-                  {
-                    $cond: [
-                      { $eq: ['$$this.command', 'RESTORE'] },
-                      false,
-                      { $ifNull: ['$$value.isDeleted', false] },
-                    ],
-                  },
-                ],
-              },
+    const states = await this.getEntityStatesFor({ entityIds, entityType });
+    const ineligible = entityIds.reduce((set, entityId) => {
+      const id = EJSON.stringify(entityId);
+      const state = states.get(id);
+      const eligible = eligibleWhenFn({ state });
+      if (!eligible) set.add(id);
+      return set;
+    }, new Set());
 
-              created: {
-                $ifNull: [
-                  {
-                    $cond: [
-                      { $eq: ['$$this.command', 'CREATE'] },
-                      { date: '$$this.date', userId: '$$this.userId' },
-                      null,
-                    ],
-                  },
-                  '$$value.created',
-                ],
-              },
-
-              modified: {
-                $cond: [
-                  { $eq: ['$$this.omitFromModified', true] },
-                  '$$value.modified',
-                  {
-                    date: '$$this.date',
-                    n: { $add: [{ $ifNull: ['$$value.modified.n', 0] }, 1] },
-                    userId: '$$this.userId',
-                  },
-                ],
-              },
-
-              touched: {
-                date: '$$this.date',
-                n: { $add: [{ $ifNull: ['$$value.touched.n', 0] }, 1] },
-                userId: '$$this.userId',
-              },
-
-              values: {
-                $mergeObjects: [
-                  '$$value.values',
-                  {
-                    $cond: [
-                      { $eq: ['$$this.command', 'DELETED'] },
-                      {},
-                      valueBranches.length ? {
-                        $switch: {
-                          branches: valueBranches,
-                          default: '$$this.values',
-                        },
-                      } : '$$this.values',
-                    ],
-                  },
-                  ...mergeValuesStages,
-                ],
-              },
-            },
-          },
-        },
-      },
-    }, {
-      $replaceRoot: {
-        newRoot: {
-          $mergeObjects: [
-            { _id: '$_id' },
-            {
-              _deleted: '$_.isDeleted',
-              _history: { $filter: { input: '$stream', cond: { $ne: ['$$this.omitFromHistory', true] } } },
-              _meta: { created: '$_.created', modified: '$_.modified', touched: '$_.touched' },
-              _normalized: '$$NOW',
-            },
-            '$_.values',
-            ...newRootMergeObjects,
-          ],
-        },
-      },
-    }, {
-      $unset: [
-        '_history.entityId',
-        '_history.omitFromHistory',
-        '_history.omitFromModified',
-        ...unsetFields,
-      ],
-    }, {
-      $merge: {
-        into: { db: DB_NAME, coll: `${entityType}/normalized` },
-        on: '_id',
-        whenMatched: 'replace',
-        whenNotMatched: 'insert',
-      },
-    }];
+    const canPush = !ineligible.size;
+    if (!throwWhenFalse) return canPush;
+    if (!canPush) {
+      const error = new Error(`Unable to execute command: no eligible ${entityType} entities were found for ${[...ineligible].join(', ')}.`);
+      error.statusCode = 404;
+      throw error;
+    }
+    return true;
   }
 
   /**
-   * Creates the database indexes for this store.
    *
-   * @returns {Promise<string[]>}
+   * @param {Array} entityIds
+   * @param {string} entityType
+   * @param {object} options
+   * @param {boolean} options.throwWhenFalse
+   * @returns {Promise<boolean>}
+   */
+  async canPushDelete({ entityIds, entityType }, { throwWhenFalse } = {}) {
+    return this.canPush({
+      entityIds,
+      entityType,
+      throwWhenFalse,
+      eligibleWhenFn: ({ state }) => state === 'CREATED',
+    });
+  }
+
+  /**
+   *
+   * @param {Array} entityIds
+   * @param {string} entityType
+   * @param {object} options
+   * @param {boolean} options.throwWhenFalse
+   * @returns {Promise<boolean>}
+   */
+  async canPushRestore({ entityIds, entityType }, { throwWhenFalse } = {}) {
+    return this.canPush({
+      entityIds,
+      entityType,
+      throwWhenFalse,
+      eligibleWhenFn: ({ state }) => state === 'DELETED',
+    });
+  }
+
+  /**
+   *
+   * @param {Array} entityIds
+   * @param {string} entityType
+   * @param {object} options
+   * @param {boolean} [options.throwWhenFalse]
+   * @returns {Promise<boolean>}
+   */
+  async canPushUpdate({ entityIds, entityType }, { throwWhenFalse } = {}) {
+    return this.canPush({
+      entityIds,
+      entityType,
+      throwWhenFalse,
+      eligibleWhenFn: ({ state }) => state === 'CREATED',
+    });
+  }
+
+  /**
+   * Creates the database indexes for the store and reservation collection.
+   *
+   * @returns {Promise<Map<string, string[]>>}
    */
   async createIndexes() {
-    return this.collection.createIndexes([
-      { key: { entityId: 1, date: 1, _id: 1 } },
-      { key: { entityId: 1, entityType: 1, command: 1 } },
-      { key: { entityId: 1, entityType: 1 }, unique: true, partialFilterExpression: { command: 'CREATE' } },
-    ]);
+    return new Map(await Promise.all([
+      (async () => {
+        const r = await this.collection.createIndexes([
+          { key: { entityId: 1, date: 1, _id: 1 } },
+          { key: { entityId: 1, entityType: 1, command: 1 } },
+          { key: { entityId: 1, entityType: 1 }, unique: true, partialFilterExpression: { command: 'CREATE' } },
+        ]);
+        return ['store', r];
+      })(),
+      (async () => {
+        const r = await this.reservations.createIndexes([
+          { key: { entityId: 1 } },
+          { key: { value: 1, key: 1, entityType: 1 }, unique: true },
+        ]);
+        return ['reservations', r];
+      })(),
+    ]));
+  }
+
+  /**
+   * @typedef ExecuteCreateParams
+   * @property {string} entityType
+   * @property {ExecuteCreateParamsInput[]} input
+   * @property {ClientSession} [session]
+   *
+   * @typedef ExecuteCreateParamsInput
+   * @property {Date|string} [date]
+   * @property {*} entityId
+   * @property {ObjectId|null} [userId]
+   * @property {object} [values]
+   *
+   * @param {ExecuteCreateParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async executeCreate(params) {
+    /** @type {ExecuteCreateParams} */
+    const { entityType, input, session } = await validateAsync(object({
+      entityType: eventProps.entityType.required(),
+      input: array().items(object({
+        date: eventProps.date,
+        entityId: eventProps.entityId.required(),
+        userId: eventProps.userId,
+        values: eventProps.values.required(),
+      }).required()).required(),
+      session: mongoSessionProp,
+    }).required().label('handler.executeCreate'), params);
+
+    return this.push({
+      events: input.map((event) => ({
+        ...event,
+        entityType,
+        command: 'CREATE',
+      })),
+      session,
+    });
+  }
+
+  /**
+   * @typedef ExecuteDeleteParams
+   * @property {string} entityType
+   * @property {ExecuteDeleteParamsInput[]} input
+   * @property {ClientSession} [session]
+   *
+   * @typedef ExecuteDeleteParamsInput
+   * @property {Date|string} [date]
+   * @property {*} entityId
+   * @property {ObjectId|null} [userId]
+   *
+   * @param {ExecuteDeleteParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async executeDelete(params) {
+    /** @type {ExecuteDeleteParams} */
+    const { entityType, input, session } = await validateAsync(object({
+      entityType: eventProps.entityType.required(),
+      input: array().items(object({
+        date: eventProps.date,
+        entityId: eventProps.entityId.required(),
+        userId: eventProps.userId,
+      }).required()).required(),
+      session: mongoSessionProp,
+    }).required().label('handler.executeDelete'), params);
+
+    const { entityIds, events } = input.reduce((o, command) => {
+      o.entityIds.push(command.entityId);
+      o.events.push({ ...command, entityType, command: 'DELETE' });
+      return o;
+    }, { entityIds: [], events: [] });
+
+    await this.canPushDelete({ entityType, entityIds });
+    return this.push({ events, session });
+  }
+
+  /**
+   * @typedef ExecuteRestoreParams
+   * @property {string} entityType
+   * @property {ExecuteRestoreParamsInput[]} input
+   * @property {ClientSession} [session]
+   *
+   * @typedef ExecuteRestoreParamsInput
+   * @property {Date|string} [date]
+   * @property {*} entityId
+   * @property {ObjectId|null} [userId]
+   * @property {object} [values]
+   *
+   * @param {ExecuteRestoreParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async executeRestore(params) {
+    /** @type {ExecuteRestoreParams} */
+    const { entityType, input, session } = await validateAsync(object({
+      entityType: eventProps.entityType.required(),
+      input: array().items(object({
+        date: eventProps.date,
+        entityId: eventProps.entityId.required(),
+        userId: eventProps.userId,
+        values: eventProps.values.default({}),
+      }).required()).required(),
+      session: mongoSessionProp,
+    }).required().label('handler.executeRestore'), params);
+
+    const { entityIds, events } = input.reduce((o, command) => {
+      o.entityIds.push(command.entityId);
+      o.events.push({ ...command, entityType, command: 'RESTORE' });
+      return o;
+    }, { entityIds: [], events: [] });
+
+    await this.canPushRestore({ entityIds, entityType });
+    return this.push({ events, session });
+  }
+
+  /**
+   * @typedef ExecuteUpdateParams
+   * @property {string} entityType
+   * @property {ExecuteUpdateParamsInput[]} input
+   * @property {ClientSession} [session]
+   *
+   * @typedef ExecuteUpdateParamsInput
+   * @property {string} command
+   * @property {Date|string} [date]
+   * @property {*} entityId
+   * @property {boolean} [omitFromHistory]
+   * @property {boolean} [omitFromModified]
+   * @property {ObjectId|null} [userId]
+   * @property {object} [values]
+   *
+   * @param {ExecuteUpdateParams} params
+   * @returns {Promise<EventStoreResult[]>}
+   */
+  async executeUpdate(params) {
+    /** @type {ExecuteUpdateParams} */
+    const { entityType, input, session } = await validateAsync(object({
+      entityType: eventProps.entityType.required(),
+      input: array().items(object({
+        command: eventProps.command.required(),
+        date: eventProps.date,
+        entityId: eventProps.entityId.required(),
+        omitFromHistory: eventProps.omitFromHistory,
+        omitFromModified: eventProps.omitFromModified,
+        userId: eventProps.userId,
+        values: eventProps.values.default({}),
+      }).required()).required(),
+      session: mongoSessionProp,
+    }).required().label('handler.executeUpdate'), params);
+
+    const { entityIds, events } = input.reduce((o, command) => {
+      o.entityIds.push(command.entityId);
+      o.events.push({ ...command, entityType });
+      return o;
+    }, { entityIds: [], events: [] });
+
+    await this.canPushUpdate({ entityIds, entityType });
+    return this.push({ events, session });
   }
 
   /**
@@ -234,28 +403,6 @@ export class EventStore {
   }
 
   /**
-   * Normalizes data from the event store collection based on the provided entity type and IDs
-   *
-   * @typedef EventStoreNormalizeParams
-   * @property {Array} entityIds
-   * @property {string} entityType
-   *
-   * @param {string} type The entity type to push events for
-   * @param {EventStoreNormalizeParams} params
-   * @returns {Promise<void>}
-   */
-  async normalize(params) {
-    /** @type {EventStoreNormalizeParams} */
-    const { entityIds, entityType } = await validateAsync(object({
-      entityIds: array().items(eventProps.entityId).required(),
-      entityType: eventProps.entityType.required(),
-    }).required().label('eventStore.normalize'), params);
-
-    const pipeline = this.buildNormalizationPipeline({ entityIds, entityType });
-    await this.collection.aggregate(pipeline).toArray();
-  }
-
-  /**
    * Pushes and persists one or more events to the store.
    *
    * @typedef PushParams
@@ -267,7 +414,7 @@ export class EventStore {
    */
   async push(params) {
     /** @type {PushParams} */
-    const { events, session } = await validateAsync(object({
+    const { events, session: currentSession } = await validateAsync(object({
       events: array().items(object({
         command: eventProps.command.required(),
         entityId: eventProps.entityId.required(),
@@ -281,32 +428,133 @@ export class EventStore {
       session: object(),
     }).required().label('eventStore.push'), params);
 
-    const objs = [];
-    const operations = [];
-    events.forEach((event) => {
-      const prepared = { ...event, values: { $literal: event.values } };
-      objs.push(prepared);
-      operations.push({
-        updateOne: {
-          filter: { _id: { $lt: 0 } },
-          update: [{ $replaceRoot: { newRoot: { $mergeObjects: [prepared, '$$ROOT'] } } }],
-          upsert: true,
-        },
+    const push = async (session) => {
+      const objs = [];
+      const operations = [];
+      events.forEach((event) => {
+        const prepared = { ...event, values: { $literal: event.values } };
+        objs.push(prepared);
+        operations.push({
+          updateOne: {
+            filter: { _id: { $lt: 0 } },
+            update: [{ $replaceRoot: { newRoot: { $mergeObjects: [prepared, '$$ROOT'] } } }],
+            upsert: true,
+          },
+        });
       });
-    });
 
-    const { result } = await this.collection.bulkWrite(operations, { session });
-    return result.upserted.map(({ _id, index }) => {
-      const o = objs[index];
-      return {
-        _id,
-        command: o.command,
-        entityId: o.entityId,
-        entityType: o.entityType,
-        userId: o.userId,
-        values: o.values.$literal || {},
-      };
-    });
+      const { result } = await this.collection.bulkWrite(operations, { session });
+      const results = result.upserted.map(({ _id, index }) => {
+        const o = objs[index];
+        return {
+          _id,
+          command: o.command,
+          entityId: o.entityId,
+          entityType: o.entityType,
+          userId: o.userId,
+          values: o.values.$literal || {},
+        };
+      });
+
+      await enqueueMessages({
+        // strip values so they are not sent over the wire (can be large)
+        messages: results.map(({ values, ...o }) => ({
+          body: o,
+          attributes: [
+            { name: 'command', value: o.command },
+            { name: 'entityId', value: EJSON.stringify(o.entityId) },
+            { name: 'entityType', value: o.entityType },
+            { name: 'userId', value: `${o.userId}` },
+          ],
+        })),
+        queueUrl: this.sqs.url,
+        sqsClient: this.sqs.client,
+      });
+
+      return results;
+    };
+
+    if (currentSession) {
+      const results = await push(currentSession);
+      return results;
+    }
+
+    const session = this.mongo.startSession();
+    try {
+      let results;
+      await session.withTransaction(async (activeSession) => {
+        results = await push(activeSession);
+      });
+      return results;
+    } finally {
+      await session.endSession();
+    }
+  }
+
+  /**
+   * Releases entity field values.
+   *
+   * @param {ReservationsReleaseParams} params
+   * @returns {Promise<BulkWriteResult>}
+   */
+  async release(params) {
+    /** @type {ReservationsReleaseParams} */
+    const { input, session } = await validateAsync(object({
+      input: array().items(object({
+        entityId: eventProps.entityId.required(),
+        entityType: eventProps.entityType.required(),
+        key: reservationProps.key.required(),
+      }).required()).required(),
+      session: mongoSessionProp,
+    }).required(), params);
+
+    const operations = input.map((document) => ({
+      deleteOne: { filter: document },
+    }));
+    return this.reservations.bulkWrite(operations, { session });
+  }
+
+  /**
+   * Reserves entity field values.
+   *
+   * @param {ReservationsReserveParams} params
+   * @returns {Promise<BulkWriteResult>}
+   */
+  async reserve(params) {
+    /** @type {ReservationsReserveParams} */
+    const { input, session } = await validateAsync(object({
+      input: array().items(object({
+        entityId: eventProps.entityId.required(),
+        entityType: eventProps.entityType.required(),
+        key: reservationProps.key.required(),
+        value: reservationProps.value.required(),
+      }).required()).required(),
+      session: mongoSessionProp,
+    }).required(), params);
+
+    const operations = input.map((document) => ({
+      insertOne: document,
+    }));
+
+    try {
+      const result = await this.reservations.bulkWrite(operations, { session });
+      return result;
+    } catch (e) {
+      if (e.code !== 11000 || !e.writeErrors) throw e;
+      const [writeError] = e.writeErrors;
+      const { op } = writeError.err;
+      const error = new Error(`The ${op.entityType} ${op.key} '${op.value}' is already in use.'`);
+      error.statusCode = 409;
+      throw error;
+    }
+  }
+
+  /**
+   *
+   * @returns {ClientSession}
+   */
+  startSession() {
+    return this.mongo.startSession();
   }
 
   /**

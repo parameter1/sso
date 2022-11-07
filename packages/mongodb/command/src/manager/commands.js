@@ -1,5 +1,5 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
-import { CommandHandler } from '../handler.js';
+import { EventStore } from '@parameter1/sso-mongodb-event-store';
 
 import {
   changeManagerRole,
@@ -17,18 +17,18 @@ const { array, object } = PropTypes;
 export class ManagerCommands {
   /**
    * @typedef ConstructorParams
-   * @property {CommandHandler} handler
+   * @property {EventStore} store
    *
    * @param {ConstructorParams} params
    */
   constructor(params) {
     /** @type {ConstructorParams} */
-    const { handler } = attempt(params, object({
-      handler: object().instance(CommandHandler).required(),
+    const { store } = attempt(params, object({
+      store: object().instance(EventStore).required(),
     }).required());
     this.entityType = 'manager';
-    /** @type {CommandHandler} */
-    this.handler = handler;
+    /** @type {EventStore} */
+    this.store = store;
   }
 
   /**
@@ -46,7 +46,7 @@ export class ManagerCommands {
       input: array().items(changeManagerRole).required(),
     }).required().label('manager.changeName'), params);
 
-    return this.handler.executeUpdate({
+    return this.store.executeUpdate({
       entityType: this.entityType,
       input: input.map(({ role, ...rest }) => ({
         ...rest,
@@ -71,7 +71,7 @@ export class ManagerCommands {
       input: array().items(createManager).required(),
     }).required().label('manager.create'), params);
 
-    return this.handler.executeCreate({
+    return this.store.executeCreate({
       entityType: this.entityType,
       input,
     });
@@ -116,7 +116,7 @@ export class ManagerCommands {
       input: array().items(deleteManager).required(),
     }).required().label('manager.delete'), params);
 
-    return this.handler.executeDelete({
+    return this.store.executeDelete({
       entityType: this.entityType,
       input,
     });
@@ -137,7 +137,7 @@ export class ManagerCommands {
       input: array().items(restoreManager).required(),
     }).required().label('manager.restore'), params);
 
-    return this.handler.executeRestore({
+    return this.store.executeRestore({
       entityType: this.entityType,
       input,
     });

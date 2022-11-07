@@ -7,9 +7,6 @@ import {
   MemberCommands,
   UserCommands,
   WorkspaceCommands,
-
-  CommandHandler,
-  Reservations,
 } from '@parameter1/sso-mongodb-command';
 
 import { MONGO_URL, SQS_QUEUE_URL } from './env.js';
@@ -20,17 +17,13 @@ export const mongo = new MongoClient(MONGO_URL, {
   appname: `${pkg.name} v${pkg.version}`,
 });
 
-export const handler = new CommandHandler({
-  reservations: new Reservations({ mongo }),
-  sqs: { client: sqsClient, url: SQS_QUEUE_URL },
-  store: new EventStore({ mongo }),
-});
+export const store = new EventStore({ mongo, sqs: { client: sqsClient, url: SQS_QUEUE_URL } });
 
 export const commands = {
-  application: new ApplicationCommands({ handler }),
-  organization: new OrganizationCommands({ handler }),
-  manager: new ManagerCommands({ handler }),
-  member: new MemberCommands({ handler }),
-  user: new UserCommands({ handler }),
-  workspace: new WorkspaceCommands({ handler }),
+  application: new ApplicationCommands({ store }),
+  organization: new OrganizationCommands({ store }),
+  manager: new ManagerCommands({ store }),
+  member: new MemberCommands({ store }),
+  user: new UserCommands({ store }),
+  workspace: new WorkspaceCommands({ store }),
 };

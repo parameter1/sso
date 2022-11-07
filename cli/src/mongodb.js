@@ -2,8 +2,6 @@ import { MongoClient } from '@parameter1/sso-mongodb-core';
 import { EventStore } from '@parameter1/sso-mongodb-event-store';
 import {
   UserCommands,
-  CommandHandler,
-  Reservations,
 } from '@parameter1/sso-mongodb-command';
 import { MaterializedRepoManager } from '@parameter1/sso-mongodb-materialized';
 import { NormalizedRepoManager } from '@parameter1/sso-mongodb-normalized';
@@ -19,17 +17,13 @@ export const mongo = new MongoClient(MONGO_URL, {
   appname: `${pkg.name} v${pkg.version}`,
 });
 
-export const commandHandler = new CommandHandler({
-  reservations: new Reservations({ mongo }),
-  sqs: { client: sqsClient, url: SQS_QUEUE_URL },
-  store: new EventStore({ mongo }),
-});
+export const store = new EventStore({ mongo, sqs: { client: sqsClient, url: SQS_QUEUE_URL } });
 
 export const normalizedRepoManager = new NormalizedRepoManager({ mongo });
 export const materializedRepoManager = new MaterializedRepoManager({ mongo });
 export const materializers = new Materializer({ normalizedRepoManager });
 
-export const userCommands = new UserCommands({ handler: commandHandler });
+export const userCommands = new UserCommands({ store });
 
 export const tokenRepo = new TokenRepo({ mongo, tokenSecret: TOKEN_SECRET });
 export const userLogRepo = new UserLogRepo({ mongo });

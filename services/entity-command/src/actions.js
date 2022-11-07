@@ -1,6 +1,6 @@
 import { PropTypes, validateAsync } from '@parameter1/sso-prop-types-core';
 
-import { commands, handler } from './mongodb.js';
+import { commands, store } from './mongodb.js';
 import { waitUntilProcessed } from './pubsub.js';
 
 const { array, boolean, object } = PropTypes;
@@ -15,7 +15,7 @@ const extractClassMethodNames = (instance) => {
 
 export default {
   createIndexes: async () => {
-    const map = await handler.createIndexes();
+    const map = await store.createIndexes();
     return [...map];
   },
 

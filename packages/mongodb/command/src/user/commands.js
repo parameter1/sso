@@ -1,7 +1,7 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
+import { EventStore } from '@parameter1/sso-mongodb-event-store';
 import { mongoSessionProp } from '@parameter1/sso-mongodb-core';
 import { sluggify } from '@parameter1/slug';
-import { CommandHandler } from '../handler.js';
 
 import {
   changeUserEmail,
@@ -30,18 +30,18 @@ const { array, object } = PropTypes;
 export class UserCommands {
   /**
    * @typedef ConstructorParams
-   * @property {CommandHandler} handler
+   * @property {EventStore} store
    *
    * @param {ConstructorParams} params
    */
   constructor(params) {
     /** @type {ConstructorParams} */
-    const { handler } = attempt(params, object({
-      handler: object().instance(CommandHandler).required(),
+    const { store } = attempt(params, object({
+      store: object().instance(EventStore).required(),
     }).required());
     this.entityType = 'user';
-    /** @type {CommandHandler} */
-    this.handler = handler;
+    /** @type {EventStore} */
+    this.store = store;
   }
 
   /**
@@ -59,7 +59,7 @@ export class UserCommands {
       input: array().items(changeUserEmail).required(),
     }).required().label('user.changeEmail'), params);
 
-    const session = this.handler.startSession();
+    const session = this.store.startSession();
     try {
       let results;
       const { entityType } = this;
@@ -75,10 +75,10 @@ export class UserCommands {
           });
           return o;
         }, { release: [], reserve: [] });
-        await this.handler.release({ input: release, session: activeSession });
-        await this.handler.reserve({ input: reserve, session: activeSession });
+        await this.store.release({ input: release, session: activeSession });
+        await this.store.reserve({ input: reserve, session: activeSession });
 
-        results = await this.handler.executeUpdate({
+        results = await this.store.executeUpdate({
           entityType,
           input: input.map(({ email, ...rest }) => ({
             ...rest,
@@ -109,7 +109,7 @@ export class UserCommands {
       input: array().items(changeUserName).required(),
     }).required().label('user.changeName'), params);
 
-    return this.handler.executeUpdate({
+    return this.store.executeUpdate({
       entityType: this.entityType,
       input: input.map(({ familyName, givenName, ...rest }) => {
         const names = [givenName, familyName];
@@ -144,22 +144,22 @@ export class UserCommands {
       input: array().items(createUser).required(),
     }).required().label('user.create'), params);
 
-    const session = this.handler.startSession();
+    const session = this.store.startSession();
     try {
       let results;
       await session.withTransaction(async (activeSession) => {
         // reserve first, so failed reservations will not trigger a push message
-        await this.handler.reserve({
+        await this.store.reserve({
           input: input.map((o) => ({
             entityId: o.entityId,
             entityType: this.entityType,
             key: 'email',
             value: o.values.email,
           })),
-          session,
+          session: activeSession,
         });
 
-        results = await this.handler.executeCreate({
+        results = await this.store.executeCreate({
           entityType: this.entityType,
           input: input.map(({ values, ...rest }) => {
             const names = [values.givenName, values.familyName];
@@ -199,17 +199,17 @@ export class UserCommands {
       input: array().items(deleteUser).required(),
     }).required().label('user.delete'), params);
 
-    const session = this.handler.startSession();
+    const session = this.store.startSession();
     try {
       let results;
       const { entityType } = this;
       await session.withTransaction(async (activeSession) => {
         // release first so failures will not trigger a push message
-        await this.handler.release({
+        await this.store.release({
           input: input.map(({ entityId }) => ({ entityId, entityType, key: 'email' })),
           session: activeSession,
         });
-        results = await this.handler.executeDelete({ entityType, input, session });
+        results = await this.store.executeDelete({ entityType, input, session });
       });
       return results;
     } finally {
@@ -234,7 +234,7 @@ export class UserCommands {
       session: mongoSessionProp,
     }).required().label('user.magicLogin'), params);
 
-    return this.handler.executeUpdate({
+    return this.store.executeUpdate({
       entityType: this.entityType,
       input: input.map(({ entityId }) => ({
         command: 'MAGIC_LOGIN',
@@ -261,13 +261,13 @@ export class UserCommands {
       input: array().items(restoreUser).required(),
     }).required().label('user.restore'), params);
 
-    const session = this.handler.startSession();
+    const session = this.store.startSession();
     try {
       let results;
       const { entityType } = this;
       await session.withTransaction(async (activeSession) => {
         // reserve first so failures will not trigger a push message
-        await this.handler.reserve({
+        await this.store.reserve({
           input: input.map(({ entityId, email }) => ({
             entityId,
             entityType,
@@ -276,7 +276,7 @@ export class UserCommands {
           })),
           session: activeSession,
         });
-        results = await this.handler.executeRestore({
+        results = await this.store.executeRestore({
           entityType,
           input: input.map(({ email, ...rest }) => ({
             ...rest,

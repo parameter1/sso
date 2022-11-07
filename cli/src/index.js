@@ -5,7 +5,6 @@ import { filterMongoURL } from '@parameter1/sso-mongodb-core';
 import { inspect } from 'util';
 
 import { mongo, normalizedRepoManager } from './mongodb.js';
-import { pubSubManager } from './pubsub.js';
 
 import actions from './actions.js';
 
@@ -209,11 +208,6 @@ const run = async () => {
       await mongo.connect();
       log(`> MongoDB connection to ${filterMongoURL(mongo)}`);
     })(),
-    (async () => {
-      log('> Connecting to Redis pub/sub...');
-      await pubSubManager.connect();
-      log('> Redis pub/sub connected.');
-    })(),
   ]);
 
   await run();
@@ -223,11 +217,6 @@ const run = async () => {
       log('> Closing to MongoDB...');
       await mongo.close();
       log('> MongoDB closed');
-    })(),
-    (async () => {
-      log('> Closing Redis pub/sub...');
-      await pubSubManager.quit();
-      log('> Redis pub/sub closed.');
     })(),
   ]);
   log('> DONE');

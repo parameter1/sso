@@ -65,6 +65,23 @@ services:
     entrypoint: ["tail"]
     command: ["-f", "/dev/null"]
 
+  entity-command:
+    <<: *node
+    working_dir: /sso/services/entity-command
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: [*env, *env-redis-pubsub, *env-mongodb, *env-entity-message]
+      EXPOSED_HOST: services.sso.dev.parameter1.com
+      EXPOSED_PORT: 7919
+      HOST: services.sso.dev.parameter1.com
+    ports:
+      - "7919:80"
+    hostname: services.sso.dev.parameter1.com
+    depends_on:
+      - entity-message-poll
+      - redis-pubsub
+
   entity-message-poll:
     <<: *node
     working_dir: /sso/services/entity-message-poll

@@ -1,6 +1,6 @@
 import { PropTypes, validateAsync } from '@parameter1/sso-prop-types-core';
 
-import { commands } from './mongodb.js';
+import { commands, handler } from './mongodb.js';
 import { waitUntilProcessed } from './pubsub.js';
 
 const { array, boolean, object } = PropTypes;
@@ -14,6 +14,13 @@ const extractClassMethodNames = (instance) => {
 };
 
 export default {
+  createIndexes: async () => {
+    const map = await handler.createIndexes();
+    return [...map];
+  },
+
+  ping: () => 'pong',
+
   ...Object.keys(commands).reduce((o, type) => {
     const instance = commands[type];
     const methodNames = extractClassMethodNames(instance);
@@ -39,6 +46,4 @@ export default {
       }, {}),
     };
   }, {}),
-
-  ping: () => 'pong',
 };

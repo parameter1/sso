@@ -1,5 +1,6 @@
 import { PropTypes, attempt } from '@parameter1/sso-prop-types-core';
-import { mongoDBClientProp } from '@parameter1/sso-mongodb-core';
+import { mongoClientProp } from '@parameter1/mongodb-prop-types';
+import { MongoDBDataLoader } from '@parameter1/mongodb-dataloader';
 
 import { MaterializedApplicationRepo } from './application.js';
 import { MaterializedOrganizationRepo } from './organization.js';
@@ -28,7 +29,7 @@ export class MaterializedRepoManager {
   constructor(params) {
     /** @type {MaterializedRepoManagerConstructorParams} */
     const { mongo } = attempt(params, object({
-      mongo: mongoDBClientProp.required(),
+      mongo: mongoClientProp.required(),
     }).required());
 
     this.repos = [...repos.keys()].reduce((map, entityType) => {
@@ -50,6 +51,21 @@ export class MaterializedRepoManager {
       return [entityType, result];
     }));
     return new Map(results);
+  }
+
+  /**
+   *
+   * @returns {Map<string, MongoDBDataLoader>}
+   */
+  createDataloaders() {
+    const loaders = new Map();
+    this.repos.forEach((repo, entityType) => {
+      loaders.set(entityType, new MongoDBDataLoader({
+        collection: repo.collection,
+        name: entityType,
+      }));
+    });
+    return repos;
   }
 
   /**

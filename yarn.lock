@@ -2246,6 +2246,62 @@
     micro "^9.4.1"
     node-fetch "^3.2.10"
 
+"@parameter1/mongodb-bson@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@parameter1/mongodb-bson/-/mongodb-bson-1.0.0.tgz#254289adae631f56858c97249d6a8ba014115f82"
+  integrity sha512-HDRbTMfqSfr8fNyeT/zVinQmSIjuVYV3FGvkdZWgvo8kcvPSTSS5pViJdoV6O9VPQdnCVNeOZvOfZq5PEx52Jg==
+  dependencies:
+    bson "^4.7.0"
+
+"@parameter1/mongodb-core@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@parameter1/mongodb-core/-/mongodb-core-1.0.0.tgz#d582c74b80e7d956fb56fe5011fc31906f101efd"
+  integrity sha512-7oTc4JHY9K4ZjsdUGzI4SsT34/zh4GpCL1i3D6hUxXq7VrsyX7X21/Bcvk+W5I0ygLG0hL9Ut+cHVgFxPMxLGQ==
+  dependencies:
+    mongodb "^4.11.0"
+
+"@parameter1/mongodb-dataloader@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@parameter1/mongodb-dataloader/-/mongodb-dataloader-1.0.1.tgz#32deb5461d6e59c451736854956c28779b857d61"
+  integrity sha512-U+j3zZL8ndFQHgRXgg1zfqpnVvg4lhGDijwauNTj6pAi/l/Tj9X6QDlgIn5U7MEL5ejq9i3UC/umMKgSMC2pvw==
+  dependencies:
+    "@parameter1/mongodb-bson" "^1.0.0"
+    "@parameter1/object-path" "^2.0.0"
+    "@parameter1/utils" "^2.0.0"
+    dataloader "^2.1.0"
+    escape-string-regexp "^5.0.0"
+    object-hash "^3.0.0"
+
+"@parameter1/mongodb-graphql-types@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@parameter1/mongodb-graphql-types/-/mongodb-graphql-types-1.0.0.tgz#067a9d492fec8db8749743570cd1b80a18836fa7"
+  integrity sha512-w3Z2Ml/+JTscn/ZGnRe1uK8tHCETmYbaocnXvvk3fh2IQYK+n/xFmW+2s+fnijEehleE0PB1jTk+YmeNAl0OTQ==
+  dependencies:
+    "@parameter1/mongodb-bson" "^1.0.0"
+
+"@parameter1/mongodb-pagination@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@parameter1/mongodb-pagination/-/mongodb-pagination-1.0.2.tgz#a74ee5b0012a5ee38a3a955ad8d6e1bad8225821"
+  integrity sha512-08f0SZ93Fe1imyHLmhCqSQ3fh+tOp1jLbz6qHErJUenDTzH54rALnPozhvlDuYkKXFakoZQmfer46J/MhWJ0EA==
+  dependencies:
+    "@parameter1/mongodb-bson" "^1.0.0"
+    "@parameter1/mongodb-prop-types" "^1.0.0"
+    "@parameter1/object-path" "^2.0.0"
+    "@parameter1/slug" "^2.1.0"
+    "@parameter1/utils" "^2.0.0"
+    joi "^17.7.0"
+    lodash.orderby "^4.6.0"
+    sift "^16.0.1"
+
+"@parameter1/mongodb-prop-types@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@parameter1/mongodb-prop-types/-/mongodb-prop-types-1.0.0.tgz#f2f8ada46c4a93348e6be52a69021ec9ef56379e"
+  integrity sha512-n5K4Ga06GEBRnvg7dZIhheFP/TR3nJk/7SJLvMswVlejayhEGJWq7s9vAP3XClV6q9nEkASPdk0L1HUZD6IOGQ==
+  dependencies:
+    "@parameter1/mongodb-bson" "^1.0.0"
+    "@parameter1/mongodb-core" "^1.0.0"
+    joi "^17.7.0"
+
 "@parameter1/mongodb@^4.9.0":
   version "4.9.0"
   resolved "https://registry.yarnpkg.com/@parameter1/mongodb/-/mongodb-4.9.0.tgz#28003bb105dec9bc0a1ce96d9afafac48e8f531c"

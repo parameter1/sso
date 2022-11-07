@@ -25,7 +25,7 @@ export class MaterializedUserRepo extends MaterializedRepo {
   /**
    * Finds a single user by email address.
    *
-   * @typedef {import("mongodb").Document} Document
+   * @typedef {import("@parameter1/mongodb-core").Document} Document
    *
    * @typedef MaterializedUserRepoFindByEmailParams
    * @property {string} email

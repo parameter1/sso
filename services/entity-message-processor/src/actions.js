@@ -7,6 +7,7 @@ export default {
 
   processEvent: async ({
     _id,
+    command,
     entityId,
     entityType,
     userId,
@@ -17,6 +18,7 @@ export default {
       await materializers.materialize(entityType, { entityIds: [entityId] });
       await pubSubManager.publish(COMMAND_PROCESSED, {
         _id,
+        command,
         entityId,
         entityType,
         userId,

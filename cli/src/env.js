@@ -11,6 +11,7 @@ export const {
   REDIS_PUBSUB_HOST,
   REDIS_PUBSUB_PORT,
   SQS_QUEUE_URL,
+  TOKEN_SECRET,
 } = cleanEnv(process.env, {
   AWS_ACCESS_KEY_ID: str({ desc: 'The AWS access key ID.' }),
   AWS_REGION: str({ desc: 'The AWS region to connect to.', default: 'us-east-2' }),
@@ -19,4 +20,5 @@ export const {
   REDIS_PUBSUB_HOST: str({ desc: 'The Redis PubSub host to connect to.' }),
   REDIS_PUBSUB_PORT: str({ desc: 'The Redis PubSub port to connect to.' }),
   SQS_QUEUE_URL: str({ desc: 'The event store SQS queue to send event messages to.' }),
+  TOKEN_SECRET: str({ desc: 'The user token signing secret.' }),
 });

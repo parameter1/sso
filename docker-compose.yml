@@ -58,7 +58,7 @@ services:
     entrypoint: ["node"]
     command: ["src/index.js"]
     environment:
-      <<: [*env, *env-redis-pubsub, *env-entity-message, *env-mongodb]
+      <<: [*env, *env-redis-pubsub, *env-entity-message, *env-mongodb, *env-token]
 
   commands:
     <<: *node

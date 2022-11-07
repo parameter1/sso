@@ -1,5 +1,11 @@
 import inquirer from 'inquirer';
-import { commandHandler, materializedRepoManager, normalizedRepoManager } from '../../mongodb.js';
+import {
+  commandHandler,
+  materializedRepoManager,
+  normalizedRepoManager,
+  tokenRepo,
+  userLogRepo,
+} from '../../mongodb.js';
 
 export default async () => {
   const questions = [
@@ -28,6 +34,13 @@ export default async () => {
       const r = await materializedRepoManager.createAllIndexes();
       return ['materialized', r];
     })(),
-    // userManager.createIndexes(),
+    (async () => {
+      const r = await tokenRepo.createIndexes();
+      return ['token', r];
+    })(),
+    (async () => {
+      const r = await userLogRepo.createIndexes();
+      return ['userlog', r];
+    })(),
   ]));
 };

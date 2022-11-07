@@ -29,6 +29,8 @@
     "@parameter1/sso-mongodb-materialized": "^0.5.4",
     "@parameter1/sso-mongodb-materializers": "^0.5.4",
     "@parameter1/sso-mongodb-normalized": "^0.5.4",
+    "@parameter1/sso-mongodb-token": "^0.5.4",
+    "@parameter1/sso-mongodb-user-manager": "^0.5.4",
     "@parameter1/sso-sqs": "^0.5.4",
     "@parameter1/utils": "^2.0.0",
     "envalid": "^7.3.1",

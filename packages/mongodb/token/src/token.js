@@ -1,5 +1,5 @@
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
-import { DB_NAME, mongoDBClientProp } from '@parameter1/sso-mongodb-core';
+import { DB_NAME, mongoDBClientProp, ObjectId } from '@parameter1/sso-mongodb-core';
 import { dateToUnix } from '@parameter1/utils';
 import jwt from 'jsonwebtoken';
 
@@ -183,7 +183,7 @@ export class TokenRepo {
       const verified = jwt.verify(token, this.tokenSecret, { algorithms: ['HS256'] });
       // Ensure the token exists in the db and matches the subject.
       const { jti } = verified;
-      const doc = await this.collection.findOne({ _id: jti }, options);
+      const doc = await this.collection.findOne({ _id: new ObjectId(jti) }, options);
       if (!doc) throw createError(404, 'No token was found for the provided value.');
       if (subject !== doc.subject) throw createError(409, 'The token subject does not match.');
       return { doc, signed: token };

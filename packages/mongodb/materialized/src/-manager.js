@@ -65,7 +65,7 @@ export class MaterializedRepoManager {
         name: entityType,
       }));
     });
-    return repos;
+    return loaders;
   }
 
   /**

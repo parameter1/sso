@@ -145,6 +145,9 @@ services:
     ports:
       - "7912:80"
     hostname: graphql.sso.dev.parameter1.com
+    depends_on:
+      - entity-command
+      - user
 
   graphql-query:
     <<: *node
@@ -161,6 +164,8 @@ services:
     ports:
       - "7911:80"
     hostname: graphql.sso.dev.parameter1.com
+    depends_on:
+      - user
 
   graphql-subscription:
     <<: *node
@@ -168,15 +173,16 @@ services:
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
-      <<: [*env, *env-mongodb, *env-redis-pubsub]
-      MONGO_URL: ${MONGO_URL_SUBSCRIPTION}
+      <<: [*env, *env-redis-pubsub]
       EXPOSED_HOST: graphql.sso.dev.parameter1.com
       EXPOSED_PORT: 7915
       HOST: graphql.sso.dev.parameter1.com
+      USER_URL: ${USER_URL-http://user}
     ports:
       - "7915:80"
     depends_on:
       - redis-pubsub
+      - user
     hostname: graphql.sso.dev.parameter1.com
 
   lib:

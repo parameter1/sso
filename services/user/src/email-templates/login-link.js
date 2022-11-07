@@ -8,7 +8,7 @@ const { object, objectId, string } = PropTypes;
  * @param {string} params.loginToken
  * @param {string} [params.redirectTo]
  */
-export default (params = {}) => {
+export function createLoginLinkTemplate(params) {
   const { application, loginToken, redirectTo } = validate(object({
     application: object({
       _id: objectId().required(),
@@ -32,4 +32,4 @@ export default (params = {}) => {
       Link: ${url}
     `,
   };
-};
+}

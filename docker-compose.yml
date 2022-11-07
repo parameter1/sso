@@ -121,9 +121,11 @@ services:
     command: ["dev"]
     environment:
       <<: [*env, *env-mongodb, *env-entity-message, *env-token]
+      APP_URL: ${APP_URL-http://sso.dev.parameter1.com:7913}
       EXPOSED_HOST: services.sso.dev.parameter1.com
       EXPOSED_PORT: 7920
       HOST: services.sso.dev.parameter1.com
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY-}
     ports:
       - "7920:80"
     hostname: services.sso.dev.parameter1.com
@@ -136,11 +138,9 @@ services:
     environment:
       <<: [*env, *env-mongodb]
       MONGO_URL: ${MONGO_URL_COMMAND}
-      APP_URL: ${APP_URL-http://sso.dev.parameter1.com:7913}
       EXPOSED_HOST: graphql.sso.dev.parameter1.com
       EXPOSED_PORT: 7912
       HOST: graphql.sso.dev.parameter1.com
-      SENDGRID_API_KEY: ${SENDGRID_API_KEY-}
     ports:
       - "7912:80"
     hostname: graphql.sso.dev.parameter1.com

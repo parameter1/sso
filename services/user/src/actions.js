@@ -1,4 +1,6 @@
 import { userManager } from './mongodb.js';
+import { createLoginLinkTemplate } from './email-templates/login-link.js';
+import { send } from './sendgrid.js';
 
 const extractClassMethodNames = (instance) => {
   const proto = Object.getPrototypeOf(instance);
@@ -22,4 +24,26 @@ export default {
       },
     };
   }, {}),
+
+  // override to support email sending
+  createLoginLinkToken: async ({ emailOptions, ...params }) => {
+    if (emailOptions && emailOptions.send) {
+      return userManager.createLoginLinkToken({
+        ...params,
+        inTransaction: async (data) => {
+          const { subject, html, text } = createLoginLinkTemplate({
+            loginToken: data.token.signed,
+            redirectTo: emailOptions.redirectTo,
+          });
+          await send({
+            to: data.user.email,
+            subject,
+            html,
+            text,
+          });
+        },
+      });
+    }
+    return userManager.createLoginLinkToken(params);
+  },
 };

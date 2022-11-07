@@ -5,25 +5,33 @@ import {
 } from 'envalid';
 
 export const {
+  APP_URL,
   AWS_ACCESS_KEY_ID,
   AWS_REGION,
   AWS_SECRET_ACCESS_KEY,
+  EMAIL_FROM,
+  EMAIL_REPLY_TO,
   EXPOSED_HOST,
   EXPOSED_PORT,
   HOST,
   MONGO_URL,
   PORT,
+  SENDGRID_API_KEY,
   SQS_QUEUE_URL,
   TOKEN_SECRET,
 } = cleanEnv(process.env, {
+  APP_URL: str({ desc: 'The single sign-on application/interace URL.' }),
   AWS_ACCESS_KEY_ID: str({ desc: 'The AWS access key ID.' }),
   AWS_REGION: str({ desc: 'The AWS region to connect to.', default: 'us-east-2' }),
   AWS_SECRET_ACCESS_KEY: str({ desc: 'The AWS secret access key.' }),
+  EMAIL_FROM: str({ desc: 'The address to use when sending email.', default: 'Parameter1 SSO <no-reply@sso.parameter1.com>' }),
+  EMAIL_REPLY_TO: str({ desc: 'The reply-to email address when sending email', default: 'support@parameter1.com' }),
   EXPOSED_HOST: str({ desc: 'The host that the service is exposed on.', default: '0.0.0.0' }),
   EXPOSED_PORT: port({ desc: 'The port that the service is exposed on.', default: 80 }),
   HOST: str({ desc: 'The host that the service will run on.', default: '0.0.0.0' }),
   MONGO_URL: str({ desc: 'The MongoDB URL to connect to.' }),
   PORT: port({ desc: 'The port that the service will run on.', default: 80 }),
+  SENDGRID_API_KEY: str({ desc: 'The Sendgrid API key.' }),
   SQS_QUEUE_URL: str({ desc: 'The event store SQS queue to send event messages to.' }),
   TOKEN_SECRET: str({ desc: 'The user token signing secret.' }),
 });

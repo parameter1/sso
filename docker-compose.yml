@@ -58,10 +58,12 @@ services:
     entrypoint: ["node"]
     command: ["src/index.js"]
     environment:
-      <<: [*env, *env-redis-pubsub, *env-entity-message, *env-mongodb, *env-token]
+      <<: [*env, *env-mongodb]
       ENTITY_COMMAND_URL: ${ENTITY_COMMAND_URL-http://entity-command}
+      USER_URL: ${USER_URL-http://user}
     depends_on:
       - entity-command
+      - user
 
   commands:
     <<: *node
@@ -111,6 +113,20 @@ services:
     hostname: services.sso.dev.parameter1.com
     depends_on:
       - redis-pubsub
+
+  user:
+    <<: *node
+    working_dir: /sso/services/user
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: [*env, *env-mongodb, *env-entity-message, *env-token]
+      EXPOSED_HOST: services.sso.dev.parameter1.com
+      EXPOSED_PORT: 7920
+      HOST: services.sso.dev.parameter1.com
+    ports:
+      - "7920:80"
+    hostname: services.sso.dev.parameter1.com
 
   graphql-command:
     <<: *node

@@ -1,5 +1,5 @@
 import merge from 'lodash.merge';
-import { ObjectId } from '@parameter1/sso-mongodb';
+import { ObjectId } from '@parameter1/sso-mongodb-core';
 import { GraphQLDateTime, GraphQLObjectId } from '@parameter1/sso-graphql';
 
 import user from './user.js';

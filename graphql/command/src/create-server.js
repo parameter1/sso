@@ -13,7 +13,7 @@ import {
 } from '@parameter1/sso-graphql';
 
 import schema from './schema.js';
-import { userManager } from './mongodb.js';
+import { userManager } from './service-clients.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 

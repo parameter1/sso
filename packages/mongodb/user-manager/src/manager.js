@@ -73,6 +73,24 @@ export class UserManager {
   }
 
   /**
+   * Creates the database indexes for the token and user log collections.
+   *
+   * @returns {Promise<Map<string, string[]>>}
+   */
+  async createIndexes() {
+    return new Map(await Promise.all([
+      (async () => {
+        const r = await this.token.createIndexes();
+        return ['token', r];
+      })(),
+      (async () => {
+        const r = await this.userLog.createIndexes();
+        return ['user-log', r];
+      })(),
+    ]));
+  }
+
+  /**
    * @typedef CreateLoginLinkTokenParams
    * @property {string} email
    * @property {string} [ip]

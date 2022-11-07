@@ -41,7 +41,6 @@ export class UserManager {
    * @property {TokenRepo} token
    * @property {MaterializedUserRepo} materialized
    * @property {UserLogRepo} userLog
-   * @property {string} tokenSecret
    *
    * @param {ConstructorParams} params
    */
@@ -53,14 +52,12 @@ export class UserManager {
       token,
       materialized,
       userLog,
-      tokenSecret,
     } = attempt(params, object({
       mongo: mongoDBClientProp.required(),
       commands: object().instance(UserCommands).required(),
       token: object().instance(TokenRepo).required(),
       materialized: object().instance(MaterializedUserRepo).required(),
       userLog: object().instance(UserLogRepo).required(),
-      tokenSecret: string().required(),
     }).required());
 
     /** @type {MongoClient} */
@@ -73,8 +70,6 @@ export class UserManager {
     this.materialized = materialized;
     /** @type {UserLogRepo} */
     this.userLog = userLog;
-    /** @type {string} */
-    this.tokenSecret = tokenSecret;
   }
 
   /**

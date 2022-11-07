@@ -18,7 +18,7 @@ export class Normalizer {
   /**
    *
    * @param {object} params
-   * @param {MongoClient} params.store
+   * @param {MongoClient} params.mongo
    */
   constructor(params) {
     const { mongo } = attempt(params, object({

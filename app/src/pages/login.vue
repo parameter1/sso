@@ -49,7 +49,7 @@
                 {{ email }}
               </span>
             </p>
-            <need-access label="Need help?" />
+            <help-link @click="helpOpen = true" />
           </div>
 
           <login-button class="mt-8" @click="startOver">
@@ -77,7 +77,7 @@
 
             <div class="flex items-center justify-between">
               <remember-me v-model="rememberMe" :disabled="sending" />
-              <need-access label="Need help?" />
+              <help-link @click="helpOpen = true" />
             </div>
 
             <div>
@@ -95,15 +95,24 @@
         </div>
       </div>
     </div>
+
+    <modal-overlay
+      :open="helpOpen"
+      backdrop
+      @close="helpOpen = false"
+    >
+      <help-panel />
+    </modal-overlay>
   </splash-image-layout>
 </template>
 
 <script>
-import ErrorElement from '../components/error.vue';
-
 import EmailInput from '../components/login/email-input.vue';
+import ErrorElement from '../components/error.vue';
+import HelpLink from '../components/login/help-link.vue';
+import HelpPanel from '../components/login/help-panel.vue';
 import LoginButton from '../components/login/button.vue';
-import NeedAccess from '../components/login/need-access.vue';
+import ModalOverlay from '../components/overlays/modal.vue';
 import RememberMe from '../components/login/remember-me.vue';
 import SplashImageLayout from '../components/layouts/splash-image.vue';
 
@@ -116,10 +125,12 @@ export default {
   name: 'LoginPage',
 
   components: {
-    LoginButton,
     EmailInput,
     ErrorElement,
-    NeedAccess,
+    HelpLink,
+    HelpPanel,
+    LoginButton,
+    ModalOverlay,
     RememberMe,
     SplashImageLayout,
   },
@@ -134,6 +145,7 @@ export default {
   data: () => ({
     email: localStorage.getItem(REMEMBER_ME_KEY) || null,
     error: null,
+    helpOpen: false,
     rememberMe: Boolean(localStorage.getItem(REMEMBER_ME_KEY)),
     sending: false,
     sent: false,

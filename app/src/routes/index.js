@@ -40,7 +40,7 @@ const routes = [
   {
     path: '/login',
     name: 'login',
-    meta: { whenAuthed: { then: 'manage', otherwise: true }, title: 'Login' },
+    meta: { whenAuthed: { then: 'manage', otherwise: true }, title: 'Sign In' },
     component: () => import('../pages/login.vue'),
     props: ({ query }) => ({
       appKey: query.appKey,

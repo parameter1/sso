@@ -1,16 +1,16 @@
 <template>
-  <div class="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
+  <div class="hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col lg:w-64 xl:w-72">
     <!-- swap here for a different sidebar style -->
-    <div class="flex flex-grow flex-col overflow-y-auto bg-blue-700 pt-5 pb-4">
-      <div class="flex flex-shrink-0 items-center px-4">
+    <div class="flex flex-grow flex-col overflow-y-auto bg-white pt-4 pb-4">
+      <div class="flex flex-shrink-0 items-center px-4 border-b border-slate-300 pb-4">
         <!-- logo -->
-        <main-logo class="h-8 w-auto brightness-0 invert drop-shadow-md" />
+        <main-logo class="h-10 w-auto" />
       </div>
 
       <!-- main nav -->
-      <nav class="mt-5 flex flex-1 flex-col divide-y divide-blue-800 overflow-y-auto">
+      <nav class="mt-5 flex flex-1 flex-col divide-y divide-slate-300 overflow-y-auto">
         <!-- primary items -->
-        <div class="space-y-1 px-2">
+        <div class="space-y-1 px-2 py-2">
           <nav-item
             v-for="item in primaryNavItems"
             :key="item.name"
@@ -24,16 +24,13 @@
         <!-- secondary items -->
         <div class="mt-6 pt-6">
           <div class="space-y-1 px-2">
-            <a
-              href="#logout"
-              class="group flex items-center rounded-md px-2 py-2
-              text-sm font-medium leading-6 text-blue-100
-              hover:bg-blue-600 hover:text-white hover:shadow-sm"
+            <nav-item
+              :icon="ArrowLeftOnRectangleIcon"
+              name="Logout"
+              to="#logout"
+              text-size="sm"
               @click.prevent="$emit('logout')"
-            >
-              <arrow-left-on-rectangle-icon class="mr-4 h-6 w-6 text-blue-200" aria-hidden="true" />
-              Logout
-            </a>
+            />
           </div>
         </div>
       </nav>
@@ -52,7 +49,6 @@ export default {
   emits: ['logout'],
 
   components: {
-    ArrowLeftOnRectangleIcon,
     MainLogo,
     NavItem,
   },
@@ -63,5 +59,9 @@ export default {
       default: () => [],
     },
   },
+
+  data: () => ({
+    ArrowLeftOnRectangleIcon,
+  }),
 };
 </script>

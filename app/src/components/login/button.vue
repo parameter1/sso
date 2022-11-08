@@ -1,5 +1,5 @@
 <template>
-  <button
+  <button-element
     type="submit"
     :class="classes"
     :disabled="disabled || loading"
@@ -8,16 +8,18 @@
     <span v-else>
       <slot />
     </span>
-  </button>
+  </button-element>
 </template>
 
 <script>
+import ButtonElement from '../button.vue';
 import LoadingSpinner from '../loading-spinner.vue';
 
 export default {
   name: 'LoginButton',
 
   components: {
+    ButtonElement,
     LoadingSpinner,
   },
 

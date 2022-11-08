@@ -6,7 +6,7 @@
   >
     <loading-spinner v-if="loading" color="white" />
     <span v-else>
-      {{ label }}
+      <slot />
     </span>
   </button>
 </template>
@@ -15,7 +15,7 @@
 import LoadingSpinner from '../loading-spinner.vue';
 
 export default {
-  name: 'LoginContinueButton',
+  name: 'LoginButton',
 
   components: {
     LoadingSpinner,
@@ -25,11 +25,6 @@ export default {
     disabled: {
       type: Boolean,
       default: false,
-    },
-
-    label: {
-      type: String,
-      default: 'Continue',
     },
 
     loading: {

@@ -130,6 +130,7 @@ export class UserManager {
         email,
         options: { projection: { email: 1 } },
       });
+      if (!user) throw createError(404, 'No user was found for the provided email address.');
       const data = { ...(scope && { scope }), ...(impersonated && { impersonated }) };
 
       const token = await this.token.createAndSign({

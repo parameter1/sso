@@ -40,7 +40,7 @@ export function createLoginLinkTemplate(params) {
         </head>
         <body>
           <p>You recently requested to login${application ? ` <strong>from ${application.name}</strong>` : ''}. This link is good for one hour and will expire immediately after use.</p>
-          <p><a href="${url}">Complete your login</a></p>
+          <p><a href="${url}">Click here to complete your login</a></p>
           <p>If you didn't request this link, simply ignore this email${supportEmailHtml}.</p>
           <hr>
           <small style="font-color: #ccc;">

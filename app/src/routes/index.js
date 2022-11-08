@@ -48,15 +48,6 @@ const routes = [
     }),
   },
   {
-    path: '/logout',
-    name: 'logout',
-    meta: { whenAuthed: { then: true, otherwise: 'login' }, title: 'Logout' },
-    component: () => import('../pages/logout.vue'),
-    props: ({ query }) => ({
-      next: query.next,
-    }),
-  },
-  {
     path: '/error',
     name: 'error',
     meta: { title: 'Fatal Error' },

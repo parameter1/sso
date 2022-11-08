@@ -1,14 +1,14 @@
 <template>
   <div class="flex min-h-full">
-    <div
+    <main
       class="flex flex-1 flex-col justify-center py-12 px-4
       sm:px-6 lg:flex-none lg:px-20 xl:px-24 shadow-2xl shadow-slate-500 z-10
       "
     >
       <slot />
-    </div>
+    </main>
 
-    <div class="relative hidden w-0 flex-1 lg:block bg-slate-100">
+    <aside class="relative hidden w-0 flex-1 lg:block bg-slate-100">
       <slot name="image">
         <img
           class="absolute inset-0 h-full w-full object-cover opacity-60 "
@@ -16,7 +16,7 @@
           alt=""
         >
       </slot>
-    </div>
+    </aside>
   </div>
 </template>
 

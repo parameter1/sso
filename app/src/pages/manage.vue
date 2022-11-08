@@ -1,5 +1,11 @@
 <template>
-  <main>
+  <div class="flex min-h-full">
+    <!-- mobile sidebar here! -->
+
+    <!-- desktop sidebar -->
+    <app-sidebar @logout="logout" />
+  </div>
+  <!-- <main>
     <h1>Manage</h1>
     <p v-if="isLoading">
       Loading...
@@ -21,11 +27,11 @@
     </nav>
 
     <router-view />
-  </main>
+  </main> -->
 </template>
 
 <script>
-import ErrorElement from '../components/error.vue';
+import AppSidebar from '../components/app/sidebar.vue';
 
 import userService from '../services/user';
 import { CURRENT_USER } from '../graphql/queries';
@@ -35,7 +41,7 @@ export default {
   name: 'ManagePage',
 
   components: {
-    ErrorElement,
+    AppSidebar,
   },
 
   apollo: {

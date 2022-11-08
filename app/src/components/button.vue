@@ -1,34 +1,45 @@
 <template>
-  <button
-    :type="type"
-    :disabled="disabled || loading"
-    @click="$emit('click', $event)"
-  >
-    <span v-if="loading">
-      Loading...
-    </span>
-    <slot v-else />
+  <button>
+    <slot />
   </button>
 </template>
 
 <script>
+import { nextFrame } from '../utils/next-frame';
+
 export default {
   name: 'ButtonElement',
-  emits: ['click'],
 
   props: {
-    type: {
-      type: String,
-      default: 'button',
-      validator: (value) => ['button', 'submit', 'reset'].includes(value),
-    },
-    loading: {
+    autofocus: {
       type: Boolean,
       default: false,
     },
-    disabled: {
-      type: Boolean,
-      default: false,
+  },
+
+  mounted() {
+    this.handleAutofocus();
+  },
+
+  watch: {
+    autofocus() {
+      this.handleAutofocus();
+    },
+  },
+
+  methods: {
+    blur() {
+      this.$el.blur();
+    },
+
+    focus() {
+      this.$el.focus();
+    },
+
+    handleAutofocus() {
+      nextFrame(() => {
+        if (this.autofocus) this.focus();
+      });
     },
   },
 };

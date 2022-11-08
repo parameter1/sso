@@ -3,15 +3,18 @@
     :href="to"
     :class="[
       current
-        ? 'bg-blue-800 text-white'
-        : 'text-blue-100 hover:text-white hover:bg-blue-600',
+        ? 'bg-blue-600 text-white shadow-md'
+        : 'text-slate-900 hover:text-white hover:bg-blue-600 hover:shadow-md',
       'group flex items-center px-2 py-2 text-sm leading-6 font-medium rounded-md'
     ]"
     :aria-current="current ? 'page' : undefined"
   >
     <component
       :is="icon"
-      class="mr-4 h-6 w-6 flex-shrink-0 text-blue-200"
+      :class="[
+        current ? 'text-blue-200' : 'text-slate-400 group-hover:text-blue-200',
+        'mr-4 h-6 w-6 flex-shrink-0',
+      ]"
       aria-hidden="true"
     />
     {{ name }}

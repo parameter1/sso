@@ -41,19 +41,25 @@
 
           <div v-if="sent" class="mt-6 py-px">
             <p class="text-base text-slate-700">
-              We just sent an email to
-              <span class="font-medium text-slate-900">jacob@parameter1.com</span>
-              with your one-time login link.
+              We just sent an email to with your one-time login link.
               To finish signing in, open the email message and click the link within.
             </p>
 
-            <need-access label="Need help?" class="mt-3" />
+            <div class="flex items-center justify-between mt-3">
+              <p class="text-sm">
+                <span class="text-slate-700">
+                  Sent to
+                </span>
+                <span class="font-medium text-slate-900">
+                  {{ email }}
+                </span>
+              </p>
+              <need-access label="Need help?" />
+            </div>
 
-            <continue-button
-              class="mt-8"
-              label="Start over"
-              @click="sent = null"
-            />
+            <login-button class="mt-8" @click="startOver">
+              Start over
+            </login-button>
           </div>
 
           <div v-else class="mt-8">
@@ -66,17 +72,23 @@
                   Email address
                 </label>
                 <div class="mt-1">
-                  <email-input v-model="email" :disabled="sending" />
+                  <email-input
+                    v-model="email"
+                    :disabled="sending"
+                    :autofocus="autofocus.email"
+                  />
                 </div>
               </div>
 
               <div class="flex items-center justify-between">
                 <remember-me v-model="rememberMe" :disabled="sending" />
-                <need-access />
+                <need-access label="Need help?" />
               </div>
 
               <div>
-                <continue-button :loading="sending" />
+                <login-button :loading="sending" :autofocus="autofocus.button">
+                  Continue
+                </login-button>
               </div>
 
               <error-element
@@ -102,8 +114,8 @@
 <script>
 import ErrorElement from '../components/error.vue';
 
-import ContinueButton from '../components/login/continue-button.vue';
 import EmailInput from '../components/login/email-input.vue';
+import LoginButton from '../components/login/button.vue';
 import NeedAccess from '../components/login/need-access.vue';
 import RememberMe from '../components/login/remember-me.vue';
 
@@ -116,7 +128,7 @@ export default {
   name: 'LoginPage',
 
   components: {
-    ContinueButton,
+    LoginButton,
     EmailInput,
     ErrorElement,
     NeedAccess,
@@ -144,6 +156,14 @@ export default {
     },
   },
 
+  computed: {
+    autofocus() {
+      if (!this.email) return { email: true };
+      if (this.rememberMe && this.email) return { button: true };
+      return {};
+    },
+  },
+
   methods: {
     async sendLoginLink() {
       try {
@@ -157,6 +177,11 @@ export default {
       } finally {
         this.sending = false;
       }
+    },
+
+    startOver() {
+      if (!this.rememberMe) this.email = null;
+      this.sent = null;
     },
   },
 };

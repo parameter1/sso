@@ -16,9 +16,9 @@ export default {
   emits: ['logout'],
 
   props: {
-    mobile: {
-      type: Boolean,
-      default: false,
+    type: {
+      type: String,
+      required: true,
     },
   },
 
@@ -27,6 +27,7 @@ export default {
       name: 'Dashboard',
       to: '#',
       icon: HomeIcon,
+      current: true,
     }, {
       name: 'My Profile',
       to: '#',

@@ -1,9 +1,9 @@
 <template>
-  <div class="flex min-h-full">
+  <div class="h-full bg-slate-100">
     <!-- mobile sidebar here! -->
 
     <!-- desktop sidebar -->
-    <app-sidebar @logout="logout" />
+    <app-sidebar type="desktop" @logout="logout" />
   </div>
   <!-- <main>
     <h1>Manage</h1>

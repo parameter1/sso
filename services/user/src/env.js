@@ -17,6 +17,7 @@ export const {
   MONGO_URL,
   PORT,
   SENDGRID_API_KEY,
+  SENDING_DOMAIN,
   SQS_QUEUE_URL,
   TOKEN_SECRET,
 } = cleanEnv(process.env, {
@@ -32,6 +33,7 @@ export const {
   MONGO_URL: str({ desc: 'The MongoDB URL to connect to.' }),
   PORT: port({ desc: 'The port that the service will run on.', default: 80 }),
   SENDGRID_API_KEY: str({ desc: 'The Sendgrid API key.' }),
+  SENDING_DOMAIN: str({ desc: 'The email sending domain.', default: 'sso.parameter1.com' }),
   SQS_QUEUE_URL: str({ desc: 'The event store SQS queue to send event messages to.' }),
   TOKEN_SECRET: str({ desc: 'The user token signing secret.' }),
 });

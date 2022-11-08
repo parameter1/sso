@@ -20,6 +20,7 @@
     }],
     "vue/component-name-in-template-casing": ["error", "kebab-case", {
       "registeredComponentsOnly": false
-    }]
+    }],
+    "import/prefer-default-export": [0]
   }
 }

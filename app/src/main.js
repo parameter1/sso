@@ -4,6 +4,7 @@ import App from './app.vue';
 import router from './routes';
 import clients from './apollo';
 import userService from './services/user';
+import './index.css';
 
 const apolloProvider = createApolloProvider({
   clients,

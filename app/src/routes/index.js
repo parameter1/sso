@@ -53,11 +53,6 @@ const routes = [
     }),
   },
   {
-    path: '/_style',
-    name: 'style-guide',
-    component: () => import('../pages/style-guide.vue'),
-  },
-  {
     path: '/error',
     name: 'error',
     component: () => import('../pages/error.vue'),

@@ -12,6 +12,11 @@
             {{ item.name }}
           </router-link>
         </li>
+        <li>
+          <a href="#logout" @click.prevent="logout">
+            Logout
+          </a>
+        </li>
       </ul>
     </nav>
 
@@ -22,6 +27,7 @@
 <script>
 import ErrorElement from '../components/error.vue';
 
+import userService from '../services/user';
 import { CURRENT_USER } from '../graphql/queries';
 import GraphQLError from '../graphql/error';
 
@@ -51,8 +57,14 @@ export default {
     primaryNavItems: [
       { name: 'Index', to: '/manage' },
       { name: 'Profile', to: '/manage/profile' },
-      { name: 'Logout', to: '/logout' },
+      // { name: 'Logout', to: '/logout' },
     ],
   }),
+
+  methods: {
+    async logout() {
+      await userService.logout({ next: this.next });
+    },
+  },
 };
 </script>

@@ -1,5 +1,8 @@
+import { nextTick } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import userService from '../services/user';
+
+const DEFAULT_TITLE = 'Parameter1 SSO';
 
 const routes = [
   {
@@ -10,6 +13,7 @@ const routes = [
     path: '/authenticate',
     name: 'authenticate',
     component: () => import('../pages/authenticate.vue'),
+    meta: { title: 'Authenticate' },
     props: ({ query }) => ({
       token: query.token,
       next: query.next,
@@ -36,7 +40,7 @@ const routes = [
   {
     path: '/login',
     name: 'login',
-    meta: { whenAuthed: { then: 'manage', otherwise: true } },
+    meta: { whenAuthed: { then: 'manage', otherwise: true }, title: 'Login' },
     component: () => import('../pages/login.vue'),
     props: ({ query }) => ({
       appKey: query.appKey,
@@ -46,7 +50,7 @@ const routes = [
   {
     path: '/logout',
     name: 'logout',
-    meta: { whenAuthed: { then: true, otherwise: 'login' } },
+    meta: { whenAuthed: { then: true, otherwise: 'login' }, title: 'Logout' },
     component: () => import('../pages/logout.vue'),
     props: ({ query }) => ({
       next: query.next,
@@ -55,12 +59,14 @@ const routes = [
   {
     path: '/error',
     name: 'error',
+    meta: { title: 'Fatal Error' },
     component: () => import('../pages/error.vue'),
     props: true,
   },
   {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
+    meta: { title: 'Page Not Found' },
     component: () => import('../pages/not-found.vue'),
   },
 ];
@@ -90,6 +96,13 @@ router.beforeEach(async (to, from, next) => {
     next();
   }
   return null;
+});
+
+router.afterEach((to) => {
+  const { title } = to.meta;
+  nextTick(() => {
+    document.title = title ? `${title} | ${DEFAULT_TITLE}` : DEFAULT_TITLE;
+  });
 });
 
 export default router;

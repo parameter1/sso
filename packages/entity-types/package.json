@@ -1,0 +1,20 @@
+{
+  "name": "@parameter1/sso-entity-types",
+  "version": "0.5.4",
+  "type": "module",
+  "description": "The SSO entity types.",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/sso/tree/main/packages/entity-types#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/sso.git",
+    "directory": "packages/entity-types"
+  },
+  "private": true,
+  "license": "MIT",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "eslint --ext .js ./",
+    "test": "yarn lint"
+  }
+}

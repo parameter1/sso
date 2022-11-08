@@ -48,7 +48,7 @@ jobs:
 
   post-deploy-failure:
     if: failure()
-    needs: [vars, deploy-services, deploy-graphql-servers, deploy-app]
+    needs: [vars, deploy-services-5]
     runs-on: ubuntu-latest
     steps:
     - name: Notify failure
@@ -63,7 +63,7 @@ jobs:
 
   post-deploy-success:
     if: success()
-    needs: [vars, deploy-services, deploy-graphql-servers, deploy-app]
+    needs: [vars, deploy-services-5]
     runs-on: ubuntu-latest
     steps:
     - name: Notify success
@@ -112,8 +112,10 @@ jobs:
           - { path: graphql/command, name: graphql-command }
           - { path: graphql/query, name: graphql-query }
           - { path: graphql/subscription, name: graphql-subscription }
-          - { path: services/command-processor, name: command-processor }
-          - { path: services/event-store-listener, name: event-store-listener }
+          - { path: services/entity-command, name: entity-command }
+          - { path: services/entity-message-poll, name: entity-message-poll }
+          - { path: services/entity-message-processor, name: entity-message-processor }
+          - { path: services/user, name: user }
     steps:
       - uses: actions/checkout@v2
       - uses: docker/login-action@v1
@@ -130,15 +132,15 @@ jobs:
             SERVICE_PATH=${{ matrix.service.path }}
           tags: ${{ env.ECR_REGISTRY }}/${{ env.IMG_PREFIX }}-${{ matrix.service.name }}:${{ needs.vars.outputs.version }}
 
-  deploy-services:
-    needs: [vars, build]
+  deploy-services-1:
+    needs:
+    - vars
+    - build
     runs-on: ubuntu-latest
     strategy:
       matrix:
         service:
-          - { path: cli, name: cli }
-          - { path: services/command-processor, name: command-processor }
-          - { path: services/event-store-listener, name: event-store-listener }
+          - { path: services/entity-message-processor, name: entity-message-processor }
     steps:
       - name: Deploy to Kubernetes
         run: |
@@ -151,12 +153,61 @@ jobs:
           RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
           RANCHER_URL: ${{ secrets.RANCHER_URL }}
 
-  deploy-graphql-servers:
-    needs: [vars, build, deploy-services]
+  deploy-services-2:
+    needs:
+    - vars
+    - build
+    - deploy-services-1
     runs-on: ubuntu-latest
     strategy:
       matrix:
         service:
+          - { path: services/entity-message-poll, name: entity-message-poll }
+    steps:
+      - name: Deploy to Kubernetes
+        run: |
+          npx @parameter1/rancher2cli dl \
+            --wait --namespace ${{ env.TARGET_NAMESPACE }} \
+            sso-service ${{ matrix.service.name }} \
+            ${{ env.ECR_REGISTRY }}/${{ env.IMG_PREFIX }}-${{ matrix.service.name }}:${{ needs.vars.outputs.version }}
+        env:
+          RANCHER_CLUSTERID: ${{ secrets.RANCHER_CLUSTERID_MINDFUL }}
+          RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
+          RANCHER_URL: ${{ secrets.RANCHER_URL }}
+
+  deploy-services-3:
+    needs:
+    - vars
+    - build
+    - deploy-services-2
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - { path: services/entity-command, name: entity-command }
+          - { path: services/user, name: user }
+    steps:
+      - name: Deploy to Kubernetes
+        run: |
+          npx @parameter1/rancher2cli dl \
+            --wait --namespace ${{ env.TARGET_NAMESPACE }} \
+            sso-service ${{ matrix.service.name }} \
+            ${{ env.ECR_REGISTRY }}/${{ env.IMG_PREFIX }}-${{ matrix.service.name }}:${{ needs.vars.outputs.version }}
+        env:
+          RANCHER_CLUSTERID: ${{ secrets.RANCHER_CLUSTERID_MINDFUL }}
+          RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
+          RANCHER_URL: ${{ secrets.RANCHER_URL }}
+
+  deploy-services-4:
+    needs:
+    - vars
+    - build
+    - deploy-services-3
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service:
+          - { path: cli, name: cli }
           - { path: graphql/command, name: graphql-command }
           - { path: graphql/query, name: graphql-query }
           - { path: graphql/subscription, name: graphql-subscription }
@@ -172,8 +223,8 @@ jobs:
           RANCHER_TOKEN: ${{ secrets.RANCHER_TOKEN }}
           RANCHER_URL: ${{ secrets.RANCHER_URL }}
 
-  deploy-app:
-    needs: [vars, build-app, deploy-graphql-servers]
+  deploy-services-5:
+    needs: [vars, build-app, deploy-services-4]
     runs-on: ubuntu-latest
     strategy:
       matrix:

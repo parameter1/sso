@@ -1,4 +1,4 @@
-import { filterMongoURL } from '@parameter1/sso-mongodb';
+import { filterMongoURL } from '@parameter1/mongodb-core';
 import { immediatelyThrow } from '@parameter1/utils';
 import pkg from '../package.js';
 import createServer from './create-server.js';
@@ -8,7 +8,7 @@ import {
   HOST,
   PORT,
 } from './env.js';
-import { mongodb } from './mongodb.js';
+import { mongo } from './mongodb.js';
 
 process.on('unhandledRejection', immediatelyThrow);
 
@@ -18,20 +18,20 @@ const { log } = console;
   log(`Booting ${pkg.name} v${pkg.version}...`);
   // start services here
   log('Connecting to MongoDB...');
-  const client = await mongodb.connect();
-  log(`MongoDB connected on ${filterMongoURL(client)}`);
+  await mongo.connect();
+  log(`MongoDB connected on ${filterMongoURL(mongo)}`);
 
   const server = await createServer({
     fastify: {
       trustProxy: ['loopback', 'linklocal', 'uniquelocal'],
     },
     onHealthCheck: async () => {
-      await mongodb.ping({ id: pkg.name, withWrite: false });
+      await mongo.db('test').command({ ping: 1 });
       return true;
     },
     onShutdown: async () => {
       // stop services here
-      await mongodb.close();
+      await mongo.close();
     },
   });
 

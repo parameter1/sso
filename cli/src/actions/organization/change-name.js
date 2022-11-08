@@ -1,7 +1,8 @@
 import inquirer from 'inquirer';
-import { organizationCommandProps } from '@parameter1/sso-mongodb';
-import { getOrgList, waitUntilProcessed } from '../utils/index.js';
-import { entityManager } from '../../mongodb.js';
+import { organizationProps } from '@parameter1/sso-mongodb-command';
+
+import getOrgList from '../utils/get-org-list.js';
+import { commands } from '../../service-clients.js';
 
 export default async () => {
   const questions = [
@@ -17,11 +18,11 @@ export default async () => {
       default: ({ org }) => org.name,
       message: 'Enter the new organization name',
       filter: (input) => {
-        const { value } = organizationCommandProps.name.required().validate(input);
+        const { value } = organizationProps.name.required().validate(input);
         return value;
       },
       validate: async (input) => {
-        const { error } = organizationCommandProps.name.validate(input);
+        const { error } = organizationProps.name.validate(input);
         if (error) return error;
         return true;
       },
@@ -41,9 +42,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  const handler = entityManager.getCommandHandler('organization');
-  return waitUntilProcessed(() => handler.changeName({
-    entityId: org._id,
-    name,
-  }));
+  return commands.request('organization.changeName', {
+    input: [{ entityId: org._id, name }],
+    awaitProcessing: true,
+  });
 };

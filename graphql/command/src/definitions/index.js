@@ -9,6 +9,7 @@ scalar ObjectID
 
 directive @auth on FIELD_DEFINITION
 directive @interfaceFields on OBJECT
+directive @runCommand on FIELD_DEFINITION
 
 type Query {
   "A simple ping/pong query."

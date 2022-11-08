@@ -1,4 +1,4 @@
-FROM node:16.15-alpine as build
+FROM node:18.12-alpine as build
 
 WORKDIR /sso
 ENV NODE_ENV production
@@ -8,7 +8,7 @@ ARG SERVICE_PATH
 ADD $SERVICE_PATH /sso/$SERVICE_PATH
 RUN yarn --production --pure-lockfile
 
-FROM node:16.15-alpine
+FROM node:18.12-alpine
 ENV NODE_ENV production
 COPY --from=build /sso /sso
 ENTRYPOINT [ "node", "." ]

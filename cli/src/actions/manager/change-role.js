@@ -1,7 +1,8 @@
 import inquirer from 'inquirer';
-import { managerCommandProps } from '@parameter1/sso-mongodb';
-import { getOrgList, waitUntilProcessed } from '../utils/index.js';
-import { entityManager } from '../../mongodb.js';
+import { managerProps } from '@parameter1/sso-mongodb-command';
+
+import { getOrgList } from '../utils/index.js';
+import { commands } from '../../service-clients.js';
 
 export default async () => {
   const questions = [
@@ -43,11 +44,11 @@ export default async () => {
         disabled: role === user.role,
       })),
       filter: (input) => {
-        const { value } = managerCommandProps.role.required().validate(input);
+        const { value } = managerProps.role.required().validate(input);
         return value;
       },
       validate: (input) => {
-        const { error } = managerCommandProps.role.required().validate(input);
+        const { error } = managerProps.role.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -69,9 +70,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  const handler = entityManager.getCommandHandler('manager');
-  return waitUntilProcessed(() => handler.changeRole({
-    entityId: { org: org._id, user: user.node._id },
-    role,
-  }));
+  return commands.request('manager.changeRole', {
+    input: [{ entityId: { org: org._id, user: user.node._id }, role }],
+    awaitProcessing: true,
+  });
 };

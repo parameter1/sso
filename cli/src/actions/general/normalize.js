@@ -1,5 +1,6 @@
 import inquirer from 'inquirer';
-import { entityManager } from '../../mongodb.js';
+import { EntityTypes } from '@parameter1/sso-entity-types';
+import { normalizer } from '../../mongodb.js';
 
 export default async () => {
   const questions = [
@@ -7,7 +8,7 @@ export default async () => {
       type: 'checkbox',
       name: 'entityTypes',
       message: 'Select the entity types to normalize',
-      choices: () => entityManager.commandHandlers.normalizerKeys(),
+      choices: async () => EntityTypes.getKeys(),
     },
     {
       type: 'confirm',
@@ -18,8 +19,9 @@ export default async () => {
   ];
 
   const { entityTypes, confirm } = await inquirer.prompt(questions);
-  return confirm ? Promise.all(entityTypes.map(async (entityType) => {
-    await entityManager.normalize({ entityType, entityIds: [] });
-    return { [entityType]: 'ok' };
-  })) : [];
+  if (!confirm) return [];
+  return new Map(await Promise.all(entityTypes.map(async (entityType) => {
+    await normalizer.normalize({ entityIds: [], entityType });
+    return [entityType, 'ok'];
+  })));
 };

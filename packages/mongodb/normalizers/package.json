@@ -1,0 +1,25 @@
+{
+  "name": "@parameter1/sso-mongodb-normalizers",
+  "version": "0.5.4",
+  "type": "module",
+  "description": "The SSO MongoDB normalizers.",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/sso/tree/main/packages/mongodb/normalizers#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/sso.git",
+    "directory": "packages/mongodb/normalizers"
+  },
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.js",
+  "scripts": {
+    "lint": "eslint --ext .js ./",
+    "test": "yarn lint"
+  },
+  "dependencies": {
+    "@parameter1/mongodb-prop-types": "^1.0.0",
+    "@parameter1/sso-prop-types-core": "^0.5.4",
+    "@parameter1/sso-prop-types-event": "^0.5.4"
+  }
+}

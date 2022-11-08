@@ -6,16 +6,23 @@ x-env-defaults: &env
 
 x-env-mongodb: &env-mongodb
   MONGO_URL: ${MONGO_URL-}
+
+x-env-token: &env-token
   TOKEN_SECRET: ${TOKEN_SECRET-thisisnotsecretdonotuse}
 
 x-env-redis-pubsub: &env-redis-pubsub
   REDIS_PUBSUB_HOST: ${REDIS_PUBSUB_HOST-redis-pubsub}
   REDIS_PUBSUB_PORT: ${REDIS_PUBSUB_PORT-6379}
 
+x-env-entity-message: &env-entity-message
+  AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_ENTITY_MESSAGE}
+  AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_ENTITY_MESSAGE}
+  SQS_QUEUE_URL: ${SQS_QUEUE_URL_ENTITY_MESSAGE}
+
 x-node-defaults: &node
   tty: true
   init: true
-  image: node:16.15-alpine
+  image: node:18.12-alpine
   working_dir: /sso
   volumes:
     - .:/sso:cached
@@ -51,44 +58,77 @@ services:
     entrypoint: ["node"]
     command: ["src/index.js"]
     environment:
-      <<: [*env, *env-mongodb, *env-redis-pubsub]
-      MONGO_URL: ${MONGO_URL_PROCESSOR}
-    depends_on:
-      - event-store-listener
-      - redis-pubsub
-
-  command-processor:
-    <<: *node
-    working_dir: /sso/services/command-processor
-    entrypoint: ["yarn"]
-    command: ["dev"]
-    environment:
       <<: [*env, *env-mongodb]
-      MONGO_URL: ${MONGO_URL_PROCESSOR}
-      EXPOSED_HOST: services.sso.dev.parameter1.com
-      EXPOSED_PORT: 7916
-      HOST: services.sso.dev.parameter1.com
-    ports:
-      - "7916:80"
-    hostname: services.sso.dev.parameter1.com
+      ENTITY_COMMAND_URL: ${ENTITY_COMMAND_URL-http://entity-command}
+      USER_URL: ${USER_URL-http://user}
+    depends_on:
+      - entity-command
+      - user
 
   commands:
     <<: *node
     entrypoint: ["tail"]
     command: ["-f", "/dev/null"]
 
-  event-store-listener:
+  entity-command:
     <<: *node
-    working_dir: /sso/services/event-store-listener
+    working_dir: /sso/services/entity-command
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
-      <<: [*env, *env-mongodb, *env-redis-pubsub]
-      MONGO_URL: ${MONGO_URL_LISTENER}
-      COMMAND_PROCESSOR_URL: ${COMMAND_PROCESSOR_URL-http://command-processor}
+      <<: [*env, *env-redis-pubsub, *env-mongodb, *env-entity-message]
+      EXPOSED_HOST: services.sso.dev.parameter1.com
+      EXPOSED_PORT: 7919
+      HOST: services.sso.dev.parameter1.com
+    ports:
+      - "7919:80"
+    hostname: services.sso.dev.parameter1.com
     depends_on:
-      - command-processor
+      - entity-message-poll
       - redis-pubsub
+
+  entity-message-poll:
+    <<: *node
+    working_dir: /sso/services/entity-message-poll
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: [*env, *env-entity-message]
+      ENTITY_PROCESSOR_URL: ${ENTITY_PROCESSOR_URL-http://entity-message-processor}
+    depends_on:
+      - entity-message-processor
+
+  entity-message-processor:
+    <<: *node
+    working_dir: /sso/services/entity-message-processor
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: [*env, *env-redis-pubsub, *env-mongodb]
+      EXPOSED_HOST: services.sso.dev.parameter1.com
+      EXPOSED_PORT: 7918
+      HOST: services.sso.dev.parameter1.com
+    ports:
+      - "7918:80"
+    hostname: services.sso.dev.parameter1.com
+    depends_on:
+      - redis-pubsub
+
+  user:
+    <<: *node
+    working_dir: /sso/services/user
+    entrypoint: ["yarn"]
+    command: ["dev"]
+    environment:
+      <<: [*env, *env-mongodb, *env-entity-message, *env-token]
+      APP_URL: ${APP_URL-http://sso.dev.parameter1.com:7913}
+      EXPOSED_HOST: services.sso.dev.parameter1.com
+      EXPOSED_PORT: 7920
+      HOST: services.sso.dev.parameter1.com
+      SENDGRID_API_KEY: ${SENDGRID_API_KEY-}
+    ports:
+      - "7920:80"
+    hostname: services.sso.dev.parameter1.com
 
   graphql-command:
     <<: *node
@@ -96,18 +136,18 @@ services:
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
-      <<: [*env, *env-mongodb]
-      MONGO_URL: ${MONGO_URL_COMMAND}
-      APP_URL: ${APP_URL-http://sso.dev.parameter1.com:7913}
+      <<: [*env]
+      ENTITY_COMMAND_URL: ${ENTITY_COMMAND_URL-http://entity-command}
       EXPOSED_HOST: graphql.sso.dev.parameter1.com
       EXPOSED_PORT: 7912
       HOST: graphql.sso.dev.parameter1.com
-      SENDGRID_API_KEY: ${SENDGRID_API_KEY-}
+      USER_URL: ${USER_URL-http://user}
     ports:
       - "7912:80"
     hostname: graphql.sso.dev.parameter1.com
     depends_on:
-      - event-store-listener
+      - entity-command
+      - user
 
   graphql-query:
     <<: *node
@@ -115,14 +155,17 @@ services:
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
-      <<: [*env, *env-mongodb]
-      MONGO_URL: ${MONGO_URL_QUERY}
+      <<: [*env]
       EXPOSED_HOST: graphql.sso.dev.parameter1.com
       EXPOSED_PORT: 7911
       HOST: graphql.sso.dev.parameter1.com
+      MONGO_URL: ${MONGO_URL_GRAPHQL_QUERY}
+      USER_URL: ${USER_URL-http://user}
     ports:
       - "7911:80"
     hostname: graphql.sso.dev.parameter1.com
+    depends_on:
+      - user
 
   graphql-subscription:
     <<: *node
@@ -130,15 +173,16 @@ services:
     entrypoint: ["yarn"]
     command: ["dev"]
     environment:
-      <<: [*env, *env-mongodb, *env-redis-pubsub]
-      MONGO_URL: ${MONGO_URL_SUBSCRIPTION}
+      <<: [*env, *env-redis-pubsub]
       EXPOSED_HOST: graphql.sso.dev.parameter1.com
       EXPOSED_PORT: 7915
       HOST: graphql.sso.dev.parameter1.com
+      USER_URL: ${USER_URL-http://user}
     ports:
       - "7915:80"
     depends_on:
       - redis-pubsub
+      - user
     hostname: graphql.sso.dev.parameter1.com
 
   lib:

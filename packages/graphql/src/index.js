@@ -1,5 +1,5 @@
 export { gql } from '@parameter1/graphql/tag';
-export { GraphQLDateTime, GraphQLObjectId } from '@parameter1/graphql/scalars';
+export { GraphQLDateTime } from '@parameter1/graphql/scalars';
 export {
   paginationDefinitions,
   paginationEnums,
@@ -38,5 +38,3 @@ export * from './projection/index.js';
 export { formatServerError } from './format-server-error.js';
 
 export { commandResultDefinitions, commandResultEnums } from './definitions/command.js';
-
-export { addArrayFilter } from './utils/add-array-filter.js';

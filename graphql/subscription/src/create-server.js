@@ -15,7 +15,7 @@ import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 
 import schema from './schema.js';
-import { userManager } from './mongodb.js';
+import { userManager } from './service-clients.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 

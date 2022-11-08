@@ -69,7 +69,7 @@ export default {
         query: gql`
           subscription ManageProfilePage {
             event: currentUserCommandProcessed(input: {
-              command: "CHANGE_NAME"
+              for: [{ entityType: USER commands: ["CHANGE_NAME"] }]
             }) {
               _id
             }
@@ -112,7 +112,8 @@ export default {
           mutation: UPDATE_OWN_USER_NAMES,
           variables: { input },
         });
-        this.lastEventId = data.ownUserNames._id;
+        const [event] = data.ownUserNames;
+        this.lastEventId = event._id;
         this.saveMessage = 'Profile update command successfully submitted.';
       } catch (e) {
         this.saveError = new GraphQLError(e);

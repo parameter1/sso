@@ -1,5 +1,11 @@
 <template>
-  <main>
+  <div class="h-full bg-slate-100">
+    <!-- mobile sidebar here! -->
+
+    <!-- desktop sidebar -->
+    <app-sidebar type="desktop" @logout="logout" />
+  </div>
+  <!-- <main>
     <h1>Manage</h1>
     <p v-if="isLoading">
       Loading...
@@ -12,16 +18,22 @@
             {{ item.name }}
           </router-link>
         </li>
+        <li>
+          <a href="#logout" @click.prevent="logout">
+            Logout
+          </a>
+        </li>
       </ul>
     </nav>
 
     <router-view />
-  </main>
+  </main> -->
 </template>
 
 <script>
-import ErrorElement from '../components/error.vue';
+import AppSidebar from '../components/app/sidebar.vue';
 
+import userService from '../services/user';
 import { CURRENT_USER } from '../graphql/queries';
 import GraphQLError from '../graphql/error';
 
@@ -29,7 +41,7 @@ export default {
   name: 'ManagePage',
 
   components: {
-    ErrorElement,
+    AppSidebar,
   },
 
   apollo: {
@@ -51,8 +63,14 @@ export default {
     primaryNavItems: [
       { name: 'Index', to: '/manage' },
       { name: 'Profile', to: '/manage/profile' },
-      { name: 'Logout', to: '/logout' },
+      // { name: 'Logout', to: '/logout' },
     ],
   }),
+
+  methods: {
+    async logout() {
+      await userService.logout({ next: this.next });
+    },
+  },
 };
 </script>

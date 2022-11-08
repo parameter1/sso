@@ -1,7 +1,8 @@
 import inquirer from 'inquirer';
-import { userCommandProps } from '@parameter1/sso-mongodb';
-import { getUserList, waitUntilProcessed } from '../utils/index.js';
-import { entityManager } from '../../mongodb.js';
+import { userProps } from '@parameter1/sso-mongodb-command';
+
+import getUserList from '../utils/get-user-list.js';
+import { commands } from '../../service-clients.js';
 
 export default async () => {
   const questions = [
@@ -17,11 +18,11 @@ export default async () => {
       default: ({ user }) => user.givenName,
       message: 'Enter the new first/given name',
       filter: (input) => {
-        const { value } = userCommandProps.givenName.required().validate(input);
+        const { value } = userProps.givenName.required().validate(input);
         return value;
       },
       validate: async (input) => {
-        const { error } = userCommandProps.givenName.required().validate(input);
+        const { error } = userProps.givenName.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -32,11 +33,11 @@ export default async () => {
       default: ({ user }) => user.familyName,
       message: 'Enter the new last/family name',
       filter: (input) => {
-        const { value } = userCommandProps.familyName.required().validate(input);
+        const { value } = userProps.familyName.required().validate(input);
         return value;
       },
       validate: async (input) => {
-        const { error } = userCommandProps.familyName.required().validate(input);
+        const { error } = userProps.familyName.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -57,10 +58,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  const handler = entityManager.getCommandHandler('user');
-  return waitUntilProcessed(() => handler.changeName({
-    entityId: user._id,
-    givenName,
-    familyName,
-  }));
+  return commands.request('user.changeName', {
+    input: [{ entityId: user._id, givenName, familyName }],
+    awaitProcessing: true,
+  });
 };

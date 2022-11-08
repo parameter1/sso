@@ -25,13 +25,18 @@ type Subscription {
 
 type CommandProcessingResult {
   _id: ObjectID!
-  ok: Boolean!
   result: CommandResult!
 }
 
 input CurrentUserCommandProcessed {
-  _id: [ObjectID!]! = []
-  command: [String!]! = []
+  _ids: [ObjectID!]! = []
+  for: [CommandProcessedForInput!]! = []
+}
+
+input CommandProcessedForInput {
+  entityType: CommandResultEntityTypeEnum!
+  commands: [String!]! = []
+  entityIds: [ObjectID!]! = []
 }
 
 ${commandResultDefinitions}

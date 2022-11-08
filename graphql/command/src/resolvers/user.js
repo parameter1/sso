@@ -1,6 +1,4 @@
-import { entityManager, userManager } from '../mongodb.js';
-import createLoginLinkTemplate from '../email-templates/login-link.js';
-import { send } from '../sendgrid.js';
+import { userManager } from '../service-clients.js';
 
 export default {
   /**
@@ -16,7 +14,7 @@ export default {
         authToken,
         userId,
         authDoc,
-      } = await userManager.magicLogin({ loginLinkToken, ip, ua });
+      } = await userManager.request('magicLogin', { loginLinkToken, ip, ua });
       return { value: authToken, expiresAt: authDoc.expiresAt, userId };
     },
 
@@ -25,7 +23,7 @@ export default {
      */
     async logoutMagicUser(_, __, { auth, ip, ua }) {
       const authToken = await auth.getMagicAuthToken();
-      return userManager.logoutMagicUser({ authToken, ip, ua });
+      return userManager.request('logoutMagicUser', { authToken, ip, ua });
     },
 
     /**
@@ -33,14 +31,15 @@ export default {
      */
     async ownUserNames(_, { input }, { auth }) {
       const entityId = await auth.getUserId();
-      const handler = entityManager.getCommandHandler('user');
-      const [{ event }] = await handler.changeName({
-        entityId,
-        familyName: input.family,
-        givenName: input.given,
-        userId: entityId,
-      }, { returnResults: true });
-      return event;
+      return {
+        action: 'user.changeName',
+        input: [{
+          entityId,
+          familyName: input.family,
+          givenName: input.given,
+          userId: entityId,
+        }],
+      };
     },
 
     /**
@@ -48,22 +47,11 @@ export default {
      */
     async sendUserLoginLink(_, { input }, { ip, ua }) {
       const { email, redirectTo } = input;
-      await userManager.createLoginLinkToken({
+      await userManager.request('createLoginLinkToken', {
         email,
         ip,
         ua,
-        inTransaction: async (data) => {
-          const { subject, html, text } = createLoginLinkTemplate({
-            loginToken: data.token.signed,
-            redirectTo,
-          });
-          await send({
-            to: data.user.email,
-            subject,
-            html,
-            text,
-          });
-        },
+        emailOptions: { send: true, redirectTo },
       });
       return 'ok';
     },

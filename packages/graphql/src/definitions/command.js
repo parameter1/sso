@@ -15,7 +15,6 @@ enum CommandResultEntityTypeEnum {
 interface CommandResultInterface {
   _id: ObjectID!
   command: String!
-  date: DateTime!
   entityType: CommandResultEntityTypeEnum!
   userId: ObjectID
 }

@@ -13,7 +13,8 @@ import {
 } from '@parameter1/sso-graphql';
 
 import schema from './schema.js';
-import { entityManager, userManager } from './mongodb.js';
+import { materialized } from './mongodb.js';
+import { userManager } from './service-clients.js';
 
 const isProduction = process.env.NODE_ENV === 'production';
 
@@ -24,7 +25,7 @@ export default async (options = {}) => {
     csrfPrevention: true,
     context: async ({ request }) => ({
       auth: AuthContext({ header: request.headers.authorization, userManager }),
-      dataloaders: await entityManager.materializedRepos.createDataloaders(),
+      dataloaders: materialized.createDataloaders(),
       ip: request.ip,
       ua: request.headers['user-agent'],
     }),

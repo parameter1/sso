@@ -1,7 +1,10 @@
 import inquirer from 'inquirer';
-import { userCommandProps } from '@parameter1/sso-mongodb';
-import { entityManager } from '../../mongodb.js';
-import { waitUntilProcessed } from '../utils/index.js';
+import { userProps } from '@parameter1/sso-mongodb-command';
+
+import { materializedRepoManager } from '../../mongodb.js';
+import { commands } from '../../service-clients.js';
+
+const repo = materializedRepoManager.get('user');
 
 export default async () => {
   const questions = [
@@ -10,13 +13,13 @@ export default async () => {
       name: 'email',
       message: 'Enter the new user\'s email address',
       filter: (input) => {
-        const { value } = userCommandProps.email.required().validate(input);
+        const { value } = userProps.email.required().validate(input);
         return value;
       },
       validate: async (input) => {
-        const { error, value } = userCommandProps.email.required().validate(input);
+        const { error, value } = userProps.email.required().validate(input);
         if (error) return error;
-        const doc = await entityManager.getMaterializedRepo('user').findByEmail({
+        const doc = await repo.findByEmail({
           email: value,
           options: { projection: { _id: 1 } },
         });
@@ -29,7 +32,7 @@ export default async () => {
       name: 'givenName',
       message: 'Enter the user\'s first/given name',
       validate: (input) => {
-        const { error } = userCommandProps.givenName.required().validate(input);
+        const { error } = userProps.givenName.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -39,7 +42,7 @@ export default async () => {
       name: 'familyName',
       message: 'Enter the user\'s last/family name',
       validate: (input) => {
-        const { error } = userCommandProps.familyName.required().validate(input);
+        const { error } = userProps.familyName.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -60,8 +63,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  const handler = entityManager.getCommandHandler('user');
-  return waitUntilProcessed(() => handler.create({
-    values: { email, givenName, familyName },
-  }));
+  return commands.request('user.create', {
+    input: [{ values: { email, givenName, familyName } }],
+    awaitProcessing: true,
+  });
 };

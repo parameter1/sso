@@ -1,7 +1,8 @@
 import inquirer from 'inquirer';
-import { applicationCommandProps } from '@parameter1/sso-mongodb';
-import { getAppList, waitUntilProcessed } from '../utils/index.js';
-import { entityManager } from '../../mongodb.js';
+import { applicationProps } from '@parameter1/sso-mongodb-command';
+
+import getAppList from '../utils/get-app-list.js';
+import { commands } from '../../service-clients.js';
 
 export default async () => {
   const questions = [
@@ -17,11 +18,11 @@ export default async () => {
       default: ({ app }) => app.name,
       message: 'Enter the new application name',
       filter: (input) => {
-        const { value } = applicationCommandProps.name.required().validate(input);
+        const { value } = applicationProps.name.required().validate(input);
         return value;
       },
       validate: async (input) => {
-        const { error } = applicationCommandProps.name.validate(input);
+        const { error } = applicationProps.name.validate(input);
         if (error) return error;
         return true;
       },
@@ -41,9 +42,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  const handler = entityManager.getCommandHandler('application');
-  return waitUntilProcessed(() => handler.changeName({
-    entityId: app._id,
-    name,
-  }));
+  return commands.request('application.changeName', {
+    input: [{ entityId: app._id, name }],
+    awaitProcessing: true,
+  });
 };

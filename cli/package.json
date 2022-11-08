@@ -19,10 +19,16 @@
   },
   "dependencies": {
     "@parameter1/joi": "^2.6.0",
+    "@parameter1/micro-ejson": "^1.1.0",
+    "@parameter1/mongodb-core": "^1.0.0",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/slug": "^2.1.0",
-    "@parameter1/sso-graphql-redis-pubsub": "^0.5.4",
-    "@parameter1/sso-mongodb": "^0.5.4",
+    "@parameter1/sso-entity-types": "^0.5.4",
+    "@parameter1/sso-mongodb-command": "^0.5.4",
+    "@parameter1/sso-mongodb-materialized": "^0.5.4",
+    "@parameter1/sso-mongodb-materializers": "^0.5.4",
+    "@parameter1/sso-mongodb-normalized": "^0.5.4",
+    "@parameter1/sso-mongodb-normalizers": "^0.5.4",
     "@parameter1/utils": "^2.0.0",
     "envalid": "^7.3.1",
     "inquirer": "^9.1.4"

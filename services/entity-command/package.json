@@ -1,0 +1,36 @@
+{
+  "name": "@parameter1/sso-entity-command-service",
+  "version": "0.5.4",
+  "type": "module",
+  "description": "Responsible for processing entity messages.",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/sso/tree/main/services/entity-command#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/sso.git",
+    "directory": "services/entity-command"
+  },
+  "private": true,
+  "license": "MIT",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "gulp",
+    "lint": "eslint --ext .js ./",
+    "test": "yarn lint"
+  },
+  "dependencies": {
+    "@parameter1/micro-ejson": "^1.1.0",
+    "@parameter1/mongodb-core": "^1.0.0",
+    "@parameter1/sso-graphql-redis-pubsub": "^0.5.4",
+    "@parameter1/sso-mongodb-command": "^0.5.4",
+    "@parameter1/sso-mongodb-event-store": "^0.5.4",
+    "@parameter1/sso-prop-types-core": "^0.5.4",
+    "@parameter1/sso-sqs": "^0.5.4",
+    "@parameter1/terminus": "^2.2.1",
+    "@parameter1/utils": "^2.0.0",
+    "envalid": "^7.3.1"
+  },
+  "devDependencies": {
+    "@parameter1/gulp": "^2.0.0"
+  }
+}

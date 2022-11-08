@@ -1,5 +1,5 @@
 import { isFunction as isFn } from '@parameter1/utils';
-import { entityManager } from '../../mongodb.js';
+import { materializedRepoManager } from '../../mongodb.js';
 
 export default async ({
   filter,
@@ -7,21 +7,21 @@ export default async ({
   query,
   projection,
 } = {}) => {
-  const repo = entityManager.getMaterializedRepo('workspace');
+  const repo = materializedRepoManager.get('workspace');
   const pipeline = [
     { $match: { _deleted: false, ...query } },
     {
       $project: {
         ...projection,
         fullName: 1,
+        name: 1,
         namespace: 1,
       },
     },
     { $sort: { path: 1, _id: 1 } },
   ];
-  const cursor = await repo.aggregate({ pipeline });
-  const apps = await cursor.toArray();
-  return apps.filter((doc) => {
+  const workspaces = await repo.collection.aggregate(pipeline).toArray();
+  return workspaces.filter((doc) => {
     if (isFn(filter)) return filter(doc);
     return true;
   }).map((doc) => ({

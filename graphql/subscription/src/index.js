@@ -1,4 +1,3 @@
-import { filterMongoURL } from '@parameter1/sso-mongodb';
 import { immediatelyThrow } from '@parameter1/utils';
 import pkg from '../package.js';
 import createServer from './create-server.js';
@@ -8,7 +7,6 @@ import {
   HOST,
   PORT,
 } from './env.js';
-import { mongodb } from './mongodb.js';
 import { pubSubManager } from './pubsub.js';
 
 process.on('unhandledRejection', immediatelyThrow);
@@ -19,11 +17,6 @@ const { log } = console;
   log(`Booting ${pkg.name} v${pkg.version}...`);
   // start services here
   await Promise.all([
-    (async () => {
-      log('Connecting to MongoDB...');
-      const client = await mongodb.connect();
-      log(`MongoDB connected on ${filterMongoURL(client)}`);
-    })(),
     (async () => {
       log('> Connecting to Redis pub/sub...');
       await pubSubManager.connect();
@@ -37,7 +30,6 @@ const { log } = console;
     },
     onHealthCheck: async () => {
       await Promise.all([
-        mongodb.ping({ id: pkg.name, withWrite: false }),
         pubSubManager.ping(),
       ]);
       return true;
@@ -45,7 +37,6 @@ const { log } = console;
     onShutdown: async () => {
       // stop services here
       await Promise.all([
-        mongodb.close(),
         pubSubManager.quit(),
       ]);
     },

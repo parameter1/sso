@@ -1,8 +1,10 @@
 import inquirer from 'inquirer';
 import { immediatelyThrow } from '@parameter1/utils';
 import { get } from '@parameter1/object-path';
-import { connect, close, entityManager } from './mongodb.js';
-import { pubSubManager } from './pubsub.js';
+import { filterMongoURL } from '@parameter1/mongodb-core';
+import { inspect } from 'util';
+
+import { mongo, normalizedRepoManager } from './mongodb.js';
 
 import actions from './actions.js';
 
@@ -21,10 +23,9 @@ const hasDocuments = async () => {
     { entityType: 'workspace', deleted: false },
   ].map(async ({ entityType, deleted }) => {
     const key = deleted ? `${entityType}_deleted` : entityType;
-    const repo = entityManager.getNormalizedRepo(entityType);
-    const doc = await repo.findOne({
-      query: { _deleted: deleted },
-      options: { projection: { _id: 1 } },
+    const repo = normalizedRepoManager.get(entityType);
+    const doc = await repo.collection.findOne({ _deleted: deleted }, {
+      projection: { _id: 1 },
     });
     return { key, hasDocs: Boolean(doc) };
   }));
@@ -185,7 +186,7 @@ const run = async () => {
   if (!action) throw new Error(`No action found for ${path}`);
 
   const r = await action();
-  if (r !== null) log(r);
+  if (r !== null) log(inspect(r, { colors: true, depth: null }));
 
   log(`> Action '${path}' complete`);
 
@@ -202,22 +203,20 @@ const run = async () => {
 
 (async () => {
   await Promise.all([
-    connect(),
     (async () => {
-      log('> Connecting to Redis pub/sub...');
-      await pubSubManager.connect();
-      log('> Redis pub/sub connected.');
+      log('> Connecting to MongoDB...');
+      await mongo.connect();
+      log(`> MongoDB connection to ${filterMongoURL(mongo)}`);
     })(),
   ]);
 
   await run();
 
   await Promise.all([
-    close(),
     (async () => {
-      log('> Closing Redis pub/sub...');
-      await pubSubManager.quit();
-      log('> Redis pub/sub closed.');
+      log('> Closing to MongoDB...');
+      await mongo.close();
+      log('> MongoDB closed');
     })(),
   ]);
   log('> DONE');

@@ -9,8 +9,9 @@ extend type Mutation {
   logoutMagicUser: String!
     @auth
   "Changes the currently logged-in user's given and family names"
-  ownUserNames(input: OwnUserNamesInput!): CommandResult!
+  ownUserNames(input: OwnUserNamesInput!, awaitProcessing: Boolean): [CommandResult!]!
     @auth
+    @runCommand
   "Sends a magic login link to a user's email address. The user must already exist."
   sendUserLoginLink(input: SendUserLoginLinkInput!): String!
 }

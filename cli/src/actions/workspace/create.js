@@ -1,8 +1,12 @@
 import inquirer from 'inquirer';
+import { workspaceProps } from '@parameter1/sso-mongodb-command';
 import { sluggify } from '@parameter1/slug';
-import { workspaceCommandProps } from '@parameter1/sso-mongodb';
-import { entityManager } from '../../mongodb.js';
-import { getAppList, getOrgList, waitUntilProcessed } from '../utils/index.js';
+
+import { getAppList, getOrgList } from '../utils/index.js';
+import { materializedRepoManager } from '../../mongodb.js';
+import { commands } from '../../service-clients.js';
+
+const repo = materializedRepoManager.get('workspace');
 
 export default async () => {
   const questions = [
@@ -24,11 +28,11 @@ export default async () => {
       message: 'Enter the workspace name',
       default: 'Default',
       filter: (input) => {
-        const { value } = workspaceCommandProps.name.required().validate(input);
+        const { value } = workspaceProps.name.required().validate(input);
         return value;
       },
       validate: (input) => {
-        const { error } = workspaceCommandProps.name.required().validate(input);
+        const { error } = workspaceProps.name.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -39,20 +43,17 @@ export default async () => {
       message: 'Enter the workspace key',
       default: ({ name }) => sluggify(name),
       filter: (input) => {
-        const { value } = workspaceCommandProps.key.required().validate(input);
+        const { value } = workspaceProps.key.required().validate(input);
         return value;
       },
       validate: async (input, { app, org }) => {
-        const { error } = workspaceCommandProps.key.required().validate(input);
+        const { error } = workspaceProps.key.required().validate(input);
         if (error) return error;
-        const doc = await entityManager.getMaterializedRepo('workspace').findOne({
-          query: {
-            '_edge.organization.node._id': org._id,
-            '_edge.application.node._id': app._id,
-            key: input,
-          },
-          options: { projection: { _id: 1 } },
-        });
+        const doc = await repo.collection.findOne({
+          '_edge.organization.node._id': org._id,
+          '_edge.application.node._id': app._id,
+          key: input,
+        }, { projection: { _id: 1 } });
         if (doc) return new Error('A workspace already exists with this key');
         return true;
       },
@@ -74,13 +75,15 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  const handler = entityManager.getCommandHandler('workspace');
-  return waitUntilProcessed(() => handler.create({
-    values: {
-      appId: app._id,
-      name,
-      orgId: org._id,
-      key,
-    },
-  }));
+  return commands.request('workspace.create', {
+    input: [{
+      values: {
+        appId: app._id,
+        name,
+        orgId: org._id,
+        key,
+      },
+    }],
+    awaitProcessing: true,
+  });
 };

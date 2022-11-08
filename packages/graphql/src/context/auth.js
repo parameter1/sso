@@ -10,7 +10,7 @@ const parseHeader = (header) => {
  *
  * @param {object} params
  * @param {string} params.header
- * @param {UserManager} params.userManager
+ * @param {import("@parameter1/micro-ejson").EJSONClient} params.userManager
  */
 export function AuthContext({ header, userManager } = {}) {
   let magicAuthToken;
@@ -26,7 +26,7 @@ export function AuthContext({ header, userManager } = {}) {
         if (type !== 'Bearer') throw new AuthenticationError(`The auth type '${type}' is not supported.`);
         if (!value) return;
         magicAuthToken = value;
-        user = await userManager.verifyMagicAuthToken({
+        user = await userManager.request('verifyMagicAuthToken', {
           authToken: magicAuthToken,
           projection: { email: 1 },
         });

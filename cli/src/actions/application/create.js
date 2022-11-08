@@ -1,8 +1,11 @@
 import inquirer from 'inquirer';
 import { sluggify } from '@parameter1/slug';
-import { applicationCommandProps } from '@parameter1/sso-mongodb';
-import { entityManager } from '../../mongodb.js';
-import { waitUntilProcessed } from '../utils/index.js';
+import { applicationProps } from '@parameter1/sso-mongodb-command';
+
+import { materializedRepoManager } from '../../mongodb.js';
+import { commands } from '../../service-clients.js';
+
+const repo = materializedRepoManager.get('application');
 
 export default async () => {
   const questions = [
@@ -11,11 +14,11 @@ export default async () => {
       name: 'name',
       message: 'Enter the application name',
       filter: (input) => {
-        const { value } = applicationCommandProps.name.required().validate(input);
+        const { value } = applicationProps.name.required().validate(input);
         return value;
       },
       validate: (input) => {
-        const { error } = applicationCommandProps.name.required().validate(input);
+        const { error } = applicationProps.name.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -26,15 +29,14 @@ export default async () => {
       message: 'Enter the application key',
       default: ({ name }) => sluggify(name),
       filter: (input) => {
-        const { value } = applicationCommandProps.key.required().validate(input);
+        const { value } = applicationProps.key.required().validate(input);
         return value;
       },
       validate: async (input) => {
-        const { error, value } = applicationCommandProps.key.required().validate(input);
+        const { error, value } = applicationProps.key.required().validate(input);
         if (error) return error;
-        const doc = await entityManager.getMaterializedRepo('application').findByKey({
-          key: value,
-          options: { projection: { _id: 1 } },
+        const doc = await repo.findByKey(value, {
+          projection: { _id: 1 },
         });
         if (doc) return new Error('An application already exists with this key');
         return true;
@@ -47,7 +49,7 @@ export default async () => {
       default: 'Administrator, Member',
       filter: (list) => list.split(',').map((v) => v.trim()).filter((v) => v),
       validate: (roles) => {
-        const { error } = applicationCommandProps.roles.validate(roles);
+        const { error } = applicationProps.roles.validate(roles);
         if (error) return error;
         return true;
       },
@@ -68,8 +70,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  const handler = entityManager.getCommandHandler('application');
-  return waitUntilProcessed(() => handler.create({
-    values: { name, key, roles },
-  }));
+  return commands.request('application.create', {
+    input: [{ values: { name, key, roles } }],
+    awaitProcessing: true,
+  });
 };

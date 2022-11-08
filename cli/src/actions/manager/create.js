@@ -1,7 +1,8 @@
 import inquirer from 'inquirer';
-import { managerCommandProps } from '@parameter1/sso-mongodb';
-import { getOrgList, getUserList, waitUntilProcessed } from '../utils/index.js';
-import { entityManager } from '../../mongodb.js';
+import { managerProps } from '@parameter1/sso-mongodb-command';
+
+import { getOrgList, getUserList } from '../utils/index.js';
+import { commands } from '../../service-clients.js';
 
 export default async () => {
   const questions = [
@@ -27,11 +28,11 @@ export default async () => {
       message: 'Select the manager role',
       choices: () => ['Owner', 'Administrator', 'Manager'],
       filter: (input) => {
-        const { value } = managerCommandProps.role.required().validate(input);
+        const { value } = managerProps.role.required().validate(input);
         return value;
       },
       validate: (input) => {
-        const { error } = managerCommandProps.role.required().validate(input);
+        const { error } = managerProps.role.required().validate(input);
         if (error) return error;
         return true;
       },
@@ -53,12 +54,8 @@ export default async () => {
   } = await inquirer.prompt(questions);
   if (!confirm) return null;
 
-  const handler = entityManager.getCommandHandler('manager');
-  return waitUntilProcessed(() => handler.createOrRestore({
-    entityId: {
-      org: org._id,
-      user: user._id,
-    },
-    values: { role },
-  }));
+  return commands.request('manager.create', {
+    input: [{ entityId: { org: org._id, user: user._id }, values: { role } }],
+    awaitProcessing: true,
+  });
 };

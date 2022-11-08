@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-mongodb-command",
-  "version": "0.5.4",
+  "version": "1.0.0-alpha.0",
   "type": "module",
   "description": "The SSO MongoDB command handlers.",
   "author": "Jacob Bare <jacob@parameter1.com>",
@@ -22,9 +22,9 @@
     "@parameter1/mongodb-bson": "^1.0.0",
     "@parameter1/mongodb-prop-types": "^1.0.0",
     "@parameter1/slug": "^2.1.0",
-    "@parameter1/sso-mongodb-event-store": "^0.5.4",
-    "@parameter1/sso-prop-types-core": "^0.5.4",
-    "@parameter1/sso-prop-types-event": "^0.5.4",
+    "@parameter1/sso-mongodb-event-store": "^1.0.0-alpha.0",
+    "@parameter1/sso-prop-types-core": "^1.0.0-alpha.0",
+    "@parameter1/sso-prop-types-event": "^1.0.0-alpha.0",
     "@parameter1/utils": "^2.0.0"
   }
 }

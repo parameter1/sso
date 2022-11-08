@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-mongodb-materialized",
-  "version": "0.5.4",
+  "version": "1.0.0-alpha.0",
   "type": "module",
   "description": "The SSO MongoDB materialized repos.",
   "author": "Jacob Bare <jacob@parameter1.com>",
@@ -22,7 +22,7 @@
     "@parameter1/mongodb-dataloader": "^1.0.1",
     "@parameter1/mongodb-pagination": "^1.0.2",
     "@parameter1/mongodb-prop-types": "^1.0.0",
-    "@parameter1/sso-prop-types-core": "^0.5.4",
-    "@parameter1/sso-prop-types-event": "^0.5.4"
+    "@parameter1/sso-prop-types-core": "^1.0.0-alpha.0",
+    "@parameter1/sso-prop-types-event": "^1.0.0-alpha.0"
   }
 }

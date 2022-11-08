@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-entity-types",
-  "version": "0.5.4",
+  "version": "1.0.0-alpha.0",
   "type": "module",
   "description": "The SSO entity types.",
   "author": "Jacob Bare <jacob@parameter1.com>",

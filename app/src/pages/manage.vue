@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-full" v-if="!loading">
-    <app-header :current-user="currentUser" :primary-nav-items="primaryNavItems" />
+    <app-header :user="currentUser" />
 
     <!-- main content -->
     <main class="mx-auto max-w-7xl pb-10 sm:py-12 sm:px-4 lg:px-8">
@@ -11,7 +11,6 @@
 
 <script>
 import gql from 'graphql-tag';
-import { HomeIcon, BuildingOffice2Icon } from '@heroicons/vue/24/outline';
 
 import AppHeader from '../components/app/header.vue';
 
@@ -56,15 +55,6 @@ export default {
     },
     error: null,
     loading: false,
-    primaryNavItems: [{
-      name: 'Dashboard',
-      to: '/manage',
-      icon: HomeIcon,
-    }, {
-      name: 'Organizations',
-      to: '/manage/organizations',
-      icon: BuildingOffice2Icon,
-    }],
   }),
 
   methods: {

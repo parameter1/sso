@@ -92,16 +92,17 @@
 
               <!-- user nav -->
               <div class="mt-3 space-y-1 px-2">
-                <a
-                  v-for="item in userNavItems"
-                  :key="item.name"
-                  :href="item.href"
-                  class="block rounded-md px-3 py-2 text-base font-medium text-slate-900
-                  hover:bg-slate-100 hover:text-slate-800"
-                  @click="close"
-                >
-                  {{ item.name }}
-                </a>
+                <user-button
+                  name="My Profile"
+                  :icon="UserIcon"
+                  @click="$emit('profile')"
+                />
+
+                <user-button
+                  name="Logout"
+                  :icon="ArrowLeftOnRectangleIcon"
+                  @click="$emit('logout')"
+                />
               </div>
             </div>
           </div>
@@ -119,13 +120,16 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue';
-import { XMarkIcon } from '@heroicons/vue/24/outline';
+import { ArrowLeftOnRectangleIcon, UserIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 import MainLogo from '../../logos/parameter1-wide.vue';
 import NavItem from './primary-nav-link.vue';
+import UserButton from './mobile-menu-user-button.vue';
 import UserImage from './user-image.vue';
 
 export default {
   name: 'AppHeaderMobileMenu',
+
+  emits: ['logout', 'profile'],
 
   components: {
     PopoverButton,
@@ -135,6 +139,7 @@ export default {
     NavItem,
     TransitionChild,
     TransitionRoot,
+    UserButton,
     UserImage,
     XMarkIcon,
   },
@@ -154,11 +159,11 @@ export default {
       type: Object,
       required: true,
     },
-
-    userNavItems: {
-      type: Array,
-      required: true,
-    },
   },
+
+  data: () => ({
+    ArrowLeftOnRectangleIcon,
+    UserIcon,
+  }),
 };
 </script>

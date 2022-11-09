@@ -22,13 +22,12 @@
         <mobile-menu
           :open="open"
           :primary-nav-items="primaryNavItems"
-          :user="currentUser"
-          :user-nav-items="userNavItems"
+          :user="user"
         />
 
         <!-- user dropdown -->
         <div class="hidden sm:ml-4 sm:flex sm:items-center">
-          <user-dropdown :user="currentUser" :navigation="userNavItems" />
+          <user-dropdown :user="user" />
         </div>
       </div>
 
@@ -49,6 +48,7 @@
 
 <script>
 import { Popover as PopoverContainer } from '@headlessui/vue';
+import { HomeIcon, BuildingOffice2Icon } from '@heroicons/vue/24/outline';
 
 import MainLogo from '../logos/parameter1-wide.vue';
 import MobileMenu from './header/mobile-menu.vue';
@@ -69,21 +69,22 @@ export default {
   },
 
   props: {
-    currentUser: {
+    user: {
       type: Object,
-      required: true,
-    },
-    primaryNavItems: {
-      type: Array,
       required: true,
     },
   },
 
   data: () => ({
-    userNavItems: [
-      { name: 'Your Profile', href: '#' },
-      { name: 'Logout', href: '#' },
-    ],
+    primaryNavItems: [{
+      name: 'Dashboard',
+      to: '/manage',
+      icon: HomeIcon,
+    }, {
+      name: 'Organizations',
+      to: '/manage/organizations',
+      icon: BuildingOffice2Icon,
+    }],
   }),
 };
 </script>

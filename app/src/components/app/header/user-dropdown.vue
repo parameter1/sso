@@ -85,10 +85,6 @@ export default {
   },
 
   props: {
-    navigation: {
-      type: Array,
-      required: true,
-    },
     user: {
       type: Object,
       required: true,

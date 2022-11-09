@@ -34,7 +34,7 @@
 
 <script>
 export default {
-  name: 'AppHeaderDesktopNavItem',
+  name: 'AppHeaderPrimaryNavLink',
 
   emits: ['click'],
 

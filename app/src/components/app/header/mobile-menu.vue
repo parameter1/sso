@@ -121,7 +121,7 @@ import {
 } from '@headlessui/vue';
 import { XMarkIcon } from '@heroicons/vue/24/outline';
 import MainLogo from '../../logos/parameter1-wide.vue';
-import NavItem from './primary-nav-item.vue';
+import NavItem from './primary-nav-link.vue';
 import UserImage from './user-image.vue';
 
 export default {

@@ -26,21 +26,34 @@
         class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1
         shadow-lg ring-1 ring-blue-500 ring-opacity-5 focus:outline-none"
       >
-        <menu-item
-          v-for="item in navigation"
-          :key="item.name"
-          v-slot="{ active }"
-        >
-          <a
-            :href="item.href"
-            :class="[
-              active ? 'bg-slate-100' : '',
-              'block py-2 px-4 text-sm text-slate-700'
-            ]"
-          >
-            {{ item.name }}
-          </a>
-        </menu-item>
+        <div class="py-2 px-4">
+          <div class="text-sm font-medium text-slate-800">
+            {{ user.name.full }}
+          </div>
+          <div class="text-xs font-medium text-slate-500 truncate">
+            {{ user.email.address }}
+          </div>
+        </div>
+        <div>
+          <menu-item as="div" v-slot="{ active }">
+            <user-button
+              name="My Profile"
+              :active="active"
+              :icon="UserIcon"
+              small
+              @click="$emit('profile')"
+            />
+          </menu-item>
+          <menu-item as="div" v-slot="{ active }">
+            <user-button
+              name="Logout"
+              :active="active"
+              :icon="ArrowLeftOnRectangleIcon"
+              small
+              @click="$emit('logout')"
+            />
+          </menu-item>
+        </div>
       </menu-items>
     </transition>
   </menu-container>
@@ -53,16 +66,21 @@ import {
   MenuItem,
   MenuItems,
 } from '@headlessui/vue';
+import { ArrowLeftOnRectangleIcon, UserIcon } from '@heroicons/vue/24/outline';
+import UserButton from './user-dropdown-button.vue';
 import UserImage from './user-image.vue';
 
 export default {
   name: 'AppHeaderUserDropdown',
+
+  emits: ['logout', 'profile'],
 
   components: {
     MenuContainer,
     MenuButton,
     MenuItem,
     MenuItems,
+    UserButton,
     UserImage,
   },
 
@@ -76,5 +94,10 @@ export default {
       required: true,
     },
   },
+
+  data: () => ({
+    ArrowLeftOnRectangleIcon,
+    UserIcon,
+  }),
 };
 </script>

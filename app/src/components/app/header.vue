@@ -53,7 +53,7 @@ import { Popover as PopoverContainer } from '@headlessui/vue';
 import MainLogo from '../logos/parameter1-wide.vue';
 import MobileMenu from './header/mobile-menu.vue';
 import MobileMenuButton from './header/mobile-menu-button.vue';
-import NavItem from './header/primary-nav-item.vue';
+import NavItem from './header/primary-nav-link.vue';
 import UserDropdown from './header/user-dropdown.vue';
 
 export default {

@@ -25,8 +25,6 @@
 export default {
   name: 'AppHeaderUserDropdownButton',
 
-  emits: ['click'],
-
   props: {
     active: {
       type: Boolean,

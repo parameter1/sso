@@ -95,13 +95,13 @@
                 <user-button
                   name="My Profile"
                   :icon="UserIcon"
-                  @click="$emit('profile')"
+                  @click="$emit('profile'); close()"
                 />
 
                 <user-button
                   name="Logout"
                   :icon="ArrowLeftOnRectangleIcon"
-                  @click="$emit('logout')"
+                  @click="$emit('logout'); close()"
                 />
               </div>
             </div>

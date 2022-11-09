@@ -23,7 +23,8 @@
           isExactActive
             ? 'text-blue-500'
             : 'text-slate-400 group-hover:text-blue-500',
-          'mr-4 h-6 w-6',
+          small ? 'mr-2' : 'mr-4',
+          'h-6 w-6',
         ]"
         aria-hidden="true"
       />

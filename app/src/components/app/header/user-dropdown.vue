@@ -3,7 +3,7 @@
     <div>
       <menu-button
         class="flex rounded-full bg-white
-        focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
+        focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
       >
         <span class="sr-only">Open user menu</span>
         <user-image

@@ -9,12 +9,13 @@
       :class="[
         isExactActive
           ? 'bg-slate-100 text-slate-900'
-          : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
+          : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900',
         small ? 'text-sm' : 'text-base',
         'group flex items-center px-2 py-2 font-medium rounded-md',
+        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus-ring-offset-2  '
       ]"
       :aria-current="isExactActive ? 'page' : undefined"
-      @click="navigate"
+      @click.prevent="onClick(navigate)"
     >
       <component
         :is="icon"
@@ -35,6 +36,8 @@
 export default {
   name: 'AppHeaderDesktopNavItem',
 
+  emits: ['click'],
+
   props: {
     icon: {
       type: Function,
@@ -51,6 +54,13 @@ export default {
     to: {
       type: String,
       required: true,
+    },
+  },
+
+  methods: {
+    onClick(navigate) {
+      navigate();
+      this.$emit('click');
     },
   },
 };

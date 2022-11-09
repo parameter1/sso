@@ -29,6 +29,7 @@
           focus
           class="absolute top-0 right-0 z-30 w-full max-w-none
           origin-top transform p-2 transition"
+          v-slot="{ close }"
         >
           <div
             class="divide-y divide-slate-200 rounded-lg bg-white shadow-lg
@@ -61,6 +62,7 @@
                   :name="item.name"
                   :icon="item.icon"
                   :to="item.to"
+                  @click="close"
                 />
               </nav>
             </div>
@@ -96,6 +98,7 @@
                   :href="item.href"
                   class="block rounded-md px-3 py-2 text-base font-medium text-slate-900
                   hover:bg-slate-100 hover:text-slate-800"
+                  @click="close"
                 >
                   {{ item.name }}
                 </a>

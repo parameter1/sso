@@ -72,19 +72,20 @@
               <div class="flex items-center px-5">
                 <!-- user image -->
                 <div class="flex-shrink-0">
-                  <img
-                    class="h-10 w-10 rounded-full"
-                    :src="user.imageUrl"
-                    alt=""
-                  >
+                  <user-image
+                    :initials="user.name.initials"
+                    :name="user.name.full"
+                    :src="user.image.src"
+                    :srcset="user.image.srcset"
+                  />
                 </div>
                 <!-- user deats -->
                 <div class="ml-3">
                   <div class="text-base font-medium text-slate-800">
-                    {{ user.name }}
+                    {{ user.name.full }}
                   </div>
                   <div class="text-sm font-medium text-slate-500">
-                    {{ user.email }}
+                    {{ user.email.address }}
                   </div>
                 </div>
               </div>
@@ -119,6 +120,7 @@ import {
 } from '@headlessui/vue';
 import { XMarkIcon } from '@heroicons/vue/24/outline';
 import MainLogo from '../../logos/parameter1-wide.vue';
+import UserImage from './user-image.vue';
 
 export default {
   name: 'AppHeaderMobileMenu',
@@ -130,6 +132,7 @@ export default {
     MainLogo,
     TransitionChild,
     TransitionRoot,
+    UserImage,
     XMarkIcon,
   },
 

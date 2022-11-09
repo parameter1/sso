@@ -6,7 +6,12 @@
         focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2"
       >
         <span class="sr-only">Open user menu</span>
-        <img class="h-10 w-10 rounded-full" :src="user.imageUrl" :alt="imageAlt">
+        <user-image
+          :initials="user.name.initials"
+          :name="user.name.full"
+          :src="user.image.src"
+          :srcset="user.image.srcset"
+        />
       </menu-button>
     </div>
     <transition
@@ -48,6 +53,7 @@ import {
   MenuItem,
   MenuItems,
 } from '@headlessui/vue';
+import UserImage from './user-image.vue';
 
 export default {
   name: 'AppHeaderUserDropdown',
@@ -57,6 +63,7 @@ export default {
     MenuButton,
     MenuItem,
     MenuItems,
+    UserImage,
   },
 
   props: {
@@ -67,12 +74,6 @@ export default {
     user: {
       type: Object,
       required: true,
-    },
-  },
-
-  computed: {
-    imageAlt() {
-      return `${this.user.name} Profile Image`;
     },
   },
 };

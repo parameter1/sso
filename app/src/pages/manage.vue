@@ -11,6 +11,8 @@
 
 <script>
 import gql from 'graphql-tag';
+import { HomeIcon, BuildingOffice2Icon } from '@heroicons/vue/24/outline';
+
 import AppHeader from '../components/app/header.vue';
 
 import userService from '../services/user';
@@ -57,10 +59,11 @@ export default {
     primaryNavItems: [{
       name: 'Dashboard',
       to: '/manage',
-      current: true,
+      icon: HomeIcon,
     }, {
       name: 'Organizations',
       to: '/manage/organizations',
+      icon: BuildingOffice2Icon,
     }],
   }),
 

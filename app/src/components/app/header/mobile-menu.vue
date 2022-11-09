@@ -55,25 +55,13 @@
               </div>
               <!-- primary nav items -->
               <nav class="mt-3 space-y-1 px-2">
-                <router-link
+                <nav-item
                   v-for="item in primaryNavItems"
                   :key="item.name"
+                  :name="item.name"
+                  :icon="item.icon"
                   :to="item.to"
-                  custom
-                  v-slot="{ href, isExactActive, navigate }"
-                >
-                  <a
-                    :href="href"
-                    :class="[
-                      isExactActive ? 'bg-slate-100' : '',
-                      'block rounded-md px-3 py-2 text-base font-medium text-slate-900',
-                      'hover:bg-slate-100 hover:text-slate-800',
-                    ]"
-                    @click="navigate"
-                  >
-                    {{ item.name }}
-                  </a>
-                </router-link>
+                />
               </nav>
             </div>
 
@@ -130,6 +118,7 @@ import {
 } from '@headlessui/vue';
 import { XMarkIcon } from '@heroicons/vue/24/outline';
 import MainLogo from '../../logos/parameter1-wide.vue';
+import NavItem from './primary-nav-item.vue';
 import UserImage from './user-image.vue';
 
 export default {
@@ -140,6 +129,7 @@ export default {
     PopoverOverlay,
     PopoverPanel,
     MainLogo,
+    NavItem,
     TransitionChild,
     TransitionRoot,
     UserImage,

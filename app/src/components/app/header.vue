@@ -33,15 +33,15 @@
       </div>
 
       <!-- second row: desktop nav -->
-      <nav class="hidden lg:flex lg:space-x-8 lg:py-2" aria-label="Global">
+      <nav class="hidden lg:flex lg:space-x-4 lg:py-2" aria-label="Global">
         <nav-item
           v-for="item in primaryNavItems"
           :key="item.name"
-          :current="item.current"
+          :name="item.name"
+          :icon="item.icon"
           :to="item.to"
-        >
-          {{ item.name }}
-        </nav-item>
+          small
+        />
       </nav>
     </div>
   </popover-container>
@@ -53,7 +53,7 @@ import { Popover as PopoverContainer } from '@headlessui/vue';
 import MainLogo from '../logos/parameter1-wide.vue';
 import MobileMenu from './header/mobile-menu.vue';
 import MobileMenuButton from './header/mobile-menu-button.vue';
-import NavItem from './header/desktop-nav-item.vue';
+import NavItem from './header/primary-nav-item.vue';
 import UserDropdown from './header/user-dropdown.vue';
 
 export default {

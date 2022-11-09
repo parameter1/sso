@@ -1,10 +1,10 @@
 <template>
   <popover-container as="header" class="bg-white shadow" v-slot="{ open }">
-    <div class="mx-auto max-w-7xl px-2 sm:px-4 lg:divide-y lg:divide-slate-200 lg:px-8">
+    <div class="mx-auto max-w-7xl px-2 sm:divide-y sm:divide-slate-200 sm:px-4 lg:px-8">
       <!-- top row -->
       <div class="flex h-16 justify-between">
         <!-- logo -->
-        <div class="flex px-2 lg:px-0">
+        <div class="flex px-2 sm:px-0">
           <div class="flex flex-shrink-0 items-center">
             <main-logo class="block h-8 w-auto" />
           </div>
@@ -14,7 +14,7 @@
         <div class="flex flex-1" />
 
         <!-- mobile menu button -->
-        <div class="flex items-center lg:hidden">
+        <div class="flex items-center sm:hidden">
           <mobile-menu-button />
         </div>
 
@@ -27,13 +27,13 @@
         />
 
         <!-- user dropdown -->
-        <div class="hidden lg:relative lg:z-10 lg:ml-4 lg:flex lg:items-center">
+        <div class="hidden sm:ml-4 sm:flex sm:items-center">
           <user-dropdown :user="currentUser" :navigation="userNavItems" />
         </div>
       </div>
 
       <!-- second row: desktop nav -->
-      <nav class="hidden lg:flex lg:space-x-4 lg:py-2" aria-label="Global">
+      <nav class="hidden sm:flex sm:space-x-4 sm:py-2" aria-label="Global">
         <nav-item
           v-for="item in primaryNavItems"
           :key="item.name"

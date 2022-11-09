@@ -3,7 +3,7 @@
     <app-header :current-user="currentUser" :primary-nav-items="primaryNavItems" />
 
     <!-- main content -->
-    <main class="mx-auto max-w-7xl pb-10 lg:py-12 lg:px-8">
+    <main class="mx-auto max-w-7xl pb-10 sm:py-12 sm:px-4 lg:px-8">
       <router-view />
     </main>
   </div>

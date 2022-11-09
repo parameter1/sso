@@ -25,6 +25,10 @@ interface UserInterface {
     @project(field: "", deep: true)
     @object
     @auth
+  "The user's profile image."
+  image: UserInterfaceImage!
+    @object
+    @auth
   "The ISO date when the user last logged in."
   lastLoggedInAt: DateTime
     @project
@@ -56,6 +60,11 @@ type UserInterfaceEmail {
     @array
 }
 
+type UserInterfaceImage {
+  src: String
+  srcset: String
+}
+
 type UserInterfaceName {
   "The user's family/last name."
   family: String!
@@ -63,11 +72,14 @@ type UserInterfaceName {
   "An alias for the user's given name."
   first: String!
     @project(field: "givenName")
+  "The user's full name."
+  full: String!
+    @project(field: "givenName", needs: ["familyName"])
   "The user's given/first name."
   given: String!
     @project(field: "givenName")
-  "The user's full name."
-  full: String!
+  "The user's initials"
+  initials: String!
     @project(field: "givenName", needs: ["familyName"])
   "An alias for the user's family name."
   last: String!

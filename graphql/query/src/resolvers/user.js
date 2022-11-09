@@ -80,5 +80,12 @@ export default {
     full({ givenName, familyName }) {
       return [givenName, familyName].join(' ');
     },
+
+    /**
+     *
+     */
+    initials({ givenName, familyName }) {
+      return [givenName[0], familyName[0]].join('').toUpperCase();
+    },
   },
 };

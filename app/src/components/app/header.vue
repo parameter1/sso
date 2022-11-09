@@ -23,11 +23,12 @@
           :open="open"
           :primary-nav-items="primaryNavItems"
           :user="user"
+          @logout="logout"
         />
 
         <!-- user dropdown -->
         <div class="hidden sm:ml-4 sm:flex sm:items-center">
-          <user-dropdown :user="user" />
+          <user-dropdown :user="user" @logout="logout" />
         </div>
       </div>
 
@@ -55,6 +56,8 @@ import MobileMenu from './header/mobile-menu.vue';
 import MobileMenuButton from './header/mobile-menu-button.vue';
 import NavItem from './header/primary-nav-link.vue';
 import UserDropdown from './header/user-dropdown.vue';
+
+import userService from '../../services/user';
 
 export default {
   name: 'AppHeader',
@@ -86,5 +89,11 @@ export default {
       icon: BuildingOffice2Icon,
     }],
   }),
+
+  methods: {
+    async logout() {
+      await userService.logout();
+    },
+  },
 };
 </script>

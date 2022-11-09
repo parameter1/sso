@@ -14,7 +14,6 @@ import gql from 'graphql-tag';
 
 import AppHeader from '../components/app/header.vue';
 
-import userService from '../services/user';
 import GraphQLError from '../graphql/error';
 
 const QUERY = gql`
@@ -56,11 +55,5 @@ export default {
     error: null,
     loading: false,
   }),
-
-  methods: {
-    async logout() {
-      await userService.logout({ next: this.next });
-    },
-  },
 };
 </script>

@@ -4,7 +4,7 @@
 
     <!-- main content -->
     <main class="mx-auto max-w-7xl pb-10 lg:py-12 lg:px-8">
-      Hi
+      <router-view />
     </main>
   </div>
 </template>
@@ -56,11 +56,11 @@ export default {
     loading: false,
     primaryNavItems: [{
       name: 'Dashboard',
-      to: '#',
+      to: '/manage',
       current: true,
     }, {
       name: 'Organizations',
-      to: '#',
+      to: '/manage/organizations',
     }],
   }),
 

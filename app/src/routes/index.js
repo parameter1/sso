@@ -27,13 +27,13 @@ const routes = [
     children: [
       {
         path: '',
-        name: 'manage.index',
-        component: () => import('../pages/manage/index.vue'),
+        name: 'manage.dashboard',
+        component: () => import('../pages/manage/dashboard.vue'),
       },
       {
-        path: 'profile',
-        name: 'manage.profile',
-        component: () => import('../pages/manage/profile.vue'),
+        path: 'organizations',
+        name: 'manage.organizations',
+        component: () => import('../pages/manage/organizations.vue'),
       },
     ],
   },

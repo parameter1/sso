@@ -55,15 +55,25 @@
               </div>
               <!-- primary nav items -->
               <nav class="mt-3 space-y-1 px-2">
-                <a
+                <router-link
                   v-for="item in primaryNavItems"
                   :key="item.name"
-                  :href="item.to"
-                  class="block rounded-md px-3 py-2 text-base font-medium text-slate-900
-                  hover:bg-slate-100 hover:text-slate-800"
+                  :to="item.to"
+                  custom
+                  v-slot="{ href, isExactActive, navigate }"
                 >
-                  {{ item.name }}
-                </a>
+                  <a
+                    :href="href"
+                    :class="[
+                      isExactActive ? 'bg-slate-100' : '',
+                      'block rounded-md px-3 py-2 text-base font-medium text-slate-900',
+                      'hover:bg-slate-100 hover:text-slate-800',
+                    ]"
+                    @click="navigate"
+                  >
+                    {{ item.name }}
+                  </a>
+                </router-link>
               </nav>
             </div>
 

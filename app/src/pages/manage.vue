@@ -1,48 +1,14 @@
 <template>
-  <div class="h-full bg-slate-100">
-    <!-- mobile sidebar here! -->
-
-    <!-- desktop sidebar -->
-    <app-sidebar type="desktop" @logout="logout" />
-  </div>
-  <!-- <main>
-    <h1>Manage</h1>
-    <p v-if="isLoading">
-      Loading...
-    </p>
-    <error-element v-else-if="error" :error="error" />
-    <nav v-else>
-      <ul>
-        <li v-for="item in primaryNavItems" :key="item.to">
-          <router-link :to="item.to">
-            {{ item.name }}
-          </router-link>
-        </li>
-        <li>
-          <a href="#logout" @click.prevent="logout">
-            Logout
-          </a>
-        </li>
-      </ul>
-    </nav>
-
-    <router-view />
-  </main> -->
+  <h1>Manage</h1>
 </template>
 
 <script>
-import AppSidebar from '../components/app/sidebar.vue';
-
 import userService from '../services/user';
 import { CURRENT_USER } from '../graphql/queries';
 import GraphQLError from '../graphql/error';
 
 export default {
   name: 'ManagePage',
-
-  components: {
-    AppSidebar,
-  },
 
   apollo: {
     currentUser: {
@@ -57,14 +23,7 @@ export default {
   },
 
   data: () => ({
-    currentUser: null,
-    error: null,
-    isLoading: false,
-    primaryNavItems: [
-      { name: 'Index', to: '/manage' },
-      { name: 'Profile', to: '/manage/profile' },
-      // { name: 'Logout', to: '/logout' },
-    ],
+
   }),
 
   methods: {

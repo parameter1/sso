@@ -20,7 +20,7 @@
   "dependencies": {
     "@parameter1/joi": "^2.6.0",
     "@parameter1/micro-ejson": "^1.1.0",
-    "@parameter1/mongodb-core": "^1.0.0",
+    "@parameter1/mongodb-core": "^1.3.0",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/slug": "^2.1.0",
     "@parameter1/sso-entity-types": "^1.0.0-alpha.0",

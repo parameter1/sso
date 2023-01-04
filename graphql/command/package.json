@@ -28,11 +28,11 @@
     "apollo-server-core": "^3.11.1",
     "apollo-server-fastify": "^3.11.1",
     "envalid": "^7.3.1",
-    "fastify": "^3.29.3",
+    "fastify": "^3.29.4",
     "graphql": "^16.6.0",
     "lodash.merge": "^4.6.2"
   },
   "devDependencies": {
-    "@parameter1/gulp": "^2.0.0"
+    "@parameter1/gulp": "^2.1.0"
   }
 }

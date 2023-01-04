@@ -28,15 +28,15 @@
     "apollo-server-core": "^3.11.1",
     "apollo-server-fastify": "^3.11.1",
     "envalid": "^7.3.1",
-    "fastify": "^3.29.3",
+    "fastify": "^3.29.4",
     "graphql": "^16.6.0",
     "graphql-subscriptions": "^2.0.0",
     "graphql-ws": "^5.11.2",
     "pascal-case": "^3.1.2",
     "sift": "^16.0.1",
-    "ws": "^8.10.0"
+    "ws": "^8.11.0"
   },
   "devDependencies": {
-    "@parameter1/gulp": "^2.0.0"
+    "@parameter1/gulp": "^2.1.0"
   }
 }

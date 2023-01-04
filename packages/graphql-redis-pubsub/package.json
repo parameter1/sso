@@ -21,7 +21,7 @@
     "@parameter1/mongodb-bson": "^1.0.0",
     "@parameter1/sso-prop-types-core": "^1.0.0-alpha.0",
     "graphql": "^16.6.0",
-    "graphql-redis-subscriptions": "^2.5.0",
+    "graphql-redis-subscriptions": "^2.6.0",
     "graphql-subscriptions": "^2.0.0",
     "ioredis": "^5.2.4"
   }

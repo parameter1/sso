@@ -35,11 +35,11 @@
     "vue-router": "^4.1.6"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^3.2.0",
+    "@vitejs/plugin-vue": "^4.0.0",
     "@vue/compiler-sfc": "^3.2.45",
     "autoprefixer": "^10.4.13",
     "eslint-plugin-vue": "^9.8.0",
     "postcss": "^8.4.20",
-    "vite": "^3.2.5"
+    "vite": "^4.0.4"
   }
 }

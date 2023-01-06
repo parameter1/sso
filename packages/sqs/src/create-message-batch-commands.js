@@ -1,6 +1,6 @@
 import { SendMessageBatchCommand } from '@aws-sdk/client-sqs';
 import { PropTypes, validateAsync } from '@parameter1/sso-prop-types-core';
-import { EJSON } from 'bson';
+import { EJSON } from '@parameter1/mongodb-bson';
 import { chunkArray } from '@parameter1/utils';
 import { attributeValueFieldMap, sqsMessagesSchema } from './schema.js';
 

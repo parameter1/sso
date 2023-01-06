@@ -19,9 +19,9 @@
   },
   "dependencies": {
     "@parameter1/mongodb-core": "^1.3.0",
-    "@parameter1/mongodb-dataloader": "^1.1.2",
-    "@parameter1/mongodb-pagination": "^1.4.0",
-    "@parameter1/mongodb-prop-types": "^1.3.0",
+    "@parameter1/mongodb-dataloader": "^1.1.3",
+    "@parameter1/mongodb-pagination": "^1.4.1",
+    "@parameter1/mongodb-prop-types": "^1.3.1",
     "@parameter1/sso-prop-types-core": "^1.0.0-alpha.0",
     "@parameter1/sso-prop-types-event": "^1.0.0-alpha.0"
   }

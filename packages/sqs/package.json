@@ -19,8 +19,8 @@
   },
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.245.0",
+    "@parameter1/mongodb-bson": "^1.0.1",
     "@parameter1/sso-prop-types-core": "^1.0.0-alpha.0",
-    "@parameter1/utils": "^2.0.0",
-    "bson": "^4.7.1"
+    "@parameter1/utils": "^2.0.0"
   }
 }

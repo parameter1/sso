@@ -1,30 +1,34 @@
-import { ApolloServer } from 'apollo-server-fastify';
-import {
-  ApolloServerPluginDrainHttpServer,
-  ApolloServerPluginLandingPageGraphQLPlayground,
-  ApolloServerPluginLandingPageDisabled,
-} from 'apollo-server-core';
-import fastify from 'fastify';
-import {
-  formatServerError,
-  AuthContext,
-  CloseFastifyPlugin,
-  OnShutdownPlugin,
-} from '@parameter1/sso-graphql';
+import { ApolloServer } from '@apollo/server';
+import { fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
+import Fastify from 'fastify';
+import { AuthContext, onShutdownPlugin, formatServerError } from '@parameter1/sso-graphql';
+
 import { WebSocketServer } from 'ws';
 import { useServer } from 'graphql-ws/lib/use/ws';
 
 import schema from './schema.js';
 import { userManager } from './service-clients.js';
 
-const isProduction = process.env.NODE_ENV === 'production';
-
-export default async (options = {}) => {
-  const app = fastify(options.fastify);
+/**
+ *
+ * @param {object} params
+ * @param {import("fastify").FastifyServerOptions} [params.fastifyOpts]
+ * @param {Function} [params.onHealthCheck]
+ * @param {Function} [params.onShutdown]
+ * @param {string} [params.path=/graphql]
+ * @returns {import("fastify").FastifyInstance}
+ */
+export async function createServer({
+  fastifyOpts,
+  onHealthCheck,
+  onShutdown,
+  path = '/graphql',
+} = {}) {
+  const fastify = Fastify(fastifyOpts);
 
   const wsServer = new WebSocketServer({
-    server: app.server,
-    path: '/subscription',
+    server: fastify.server,
+    path,
   });
   const serverCleanup = useServer({
     schema,
@@ -34,22 +38,16 @@ export default async (options = {}) => {
   }, wsServer);
 
   const apollo = new ApolloServer({
-    cache: 'bounded',
-    csrfPrevention: true,
-    persistedQueries: false,
-    schema,
+    formatError: (e, ...rest) => {
+      const formatted = formatServerError(e, ...rest);
+      // @todo eventually log errors
+      return formatted;
+    },
     introspection: true,
-    debug: !isProduction,
+    persistedQueries: false,
     plugins: [
-      isProduction
-        ? ApolloServerPluginLandingPageDisabled()
-        : ApolloServerPluginLandingPageGraphQLPlayground(),
-      CloseFastifyPlugin(app),
-      ApolloServerPluginDrainHttpServer({
-        httpServer: app.server,
-        stopGracePeriodMillis: process.env.SHUTDOWN_GRACE_PERIOD,
-      }),
-      OnShutdownPlugin({ fn: options.onShutdown }),
+      fastifyApolloDrainPlugin(fastify),
+      onShutdownPlugin({ fn: onShutdown }),
       {
         async serverWillStart() {
           return {
@@ -60,13 +58,24 @@ export default async (options = {}) => {
         },
       },
     ],
-    formatError: formatServerError,
+    schema,
   });
 
   await apollo.start();
-  app.register(apollo.createHandler({
-    path: '/subscription',
-    onHealthCheck: options.onHealthCheck,
-  }));
-  return app;
-};
+
+  fastify.route({
+    url: path,
+    method: ['GET', 'POST'],
+    handler: fastifyApolloHandler(apollo),
+  });
+
+  fastify.route({
+    url: '/.well-known/apollo/server-health',
+    method: ['HEAD', 'GET'],
+    handler: async (_, reply) => {
+      if (typeof onHealthCheck === 'function') await onHealthCheck();
+      reply.send({ ok: true });
+    },
+  });
+  return fastify;
+}

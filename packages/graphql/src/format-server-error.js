@@ -15,15 +15,24 @@ const codes = {
   GRAPHQL_VALIDATION_FAILED: 422,
 };
 
-export function formatServerError(err) {
-  const statusCode = get(err, 'extensions.exception.statusCode');
-  const code = get(err, 'extensions.code');
+export function formatServerError(err, { originalError } = {}) {
+  // if the error does not have a status code, attempt to set from the original
+  if (!get(err, 'extensions.statusCode')) {
+    const originalStatusCode = get(originalError, 'statusCode');
+    if (originalStatusCode) {
+      set(err, 'extensions.statusCode', originalStatusCode);
+      // if original error had a status and the incoming error does not, re-align to gql code
+      const code = STATUS_CODES[originalStatusCode];
+      if (code) {
+        set(err, 'extensions.code', code.replace(/\s/g, '_').toUpperCase());
+      }
+    }
+  }
 
-  if (statusCode) set(err, 'extensions.code', STATUS_CODES[statusCode].replace(/\s/g, '_').toUpperCase());
-  if (!statusCode && codes[code]) set(err, 'extensions.exception.statusCode', codes[code]);
-
-  if (get(err, 'extensions.exception.statusCode', 500) >= 500) {
-    // @todo send the error to new relic!
+  // if still not set, attempt to align a status code with the graphql code
+  if (!get(err, 'extensions.statusCode')) {
+    const code = get(err, 'extensions.code');
+    set(err, 'extensions.statusCode', codes[code] || 500);
   }
   return err;
 }

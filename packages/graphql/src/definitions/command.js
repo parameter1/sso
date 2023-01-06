@@ -1,4 +1,4 @@
-import { gql } from '@parameter1/graphql/tag';
+import { gql } from 'graphql-tag';
 
 export const commandResultEnums = {
   CommandResultEntityTypeEnum: {

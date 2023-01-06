@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { mapSchema, MapperKind } from '@parameter1/graphql/utils';
-import { getDirectiveArgs } from '@parameter1/graphql/directives';
+import { getDirectiveArgs, mapSchema, MapperKind } from '@parameter1/graphql-utils';
 
 export function authDirectiveTransformer(schema, directiveName = 'auth') {
   return mapSchema(schema, {

@@ -1,6 +1,6 @@
 import { immediatelyThrow } from '@parameter1/utils';
 import pkg from '../package.js';
-import createServer from './create-server.js';
+import { createServer } from './create-server.js';
 import {
   EXPOSED_HOST,
   EXPOSED_PORT,
@@ -24,8 +24,9 @@ const { log } = console;
     })(),
   ]);
 
+  const path = '/subscription';
   const server = await createServer({
-    fastify: {
+    fastifyOpts: {
       trustProxy: ['loopback', 'linklocal', 'uniquelocal'],
     },
     onHealthCheck: async () => {
@@ -40,8 +41,9 @@ const { log } = console;
         pubSubManager.quit(),
       ]);
     },
+    path,
   });
 
   await server.listen({ host: HOST, port: PORT });
-  log(`Ready on http://${EXPOSED_HOST}:${EXPOSED_PORT}/subscription`);
+  log(`Ready on http://${EXPOSED_HOST}:${EXPOSED_PORT}${path}`);
 })().catch(immediatelyThrow);

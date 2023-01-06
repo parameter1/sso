@@ -19,16 +19,17 @@
     "test": "yarn lint"
   },
   "dependencies": {
+    "@apollo/server": "^4.3.0",
+    "@as-integrations/fastify": "^1.2.0",
+    "@fastify/cors": "^8.2.0",
     "@parameter1/micro-ejson": "^1.1.0",
     "@parameter1/mongodb-graphql-types": "^1.0.0",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/sso-graphql": "^1.0.0-alpha.0",
     "@parameter1/sso-prop-types-core": "^1.0.0-alpha.0",
     "@parameter1/utils": "^2.0.0",
-    "apollo-server-core": "^3.11.1",
-    "apollo-server-fastify": "^3.11.1",
     "envalid": "^7.3.1",
-    "fastify": "^3.29.4",
+    "fastify": "^4.11.0",
     "graphql": "^16.6.0",
     "lodash.merge": "^4.6.2"
   },

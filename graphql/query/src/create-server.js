@@ -1,60 +1,74 @@
-import { ApolloServer } from 'apollo-server-fastify';
-import {
-  ApolloServerPluginDrainHttpServer,
-  ApolloServerPluginLandingPageGraphQLPlayground,
-  ApolloServerPluginLandingPageDisabled,
-} from 'apollo-server-core';
-import fastify from 'fastify';
-import {
-  AuthContext,
-  CloseFastifyPlugin,
-  OnShutdownPlugin,
-  formatServerError,
-} from '@parameter1/sso-graphql';
+import { ApolloServer } from '@apollo/server';
+import { fastifyApolloDrainPlugin, fastifyApolloHandler } from '@as-integrations/fastify';
+import cors from '@fastify/cors';
+import { AuthContext, onShutdownPlugin, formatServerError } from '@parameter1/sso-graphql';
+import Fastify from 'fastify';
 
 import schema from './schema.js';
 import { materialized } from './mongodb.js';
 import { userManager } from './service-clients.js';
 
-const isProduction = process.env.NODE_ENV === 'production';
+/**
+ *
+ * @param {object} params
+ * @param {import("fastify").FastifyServerOptions} [params.fastifyOpts]
+ * @param {Function} [params.onHealthCheck]
+ * @param {Function} [params.onShutdown]
+ * @param {string} [params.path=/graphql]
+ * @returns {import("fastify").FastifyInstance}
+ */
+export async function createServer({
+  fastifyOpts,
+  onHealthCheck,
+  onShutdown,
+  path = '/graphql',
+} = {}) {
+  const fastify = Fastify(fastifyOpts);
 
-export default async (options = {}) => {
-  const app = fastify(options.fastify);
   const apollo = new ApolloServer({
-    cache: 'bounded',
-    csrfPrevention: true,
-    context: async ({ request }) => ({
-      auth: AuthContext({ header: request.headers.authorization, userManager }),
-      dataloaders: materialized.createDataloaders(),
-      ip: request.ip,
-      ua: request.headers['user-agent'],
-    }),
-    schema,
+    formatError: (e) => {
+      const formatted = formatServerError(e);
+      // @todo eventually log errors
+      return formatted;
+    },
     introspection: true,
-    debug: !isProduction,
     plugins: [
-      isProduction
-        ? ApolloServerPluginLandingPageDisabled()
-        : ApolloServerPluginLandingPageGraphQLPlayground(),
-      CloseFastifyPlugin(app),
-      ApolloServerPluginDrainHttpServer({
-        httpServer: app.server,
-        stopGracePeriodMillis: process.env.SHUTDOWN_GRACE_PERIOD,
-      }),
-      OnShutdownPlugin({ fn: options.onShutdown }),
+      fastifyApolloDrainPlugin(fastify),
+      onShutdownPlugin({ fn: onShutdown }),
     ],
-    formatError: formatServerError,
+    schema,
   });
 
   await apollo.start();
-  app.register(apollo.createHandler({
-    cors: {
-      origin: true,
-      methods: ['GET', 'POST'],
-      maxAge: 86400,
+
+  // @todo determine how to handle CORS?
+  fastify.route({
+    url: path,
+    method: ['GET', 'POST'],
+    handler: fastifyApolloHandler(apollo, {
+      context: (request) => ({
+        auth: AuthContext({ header: request.headers.authorization, userManager }),
+        dataloaders: materialized.createDataloaders(),
+        ip: request.ip,
+        ua: request.headers['user-agent'],
+      }),
+    }),
+  });
+
+  fastify.route({
+    url: '/.well-known/apollo/server-health',
+    method: ['HEAD', 'GET'],
+    handler: async (_, reply) => {
+      if (typeof onHealthCheck === 'function') await onHealthCheck();
+      reply.send({ ok: true });
     },
-    path: '/query',
-    onHealthCheck: options.onHealthCheck,
-  }));
-  return app;
-};
+  });
+
+  await fastify.register(cors, {
+    origin: true,
+    maxAge: 86400,
+    methods: ['GET', 'POST'],
+  });
+
+  return fastify;
+}

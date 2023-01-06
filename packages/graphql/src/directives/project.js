@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { mapSchema, MapperKind } from '@parameter1/graphql/utils';
-import { getDirectiveArgs } from '@parameter1/graphql/directives';
+import { getDirectiveArgs, mapSchema, MapperKind } from '@parameter1/graphql-utils';
 import { asArray } from '@parameter1/utils';
 import { get } from '@parameter1/object-path';
 

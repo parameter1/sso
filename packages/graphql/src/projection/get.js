@@ -1,4 +1,4 @@
-import { Kind } from '@parameter1/graphql';
+import { Kind } from 'graphql';
 import { get, getAsArray } from '@parameter1/object-path';
 
 const getReturnType = (type) => {

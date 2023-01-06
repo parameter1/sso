@@ -18,9 +18,20 @@
     "test": "yarn lint"
   },
   "dependencies": {
-    "@parameter1/graphql": "^4.0.0",
+    "@graphql-tools/schema": "^9.0.12",
+    "@parameter1/graphql-apollo-plugin-on-shutdown": "^1.0.0",
+    "@parameter1/graphql-directive-array": "^1.0.0",
+    "@parameter1/graphql-directive-interface-fields": "^2.0.0",
+    "@parameter1/graphql-directive-object": "^1.0.0",
+    "@parameter1/graphql-errors": "^1.0.0",
+    "@parameter1/graphql-feature-pagination": "^1.0.1",
+    "@parameter1/graphql-feature-sort-order": "^1.0.1",
+    "@parameter1/graphql-scalar-date-time": "^1.0.0",
+    "@parameter1/graphql-transformer-enum-default-values": "^1.0.0",
+    "@parameter1/graphql-utils": "^1.0.0",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/utils": "^2.0.0",
-    "apollo-server-core": "^3.11.1"
+    "graphql": "^16.6.0",
+    "graphql-tag": "^2.12.6"
   }
 }

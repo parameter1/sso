@@ -1,4 +1,4 @@
-import { ApolloError, AuthenticationError, ForbiddenError } from '../errors.js';
+import { AuthenticationError, ForbiddenError, InternalServerError } from '@parameter1/graphql-errors';
 
 const parseHeader = (header) => {
   if (!header) return {};
@@ -71,7 +71,7 @@ export function AuthContext({ header, userManager } = {}) {
   };
 
   const checkIsCurrentUser = async (id, message = 'You do not have the proper permissions to perform this operation.') => {
-    if (!id) throw new ApolloError('A user ID is required in order to check if the current user matches');
+    if (!id) throw new InternalServerError('A user ID is required in order to check if the current user matches');
     const currentUserId = await getUserId();
     if (`${currentUserId}` !== `${id}`) throw new ForbiddenError(message);
     return true;

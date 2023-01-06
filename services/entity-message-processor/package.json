@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-entity-message-processor-service",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "type": "module",
   "description": "Responsible for processing entity messages.",
   "author": "Jacob Bare <jacob@parameter1.com>",
@@ -21,10 +21,10 @@
   "dependencies": {
     "@parameter1/micro-ejson": "^1.1.0",
     "@parameter1/mongodb-core": "^1.3.0",
-    "@parameter1/sso-graphql-redis-pubsub": "^1.0.0-alpha.0",
-    "@parameter1/sso-mongodb-materializers": "^1.0.0-alpha.0",
-    "@parameter1/sso-mongodb-normalized": "^1.0.0-alpha.0",
-    "@parameter1/sso-mongodb-normalizers": "^1.0.0-alpha.0",
+    "@parameter1/sso-graphql-redis-pubsub": "^1.0.0-alpha.1",
+    "@parameter1/sso-mongodb-materializers": "^1.0.0-alpha.1",
+    "@parameter1/sso-mongodb-normalized": "^1.0.0-alpha.1",
+    "@parameter1/sso-mongodb-normalizers": "^1.0.0-alpha.1",
     "@parameter1/sso-prop-types-core": "^1.0.0-alpha.0",
     "@parameter1/sso-prop-types-event": "^1.0.0-alpha.0",
     "@parameter1/terminus": "^2.2.1",

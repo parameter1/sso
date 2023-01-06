@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-sqs",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "type": "module",
   "description": "Common functions for handling BSON-based SQS messages.",
   "author": "Jacob Bare <jacob@parameter1.com>",

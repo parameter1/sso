@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-mongodb-normalized",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "type": "module",
   "description": "The SSO MongoDB normalized repos.",
   "author": "Jacob Bare <jacob@parameter1.com>",

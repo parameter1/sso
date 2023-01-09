@@ -2394,10 +2394,10 @@
     escape-string-regexp "^5.0.0"
     object-hash "^3.0.0"
 
-"@parameter1/mongodb-graphql-types@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@parameter1/mongodb-graphql-types/-/mongodb-graphql-types-1.0.1.tgz#e950583d1a02c0acbca49891a406f3b3e492417c"
-  integrity sha512-XWcoZIBWqC/lhlvdMUvgy5TkhKUHXb9za2BAeAL+BzfwLq6mjHW8WUy7Fo9LLXjMmYFE8qU7TT+OjSnM7ZdLRQ==
+"@parameter1/mongodb-graphql-types@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@parameter1/mongodb-graphql-types/-/mongodb-graphql-types-1.0.2.tgz#cff893cdd8045d88f9962c5ac1951a35089e993a"
+  integrity sha512-8nwc8ED5CdsvEWR6mmttUnZIqYbXcdEoL2Ndbo5kBdy3hVZRlsfjpkgbnZnf6D6H2lNBgHo5Q0/TLNGRjwdVxA==
   dependencies:
     "@parameter1/mongodb-bson" "^1.0.1"
 

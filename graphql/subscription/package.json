@@ -21,7 +21,7 @@
   "dependencies": {
     "@apollo/server": "^4.3.0",
     "@as-integrations/fastify": "^1.2.0",
-    "@parameter1/micro-ejson": "^1.1.0",
+    "@parameter1/micro-ejson": "^1.2.0",
     "@parameter1/mongodb-graphql-types": "^1.0.1",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/sso-graphql": "^1.0.0-alpha.1",
@@ -34,7 +34,7 @@
     "graphql-ws": "^5.11.2",
     "pascal-case": "^3.1.2",
     "sift": "^16.0.1",
-    "ws": "^8.11.0"
+    "ws": "^8.12.0"
   },
   "devDependencies": {
     "@parameter1/gulp": "^2.1.0"

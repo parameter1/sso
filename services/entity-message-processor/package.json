@@ -19,7 +19,7 @@
     "test": "yarn lint"
   },
   "dependencies": {
-    "@parameter1/micro-ejson": "^1.1.0",
+    "@parameter1/micro-ejson": "^1.2.0",
     "@parameter1/mongodb-core": "^1.3.0",
     "@parameter1/sso-graphql-redis-pubsub": "^1.0.0-alpha.1",
     "@parameter1/sso-mongodb-materializers": "^1.0.0-alpha.1",

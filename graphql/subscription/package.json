@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-graphql-subscription-server",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "type": "module",
   "description": "The SSO GraphQL subscription API server.",
   "author": "Jacob Bare <jacob@parameter1.com>",

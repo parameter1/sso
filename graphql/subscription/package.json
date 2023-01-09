@@ -22,7 +22,7 @@
     "@apollo/server": "^4.3.0",
     "@as-integrations/fastify": "^1.2.0",
     "@parameter1/micro-ejson": "^1.2.0",
-    "@parameter1/mongodb-graphql-types": "^1.0.1",
+    "@parameter1/mongodb-graphql-types": "^1.0.2",
     "@parameter1/object-path": "^2.0.0",
     "@parameter1/sso-graphql": "^1.0.0-alpha.1",
     "@parameter1/sso-graphql-redis-pubsub": "^1.0.0",

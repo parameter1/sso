@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-graphql-redis-pubsub",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0",
   "type": "module",
   "description": "PubSub management for GraphQL+Redis.",
   "author": "Jacob Bare <jacob@parameter1.com>",
@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@parameter1/mongodb-bson": "^1.0.1",
-    "@parameter1/sso-prop-types-core": "^1.0.0-alpha.0",
+    "@parameter1/sso-prop-types-core": "^1.0.0",
     "graphql": "^16.6.0",
     "graphql-redis-subscriptions": "^2.6.0",
     "graphql-subscriptions": "^2.0.0",

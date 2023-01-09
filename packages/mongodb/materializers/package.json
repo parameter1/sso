@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-mongodb-materializers",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0",
   "type": "module",
   "description": "The SSO MongoDB materializers.",
   "author": "Jacob Bare <jacob@parameter1.com>",
@@ -18,8 +18,8 @@
     "test": "yarn lint"
   },
   "dependencies": {
-    "@parameter1/sso-mongodb-normalized": "^1.0.0-alpha.1",
-    "@parameter1/sso-prop-types-core": "^1.0.0-alpha.0",
-    "@parameter1/sso-prop-types-event": "^1.0.0-alpha.0"
+    "@parameter1/sso-mongodb-normalized": "^1.0.0",
+    "@parameter1/sso-prop-types-core": "^1.0.0",
+    "@parameter1/sso-prop-types-event": "^1.0.0"
   }
 }

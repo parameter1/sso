@@ -1,6 +1,6 @@
 {
   "name": "@parameter1/sso-prop-types-event",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "description": "Event SSO prop type handling",
   "author": "Jacob Bare <jacob@parameter1.com>",
@@ -18,7 +18,7 @@
     "test": "yarn lint"
   },
   "dependencies": {
-    "@parameter1/sso-entity-types": "^1.0.0-alpha.0",
-    "@parameter1/sso-prop-types-core": "^1.0.0"
+    "@parameter1/sso-entity-types": "^2.0.0",
+    "@parameter1/sso-prop-types-core": "^2.0.0"
   }
 }

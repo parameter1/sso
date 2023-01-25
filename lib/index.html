@@ -9,7 +9,9 @@
     <h1>Test App Using Lib</h1>
 
     <script type="module">
-      import SSO from './src/main.js';
+      import { SSO } from './src/main.js';
+
+      const { log } = console;
 
       const appKey = 'mindful';
       const sso = new SSO({
@@ -18,63 +20,49 @@
         graphqlUri: 'http://graphql.sso.dev.parameter1.com:7911/query',
       });
 
-      const loadUser = async () => {
+      const manual = async () => {
+        // check for auth state manually
+        if (await sso.isAuthenticated()) {
+          log('LOGGED IN!');
+        } else {
+          log('NOT LOGGED IN. Manually redirecting in 5 seconds...');
+          setTimeout(() => {
+            sso.redirectToApp();
+          }, 5000);
+        }
+      };
+
+      const auto = async () => {
+        // running a query that requires auth (and if the user is not authed) will auto-redirect to the app.
         const { data } = await sso.query({
+          autoRedirect: true,
           variables: { appKey },
           query: `
             query TestAppCurrentUser($appKey: String!) {
-              user: currentUser {
-                _id
-                email { address }
-                name { full }
-                workspaceConnection(input: { applicationKeys: [$appKey] }) {
-                  edges {
-                    role { _id name }
-                    node { _id name { application } }
+                user: currentUser {
+                  _id
+                  email { address }
+                  name { full }
+                  workspaceConnection(input: { applicationKeys: [$appKey] }) {
+                    edges {
+                      role { _id name }
+                      node { _id name { application } }
+                    }
                   }
                 }
               }
-            }
-          `,
-        });
-        return data.user;
+            `,
+          });
+        console.log({ user: data.user });
       };
 
       (async () => {
-        try {
-          const user = await loadUser();
-          const button = document.getElementById('logout');
-          button.style.display = 'block';
-          button.onclick = () => sso.logout();
+        // can either manually check auth and redirect
+        await manual();
 
-          const userEl = document.getElementById('user');
-          userEl.textContent = `Current User: ${user.name.full} (${user.email.address})`;
-          userEl.style.display = 'block';
-
-          const workspaces = document.getElementById('workspaces');
-          workspaces.innerHTML = `<li>${user.workspaceConnection.edges.map(({ node }) => {
-            return node.name.application;
-          }).join('</li><li>')}</li>`;
-          workspaces.style.display = 'block';
-
-        } catch (e) {
-          console.error('AN ERROR OCURRED LOADING SSO!', e.message);
-          const error = document.getElementById('error');
-          error.textContent = `ERROR: ${e.message}`;
-          error.style.display = 'block';
-        }
+        // or do it automatically
+        // await auto();
       })();
     </script>
-
-    <div id="error" role="alert" style="display: none;"></div>
-    <p id="user" style="display: none;"></p>
-    <ul id="workspaces" style="display: none;"></ul>
-    <button
-      id="logout"
-      type="button"
-      style="display: none;"
-    >
-      Logout
-    </button>
   </body>
 </html>

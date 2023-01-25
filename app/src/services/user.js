@@ -1,11 +1,11 @@
 import gql from 'graphql-tag';
 import { makeVar } from '@apollo/client/core';
 import apollo from '../apollo';
-import tokenStorage from './token-storage';
+import { AuthTokenStorage } from './token-storage';
 import addTokenListener from './add-token-listener';
 import isRedirect from '../utils/is-redirect';
 
-const loggedIn = makeVar(tokenStorage.exists());
+const loggedIn = makeVar(AuthTokenStorage.exists());
 
 const SEND_USER_LOGIN_LINK = gql`
   mutation SendUserLoginLink($input: SendUserLoginLinkInput!) {
@@ -37,7 +37,7 @@ const redirectOrReload = ({ next }) => {
 };
 
 const clearTokensAndReload = ({ next } = {}) => {
-  tokenStorage.remove();
+  AuthTokenStorage.remove();
   loggedIn(false);
   apollo.command.clearStore();
   apollo.query.clearStore();
@@ -48,7 +48,7 @@ export default {
   isLoggedIn: () => loggedIn(),
 
   /**
-   *
+   * @deprecated
    */
   attachStorageListener: () => {
     const getRedirect = () => {
@@ -75,11 +75,8 @@ export default {
       variables: { input },
     });
     const { loginUserFromLink } = data;
-    tokenStorage.set({
-      uid: loginUserFromLink.userId,
-      value: loginUserFromLink.authToken,
-      expiresAt: loginUserFromLink.expiresAt,
-    });
+    // @todo determine if, at some point, we want to use the `userId` and `expiresAt` values.
+    AuthTokenStorage.set(loginUserFromLink.authToken);
     loggedIn(true);
     return loginUserFromLink;
   },

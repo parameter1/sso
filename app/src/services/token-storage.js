@@ -1,29 +1,32 @@
-import constants from '../constants';
+import { TOKEN_KEY } from '../constants';
 
-const { TOKEN_KEY } = constants;
-
-const parse = (json) => {
-  try {
-    return JSON.parse(json);
-  } catch (e) {
-    return null;
+export class AuthTokenStorage {
+  /**
+   * @returns {boolean}
+   */
+  static exists() {
+    return Boolean(AuthTokenStorage.get());
   }
-};
 
-const get = () => parse(localStorage.getItem(TOKEN_KEY));
+  /**
+   * @returns {string|null}
+   */
+  static get() {
+    return localStorage.getItem(TOKEN_KEY) || null;
+  }
 
-export default {
-  get,
-  exists: () => {
-    const tokenObj = get();
-    return Boolean(tokenObj && tokenObj.value);
-  },
-  remove: () => {
+  static getKey() {
+    return TOKEN_KEY;
+  }
+
+  static remove() {
     localStorage.removeItem(TOKEN_KEY);
-  },
-  set: (obj) => {
-    if (!obj || !obj.value) throw new Error('Unable to set token: no value was provided.');
-    const json = JSON.stringify(obj);
-    localStorage.setItem(TOKEN_KEY, json);
-  },
-};
+  }
+
+  /**
+   * @param {string} token The JWT string
+   */
+  static set(token) {
+    localStorage.setItem(TOKEN_KEY, token);
+  }
+}

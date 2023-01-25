@@ -1,6 +1,4 @@
-import constants from '../constants';
-
-const { TOKEN_KEY } = constants;
+import { TOKEN_KEY } from '../constants';
 
 export default function addTokenListener({ onAdd, onRemove } = {}) {
   return window.addEventListener('storage', (event) => {

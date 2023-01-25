@@ -3,15 +3,12 @@ import { createApolloProvider } from '@vue/apollo-option';
 import App from './app.vue';
 import router from './routes';
 import clients from './apollo';
-import userService from './services/user';
 import './index.css';
 
 const apolloProvider = createApolloProvider({
   clients,
   defaultClient: clients.query,
 });
-
-userService.attachStorageListener();
 
 const app = createApp(App);
 app.use(apolloProvider);

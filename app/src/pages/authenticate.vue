@@ -47,6 +47,7 @@ import { ShieldExclamationIcon } from '@heroicons/vue/24/outline';
 import LoadingSpinner from '../components/loading-spinner.vue';
 import SplashImageLayout from '../components/layouts/splash-image/horizontal-with-logo.vue';
 
+import { TOKEN_KEY } from '../constants';
 import isJWT from '../utils/is-jwt';
 import isRedirect from '../utils/is-redirect';
 import userService from '../services/user';
@@ -90,13 +91,16 @@ export default {
         const { token, next } = this;
         if (!token) throw new Error('No token was provided.');
         if (!isJWT(token)) throw new Error('The provided token format is invalid.');
-        await userService.loginUserFromLink({ loginLinkToken: token });
+        const { authToken } = await userService.loginUserFromLink({ loginLinkToken: token });
 
         const redirect = isRedirect(next);
         if (redirect.valid) {
           this.redirecting = true;
           if (redirect.type === 'external') {
-            window.location.href = next;
+            // append the current auth token to the redirect so external apps can set.
+            const url = new URL(next);
+            url.searchParams.set(TOKEN_KEY, authToken);
+            window.location.href = `${url}`;
           } else {
             const resolved = this.$router.resolve(next);
             const to = !resolved || resolved.name === 'not-found' ? '/manage' : next;

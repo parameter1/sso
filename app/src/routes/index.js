@@ -38,6 +38,15 @@ const routes = [
     ],
   },
   {
+    path: '/check-auth',
+    name: 'check-auth',
+    component: () => import('../pages/check-auth.vue'),
+    props: ({ query }) => ({
+      appKey: query.appKey,
+      next: query.next,
+    }),
+  },
+  {
     path: '/login',
     name: 'login',
     meta: { whenAuthed: { then: 'manage', otherwise: true }, title: 'Sign In' },

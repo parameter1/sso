@@ -330,6 +330,7 @@ export class UserManager {
    * @prop {string} loginToken
    * @prop {string} [ip]
    * @prop {string} [ua]
+   * @prop {boolean} [invalidateAfterUse=false] Whether to immediately invalidate the token.
    *
    * @typedef MagicLoginResult
    * @prop {string} authToken
@@ -341,10 +342,16 @@ export class UserManager {
    */
   async magicLogin(params) {
     /** @type {MagicLoginParams} */
-    const { loginLinkToken: token, ip, ua } = await validateAsync(object({
+    const {
+      loginLinkToken: token,
+      ip,
+      ua,
+      invalidateAfterUse,
+    } = await validateAsync(object({
       loginLinkToken: string().required(),
       ip: userLogProps.ip,
       ua: userLogProps.ua,
+      invalidateAfterUse: boolean().default(false),
     }).required(), params);
 
     const loginLinkToken = await this.token.verify({ token, subject: 'magic-login-link' });
@@ -380,10 +387,12 @@ export class UserManager {
           });
         }
 
-        await this.token.invalidate({
-          id: get(loginLinkToken, 'doc._id'),
-          options: { session: activeSession },
-        });
+        if (invalidateAfterUse) {
+          await this.token.invalidate({
+            id: get(loginLinkToken, 'doc._id'),
+            options: { session: activeSession },
+          });
+        }
 
         result = {
           authToken: authToken.signed,

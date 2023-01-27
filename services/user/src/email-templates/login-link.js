@@ -39,7 +39,7 @@ export function createLoginLinkTemplate(params) {
           <title>Your personal login link</title>
         </head>
         <body>
-          <p>You recently requested to login${application ? ` <strong>from ${application.name}</strong>` : ''}. This link is good for one hour and will expire immediately after use.</p>
+          <p>You recently requested to login${application ? ` <strong>from ${application.name}</strong>` : ''}. This link can be used multiple times to login, but will expire in one hour.</p>
           <p><a href="${url}">Click here to complete your login</a></p>
           <p>If you didn't request this link, simply ignore this email${supportEmailHtml}.</p>
           <hr>
@@ -52,7 +52,7 @@ export function createLoginLinkTemplate(params) {
       </html>
     `,
     text: `
-You recently requested to login${application ? ` from ${application.name}` : ''}. This link is good for one hour and will expire immediately after use.
+You recently requested to login${application ? ` from ${application.name}` : ''}. This link can be used multiple times to login, but will expire in one hour.
 
 Complete your login by visiting this link:
 ${url}

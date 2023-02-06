@@ -57,6 +57,15 @@ const routes = [
     }),
   },
   {
+    path: '/logout',
+    name: 'logout',
+    component: () => import('../pages/logout.vue'),
+    props: ({ query }) => ({
+      appKey: query.appKey,
+      next: query.next,
+    }),
+  },
+  {
     path: '/error',
     name: 'error',
     meta: { title: 'Fatal Error' },

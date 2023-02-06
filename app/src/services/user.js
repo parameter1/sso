@@ -2,7 +2,6 @@ import gql from 'graphql-tag';
 import { makeVar } from '@apollo/client/core';
 import apollo from '../apollo';
 import { AuthTokenStorage } from './token-storage';
-import addTokenListener from './add-token-listener';
 import isRedirect from '../utils/is-redirect';
 
 const loggedIn = makeVar(AuthTokenStorage.exists());
@@ -29,44 +28,21 @@ const LOGOUT = gql`
   }
 `;
 
-const redirectOrReload = ({ next }) => {
-  const redirect = isRedirect(next);
-  let href = '/';
-  if (redirect.valid) href = next;
-  window.location.href = href;
-};
-
 const clearTokensAndReload = ({ next } = {}) => {
   AuthTokenStorage.remove();
   loggedIn(false);
   apollo.command.clearStore();
   apollo.query.clearStore();
-  redirectOrReload({ next });
+
+  const redirect = isRedirect(next);
+  const href = redirect.valid && redirect.type === 'external'
+    ? `/login?next=${encodeURIComponent(next)}`
+    : '/';
+  window.location.href = href;
 };
 
 export default {
   isLoggedIn: () => loggedIn(),
-
-  /**
-   * @deprecated
-   */
-  attachStorageListener: () => {
-    const getRedirect = () => {
-      const params = new URLSearchParams(window.location.search);
-      return params.get('next');
-    };
-
-    addTokenListener({
-      onAdd: () => {
-        // user has likely logged in. reload the app.
-        redirectOrReload({ next: getRedirect() });
-      },
-      onRemove: () => {
-        // user should be logged out
-        clearTokensAndReload({ next: getRedirect() });
-      },
-    });
-  },
 
   loginUserFromLink: async ({ loginLinkToken } = {}) => {
     const input = { loginLinkToken };

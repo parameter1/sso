@@ -97,6 +97,19 @@ export function createOrgManager() {
           }),
         ],
       }),
+      new Organization({
+        key: 'bizbash',
+        name: 'BizBash',
+        workspaces: [
+          new Workspace({
+            sources: [
+              new BaseCMSSource({ stack: 'tauron', tenant: 'bizbash_bzb' }),
+              new EmailXSource({ tenant: 'bizbash' }),
+              new IdentityXSource({ orgId: '609d2bf1ac6305ba5790f719' }),
+            ],
+          }),
+        ],
+      }),
     ],
   });
 }

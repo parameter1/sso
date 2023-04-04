@@ -84,6 +84,19 @@ export function createOrgManager() {
           }),
         ],
       }),
+      new Organization({
+        key: 'ascend',
+        name: 'Ascend Media',
+        workspaces: [
+          new Workspace({
+            sources: [
+              new BaseCMSSource({ stack: 'tauron', tenant: 'ascend_hh' }),
+              new EmailXSource({ tenant: 'ascend' }),
+              new NativeXSource({ tenant: 'ascend' }),
+            ],
+          }),
+        ],
+      }),
     ],
   });
 }

@@ -18,7 +18,7 @@ export function createOrgManager() {
             sources: [
               new BaseCMSSource({ stack: 'virgon', tenant: 'abmedia_all' }),
               new EmailXSource({ tenant: 'abmedia' }),
-              new IdentityXSource({ org: '5e28a14af7614f59648bd70f' }),
+              new IdentityXSource({ orgId: '5e28a14af7614f59648bd70f' }),
               new NativeXSource({ tenant: 'abmedia' }),
             ],
           }),

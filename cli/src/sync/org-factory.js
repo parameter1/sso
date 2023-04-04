@@ -4,6 +4,7 @@ import { Workspace } from './workspace.js';
 
 import { BaseCMSSource } from './sources/base-cms.js';
 import { EmailXSource } from './sources/email-x.js';
+import { LeadManagementSource } from './sources/lead-management.js';
 import { IdentityXSource } from './sources/identity-x.js';
 import { NativeXSource } from './sources/native-x.js';
 
@@ -122,6 +123,36 @@ export function createOrgManager() {
               new EmailXSource({ tenant: 'bobit' }),
               new IdentityXSource({ orgId: '637c5af4988761a8b41525b2' }),
               new NativeXSource({ tenant: 'bobit' }),
+            ],
+          }),
+        ],
+      }),
+      new Organization({
+        key: 'cma',
+        name: 'Cox, Matthews & Associates',
+        workspaces: [
+          new Workspace({
+            sources: [
+              new BaseCMSSource({ stack: 'virgon', tenant: 'diverse_all' }),
+              new EmailXSource({ tenant: 'diverse' }),
+              new IdentityXSource({ orgId: '60b7b2a45ee71a459cb2087a' }),
+              new NativeXSource({ tenant: 'diverse' }),
+            ],
+          }),
+        ],
+      }),
+      new Organization({
+        key: 'im',
+        name: 'Industrial Media',
+        workspaces: [
+          new Workspace({
+            sources: [
+              new BaseCMSSource({ stack: 'tauron', tenant: 'indm_multi' }),
+              new EmailXSource({ tenant: 'indm' }),
+              new IdentityXSource({ orgId: '5e28a13df7614fdab88bd70d' }),
+              new LeadManagementSource({ tenant: 'indm' }),
+              new LeadManagementSource({ tenant: 'lynchm' }),
+              new NativeXSource({ tenant: 'indm' }),
             ],
           }),
         ],

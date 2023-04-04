@@ -4,12 +4,12 @@ export class EmailXSource extends AbstractSource {
   /**
    *
    * @param {object} params
-   * @param {string} params.key The EmailX tenant key, e.g. `acbm`
+   * @param {string} params.tenant The EmailX tenant key, e.g. `acbm`
    */
-  constructor({ key }) {
-    super({ kind: 'email-x' });
-    if (/^[a-z0-9]+$/.test(key)) throw new Error(`Invalid EmailX tenant key: ${key}`);
+  constructor({ tenant }) {
+    if (/^[a-z0-9]+$/.test(tenant)) throw new Error(`Invalid EmailX tenant key: ${tenant}`);
 
-    this.key = key;
+    super({ kind: 'email-x', key: tenant });
+    this.tenant = tenant;
   }
 }

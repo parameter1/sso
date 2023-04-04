@@ -8,9 +8,9 @@ export class IdentityXSource extends AbstractSource {
    * @param {string} params.org The IdentityX organization ID
    */
   constructor({ org }) {
-    super({ kind: 'identity-x' });
     if (/^[a-f0-9]{24}$/.test(`${org}`)) throw new Error(`Invalid IdentityX org ID: ${org}`);
 
+    super({ kind: 'identity-x', key: `${org}` });
     this.org = new ObjectId(`${org}`);
   }
 }

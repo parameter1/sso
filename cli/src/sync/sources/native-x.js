@@ -4,12 +4,12 @@ export class NativeXSource extends AbstractSource {
   /**
    *
    * @param {object} params
-   * @param {string} params.key The NativeX tenant key, e.g. `acbm`
+   * @param {string} params.tenant The NativeX tenant key, e.g. `acbm`
    */
-  constructor({ key }) {
-    super({ kind: 'native-x' });
-    if (/^[a-z0-9]$/.test(key)) throw new Error(`Invalid NativeX tenant key: ${key}`);
+  constructor({ tenant }) {
+    if (/^[a-z0-9]$/.test(tenant)) throw new Error(`Invalid NativeX tenant key: ${tenant}`);
 
-    this.key = key;
+    super({ kind: 'native-x', key: tenant });
+    this.tenant = tenant;
   }
 }

@@ -4,12 +4,12 @@ export class LeadManagementSource extends AbstractSource {
   /**
    *
    * @param {object} params
-   * @param {string} params.key The lead management tenant key, e.g. `acbm`
+   * @param {string} params.tenant The lead management tenant key, e.g. `acbm`
    */
-  constructor({ key }) {
-    super({ kind: 'lead-management' });
-    if (/^[a-z0-9]+$/.test(key)) throw new Error(`Invalid Lead Management tenant key: ${key}`);
+  constructor({ tenant }) {
+    if (/^[a-z0-9]+$/.test(tenant)) throw new Error(`Invalid Lead Management tenant key: ${tenant}`);
 
-    this.key = key;
+    super({ kind: 'lead-management', key: tenant });
+    this.tenant = tenant;
   }
 }

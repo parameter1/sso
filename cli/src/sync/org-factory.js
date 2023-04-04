@@ -110,6 +110,22 @@ export function createOrgManager() {
           }),
         ],
       }),
+      new Organization({
+        key: 'bobit',
+        name: 'Bobit Business Media',
+        workspaces: [
+          new Workspace({
+            key: 'public-safety',
+            name: 'Public Safety',
+            sources: [
+              new BaseCMSSource({ stack: 'virgon', tenant: 'bobit_publicsafety' }),
+              new EmailXSource({ tenant: 'bobit' }),
+              new IdentityXSource({ orgId: '637c5af4988761a8b41525b2' }),
+              new NativeXSource({ tenant: 'bobit' }),
+            ],
+          }),
+        ],
+      }),
     ],
   });
 }

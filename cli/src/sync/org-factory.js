@@ -170,6 +170,30 @@ export function createOrgManager() {
           }),
         ],
       }),
+      new Organization({
+        key: 'pmmi',
+        name: 'PMMI Media Group',
+        workspaces: [
+          new Workspace({
+            sources: [
+              new BaseCMSSource({ stack: 'tauron', tenant: 'pmmi_all' }),
+              new EmailXSource({ tenant: 'pmmi', publisherIds: ['609291f8932e210188802d75', '609291efb1fcca1eb21ba585', '609291d5932e21d04d802d62', '600dac837d46a2a37e38dbe7'] }),
+              new IdentityXSource({ orgId: '5e28a144f7614f1d488bd70e', appIds: ['5e28a4ba58e67b867055ae4c', '5e28a4ad58e67b166155ae4b', '5e28a4a058e67b7fad55ae4a', '5e28a49458e67b68f255ae49'] }),
+              new NativeXSource({ tenant: 'pmmi', publisherIds: ['5da7778e65ebb90001f3cd99', '5da7778465ebb90001f3cd8f', '5da7777265ebb90001f3cd85', '5da7776165ebb90001f3cd7b'] }),
+            ],
+          }),
+          new Workspace({
+            key: 'mundo',
+            name: 'Mundo',
+            sources: [
+              new BaseCMSSource({ stack: 'tauron', tenant: 'pmmi_mundo' }),
+              new EmailXSource({ tenant: 'pmmi', publisherIds: ['60c2055a4a5b98912ea45c8e'] }),
+              new IdentityXSource({ orgId: '5e28a144f7614f1d488bd70e', appIds: ['5e28a4c858e67b86c955ae4d'] }),
+              new NativeXSource({ tenant: 'pmmi', publisherIds: ['60832568496c2400016b51c2'] }),
+            ],
+          }),
+        ],
+      }),
     ],
   });
 }

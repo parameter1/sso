@@ -14,7 +14,7 @@ export class BaseCMSSource extends AbstractSource {
    */
   constructor({ stack, tenant }) {
     if (!stacks.has(stack)) throw new Error(`Invalid BaseCMS stack value: ${stack}`);
-    if (/^[a-z0-9]+_[a-z0-9]+$/.test(tenant)) throw new Error(`Invalid BaseCMS tenant key: ${tenant}`);
+    if (!/^[a-z0-9]+_[a-z0-9]+$/.test(tenant)) throw new Error(`Invalid BaseCMS tenant key: ${tenant}`);
 
     super({ kind: 'base-cms', key: `${stack}:${tenant}` });
     this.stack = stack;

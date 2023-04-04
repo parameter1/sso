@@ -157,6 +157,19 @@ export function createOrgManager() {
           }),
         ],
       }),
+      new Organization({
+        key: 'in',
+        name: 'Investment News',
+        workspaces: [
+          new Workspace({
+            sources: [
+              new BaseCMSSource({ stack: 'virgon', tenant: 'bonhill_all' }),
+              new EmailXSource({ tenant: 'bonhill' }),
+              new IdentityXSource({ orgId: '634cc4adde7099bd5cc8b630' }),
+            ],
+          }),
+        ],
+      }),
     ],
   });
 }

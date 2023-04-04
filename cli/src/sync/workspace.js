@@ -12,7 +12,7 @@ export class Workspace {
    * @param {AbstractSource[]} params.sources
    */
   constructor({ key = 'default', name = 'Default', sources = [] } = {}) {
-    if (!/^[a-z0-9][a-z0-9-]{1,}[a-z0-9]$/.test(key)) throw new Error(`Invalid workspace key: ${key}`);
+    if (!/^[a-z0-9][a-z0-9-]{0,}[a-z0-9]$/.test(key)) throw new Error(`Invalid workspace key: ${key}`);
     if (!name) throw new Error(`Invalid workspace name: ${name}`);
     this.key = key;
     this.name = name;

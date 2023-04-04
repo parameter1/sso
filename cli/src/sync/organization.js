@@ -12,7 +12,7 @@ export class Organization {
    * @param {Workspace[]} params.workspaces
    */
   constructor({ key, name, workspaces = [] }) {
-    if (!/^[a-z0-9][a-z0-9-]{1,}[a-z0-9]{1,}$/.test(key)) throw new Error(`Invalid organization key: ${key}`);
+    if (!/^[a-z0-9][a-z0-9-]{0,}[a-z0-9]{1,}$/.test(key)) throw new Error(`Invalid organization key: ${key}`);
     if (!name) throw new Error(`Invalid organization name: ${name}`);
     this.key = key;
     this.name = name;

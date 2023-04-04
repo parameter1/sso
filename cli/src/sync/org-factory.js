@@ -70,6 +70,20 @@ export function createOrgManager() {
           }),
         ],
       }),
+      new Organization({
+        key: 'allured',
+        name: 'Allured Business Media',
+        workspaces: [
+          new Workspace({
+            sources: [
+              new BaseCMSSource({ stack: 'tauron', tenant: 'allured_all' }),
+              new EmailXSource({ tenant: 'allured' }),
+              new IdentityXSource({ orgId: '60774925d562ff340d1329b3' }),
+              new NativeXSource({ tenant: 'allured' }),
+            ],
+          }),
+        ],
+      }),
     ],
   });
 }

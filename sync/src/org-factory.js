@@ -14,6 +14,7 @@ export function createOrgManager() {
       new Organization({
         key: 'abmedia',
         name: 'AB Media',
+        website: 'http://www.abmedia.biz/',
         workspaces: [
           new Workspace({
             sources: [

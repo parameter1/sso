@@ -526,14 +526,40 @@ export class EventStore {
         entityId: eventProps.entityId.required(),
         entityType: eventProps.entityType.required(),
         key: reservationProps.key.required(),
+        upsert: boolean().default(false),
         value: reservationProps.value.required(),
       }).required()).required(),
       session: mongoSessionProp,
     }).required(), params);
 
-    const operations = input.map((document) => ({
-      insertOne: document,
-    }));
+    const operations = input.map(({
+      upsert,
+      key,
+      value,
+      entityType,
+      ...rest
+    }) => {
+      if (upsert) {
+        const filter = { value, key, entityType };
+        return {
+          updateOne: {
+            filter,
+            update: { $setOnInsert: { ...rest, ...filter } },
+            upsert: true,
+          },
+        };
+      }
+      return {
+        insertOne: {
+          document: {
+            ...rest,
+            value,
+            key,
+            entityType,
+          },
+        },
+      };
+    });
 
     try {
       const result = await this.reservations.bulkWrite(operations, { session });

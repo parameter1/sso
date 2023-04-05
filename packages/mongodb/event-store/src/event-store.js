@@ -195,6 +195,12 @@ export class EventStore {
             unique: true,
             partialFilterExpression: { command: 'CREATE', entityType: 'organization' },
           },
+          {
+            name: '_upsert.workspace.app_org_key',
+            key: { 'values.appId': 1, 'values.orgId': 1, 'values.key': 1 },
+            unique: true,
+            partialFilterExpression: { command: 'CREATE', entityType: 'workspace' },
+          },
         ]);
         return ['store', r];
       })(),

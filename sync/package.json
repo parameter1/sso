@@ -1,0 +1,23 @@
+{
+  "name": "@parameter1/sso-sync",
+  "version": "2.0.0",
+  "type": "module",
+  "description": "The SSO sync service.",
+  "author": "Jacob Bare <jacob@parameter1.com>",
+  "homepage": "https://github.com/parameter1/sso/tree/main/sync#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parameter1/sso.git",
+    "directory": "sync"
+  },
+  "private": true,
+  "license": "MIT",
+  "main": "./src/index.js",
+  "scripts": {
+    "lint": "eslint --ext .js ./",
+    "test": "yarn lint"
+  },
+  "dependencies": {
+    "@parameter1/mongodb-core": "^1.3.0"
+  }
+}

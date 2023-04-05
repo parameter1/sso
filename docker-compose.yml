@@ -204,5 +204,13 @@ services:
     ports:
       - "7910:6379"
 
+  sync:
+    <<: *node
+    working_dir: /sso/sync
+    entrypoint: ["node"]
+    command: ["src/index.js"]
+    environment:
+      <<: [*env, *env-mongodb]
+
 volumes:
   yarn-cache: {}

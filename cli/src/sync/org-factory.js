@@ -194,6 +194,20 @@ export function createOrgManager() {
           }),
         ],
       }),
+      new Organization({
+        key: 'rmm',
+        name: 'Rogue Monky Media',
+        workspaces: [
+          new Workspace({
+            sources: [
+              new BaseCMSSource({ stack: 'virgon', tenant: 'roguemonkeymedia_all' }),
+              new EmailXSource({ tenant: 'roguemonkeymedia' }),
+              new IdentityXSource({ orgId: '6176f25862079415a02d9a44' }),
+              new NativeXSource({ tenant: 'roguemonkeymedia' }),
+            ],
+          }),
+        ],
+      }),
     ],
   });
 }

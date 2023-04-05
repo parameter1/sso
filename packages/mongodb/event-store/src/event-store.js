@@ -370,15 +370,17 @@ export class EventStore {
    * @typedef GetEntityStatesForParams
    * @property {Array} entityIds
    * @property {string} entityType
+   * @property {ClientSession} [session]
    *
    * @param {GetEntityStatesForParams} params
    * @returns {Promise<Map<string, string>>}
    */
   async getEntityStatesFor(params) {
     /** @type {GetEntityStatesForParams} */
-    const { entityIds, entityType } = await validateAsync(object({
+    const { entityIds, entityType, session } = await validateAsync(object({
       entityIds: array().items(eventProps.entityId.required()).required(),
       entityType: eventProps.entityType.required(),
+      session: object(),
     }).required().label('eventStore.getEntityStatesFor'), params);
 
     const pipeline = [{
@@ -399,7 +401,7 @@ export class EventStore {
       },
     }];
 
-    const docs = await this.collection.aggregate(pipeline).toArray();
+    const docs = await this.collection.aggregate(pipeline, { session }).toArray();
     return docs.reduce((map, doc) => {
       map.set(EJSON.stringify(doc._id), doc.state);
       return map;

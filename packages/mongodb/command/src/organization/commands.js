@@ -1,10 +1,11 @@
+import { EJSON } from '@parameter1/mongodb-bson';
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { EventStore } from '@parameter1/sso-mongodb-event-store';
 import { sluggify } from '@parameter1/slug';
 
 import { changeOrganizationName, createOrganization } from './schema.js';
 
-const { array, object } = PropTypes;
+const { array, boolean, object } = PropTypes;
 
 /**
  * @typedef {import("../types").EventStoreResult} EventStoreResult
@@ -56,16 +57,19 @@ export class OrganizationCommands {
    *
    * @typedef CreateParams
    * @property {CreateOrganization[]} input
+   * @property {boolean} [upsert=false]
    *
    * @param {CreateParams} params
    * @returns {Promise<EventStoreResult[]>}
    */
   async create(params) {
     /** @type {CreateParams}  */
-    const { input } = await validateAsync(object({
+    const { input, upsert } = await validateAsync(object({
       input: array().items(createOrganization).required(),
+      upsert: boolean().default(false),
     }).required().label('organization.create'), params);
 
+    const { entityType } = this;
     const session = this.store.startSession();
     try {
       let results;
@@ -74,25 +78,42 @@ export class OrganizationCommands {
         await this.store.reserve({
           input: input.map((o) => ({
             entityId: o.entityId,
-            entityType: this.entityType,
+            entityType,
             key: 'key',
             value: o.values.key,
+            upsert,
           })),
           session: activeSession,
         });
 
-        results = await this.store.executeCreate({
-          entityType: this.entityType,
-          input: input.map(({ values, ...rest }) => ({
-            ...rest,
-            values: {
-              ...values,
-              slug: sluggify(values.name),
-              website: values.website || null,
-            },
-          })),
-          session: activeSession,
-        });
+        const toPush = input.map(({ values, ...rest }) => ({
+          ...rest,
+          values: { ...values, slug: sluggify(values.name), website: values.website || null },
+          ...(upsert && { upsertOn: ['key'] }),
+        }));
+
+        results = upsert
+          ? await this.store.upsert({ entityType, events: toPush, session: activeSession })
+          : await this.store.executeCreate({ entityType, input: toPush, session: activeSession });
+
+        if (upsert) {
+          // when upserting, release any reservations from entities that have since been deleted
+          const entityIds = results.map(({ entityId }) => entityId);
+          const states = await this.store.getEntityStatesFor({
+            entityType,
+            entityIds,
+            session: activeSession,
+          });
+
+          const toRelease = [];
+          states.forEach((state, encoded) => {
+            const entityId = EJSON.parse(encoded);
+            if (state === 'DELETED') toRelease.push({ entityId, entityType, key: 'key' });
+          });
+          if (toRelease.length) {
+            await this.store.release({ input: toRelease, session: activeSession });
+          }
+        }
       });
       return results;
     } finally {

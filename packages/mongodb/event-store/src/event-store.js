@@ -402,15 +402,17 @@ export class EventStore {
    * Pushes and persists one or more events to the store.
    *
    * @typedef PushParams
-   * @property {EventStoreDocument[]} events
-   * @property {import("mongodb").ClientSession} [session]
+   * @prop {boolean} [enqueue=true]
+   * @prop {EventStoreDocument[]} events
+   * @prop {import("mongodb").ClientSession} [session]
    *
    * @param {PushParams} params The push parameters
    * @returns {Promise<EventStoreResult[]>}
    */
   async push(params) {
     /** @type {PushParams} */
-    const { events, session: currentSession } = await validateAsync(object({
+    const { enqueue, events, session: currentSession } = await validateAsync(object({
+      enqueue: boolean().default(true),
       events: array().items(object({
         command: eventProps.command.required(),
         entityId: eventProps.entityId.required(),
@@ -451,6 +453,7 @@ export class EventStore {
           values: o.values.$literal || {},
         };
       });
+      if (!enqueue) return results;
 
       await enqueueMessages({
         // strip values so they are not sent over the wire (can be large)

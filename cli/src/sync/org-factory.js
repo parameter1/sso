@@ -236,6 +236,20 @@ export function createOrgManager() {
           }),
         ],
       }),
+      new Organization({
+        key: 'watt',
+        name: 'Science and Medicine Group',
+        workspaces: [
+          new Workspace({
+            sources: [
+              new BaseCMSSource({ stack: 'virgon', tenant: 'wattglobalmedia_all' }),
+              new EmailXSource({ tenant: 'watt' }),
+              new IdentityXSource({ orgId: '63e974eb0d243edfbe501e80' }),
+              new NativeXSource({ tenant: 'watt' }),
+            ],
+          }),
+        ],
+      }),
     ],
   });
 }

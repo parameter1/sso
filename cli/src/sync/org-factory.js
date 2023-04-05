@@ -208,6 +208,20 @@ export function createOrgManager() {
           }),
         ],
       }),
+      new Organization({
+        key: 'rr',
+        name: 'Randall Reilly',
+        workspaces: [
+          new Workspace({
+            sources: [
+              new BaseCMSSource({ stack: 'virgon', tenant: 'randallreilly_all' }),
+              new EmailXSource({ tenant: 'randallreilly' }),
+              new IdentityXSource({ orgId: '5f77a14c9db2fab680c6317f' }),
+              new NativeXSource({ tenant: 'randallreilly' }),
+            ],
+          }),
+        ],
+      }),
     ],
   });
 }

@@ -23,4 +23,13 @@ export class OrgManager {
     this.orgs.set(organization.key, organization);
     return this;
   }
+
+  /**
+   *
+   * @param {string} key
+   * @returns {Organization|undefined}
+   */
+  get(key) {
+    return this.orgs.get(key);
+  }
 }

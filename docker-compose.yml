@@ -211,6 +211,9 @@ services:
     command: ["src/index.js"]
     environment:
       <<: [*env, *env-mongodb]
+      ENTITY_COMMAND_URL: ${ENTITY_COMMAND_URL-http://entity-command}
+    depends_on:
+      - entity-command
 
 volumes:
   yarn-cache: {}

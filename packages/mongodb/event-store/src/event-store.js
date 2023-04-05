@@ -640,6 +640,7 @@ export class EventStore {
           userId: 1,
           values: 1,
         },
+        session,
       }).map((doc) => ({ ...doc, values: doc.values || {} })).toArray();
     };
 

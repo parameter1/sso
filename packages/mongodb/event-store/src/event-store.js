@@ -44,6 +44,7 @@ export const reservationProps = {
  * @property {*} entityId
  * @property {string} entityType
  * @property {string} key
+ * @property {boolean} [upsert=false]
  * @property {*} value
  *
  * @typedef EventStoreConstructorParams
@@ -187,6 +188,13 @@ export class EventStore {
           { key: { entityId: 1, date: 1, _id: 1 } },
           { key: { entityId: 1, entityType: 1, command: 1 } },
           { key: { entityId: 1, entityType: 1 }, unique: true, partialFilterExpression: { command: 'CREATE' } },
+          // for upserts
+          {
+            name: '_upsert.organization.key',
+            key: { 'values.key': 1 },
+            unique: true,
+            partialFilterExpression: { command: 'CREATE', entityType: 'organization' },
+          },
         ]);
         return ['store', r];
       })(),
@@ -580,6 +588,74 @@ export class EventStore {
    */
   startSession() {
     return this.mongo.startSession();
+  }
+
+  async upsert(params) {
+    const { entityType, events, session: currentSession } = await validateAsync(object({
+      entityType: eventProps.entityType.required(),
+      events: array().items(object({
+        date: eventProps.date.default('$$NOW'),
+        entityId: eventProps.entityId.required(),
+        omitFromHistory: eventProps.omitFromHistory.default(false),
+        omitFromModified: eventProps.omitFromModified.default(false),
+        values: eventProps.values.default({}),
+        upsertOn: array().items(string().required()).required(),
+        userId: eventProps.userId.default(null),
+      })).required(),
+      session: object(),
+    }).required().label('eventStore.upsert'), params);
+
+    const push = async (session) => {
+      const operations = [];
+      const queries = [];
+      events.forEach(({ upsertOn, values, ...event }) => {
+        const query = upsertOn.reduce((o, key) => ({ ...o, [`values.${key}`]: values[key] }), {});
+        const setOnInsert = {
+          ...event,
+          entityType,
+        };
+        const set = { values: { $literal: values } };
+        queries.push(query);
+        operations.push({
+          updateOne: {
+            filter: { entityType, command: 'CREATE', ...query },
+            update: [{ $replaceRoot: { newRoot: { $mergeObjects: [setOnInsert, '$$ROOT', set] } } }],
+            upsert: true,
+          },
+        });
+      });
+      await this.collection.bulkWrite(operations, { session });
+      return this.collection.find({
+        entityType,
+        command: 'CREATE',
+        $or: queries,
+      }, {
+        projection: {
+          _id: 1,
+          command: 1,
+          entityId: 1,
+          entityType: 1,
+          userId: 1,
+          values: 1,
+        },
+      }).map((doc) => ({ ...doc, values: doc.values || {} })).toArray();
+    };
+
+    if (currentSession) {
+      const results = await push(currentSession);
+      return results;
+    }
+
+    const session = this.mongo.startSession();
+    try {
+      let results;
+      await session.withTransaction(async (activeSession) => {
+        results = await push(activeSession);
+      });
+      return results;
+    } finally {
+      await session.endSession();
+    }
   }
 
   /**

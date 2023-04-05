@@ -222,6 +222,20 @@ export function createOrgManager() {
           }),
         ],
       }),
+      new Organization({
+        key: 'smg',
+        name: 'Science and Medicine Group',
+        workspaces: [
+          new Workspace({
+            sources: [
+              new BaseCMSSource({ stack: 'virgon', tenant: 'smg_all' }),
+              new EmailXSource({ tenant: 'smg' }),
+              new IdentityXSource({ orgId: '627aa459dfa0e102fdc93122' }),
+              new NativeXSource({ tenant: 'smg' }),
+            ],
+          }),
+        ],
+      }),
     ],
   });
 }

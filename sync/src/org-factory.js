@@ -238,7 +238,7 @@ export function createOrgManager() {
       }),
       new Organization({
         key: 'watt',
-        name: 'Science and Medicine Group',
+        name: 'Watt Global Media',
         workspaces: [
           new Workspace({
             sources: [

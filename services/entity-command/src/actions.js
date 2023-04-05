@@ -32,15 +32,15 @@ export default {
         return {
           ...o2,
           [name]: async (params) => {
-            const { input, awaitProcessing } = await validateAsync(object({
+            const { input, awaitProcessing, ...rest } = await validateAsync(object({
               input: array().items(object().required()).required(),
               awaitProcessing: boolean().default(false),
-            }).required(), params);
+            }).required().unknown(), params);
 
             if (awaitProcessing) {
-              return waitUntilProcessed(() => method({ input }));
+              return waitUntilProcessed(() => method({ input, ...rest }));
             }
-            return method({ input });
+            return method({ input, ...rest });
           },
         };
       }, {}),

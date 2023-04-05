@@ -85,7 +85,11 @@ export class OrganizationCommands {
           entityType: this.entityType,
           input: input.map(({ values, ...rest }) => ({
             ...rest,
-            values: { ...values, slug: sluggify(values.name) },
+            values: {
+              ...values,
+              slug: sluggify(values.name),
+              website: values.website || null,
+            },
           })),
           session: activeSession,
         });

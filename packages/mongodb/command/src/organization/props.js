@@ -6,6 +6,7 @@ const {
   hostname,
   slug,
   string,
+  url,
 } = PropTypes;
 
 const emailDomain = hostname();
@@ -16,4 +17,5 @@ export const organizationProps = {
   id: getEntityIdPropType('organization'),
   key: slug().pattern(/[a-z]/i).min(2),
   name: string().pattern(/[a-z]/i).min(2),
+  website: url(),
 };

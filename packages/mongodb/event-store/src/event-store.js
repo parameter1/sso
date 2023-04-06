@@ -206,7 +206,7 @@ export class EventStore {
       })(),
       (async () => {
         const r = await this.reservations.createIndexes([
-          { key: { entityId: 1 } },
+          { key: { entityId: 1, entityType: 1, key: 1 }, unique: true },
           { key: { value: 1, key: 1, entityType: 1 }, unique: true },
         ]);
         return ['reservations', r];

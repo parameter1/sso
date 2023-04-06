@@ -5,13 +5,16 @@ export class NativeXSource extends AbstractSource {
   /**
    *
    * @param {object} params
+   * @param {import("@parameter1/mongodb-core").MongoClient} params.mongo
    * @param {string} params.tenant The NativeX tenant key, e.g. `acbm`
    * @param {string[]} [params.publisherIds=[]] Publisher IDs to use. An empty values signifies all.
    */
-  constructor({ tenant, publisherIds = [] }) {
+  constructor({ mongo, tenant, publisherIds = [] }) {
     if (!/^[a-z0-9]{2,}$/.test(tenant)) throw new Error(`Invalid NativeX tenant key: ${tenant}`);
 
     super({ kind: 'native-x', key: tenant });
+    this.mongo = mongo;
+    this.db = mongo.db(`fortnight-${tenant}`);
     this.tenant = tenant;
     /** @type {ObjectId[]} */
     this.publisherIds = [...publisherIds.reduce((map, publisherId) => {

@@ -1,23 +1,20 @@
+import basedb from '@parameter1/base-cms-db';
 import { AbstractSource } from './-abstract.js';
 
-/**
- * @typedef {('leonis'|'tauron'|'virgon')} BaseCMSStackEnum
- */
-const stacks = new Set(['leonis', 'tauron', 'virgon']);
-
+const { createBaseDB } = basedb;
 export class BaseCMSSource extends AbstractSource {
   /**
    *
    * @param {object} params
-   * @param {BaseCMSStackEnum} params.stack The BaseCMS stack, e.g. `tauron`
+   * @param {import("@parameter1/base-cms-db").MongoDB} params.mongo
    * @param {string} params.tenant The BaseCMS tenant key, e.g. `acbm_fcp`
    */
-  constructor({ stack, tenant }) {
-    if (!stacks.has(stack)) throw new Error(`Invalid BaseCMS stack value: ${stack}`);
+  constructor({ mongo, tenant }) {
     if (!/^[a-z0-9]+_[a-z0-9]+$/.test(tenant)) throw new Error(`Invalid BaseCMS tenant key: ${tenant}`);
 
-    super({ kind: 'base-cms', key: `${stack}:${tenant}` });
-    this.stack = stack;
+    super({ kind: 'base-cms', key: tenant });
+    this.db = createBaseDB({ tenant, client: mongo });
     this.tenant = tenant;
+    this.org = tenant.split('_').shift();
   }
 }

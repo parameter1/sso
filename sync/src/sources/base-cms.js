@@ -117,7 +117,7 @@ export class BaseCMSSource extends AbstractSource {
   setMissingEmail(doc) {
     const { org } = this;
     const { username } = doc;
-    if (!doc.email || !/@/.test(doc.email)) {
+    if (!doc.email || !/@.*\..*/.test(doc.email)) {
       if (/@/.test(username)) return { ...doc, email: username };
       // api.import, api.scheduler, etc. -- create globally
       if (/^api\./.test(username)) {

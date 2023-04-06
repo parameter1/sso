@@ -54,6 +54,7 @@ export const createUser = object({
   entityId: userProps.id.default(() => new ObjectId()),
   userId: eventProps.userId,
   values: object({
+    disabled: userProps.disabled.default(false),
     email: userProps.email.required(),
     familyName: userProps.familyName.required(),
     givenName: userProps.givenName.required(),

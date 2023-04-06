@@ -212,6 +212,9 @@ services:
     environment:
       <<: [*env, *env-mongodb]
       ENTITY_COMMAND_URL: ${ENTITY_COMMAND_URL-http://entity-command}
+      MONGO_URL_AQUARIA: ${MONGO_URL_AQUARIA}
+      MONGO_URL_TAURON: ${MONGO_URL_TAURON}
+      MONGO_URL_VIRGON: ${MONGO_URL_VIRGON}
     depends_on:
       - entity-command
 

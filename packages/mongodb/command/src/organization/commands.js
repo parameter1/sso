@@ -74,20 +74,9 @@ export class OrganizationCommands {
     try {
       let results;
       await session.withTransaction(async (activeSession) => {
-        // reserve first, so failed reservations will not trigger a push message
-        await this.store.reserve({
-          input: input.map((o) => ({
-            entityId: o.entityId,
-            entityType,
-            key: 'key',
-            value: o.values.key,
-            upsert,
-          })),
-          session: activeSession,
-        });
-
         const toPush = input.map(({ values, ...rest }) => ({
           ...rest,
+          reserve: [{ key: 'key', value: values.key }],
           values: { ...values, slug: sluggify(values.name), website: values.website || null },
           ...(upsert && { upsertOn: ['key'] }),
         }));

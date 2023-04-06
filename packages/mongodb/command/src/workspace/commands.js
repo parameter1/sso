@@ -73,20 +73,9 @@ export class WorkspaceCommands {
     try {
       let results;
       await session.withTransaction(async (activeSession) => {
-        // reserve first, so failed reservations will not trigger a push message
-        await this.store.reserve({
-          input: input.map((o) => ({
-            entityId: o.entityId,
-            entityType,
-            key: 'app_org_key',
-            value: `${o.values.appId}_${o.values.orgId}_${o.values.key}`,
-            upsert,
-          })),
-          session: activeSession,
-        });
-
         const toPush = input.map(({ values, ...rest }) => ({
           ...rest,
+          reserve: [{ key: 'app_org_key', value: `${values.appId}_${values.orgId}_${values.key}` }],
           values: { ...values, slug: sluggify(values.name) },
           ...(upsert && { upsertOn: ['appId', 'orgId', 'key'] }),
         }));

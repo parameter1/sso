@@ -661,6 +661,7 @@ export class EventStore {
     const { entityType, events, session: currentSession } = await validateAsync(object({
       entityType: eventProps.entityType.required(),
       events: array().items(object({
+        _sync: object(),
         date: eventProps.date.default('$$NOW'),
         entityId: eventProps.entityId.required(),
         omitFromHistory: eventProps.omitFromHistory.default(false),
@@ -680,6 +681,7 @@ export class EventStore {
       const operations = [];
       const queries = [];
       events.forEach(({
+        _sync,
         release,
         reserve,
         upsertOn,
@@ -704,7 +706,33 @@ export class EventStore {
         operations.push({
           updateOne: {
             filter: { entityType, command: 'CREATE', ...query },
-            update: [{ $replaceRoot: { newRoot: { $mergeObjects: [setOnInsert, '$$ROOT', set] } } }],
+            update: [{
+              $replaceRoot: {
+                newRoot: {
+                  $mergeObjects: [
+                    setOnInsert,
+                    '$$ROOT',
+                    set,
+                    _sync ? {
+                      _sync: {
+                        $mergeObjects: [
+                          '$_sync',
+                          {
+                            ..._sync,
+                            sources: {
+                              $setUnion: [
+                                { $cond: [{ $isArray: '$_sync.sources' }, '$_sync.sources', []] },
+                                _sync.sources || [],
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    } : {},
+                  ],
+                },
+              },
+            }],
             upsert: true,
           },
         });

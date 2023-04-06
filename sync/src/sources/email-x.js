@@ -24,4 +24,19 @@ export class EmailXSource extends AbstractSource {
       return map;
     }, new Map()).values()];
   }
+
+  async loadUsers() {
+    const collection = this.db.collection('users');
+    return collection.find({}, {
+      projection: {
+        createdAt: 1,
+        deleted: 1,
+        email: 1,
+        familyName: 1,
+        givenName: 1,
+        updatedAt: 1,
+      },
+      sort: { email: 1 },
+    }).map(AbstractSource.appendUserDates).toArray();
+  }
 }

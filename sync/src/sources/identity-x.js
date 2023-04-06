@@ -24,4 +24,34 @@ export class IdentityXSource extends AbstractSource {
       return map;
     }, new Map()).values()];
   }
+
+  async loadUsers() {
+    const collection = this.db.collection('org-memberships');
+    return collection.aggregate([
+      { $match: { organizationId: this.org } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'email',
+          foreignField: 'email',
+          as: 'user',
+        },
+      },
+      { $unwind: '$user' },
+      {
+        $replaceRoot: {
+          newRoot: {
+            _id: '$user._id',
+            createdAt: '$user.createdAt',
+            deleted: false,
+            email: '$user.email',
+            familyName: '$user.familyName',
+            givenName: '$user.givenName',
+            updatedAt: '$user.updatedAt',
+          },
+        },
+      },
+      { $sort: { email: 1 } },
+    ]).map(AbstractSource.appendUserDates).toArray();
+  }
 }

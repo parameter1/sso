@@ -17,4 +17,19 @@ export class AbstractSource {
     this.key = key;
     this.kind = kind;
   }
+
+  /**
+   * @return {Promise<object[]>}
+   */
+  async loadUsers() { // eslint-disable-line
+    throw new Error('This method must be implemented by the extending class.');
+  }
+
+  static appendUserDates(doc) {
+    if (doc.createdAt && doc.updatedAt) return doc;
+    const d = { ...doc };
+    if (!d.createdAt) d.createdAt = d._id.getTimestamp();
+    if (!d.updatedAt) d.updatedAt = d.createdAt;
+    return d;
+  }
 }

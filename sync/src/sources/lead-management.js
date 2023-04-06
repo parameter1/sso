@@ -15,4 +15,19 @@ export class LeadManagementSource extends AbstractSource {
     this.db = mongo.db(`lead-management-${tenant}`);
     this.tenant = tenant;
   }
+
+  async loadUsers() {
+    const collection = this.db.collection('users');
+    return collection.find({}, {
+      projection: {
+        createdAt: 1,
+        deleted: 1,
+        email: 1,
+        familyName: 1,
+        givenName: 1,
+        updatedAt: 1,
+      },
+      sort: { email: 1 },
+    }).map(AbstractSource.appendUserDates).toArray();
+  }
 }

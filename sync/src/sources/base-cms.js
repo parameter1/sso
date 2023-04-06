@@ -152,7 +152,6 @@ export class BaseCMSSource extends AbstractSource {
         ...doc,
         givenName: ucFirst(givenName),
         familyName: ucFirst(familyName),
-        disabled: true, // NOTE THIS!
       };
     }
     const [mailbox, domain] = doc.email.split('@');
@@ -160,7 +159,6 @@ export class BaseCMSSource extends AbstractSource {
       ...doc,
       givenName: mailbox,
       familyName: `at ${domain}`,
-      disabled: true, // NOTE THIS!
     };
   }
 

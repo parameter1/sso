@@ -1,3 +1,4 @@
+import { EJSON } from '@parameter1/mongodb-bson';
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { EventStore } from '@parameter1/sso-mongodb-event-store';
 import { mongoSessionProp } from '@parameter1/mongodb-prop-types';
@@ -22,7 +23,7 @@ const emailValues = (email) => ({
   email,
 });
 
-const { array, object } = PropTypes;
+const { array, boolean, object } = PropTypes;
 
 /**
  * @typedef {import("../types").EventStoreResult} EventStoreResult
@@ -134,49 +135,62 @@ export class UserCommands {
    *
    * @typedef CreateParams
    * @property {CreateUser[]} input
+   * @property {boolean} [upsert=false]
    *
    * @param {CreateParams} params
    * @returns {Promise<EventStoreResult[]>}
    */
   async create(params) {
     /** @type {CreateParams}  */
-    const { input } = await validateAsync(object({
+    const { input, upsert } = await validateAsync(object({
       input: array().items(createUser).required(),
+      upsert: boolean().default(false),
     }).required().label('user.create'), params);
 
+    const { entityType } = this;
     const session = this.store.startSession();
     try {
       let results;
       await session.withTransaction(async (activeSession) => {
-        // reserve first, so failed reservations will not trigger a push message
-        await this.store.reserve({
-          input: input.map((o) => ({
-            entityId: o.entityId,
-            entityType: this.entityType,
-            key: 'email',
-            value: o.values.email,
-          })),
-          session: activeSession,
+        const toPush = input.map(({ values, ...rest }) => {
+          const names = [values.givenName, values.familyName];
+          return {
+            ...rest,
+            reserve: [{ key: 'email', value: values.email }],
+            values: {
+              ...values,
+              ...emailValues(values.email),
+              slug: {
+                default: sluggifyUserNames(names),
+                reverse: sluggifyUserNames(names, true),
+              },
+            },
+            ...(upsert && { upsertOn: ['email'] }),
+          };
         });
 
-        results = await this.store.executeCreate({
-          entityType: this.entityType,
-          input: input.map(({ values, ...rest }) => {
-            const names = [values.givenName, values.familyName];
-            return {
-              ...rest,
-              values: {
-                ...values,
-                ...emailValues(values.email),
-                slug: {
-                  default: sluggifyUserNames(names),
-                  reverse: sluggifyUserNames(names, true),
-                },
-              },
-            };
-          }),
-          session: activeSession,
-        });
+        results = upsert
+          ? await this.store.upsert({ entityType, events: toPush, session: activeSession })
+          : await this.store.executeCreate({ entityType, input: toPush, session: activeSession });
+
+        if (upsert) {
+          // when upserting, release any reservations from entities that have since been deleted
+          const entityIds = results.map(({ entityId }) => entityId);
+          const states = await this.store.getEntityStatesFor({
+            entityType,
+            entityIds,
+            session: activeSession,
+          });
+
+          const toRelease = [];
+          states.forEach((state, encoded) => {
+            const entityId = EJSON.parse(encoded);
+            if (state === 'DELETED') toRelease.push({ entityId, entityType, key: 'email' });
+          });
+          if (toRelease.length) {
+            await this.store.release({ input: toRelease, session: activeSession });
+          }
+        }
       });
       return results;
     } finally {

@@ -176,7 +176,12 @@ export class BaseCMSSource extends AbstractSource {
       { $match: { _id: { $in: userIds } } },
       {
         $project: {
-          deleted: { $eq: ['$enabled', false] },
+          deleted: {
+            $or: [
+              { $eq: ['$enabled', false] },
+              { $eq: ['$accountNonLocked', false] },
+            ],
+          },
           email: 1,
           familyName: '$lastName',
           givenName: '$firstName',

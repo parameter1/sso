@@ -3,6 +3,7 @@ import { eventProps } from '@parameter1/sso-prop-types-event';
 import { EJSON } from '@parameter1/mongodb-bson';
 import { mongoClientProp, mongoSessionProp } from '@parameter1/mongodb-prop-types';
 import { SQSClient, enqueueMessages } from '@parameter1/sso-sqs';
+import sift from 'sift';
 
 const {
   any,
@@ -19,9 +20,16 @@ export const reservationProps = {
   value: any().disallow(null, ''),
 };
 
+const releaseSchema = array().items(reservationProps.key).default([]);
+const reserveSchema = array().items(object({
+  key: reservationProps.key.required(),
+  value: reservationProps.value.required(),
+})).default([]);
+
 /**
  * @typedef {import("./index").EventStoreResult} EventStoreResult
  * @typedef {import("./index").EventStoreDocument} EventStoreDocument
+ * @typedef {import("./index").EventStoreDocumentReserve} EventStoreDocumentReserve
  * @typedef {import("mongodb").BulkWriteResult} BulkWriteResult
  * @typedef {import("@parameter1/mongodb-core").Collection} Collection
  * @typedef {import("@parameter1/mongodb-core").ClientSession} ClientSession
@@ -223,6 +231,8 @@ export class EventStore {
    * @typedef ExecuteCreateParamsInput
    * @property {Date|string} [date]
    * @property {*} entityId
+   * @property {EventStoreDocumentReserve[]} [reserve]
+   * @property {string[]} [release]
    * @property {ObjectId|null} [userId]
    * @property {object} [values]
    *
@@ -236,6 +246,8 @@ export class EventStore {
       input: array().items(object({
         date: eventProps.date,
         entityId: eventProps.entityId.required(),
+        release: releaseSchema,
+        reserve: reserveSchema,
         userId: eventProps.userId,
         values: eventProps.values.required(),
       }).required()).required(),
@@ -261,6 +273,8 @@ export class EventStore {
    * @typedef ExecuteDeleteParamsInput
    * @property {Date|string} [date]
    * @property {*} entityId
+   * @property {EventStoreDocumentReserve[]} [reserve]
+   * @property {string[]} [release]
    * @property {ObjectId|null} [userId]
    *
    * @param {ExecuteDeleteParams} params
@@ -273,6 +287,8 @@ export class EventStore {
       input: array().items(object({
         date: eventProps.date,
         entityId: eventProps.entityId.required(),
+        release: releaseSchema,
+        reserve: reserveSchema,
         userId: eventProps.userId,
       }).required()).required(),
       session: mongoSessionProp,
@@ -297,6 +313,8 @@ export class EventStore {
    * @typedef ExecuteRestoreParamsInput
    * @property {Date|string} [date]
    * @property {*} entityId
+   * @property {EventStoreDocumentReserve[]} [reserve]
+   * @property {string[]} [release]
    * @property {ObjectId|null} [userId]
    * @property {object} [values]
    *
@@ -310,6 +328,8 @@ export class EventStore {
       input: array().items(object({
         date: eventProps.date,
         entityId: eventProps.entityId.required(),
+        release: releaseSchema,
+        reserve: reserveSchema,
         userId: eventProps.userId,
         values: eventProps.values.default({}),
       }).required()).required(),
@@ -338,6 +358,8 @@ export class EventStore {
    * @property {*} entityId
    * @property {boolean} [omitFromHistory]
    * @property {boolean} [omitFromModified]
+   * @property {EventStoreDocumentReserve[]} [reserve]
+   * @property {string[]} [release]
    * @property {ObjectId|null} [userId]
    * @property {object} [values]
    *
@@ -354,6 +376,8 @@ export class EventStore {
         entityId: eventProps.entityId.required(),
         omitFromHistory: eventProps.omitFromHistory,
         omitFromModified: eventProps.omitFromModified,
+        release: releaseSchema,
+        reserve: reserveSchema,
         userId: eventProps.userId,
         values: eventProps.values.default({}),
       }).required()).required(),
@@ -436,6 +460,8 @@ export class EventStore {
         date: eventProps.date.default('$$NOW'),
         omitFromHistory: eventProps.omitFromHistory.default(false),
         omitFromModified: eventProps.omitFromModified.default(false),
+        release: releaseSchema,
+        reserve: reserveSchema,
         values: eventProps.values.default({}),
         userId: eventProps.userId.default(null),
       })).required(),
@@ -444,8 +470,23 @@ export class EventStore {
 
     const push = async (session) => {
       const objs = [];
+      const toRelease = [];
+      const toReserve = [];
       const operations = [];
-      events.forEach((event) => {
+      events.forEach(({ release, reserve, ...event }) => {
+        const { entityId, entityType } = event;
+        if (release?.length) {
+          release.forEach((key) => toRelease.push({ entityId, entityType, key }));
+        }
+        if (reserve?.length) {
+          reserve.forEach(({ key, value }) => toReserve.push({
+            entityId,
+            entityType,
+            key,
+            value,
+          }));
+        }
+
         const prepared = { ...event, values: { $literal: event.values } };
         objs.push(prepared);
         operations.push({
@@ -457,8 +498,9 @@ export class EventStore {
         });
       });
 
-      const { result } = await this.collection.bulkWrite(operations, { session });
-      const results = result.upserted.map(({ _id, index }) => {
+      const { upsertedIds } = await this.collection.bulkWrite(operations, { session });
+      const results = Object.keys(upsertedIds).map((index) => {
+        const _id = upsertedIds[index];
         const o = objs[index];
         return {
           _id,
@@ -469,6 +511,11 @@ export class EventStore {
           values: o.values.$literal || {},
         };
       });
+
+      // run release first, then reserve
+      if (toRelease.length) await this.release({ input: toRelease, session });
+      if (toReserve.length) await this.reserve({ input: toReserve, session });
+
       if (!enqueue) return results;
 
       await enqueueMessages({
@@ -584,6 +631,12 @@ export class EventStore {
       if (e.code !== 11000 || !e.writeErrors) throw e;
       const [writeError] = e.writeErrors;
       const { op } = writeError.err;
+      if (op.upsert) {
+        const { entityType, key, value } = op.u.$setOnInsert;
+        const error = new Error(`The ${entityType} ${key} '${value}' is already in use.'`);
+        error.statusCode = 409;
+        throw error;
+      }
       const error = new Error(`The ${op.entityType} ${op.key} '${op.value}' is already in use.'`);
       error.statusCode = 409;
       throw error;
@@ -606,6 +659,8 @@ export class EventStore {
         entityId: eventProps.entityId.required(),
         omitFromHistory: eventProps.omitFromHistory.default(false),
         omitFromModified: eventProps.omitFromModified.default(false),
+        release: releaseSchema,
+        reserve: reserveSchema,
         values: eventProps.values.default({}),
         upsertOn: array().items(string().required()).required(),
         userId: eventProps.userId.default(null),
@@ -614,10 +669,26 @@ export class EventStore {
     }).required().label('eventStore.upsert'), params);
 
     const push = async (session) => {
+      const toRelease = [];
+      const toReserve = [];
       const operations = [];
       const queries = [];
-      events.forEach(({ upsertOn, values, ...event }) => {
+      events.forEach(({
+        release,
+        reserve,
+        upsertOn,
+        values,
+        ...event
+      }) => {
+        // const { entityId } = event;
         const query = upsertOn.reduce((o, key) => ({ ...o, [`values.${key}`]: values[key] }), {});
+
+        if (release?.length) {
+          release.forEach((key) => toRelease.push({ query, key }));
+        }
+        if (reserve?.length) {
+          reserve.forEach(({ key, value }) => toReserve.push({ query, key, value }));
+        }
         const setOnInsert = {
           ...event,
           entityType,
@@ -633,7 +704,7 @@ export class EventStore {
         });
       });
       await this.collection.bulkWrite(operations, { session });
-      return this.collection.find({
+      const results = await this.collection.find({
         entityType,
         command: 'CREATE',
         $or: queries,
@@ -648,6 +719,40 @@ export class EventStore {
         },
         session,
       }).map((doc) => ({ ...doc, values: doc.values || {} })).toArray();
+      // since upserts can return a different entityId than provided,
+      // release and reserve based on the _returned_ results
+      // release should always run firt
+      if (toRelease.length) {
+        await this.release({
+          input: toReserve.map(({ key, query }) => {
+            const [match] = results.filter(sift(query));
+            if (!match) throw new Error(`Unable to extract a release source event document for ${JSON.stringify(query)}`);
+            return {
+              entityId: match.entityId,
+              entityType: match.entityType,
+              key,
+            };
+          }),
+          session,
+        });
+      }
+      if (toReserve.length) {
+        await this.reserve({
+          input: toReserve.map(({ key, value, query }) => {
+            const [match] = results.filter(sift(query));
+            if (!match) throw new Error(`Unable to extract a reservation source event document for ${JSON.stringify(query)}`);
+            return {
+              entityId: match.entityId,
+              entityType: match.entityType,
+              key,
+              upsert: true,
+              value,
+            };
+          }),
+          session,
+        });
+      }
+      return results;
     };
 
     if (currentSession) {

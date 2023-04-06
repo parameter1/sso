@@ -3,10 +3,13 @@ import { immediatelyThrow } from '@parameter1/utils';
 import { commands } from './service-clients.js';
 import { createOrgManager } from './org-factory.js';
 import {
+  aquaria,
   mongo,
   materializedRepoManager,
   materializer,
   normalizer,
+  tauron,
+  virgon,
 } from './mongodb.js';
 
 process.on('unhandledRejection', immediatelyThrow);
@@ -16,9 +19,17 @@ const { log } = console;
 const orgManager = createOrgManager();
 
 (async () => {
-  log('> Connecting to MongoDB...');
-  await mongo.connect();
-  log(`> MongoDB connection to ${filterMongoURL(mongo)}`);
+  const mongos = [
+    { client: mongo, name: 'SSO' },
+    { client: aquaria, name: 'Aquaria' },
+    { client: tauron, name: 'Tauron' },
+    { client: virgon, name: 'Virgon' },
+  ];
+  await Promise.all(mongos.map(async ({ client, name }) => {
+    log(`> Connecting to ${name} MongoDB...`);
+    const c = await client.connect();
+    log(`> MongoDB ${name} connected on ${filterMongoURL(c)}`);
+  }));
 
   // load the app
   const app = await materializedRepoManager.get('application').findByKey('mindful', {
@@ -74,7 +85,9 @@ const orgManager = createOrgManager();
   await normalizer.normalize({ entityIds: workspaceIds, entityType: 'workspace' });
   await materializer.materialize('workspace', { entityIds: workspaceIds });
 
-  log('> Closing to MongoDB...');
-  await mongo.close();
-  log('> MongoDB closed');
+  await Promise.all(mongos.map(async ({ client, name }) => {
+    log(`> Closing ${name} MongoDB...`);
+    await client.close();
+    log(`> MongoDB ${name} closed`);
+  }));
 })().catch(immediatelyThrow);

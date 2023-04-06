@@ -32,4 +32,30 @@ export class OrgManager {
   get(key) {
     return this.orgs.get(key);
   }
+
+  /**
+   * @typedef OrgManagerSource
+   * @prop {Organization} org
+   * @prop {import("./workspace.js").Workspace} workspace
+   * @prop {import("./sources/-abstract.js").AbstractSource} source
+   *
+   * @returns {OrgManagerSource[]}
+   */
+  getAllSources() {
+    const sources = [];
+    this.orgs.forEach((org) => {
+      org.workspaces.forEach((workspace) => {
+        workspace.sources.forEach((map) => {
+          map.forEach((source) => {
+            sources.push({
+              org,
+              workspace,
+              source,
+            });
+          });
+        });
+      });
+    });
+    return sources;
+  }
 }

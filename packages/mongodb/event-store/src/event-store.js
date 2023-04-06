@@ -550,17 +550,17 @@ export class EventStore {
 
     const operations = input.map(({
       upsert,
+      entityId,
+      entityType,
       key,
       value,
-      entityType,
-      ...rest
     }) => {
       if (upsert) {
-        const filter = { value, key, entityType };
+        const filter = { entityId, entityType, key };
         return {
           updateOne: {
             filter,
-            update: { $setOnInsert: { ...rest, ...filter } },
+            update: { $setOnInsert: { ...filter, value } },
             upsert: true,
           },
         };
@@ -568,10 +568,10 @@ export class EventStore {
       return {
         insertOne: {
           document: {
-            ...rest,
-            value,
-            key,
+            entityId,
             entityType,
+            key,
+            value,
           },
         },
       };

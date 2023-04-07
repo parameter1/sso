@@ -10,6 +10,7 @@ const {
 } = PropTypes;
 
 export const userProps = {
+  disabled: boolean(),
   email: email().lowercase().custom((value) => {
     if (isEmailBurner(value)) throw new Error('The provided email address is not allowed');
     return value;

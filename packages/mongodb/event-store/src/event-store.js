@@ -1,8 +1,10 @@
+import { get } from '@parameter1/object-path';
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { eventProps } from '@parameter1/sso-prop-types-event';
 import { EJSON } from '@parameter1/mongodb-bson';
 import { mongoClientProp, mongoSessionProp } from '@parameter1/mongodb-prop-types';
 import { SQSClient, enqueueMessages } from '@parameter1/sso-sqs';
+import sift from 'sift';
 
 const {
   any,
@@ -19,9 +21,16 @@ export const reservationProps = {
   value: any().disallow(null, ''),
 };
 
+const releaseSchema = array().items(reservationProps.key).default([]);
+const reserveSchema = array().items(object({
+  key: reservationProps.key.required(),
+  value: reservationProps.value.required(),
+})).default([]);
+
 /**
  * @typedef {import("./index").EventStoreResult} EventStoreResult
  * @typedef {import("./index").EventStoreDocument} EventStoreDocument
+ * @typedef {import("./index").EventStoreDocumentReserve} EventStoreDocumentReserve
  * @typedef {import("mongodb").BulkWriteResult} BulkWriteResult
  * @typedef {import("@parameter1/mongodb-core").Collection} Collection
  * @typedef {import("@parameter1/mongodb-core").ClientSession} ClientSession
@@ -44,6 +53,7 @@ export const reservationProps = {
  * @property {*} entityId
  * @property {string} entityType
  * @property {string} key
+ * @property {boolean} [upsert=false]
  * @property {*} value
  *
  * @typedef EventStoreConstructorParams
@@ -187,12 +197,31 @@ export class EventStore {
           { key: { entityId: 1, date: 1, _id: 1 } },
           { key: { entityId: 1, entityType: 1, command: 1 } },
           { key: { entityId: 1, entityType: 1 }, unique: true, partialFilterExpression: { command: 'CREATE' } },
+          // for upserts
+          {
+            name: '_upsert.organization.key',
+            key: { 'values.key': 1 },
+            unique: true,
+            partialFilterExpression: { command: 'CREATE', entityType: 'organization' },
+          },
+          {
+            name: '_upsert.user.email',
+            key: { 'values.email': 1 },
+            unique: true,
+            partialFilterExpression: { command: 'CREATE', entityType: 'user' },
+          },
+          {
+            name: '_upsert.workspace.app_org_key',
+            key: { 'values.appId': 1, 'values.orgId': 1, 'values.key': 1 },
+            unique: true,
+            partialFilterExpression: { command: 'CREATE', entityType: 'workspace' },
+          },
         ]);
         return ['store', r];
       })(),
       (async () => {
         const r = await this.reservations.createIndexes([
-          { key: { entityId: 1 } },
+          { key: { entityId: 1, entityType: 1, key: 1 }, unique: true },
           { key: { value: 1, key: 1, entityType: 1 }, unique: true },
         ]);
         return ['reservations', r];
@@ -209,6 +238,8 @@ export class EventStore {
    * @typedef ExecuteCreateParamsInput
    * @property {Date|string} [date]
    * @property {*} entityId
+   * @property {EventStoreDocumentReserve[]} [reserve]
+   * @property {string[]} [release]
    * @property {ObjectId|null} [userId]
    * @property {object} [values]
    *
@@ -222,6 +253,8 @@ export class EventStore {
       input: array().items(object({
         date: eventProps.date,
         entityId: eventProps.entityId.required(),
+        release: releaseSchema,
+        reserve: reserveSchema,
         userId: eventProps.userId,
         values: eventProps.values.required(),
       }).required()).required(),
@@ -247,6 +280,8 @@ export class EventStore {
    * @typedef ExecuteDeleteParamsInput
    * @property {Date|string} [date]
    * @property {*} entityId
+   * @property {EventStoreDocumentReserve[]} [reserve]
+   * @property {string[]} [release]
    * @property {ObjectId|null} [userId]
    *
    * @param {ExecuteDeleteParams} params
@@ -259,6 +294,8 @@ export class EventStore {
       input: array().items(object({
         date: eventProps.date,
         entityId: eventProps.entityId.required(),
+        release: releaseSchema,
+        reserve: reserveSchema,
         userId: eventProps.userId,
       }).required()).required(),
       session: mongoSessionProp,
@@ -283,6 +320,8 @@ export class EventStore {
    * @typedef ExecuteRestoreParamsInput
    * @property {Date|string} [date]
    * @property {*} entityId
+   * @property {EventStoreDocumentReserve[]} [reserve]
+   * @property {string[]} [release]
    * @property {ObjectId|null} [userId]
    * @property {object} [values]
    *
@@ -296,6 +335,8 @@ export class EventStore {
       input: array().items(object({
         date: eventProps.date,
         entityId: eventProps.entityId.required(),
+        release: releaseSchema,
+        reserve: reserveSchema,
         userId: eventProps.userId,
         values: eventProps.values.default({}),
       }).required()).required(),
@@ -324,6 +365,8 @@ export class EventStore {
    * @property {*} entityId
    * @property {boolean} [omitFromHistory]
    * @property {boolean} [omitFromModified]
+   * @property {EventStoreDocumentReserve[]} [reserve]
+   * @property {string[]} [release]
    * @property {ObjectId|null} [userId]
    * @property {object} [values]
    *
@@ -340,6 +383,8 @@ export class EventStore {
         entityId: eventProps.entityId.required(),
         omitFromHistory: eventProps.omitFromHistory,
         omitFromModified: eventProps.omitFromModified,
+        release: releaseSchema,
+        reserve: reserveSchema,
         userId: eventProps.userId,
         values: eventProps.values.default({}),
       }).required()).required(),
@@ -362,15 +407,17 @@ export class EventStore {
    * @typedef GetEntityStatesForParams
    * @property {Array} entityIds
    * @property {string} entityType
+   * @property {ClientSession} [session]
    *
    * @param {GetEntityStatesForParams} params
    * @returns {Promise<Map<string, string>>}
    */
   async getEntityStatesFor(params) {
     /** @type {GetEntityStatesForParams} */
-    const { entityIds, entityType } = await validateAsync(object({
+    const { entityIds, entityType, session } = await validateAsync(object({
       entityIds: array().items(eventProps.entityId.required()).required(),
       entityType: eventProps.entityType.required(),
+      session: object(),
     }).required().label('eventStore.getEntityStatesFor'), params);
 
     const pipeline = [{
@@ -391,7 +438,7 @@ export class EventStore {
       },
     }];
 
-    const docs = await this.collection.aggregate(pipeline).toArray();
+    const docs = await this.collection.aggregate(pipeline, { session }).toArray();
     return docs.reduce((map, doc) => {
       map.set(EJSON.stringify(doc._id), doc.state);
       return map;
@@ -402,15 +449,17 @@ export class EventStore {
    * Pushes and persists one or more events to the store.
    *
    * @typedef PushParams
-   * @property {EventStoreDocument[]} events
-   * @property {import("mongodb").ClientSession} [session]
+   * @prop {boolean} [enqueue=true]
+   * @prop {EventStoreDocument[]} events
+   * @prop {import("mongodb").ClientSession} [session]
    *
    * @param {PushParams} params The push parameters
    * @returns {Promise<EventStoreResult[]>}
    */
   async push(params) {
     /** @type {PushParams} */
-    const { events, session: currentSession } = await validateAsync(object({
+    const { enqueue, events, session: currentSession } = await validateAsync(object({
+      enqueue: boolean().default(true),
       events: array().items(object({
         command: eventProps.command.required(),
         entityId: eventProps.entityId.required(),
@@ -418,6 +467,8 @@ export class EventStore {
         date: eventProps.date.default('$$NOW'),
         omitFromHistory: eventProps.omitFromHistory.default(false),
         omitFromModified: eventProps.omitFromModified.default(false),
+        release: releaseSchema,
+        reserve: reserveSchema,
         values: eventProps.values.default({}),
         userId: eventProps.userId.default(null),
       })).required(),
@@ -426,8 +477,23 @@ export class EventStore {
 
     const push = async (session) => {
       const objs = [];
+      const toRelease = [];
+      const toReserve = [];
       const operations = [];
-      events.forEach((event) => {
+      events.forEach(({ release, reserve, ...event }) => {
+        const { entityId, entityType } = event;
+        if (release?.length) {
+          release.forEach((key) => toRelease.push({ entityId, entityType, key }));
+        }
+        if (reserve?.length) {
+          reserve.forEach(({ key, value }) => toReserve.push({
+            entityId,
+            entityType,
+            key,
+            value,
+          }));
+        }
+
         const prepared = { ...event, values: { $literal: event.values } };
         objs.push(prepared);
         operations.push({
@@ -439,8 +505,9 @@ export class EventStore {
         });
       });
 
-      const { result } = await this.collection.bulkWrite(operations, { session });
-      const results = result.upserted.map(({ _id, index }) => {
+      const { upsertedIds } = await this.collection.bulkWrite(operations, { session });
+      const results = Object.keys(upsertedIds).map((index) => {
+        const _id = upsertedIds[index];
         const o = objs[index];
         return {
           _id,
@@ -451,6 +518,12 @@ export class EventStore {
           values: o.values.$literal || {},
         };
       });
+
+      // run release first, then reserve
+      if (toRelease.length) await this.release({ input: toRelease, session });
+      if (toReserve.length) await this.reserve({ input: toReserve, session });
+
+      if (!enqueue) return results;
 
       await enqueueMessages({
         // strip values so they are not sent over the wire (can be large)
@@ -523,14 +596,40 @@ export class EventStore {
         entityId: eventProps.entityId.required(),
         entityType: eventProps.entityType.required(),
         key: reservationProps.key.required(),
+        upsert: boolean().default(false),
         value: reservationProps.value.required(),
       }).required()).required(),
       session: mongoSessionProp,
     }).required(), params);
 
-    const operations = input.map((document) => ({
-      insertOne: document,
-    }));
+    const operations = input.map(({
+      upsert,
+      entityId,
+      entityType,
+      key,
+      value,
+    }) => {
+      if (upsert) {
+        const filter = { entityId, entityType, key };
+        return {
+          updateOne: {
+            filter,
+            update: { $setOnInsert: { ...filter, value } },
+            upsert: true,
+          },
+        };
+      }
+      return {
+        insertOne: {
+          document: {
+            entityId,
+            entityType,
+            key,
+            value,
+          },
+        },
+      };
+    });
 
     try {
       const result = await this.reservations.bulkWrite(operations, { session });
@@ -539,6 +638,12 @@ export class EventStore {
       if (e.code !== 11000 || !e.writeErrors) throw e;
       const [writeError] = e.writeErrors;
       const { op } = writeError.err;
+      if (op.upsert) {
+        const { entityType, key, value } = op.u.$setOnInsert;
+        const error = new Error(`The ${entityType} ${key} '${value}' is already in use.'`);
+        error.statusCode = 409;
+        throw error;
+      }
       const error = new Error(`The ${op.entityType} ${op.key} '${op.value}' is already in use.'`);
       error.statusCode = 409;
       throw error;
@@ -551,6 +656,153 @@ export class EventStore {
    */
   startSession() {
     return this.mongo.startSession();
+  }
+
+  async upsert(params) {
+    const { entityType, events, session: currentSession } = await validateAsync(object({
+      entityType: eventProps.entityType.required(),
+      events: array().items(object({
+        _sync: object(),
+        date: eventProps.date.default('$$NOW'),
+        entityId: eventProps.entityId.required(),
+        omitFromHistory: eventProps.omitFromHistory.default(false),
+        omitFromModified: eventProps.omitFromModified.default(false),
+        release: releaseSchema,
+        reserve: reserveSchema,
+        values: eventProps.values.default({}),
+        upsertOn: array().items(string().required()).required(),
+        userId: eventProps.userId.default(null),
+      })).required(),
+      session: object(),
+    }).required().label('eventStore.upsert'), params);
+
+    const push = async (session) => {
+      const toRelease = [];
+      const toReserve = [];
+      const operations = [];
+      const queries = [];
+      events.forEach(({
+        _sync,
+        release,
+        reserve,
+        upsertOn,
+        ...event
+      }) => {
+        const query = upsertOn.reduce((o, path) => ({ ...o, [path]: get(event, path) }), {});
+
+        if (release?.length) {
+          release.forEach((key) => toRelease.push({ query, key }));
+        }
+        if (reserve?.length) {
+          reserve.forEach(({ key, value }) => toReserve.push({ query, key, value }));
+        }
+        const setOnInsert = {
+          ...event,
+          entityType,
+        };
+        const set = { values: { $literal: event.values } };
+        queries.push(query);
+        operations.push({
+          updateOne: {
+            filter: { entityType, command: 'CREATE', ...query },
+            update: [{
+              $replaceRoot: {
+                newRoot: {
+                  $mergeObjects: [
+                    setOnInsert,
+                    '$$ROOT',
+                    set,
+                    _sync ? {
+                      _sync: {
+                        $mergeObjects: [
+                          '$_sync',
+                          {
+                            ..._sync,
+                            sources: {
+                              $setUnion: [
+                                { $cond: [{ $isArray: '$_sync.sources' }, '$_sync.sources', []] },
+                                _sync.sources || [],
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    } : {},
+                  ],
+                },
+              },
+            }],
+            upsert: true,
+          },
+        });
+      });
+      await this.collection.bulkWrite(operations, { session });
+      const results = await this.collection.find({
+        entityType,
+        command: 'CREATE',
+        $or: queries,
+      }, {
+        projection: {
+          _id: 1,
+          command: 1,
+          entityId: 1,
+          entityType: 1,
+          userId: 1,
+          values: 1,
+        },
+        session,
+      }).map((doc) => ({ ...doc, values: doc.values || {} })).toArray();
+      // since upserts can return a different entityId than provided,
+      // release and reserve based on the _returned_ results
+      // release should always run firt
+      if (toRelease.length) {
+        await this.release({
+          input: toReserve.map(({ key, query }) => {
+            const [match] = results.filter(sift(query));
+            if (!match) throw new Error(`Unable to extract a release source event document for ${JSON.stringify(query)}`);
+            return {
+              entityId: match.entityId,
+              entityType: match.entityType,
+              key,
+            };
+          }),
+          session,
+        });
+      }
+      if (toReserve.length) {
+        await this.reserve({
+          input: toReserve.map(({ key, value, query }) => {
+            const [match] = results.filter(sift(query));
+            if (!match) throw new Error(`Unable to extract a reservation source event document for ${JSON.stringify(query)}`);
+            return {
+              entityId: match.entityId,
+              entityType: match.entityType,
+              key,
+              upsert: true,
+              value,
+            };
+          }),
+          session,
+        });
+      }
+      return results;
+    };
+
+    if (currentSession) {
+      const results = await push(currentSession);
+      return results;
+    }
+
+    const session = this.mongo.startSession();
+    try {
+      let results;
+      await session.withTransaction(async (activeSession) => {
+        results = await push(activeSession);
+      });
+      return results;
+    } finally {
+      await session.endSession();
+    }
   }
 
   /**

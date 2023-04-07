@@ -9,7 +9,7 @@ import {
   restoreMember,
 } from './schema.js';
 
-const { array, object } = PropTypes;
+const { array, boolean, object } = PropTypes;
 
 /**
  * @typedef {import("../types").EventStoreResult} EventStoreResult
@@ -61,18 +61,24 @@ export class MemberCommands {
    *
    * @typedef CreateParams
    * @property {CreateMember[]} input
+   * @property {boolean} [upsert=false]
    *
    * @param {CreateParams} params
    * @returns {Promise<EventStoreResult[]>}
    */
   async create(params) {
     /** @type {CreateParams}  */
-    const { input } = await validateAsync(object({
+    const { input, upsert } = await validateAsync(object({
       input: array().items(createMember).required(),
+      upsert: boolean().default(false),
     }).required().label('member.create'), params);
 
-    return this.store.executeCreate({
-      entityType: this.entityType,
+    const { entityType } = this;
+    return upsert ? this.store.upsert({
+      entityType,
+      events: input.map((o) => ({ ...o, upsertOn: ['entityId'] })),
+    }) : this.store.executeCreate({
+      entityType,
       input,
     });
   }

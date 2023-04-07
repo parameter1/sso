@@ -18,7 +18,8 @@
     "packages/mongodb/*",
     "packages/prop-types/*",
     "packages/service-client/*",
-    "services/*"
+    "services/*",
+    "sync"
   ],
   "devDependencies": {
     "chai": "^4.3.7",

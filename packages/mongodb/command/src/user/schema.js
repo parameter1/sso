@@ -50,10 +50,12 @@ export const changeUserName = object({
  * @property {boolean} [verified=false]
  */
 export const createUser = object({
+  _sync: object(),
   date: eventProps.date,
   entityId: userProps.id.default(() => new ObjectId()),
   userId: eventProps.userId,
   values: object({
+    disabled: userProps.disabled.default(false),
     email: userProps.email.required(),
     familyName: userProps.familyName.required(),
     givenName: userProps.givenName.required(),

@@ -133,6 +133,19 @@ export class Normalizer {
                 ],
               },
 
+              sync: {
+                $cond: [
+                  {
+                    $and: [
+                      { $eq: ['$$this.command', 'CREATE'] },
+                      '$$this._sync',
+                    ],
+                  },
+                  '$$this._sync',
+                  '$$value.sync',
+                ],
+              },
+
               touched: {
                 date: '$$this.date',
                 n: { $add: [{ $ifNull: ['$$value.touched.n', 0] }, 1] },
@@ -144,7 +157,7 @@ export class Normalizer {
                   '$$value.values',
                   {
                     $cond: [
-                      { $eq: ['$$this.command', 'DELETED'] },
+                      { $eq: ['$$this.command', 'DELETE'] },
                       {},
                       valueBranches.length ? {
                         $switch: {
@@ -171,6 +184,7 @@ export class Normalizer {
               _history: { $filter: { input: '$stream', cond: { $ne: ['$$this.omitFromHistory', true] } } },
               _meta: { created: '$_.created', modified: '$_.modified', touched: '$_.touched' },
               _normalized: '$$NOW',
+              _sync: '$_.sync',
             },
             '$_.values',
             ...newRootMergeObjects,
@@ -179,6 +193,7 @@ export class Normalizer {
       },
     }, {
       $unset: [
+        '_history._sync',
         '_history.entityId',
         '_history.omitFromHistory',
         '_history.omitFromModified',

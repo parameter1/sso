@@ -31,6 +31,7 @@ export const changeOrganizationName = object({
  * @property {string} name
  * @property {string} key
  * @property {string[]} [emailDomains=[]]
+ * @property {string} [website]
  */
 export const createOrganization = object({
   date: eventProps.date,
@@ -40,5 +41,6 @@ export const createOrganization = object({
     emailDomains: organizationProps.emailDomains.default([]),
     key: organizationProps.key.required(),
     name: organizationProps.name.required(),
+    website: organizationProps.website.allow(null, ''),
   }).required(),
 }).required();

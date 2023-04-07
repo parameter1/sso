@@ -36,6 +36,7 @@ export const changeWorkspaceName = object({
  * @property {string} key
  */
 export const createWorkspace = object({
+  _sync: object(),
   date: eventProps.date,
   entityId: workspaceProps.id.default(() => new ObjectId()),
   userId: eventProps.userId,

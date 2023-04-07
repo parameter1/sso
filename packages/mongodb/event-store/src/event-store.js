@@ -1,3 +1,4 @@
+import { get } from '@parameter1/object-path';
 import { PropTypes, attempt, validateAsync } from '@parameter1/sso-prop-types-core';
 import { eventProps } from '@parameter1/sso-prop-types-event';
 import { EJSON } from '@parameter1/mongodb-bson';
@@ -685,11 +686,9 @@ export class EventStore {
         release,
         reserve,
         upsertOn,
-        values,
         ...event
       }) => {
-        // const { entityId } = event;
-        const query = upsertOn.reduce((o, key) => ({ ...o, [`values.${key}`]: values[key] }), {});
+        const query = upsertOn.reduce((o, path) => ({ ...o, [path]: get(event, path) }), {});
 
         if (release?.length) {
           release.forEach((key) => toRelease.push({ query, key }));
@@ -701,7 +700,7 @@ export class EventStore {
           ...event,
           entityType,
         };
-        const set = { values: { $literal: values } };
+        const set = { values: { $literal: event.values } };
         queries.push(query);
         operations.push({
           updateOne: {

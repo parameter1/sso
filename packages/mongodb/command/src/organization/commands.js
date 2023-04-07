@@ -78,7 +78,7 @@ export class OrganizationCommands {
           ...rest,
           reserve: [{ key: 'key', value: values.key }],
           values: { ...values, slug: sluggify(values.name), website: values.website || null },
-          ...(upsert && { upsertOn: ['key'] }),
+          ...(upsert && { upsertOn: ['values.key'] }),
         }));
 
         results = upsert

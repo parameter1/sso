@@ -77,7 +77,7 @@ export class WorkspaceCommands {
           ...rest,
           reserve: [{ key: 'app_org_key', value: `${values.appId}_${values.orgId}_${values.key}` }],
           values: { ...values, slug: sluggify(values.name) },
-          ...(upsert && { upsertOn: ['appId', 'orgId', 'key'] }),
+          ...(upsert && { upsertOn: ['values.appId', 'values.orgId', 'values.key'] }),
         }));
 
         results = upsert

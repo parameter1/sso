@@ -165,7 +165,7 @@ export class UserCommands {
                 reverse: sluggifyUserNames(names, true),
               },
             },
-            ...(upsert && { upsertOn: ['email'] }),
+            ...(upsert && { upsertOn: ['values.email'] }),
           };
         });
 

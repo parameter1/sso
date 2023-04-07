@@ -1,6 +1,5 @@
 import { filterMongoURL } from '@parameter1/mongodb-core';
 import { immediatelyThrow } from '@parameter1/utils';
-import { inspect } from 'util';
 import { createOrgManager } from './org-factory.js';
 import {
   aquaria,

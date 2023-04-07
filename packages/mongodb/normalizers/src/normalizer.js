@@ -144,7 +144,7 @@ export class Normalizer {
                   '$$value.values',
                   {
                     $cond: [
-                      { $eq: ['$$this.command', 'DELETED'] },
+                      { $eq: ['$$this.command', 'DELETE'] },
                       {},
                       valueBranches.length ? {
                         $switch: {

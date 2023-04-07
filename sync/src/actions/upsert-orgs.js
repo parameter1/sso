@@ -5,8 +5,10 @@ import { commands } from '../service-clients.js';
  *
  * @param {object} params
  * @param {import("../org-manager.js").OrgManager} params.orgManager
+ * @param {boolean} [params.skip=false]
  */
-export async function upsertOrgs({ orgManager }) {
+export async function upsertOrgs({ orgManager, skip }) {
+  if (skip) return;
   // upsert the orgs
   const input = [...orgManager.orgs.values()].reduce((arr, org) => {
     arr.push({ values: { key: org.key, name: org.name, website: org.website } });

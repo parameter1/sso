@@ -9,8 +9,10 @@ const disabledDomains = new Set(['southcomm.com', 'cygnus.com', 'endeavorb2b.com
  *
  * @param {object} params
  * @param {import("../org-manager.js").OrgManager} params.orgManager
+ * @param {boolean} [params.skip=false]
+ * @returns {Promise<Map<string, string[]>}
  */
-export async function upsertUsers({ orgManager }) {
+export async function upsertUsers({ orgManager, skip }) {
   const sources = orgManager.getAllSources();
 
   const usersByEmailMap = new Map();
@@ -151,6 +153,8 @@ export async function upsertUsers({ orgManager }) {
     }
     return user;
   });
+
+  if (skip) return emailToWorkspaceMap;
 
   const results = await commands.request('user.create', {
     input,

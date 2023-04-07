@@ -6,8 +6,10 @@ import { commands } from '../service-clients.js';
  * @param {object} params
  * @param {import("@parameter1/mongodb-core").ObjectId} params.appId
  * @param {import("../org-manager.js").OrgManager} params.orgManager
+ * @param {boolean} [params.skip=false]
  */
-export async function upsertWorkspaces({ appId, orgManager }) {
+export async function upsertWorkspaces({ appId, orgManager, skip }) {
+  if (skip) return;
   // upsert the workspaces
   const input = [];
   orgManager.orgs.forEach((org) => {

@@ -12,7 +12,7 @@ export class IdentityXSource extends AbstractSource {
   constructor({ mongo, orgId, appIds = [] }) {
     if (!/^[a-f0-9]{24}$/.test(`${orgId}`)) throw new Error(`Invalid IdentityX org ID: ${orgId}`);
 
-    super({ kind: 'identity-x', key: `${orgId}` });
+    super({ kind: 'identity-x', key: `${orgId}`, additionalTenantKeys: ['appIds'] });
     this.mongo = mongo;
     this.db = mongo.db('identity-x');
     this.org = new ObjectId(`${orgId}`);

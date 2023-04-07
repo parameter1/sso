@@ -14,7 +14,14 @@ export async function upsertWorkspaces({ appId, orgManager, skip }) {
   const input = [];
   orgManager.orgs.forEach((org) => {
     org.workspaces.forEach((workspace) => {
+      const tenants = [];
+      workspace.sources.forEach((map) => {
+        map.forEach((source) => {
+          tenants.push(source.resolveTenant());
+        });
+      });
       input.push({
+        _sync: { tenants },
         values: {
           appId,
           orgId: org._id,

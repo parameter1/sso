@@ -12,7 +12,7 @@ export class EmailXSource extends AbstractSource {
   constructor({ mongo, tenant, publisherIds = [] }) {
     if (!/^[a-z0-9]{2,}$/.test(tenant)) throw new Error(`Invalid EmailX tenant key: ${tenant}`);
 
-    super({ kind: 'email-x', key: tenant });
+    super({ kind: 'email-x', key: tenant, additionalTenantKeys: ['publisherIds'] });
     this.mongo = mongo;
     this.db = mongo.db(`parcel-plug-${tenant}`);
     this.tenant = tenant;

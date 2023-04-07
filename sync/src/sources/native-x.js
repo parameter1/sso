@@ -12,7 +12,7 @@ export class NativeXSource extends AbstractSource {
   constructor({ mongo, tenant, publisherIds = [] }) {
     if (!/^[a-z0-9]{2,}$/.test(tenant)) throw new Error(`Invalid NativeX tenant key: ${tenant}`);
 
-    super({ kind: 'native-x', key: tenant });
+    super({ kind: 'native-x', key: tenant, additionalTenantKeys: ['publisherIds'] });
     this.mongo = mongo;
     this.db = mongo.db(`fortnight-${tenant}`);
     this.tenant = tenant;

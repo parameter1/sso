@@ -1,5 +1,6 @@
 import { filterMongoURL } from '@parameter1/mongodb-core';
 import { immediatelyThrow } from '@parameter1/utils';
+import { inspect } from 'util';
 import { createOrgManager } from './org-factory.js';
 import {
   aquaria,
@@ -9,6 +10,7 @@ import {
   virgon,
 } from './mongodb.js';
 
+import { upsertMembers } from './actions/upsert-members.js';
 import { upsertOrgs } from './actions/upsert-orgs.js';
 import { upsertWorkspaces } from './actions/upsert-workspaces.js';
 import { upsertUsers } from './actions/upsert-users.js';
@@ -34,7 +36,7 @@ const orgManager = createOrgManager();
 
   // load the app
   const app = await materializedRepoManager.get('application').findByKey('mindful', {
-    projection: { _id: 1 },
+    projection: { key: 1 },
   });
   if (!app) throw new Error('Unable to load the mindful app');
 
@@ -46,7 +48,10 @@ const orgManager = createOrgManager();
   await upsertWorkspaces({ appId: app._id, orgManager });
   // handle users
   log('> Upserting users...');
-  await upsertUsers({ orgManager });
+  const emailToWorkspaceMap = await upsertUsers({ orgManager });
+  // handle members
+  log('> Upserting members...');
+  await upsertMembers({ appKey: app.key, emailToWorkspaceMap });
 
   await Promise.all(mongos.map(async ({ client, name }) => {
     log(`> Closing ${name} MongoDB...`);

@@ -29,6 +29,7 @@ function commonFullProjection() {
     _history: asArray('$_history'),
     _meta: 1,
     _materialized: '$$NOW',
+    _sync: 1,
   });
 }
 

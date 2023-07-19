@@ -199,7 +199,7 @@ export function createOrgManager() {
       }),
       new Organization({
         key: 'rmm',
-        name: 'Rogue Monky Media',
+        name: 'Rogue Monkey Media',
         workspaces: [
           new Workspace({
             sources: [

@@ -81,6 +81,7 @@ export function createOrgManager() {
               new BaseCMSSource({ mongo: tauron, tenant: 'bizbash_bzb' }),
               new EmailXSource({ mongo: aquaria, tenant: 'bizbash' }),
               new IdentityXSource({ mongo: aquaria, orgId: '609d2bf1ac6305ba5790f719' }),
+              new NativeXSource({ mongo: aquaria, tenant: 'bbm' }),
             ],
           }),
         ],

@@ -10,6 +10,7 @@ export default async ({
   const repo = materializedRepoManager.get('workspace');
   const pipeline = [
     { $match: { _deleted: false, ...query } },
+    { $sort: { path: 1, _id: 1 } },
     {
       $project: {
         ...projection,
@@ -18,7 +19,6 @@ export default async ({
         namespace: 1,
       },
     },
-    { $sort: { path: 1, _id: 1 } },
   ];
   const workspaces = await repo.collection.aggregate(pipeline).toArray();
   return workspaces.filter((doc) => {

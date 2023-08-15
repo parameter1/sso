@@ -10,6 +10,7 @@ export default async ({
   const repo = materializedRepoManager.get('user');
   const pipeline = [
     { $match: { _deleted: false, ...query } },
+    { $sort: { 'slug.reverse': 1, _id: 1 } },
     {
       $project: {
         ...projection,
@@ -18,7 +19,6 @@ export default async ({
         familyName: 1,
       },
     },
-    { $sort: { 'slug.reverse': 1, _id: 1 } },
   ];
   const users = await repo.collection.aggregate(pipeline).toArray();
   return users.filter((doc) => {

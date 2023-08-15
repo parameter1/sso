@@ -10,6 +10,7 @@ export default async ({
   const repo = materializedRepoManager.get('application');
   const pipeline = [
     { $match: { _deleted: false, ...query } },
+    { $sort: { slug: 1, _id: 1 } },
     {
       $project: {
         ...projection,
@@ -17,7 +18,6 @@ export default async ({
         key: 1,
       },
     },
-    { $sort: { slug: 1, _id: 1 } },
   ];
   const apps = await repo.collection.aggregate(pipeline).toArray();
   return apps.filter((doc) => {
